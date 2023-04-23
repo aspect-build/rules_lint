@@ -22,7 +22,7 @@ Run `bazel run //:gazelle` to keep them up-to-date.
 ## Using this as a development dependency of other rules
 
 You'll commonly find that you develop in another WORKSPACE, such as
-some other ruleset that depends on rules_mylang, or in a nested
+some other ruleset that depends on rules_eslint, or in a nested
 WORKSPACE in the integration_tests folder.
 
 To always tell Bazel to use this directory rather than some release
@@ -30,11 +30,11 @@ artifact or a version fetched from the internet, run this from this
 directory:
 
 ```sh
-OVERRIDE="--override_repository=rules_mylang=$(pwd)/rules_mylang"
+OVERRIDE="--override_repository=rules_eslint=$(pwd)/rules_eslint"
 echo "common $OVERRIDE" >> ~/.bazelrc
 ```
 
-This means that any usage of `@rules_mylang` on your system will point to this folder.
+This means that any usage of `@rules_eslint` on your system will point to this folder.
 
 ## Releasing
 

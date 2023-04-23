@@ -1,7 +1,7 @@
 {
-  "homepage": "https://github.com/myorg/rules_mylang",
+  "homepage": "https://github.com/aspect-build/rules_eslint",
   "maintainers": [],
-  "repository": ["github:myorg/rules_mylang"],
+  "repository": ["github:aspect-build/rules_eslint"],
   "versions": [],
   "yanked_versions": {}
 }
