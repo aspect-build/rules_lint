@@ -4,3 +4,5 @@ ts_project(
     name = "ts",
     srcs = ["file.ts"],
 )
+
+exports_files([".eslintrc.cjs"])
