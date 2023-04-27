@@ -47,7 +47,8 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
         mnemonic = "ESLint",
     )
 
-def _eslint_aspect_impl(target, ctx):
+# buildifier: disable=function-docstring
+def eslint_aspect_impl(target, ctx):
     if ctx.rule.kind in ["ts_project_rule"]:
         report = ctx.actions.declare_file(target.label.name + ".eslint-report.txt")
         eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report)
@@ -58,19 +59,3 @@ def _eslint_aspect_impl(target, ctx):
     return [
         OutputGroupInfo(report = results),
     ]
-
-eslint_aspect = aspect(
-    implementation = _eslint_aspect_impl,
-    attr_aspects = ["deps"],
-    attrs = {
-        "_eslint": attr.label(
-            default = Label("//examples:eslint"),
-            executable = True,
-            cfg = "exec",
-        ),
-        "_config_file": attr.label(
-            default = "//examples/simple:.eslintrc.cjs",
-            allow_single_file = True,
-        ),
-    },
-)
