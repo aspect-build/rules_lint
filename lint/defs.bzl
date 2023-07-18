@@ -1,13 +1,13 @@
 "Public API re-exports"
 
-load("//eslint/private:eslint.bzl", "eslint_aspect_impl")
+load("//lint/private:eslint.bzl", "eslint_aspect_impl")
 
 def eslint_aspect(binary, config):
     """A factory function to create a linter aspect.
     """
     return aspect(
         implementation = eslint_aspect_impl,
-        attr_aspects = ["deps"],
+        # attr_aspects = ["deps"],
         attrs = {
             "_eslint": attr.label(
                 default = binary,
