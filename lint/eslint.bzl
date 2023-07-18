@@ -1,8 +1,8 @@
-"eslint implementation details"
+"Public API re-exports"
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_file_to_bin_action", "copy_files_to_bin_actions")
 
-def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
+def _eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     """Create a Bazel Action that spawns an eslint process.
 
     Adapter for wrapping Bazel around
@@ -48,10 +48,10 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     )
 
 # buildifier: disable=function-docstring
-def eslint_aspect_impl(target, ctx):
+def _eslint_aspect_impl(target, ctx):
     if ctx.rule.kind in ["ts_project_rule"]:
         report = ctx.actions.declare_file(target.label.name + ".eslint-report.txt")
-        eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report)
+        _eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report)
         results = depset([report])
     else:
         results = depset()
@@ -59,3 +59,22 @@ def eslint_aspect_impl(target, ctx):
     return [
         OutputGroupInfo(report = results),
     ]
+
+def eslint_aspect(binary, config):
+    """A factory function to create a linter aspect.
+    """
+    return aspect(
+        implementation = _eslint_aspect_impl,
+        # attr_aspects = ["deps"],
+        attrs = {
+            "_eslint": attr.label(
+                default = binary,
+                executable = True,
+                cfg = "exec",
+            ),
+            "_config_file": attr.label(
+                default = config,
+                allow_single_file = True,
+            ),
+        },
+    )

@@ -1,0 +1,15 @@
+load("@rules_buf//buf:defs.bzl", "buf_lint_test")
+
+exports_files(["buf.yaml"], visibility = ["//visibility:public"])
+
+proto_library(
+    name = "foo_proto",
+    srcs = ["file.proto"],
+    deps = ["//some:unused"],
+)
+
+buf_lint_test(
+    name = "foo_proto_lint",
+    targets = [":foo_proto"],
+    config = "buf.yaml",
+)
