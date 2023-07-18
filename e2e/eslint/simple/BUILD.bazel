@@ -5,4 +5,4 @@ ts_project(
     srcs = ["file.ts"],
 )
 
-exports_files([".eslintrc.cjs"])
+exports_files([".eslintrc.yml"])
