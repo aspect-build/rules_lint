@@ -1,10 +1,15 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-# For stardoc to reference the files
-exports_files(["defs.bzl"])
+bzl_library(
+    name = "buf",
+    srcs = ["buf.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_proto//proto:defs"],
+)
 
 bzl_library(
-    name = "defs",
-    srcs = ["defs.bzl"],
+    name = "eslint",
+    srcs = ["eslint.bzl"],
     visibility = ["//visibility:public"],
+    deps = ["@aspect_bazel_lib//lib:copy_to_bin"],
 )
