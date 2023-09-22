@@ -21,9 +21,10 @@ def _eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     # require explicit path to the eslintrc file, don't search for one
     args.add("--no-eslintrc")
 
+    # TODO: enable if debug config, similar to rules_ts
     # args.add("--debug")
 
-    args.add_all(["--config", ctx.file._config_file.path])
+    args.add_all(["--config", ctx.file._config_file.short_path])
     args.add_all(["--output-file", report.short_path])
     args.add_all([s.short_path for s in srcs])
 

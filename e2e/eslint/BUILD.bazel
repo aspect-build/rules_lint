@@ -1,9 +1,18 @@
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
+load("@aspect_rules_js//js:defs.bzl", "js_library")
 
 npm_link_all_packages(name = "node_modules")
 
+js_library(
+    name = "eslintrc",
+    srcs = [".eslintrc.js"],
+    visibility = ["//visibility:public"],
+    deps = [":node_modules/@typescript-eslint/eslint-plugin"],
+)
+
 eslint_bin.eslint_binary(
-  name = "eslint",
-  visibility = ["//visibility:public"],
+    name = "eslint",
+    data = [":eslintrc"],
+    visibility = ["//visibility:public"],
 )
