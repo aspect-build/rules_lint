@@ -1,6 +1,7 @@
 "Public API re-exports"
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_file_to_bin_action", "copy_files_to_bin_actions")
+load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 
 def _eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     """Create a Bazel Action that spawns an eslint process.
@@ -31,6 +32,13 @@ def _eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     env = {"BAZEL_BINDIR": ctx.bin_dir.path}
 
     inputs = copy_files_to_bin_actions(ctx, srcs)
+    inputs.extend(js_lib_helpers.gather_files_from_js_providers(
+        [ctx.attr._config_file],
+        include_transitive_sources = True,
+        include_declarations = False,
+        include_npm_linked_packages = True,
+    ).to_list())
+
     inputs.append(copy_file_to_bin_action(ctx, ctx.file._config_file))
     outputs = [report]
 

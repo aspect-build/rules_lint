@@ -4,15 +4,5 @@
     "@typescript-eslint/parser": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "typescript": "5.0"
-  },
-  "pnpm": {
-    "packageExtensions": {
-      "eslint": {
-        "peerDependencies": {
-          "@typescript-eslint/eslint-plugin": "*",
-          "@typescript-eslint/parser": "*"
-        }
-      }
-    }
   }
 }
