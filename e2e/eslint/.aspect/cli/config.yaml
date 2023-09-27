@@ -1,0 +1,5 @@
+plugins:
+  - name: lint-plugin
+    # For this to work, you must first `bazel build dev` in the root of the repo
+    from: ../../bazel-bin/plugin
+    log_level: warn
