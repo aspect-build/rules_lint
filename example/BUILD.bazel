@@ -6,6 +6,8 @@ package(default_visibility = ["//visibility:public"])
 
 npm_link_all_packages(name = "node_modules")
 
+exports_files(["buf.yaml"], visibility = ["//visibility:public"])
+
 eslint_bin.eslint_binary(name = "eslint")
 
 js_library(

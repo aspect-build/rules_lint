@@ -1,5 +1,0 @@
-proto_library(
-    name = "unused",
-    srcs = ["unused.proto"],
-    visibility = ["//visibility:public"],
-)
