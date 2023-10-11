@@ -6,3 +6,4 @@ plugins:
     properties:
       aspects:
         - //:lint.bzl%eslint
+        - //:lint.bzl%buf
