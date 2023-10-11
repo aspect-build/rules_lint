@@ -1,2 +1,1 @@
 common --enable_bzlmod
-common --registry=https://raw.githubusercontent.com/aspect-forks/bazel-central-registry/buf/
