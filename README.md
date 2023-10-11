@@ -5,27 +5,36 @@
 
 This ruleset integrates linting as a first-class concept under Bazel.
 
-Design goals:
+Features:
 
-- Linting rules don't need to be added to BUILD files or macros, and they do not appear in `bazel query` output. Instead, users should be able to lint existing `*_library`-style targets.
-- Lints can be presented in various ways: as a hard failure, as a warning, or even as bot code review comments (e.g. with [reviewdog])
-- Work for all languages/frameworks.
-- Make it easy to add support for new linters.
-- Developer ergonomics:
-  - make it _possible_ to run with vanilla Bazel, which has no `lint`  
-    command, using some awkward command-lines. Typical users will want to
-    put these in a shell script, Makefile, or similar wrapper.
-  - Using [Aspect CLI] you simply run `aspect lint`
+- **No changes needed to rulesets**. Works with the Bazel rules you already use.
+- **No changes needed to BUILD files**. You don't need to add lint wrapper macros, and lint doesn't appear in `bazel query` output.
+  Instead, users can lint their existing `*_library` targets.
+- Lints can be **presented in various ways**:
+  - a hard failure, like it would with a `lint_test` rule that fails the build
+  - as a warning, using whatever reporting method you prefer
+  - or even as bot code review comments (e.g. with [reviewdog])
+
+How developers use it:
+
+1. (preferred) This ruleset provides an Aspect CLI plugin,
+  so it can register the missing 'lint' command and users just type `bazel lint //path/to:targets`.
+2. Run with vanilla Bazel, by placing a couple commands in a shell script, Makefile, or similar wrapper.
 
 This project is inspired by the design for [Tricorder].
 This is how Googlers get their static analysis results in code review (Critique).
 https://github.com/google/shipshape is an old, abandoned attempt to open-source Tricorder.
 
-Note: we believe that Formatting is **NOT** Linting. We have a separate project for formatting, see <https://github.com/aspect-build/bazel-super-formatter#design>
+Note: we believe that Formatting is **NOT** Linting.
+We have a separate project for formatting, see <https://github.com/aspect-build/bazel-super-formatter#design>
 
 [aspect cli]: https://docs.aspect.build/v/cli
 [tricorder]: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/43322.pdf
 [reviewdog]: https://github.com/reviewdog/reviewdog
+
+## Adding a linter
+
+TODO: step-by-step instructions to add a linter in this repo, and maybe how to add one in your repo.
 
 ## Installation
 

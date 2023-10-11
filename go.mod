@@ -5,7 +5,7 @@ go 1.19
 require (
 	aspect.build/cli v1.507.2
 	github.com/hashicorp/go-plugin v1.4.10
-	github.com/manifoldco/promptui v0.9.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -21,6 +21,7 @@ require (
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect

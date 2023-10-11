@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	goplugin "github.com/hashicorp/go-plugin"
+	"gopkg.in/yaml.v2"
 
 	"aspect.build/cli/bazel/command_line"
 	"aspect.build/cli/pkg/aspecterrors"
@@ -26,7 +27,9 @@ var QUIET_BZL_ARGS = []string{"--output_filter", "DONT_MATCH_ANYTHING", "--nosho
 
 // main starts up the plugin as a child process of the CLI and connects the gRPC communication.
 func main() {
-	goplugin.Serve(config.NewConfigFor(&LintPlugin{}))
+	goplugin.Serve(config.NewConfigFor(&LintPlugin{
+		yamlUnmarshalStrict: yaml.UnmarshalStrict,
+	}))
 }
 
 // LintPlugin declares the fields on an instance of the plugin.
@@ -36,6 +39,17 @@ type LintPlugin struct {
 	aspectplugin.Base
 	// This plugin will store some state from the Build Events for use at the end of the build.
 	command_line.CommandLine
+	// Helper to parse our config section
+	yamlUnmarshalStrict    func(in []byte, out interface{}) (err error)
+	LintAspects []string `yaml:"aspects"`
+}
+
+func (plugin *LintPlugin) Setup(config *aspectplugin.SetupConfig) error {
+	if err := plugin.yamlUnmarshalStrict(config.Properties, &plugin); err != nil {
+		return fmt.Errorf("failed to setup: failed to parse properties: %w", err)
+	}
+
+	return nil
 }
 
 // CustomCommands contributes a new 'lint' command alongside the built-in ones like 'build' and 'test'.
@@ -56,7 +70,7 @@ func (plugin *LintPlugin) CustomCommands() ([]*aspectplugin.Command, error) {
 				// Build with the linter aspect collecting the 'report' output group.
 				// TODO: list of linter aspects should come from config
 				bazelCmd := bazelStartupArgs
-				bazelCmd = append(bazelStartupArgs, "build", "--aspects", "//:lint.bzl%eslint", "--output_groups=report")
+				bazelCmd = append(bazelStartupArgs, "build", "--aspects", plugin.LintAspects[0], "--output_groups=report")
 				bazelCmd = append(bazelCmd, QUIET_BZL_ARGS...)
 				bazelCmd = append(bazelCmd, args...)
 
