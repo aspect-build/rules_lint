@@ -20,5 +20,5 @@ jobs:
     uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v5
     with:
       folders: '[".", "example"]'
-      # Only test with Bazel 6 and bzlmod enabled
-      exclude: '[{"bazelversion": "5.4.0"}, {"bzlmodEnabled": false}]'
+      # Only test with Bazel 6 and bzlmod enabled. And we don't try for Windows support yet.
+      exclude: '[{"bazelversion": "5.4.0"}, {"bzlmodEnabled": false}, {"os": "windows-latest"}]'
