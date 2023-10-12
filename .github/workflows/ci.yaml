@@ -19,4 +19,4 @@ jobs:
   test:
     uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v2
     with:
-      folders: '[".", "e2e/eslint", "e2e/proto"]'
+      folders: '[".", "example"]'
