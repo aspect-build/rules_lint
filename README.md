@@ -17,9 +17,11 @@ Features:
 
 How developers use it:
 
-1. Run with vanilla Bazel, by placing a couple commands in a shell script, Makefile, or similar wrapper.
-2. (preferred) This ruleset provides an Aspect CLI plugin,
+1. (preferred) This ruleset provides an Aspect CLI plugin,
    so it can register the missing 'lint' command and users just type `bazel lint //path/to:targets`.
+2. Run with vanilla Bazel, by placing a couple commands in a shell script, Makefile, or similar wrapper.
+
+See it in action:
 
 [![asciicast](https://asciinema.org/a/prVnsvrEN3Vpvm5Wf7QVq7Ytt.svg)](https://asciinema.org/a/prVnsvrEN3Vpvm5Wf7QVq7Ytt?t=41)
 
