@@ -2,7 +2,7 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 
 ts_project(
     name = "ts",
-    srcs = ["file.ts"],
+    srcs = ["file.ts", "lint.ts"],
 )
 
 proto_library(
