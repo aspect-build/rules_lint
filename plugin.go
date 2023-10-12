@@ -122,7 +122,7 @@ func (plugin *LintPlugin) CustomCommands() ([]*aspectplugin.Command, error) {
 }
 
 func (plugin *LintPlugin) findLintResultFiles(streams ioutils.Streams, bazelStartupArgs []string) ([]string, error) {
-	// TODO: use bazel query
+	// TODO: use the Build Event Stream to learn of report files as actions write them
 
 	var infoOutBuf bytes.Buffer
 	infoStreams := ioutils.Streams{
@@ -140,7 +140,9 @@ func (plugin *LintPlugin) findLintResultFiles(streams ioutils.Streams, bazelStar
 	binDir := strings.TrimSpace(infoOutBuf.String())
 
 	var findOutBuf bytes.Buffer
-	findCmd := exec.Command("find", binDir, "-type", "f", "-name", "*-report.txt")
+	// `-mtime -1`: only look at files modified in the last day, to mitigate showing stale results of old bazel runs.
+    // `-size +1c`: don't show files containing zero bytes
+	findCmd := exec.Command("find", binDir, "-type", "f", "-mtime", "-1", "-size", "+1c", "-name", "*-report.txt")
 	findCmd.Stdout = &findOutBuf
 	findCmd.Stderr = streams.Stderr
 	findCmd.Stdin = streams.Stdin
