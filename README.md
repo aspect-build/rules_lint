@@ -38,6 +38,8 @@ We have a separate project for formatting, see <https://github.com/aspect-build/
   - `buf lint`: <https://buf.build/docs/lint/overview>
 - JavaScript
   - `eslint`: https://eslint.org/
+- Python
+  - `flake8`: <https://flake8.pycqa.org/en/latest/index.html>
 
 ### Adding a linter
 
