@@ -1,13 +1,25 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 
 package(default_visibility = ["//visibility:public"])
 
+compile_pip_requirements(
+    name = "requirements",
+)
+
 npm_link_all_packages(name = "node_modules")
 
-exports_files(["buf.yaml"], visibility = ["//visibility:public"])
+exports_files(["buf.yaml", ".flake8"], visibility = ["//visibility:public"])
+
+# We can test that it works with:
+# bazel run :flake8 -- --help
+py_console_script_binary(
+    name = "flake8",
+    pkg = "@pip//flake8:pkg",
+)
 
 eslint_bin.eslint_binary(name = "eslint")
 
@@ -18,10 +30,4 @@ js_library(
       ":node_modules/@typescript-eslint/eslint-plugin",
       ":node_modules/@typescript-eslint/parser",
     ],
-)
-
-# Just so there's at least one test target in the example
-build_test(
-    name = "test",
-    targets = [":eslint"],
 )
