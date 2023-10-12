@@ -7,3 +7,4 @@ plugins:
       lint_aspects:
         - //:lint.bzl%eslint
         - //:lint.bzl%buf
+        - //:lint.bzl%flake8
