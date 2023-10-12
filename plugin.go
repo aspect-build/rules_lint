@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	goplugin "github.com/hashicorp/go-plugin"
+	"gopkg.in/yaml.v2"
 
 	"aspect.build/cli/bazel/command_line"
 	"aspect.build/cli/pkg/aspecterrors"
@@ -36,6 +37,15 @@ type LintPlugin struct {
 	aspectplugin.Base
 	// This plugin will store some state from the Build Events for use at the end of the build.
 	command_line.CommandLine
+	LintAspects []string `yaml:"lint_aspects"`
+}
+
+func (plugin *LintPlugin) Setup(config *aspectplugin.SetupConfig) error {
+	if err := yaml.UnmarshalStrict(config.Properties, &plugin); err != nil {
+		return fmt.Errorf("failed to setup: failed to parse properties: %w", err)
+	}
+
+	return nil
 }
 
 // CustomCommands contributes a new 'lint' command alongside the built-in ones like 'build' and 'test'.
@@ -56,7 +66,7 @@ func (plugin *LintPlugin) CustomCommands() ([]*aspectplugin.Command, error) {
 				// Build with the linter aspect collecting the 'report' output group.
 				// TODO: list of linter aspects should come from config
 				bazelCmd := bazelStartupArgs
-				bazelCmd = append(bazelStartupArgs, "build", "--aspects", "//:lint.bzl%eslint", "--output_groups=report")
+				bazelCmd = append(bazelStartupArgs, "build", "--aspects", strings.Join(plugin.LintAspects, ","), "--output_groups=report")
 				bazelCmd = append(bazelCmd, QUIET_BZL_ARGS...)
 				bazelCmd = append(bazelCmd, args...)
 
@@ -130,7 +140,7 @@ func (plugin *LintPlugin) findLintResultFiles(streams ioutils.Streams, bazelStar
 	binDir := strings.TrimSpace(infoOutBuf.String())
 
 	var findOutBuf bytes.Buffer
-	findCmd := exec.Command("find", binDir, "-type", "f", "-name", "*eslint-report.txt")
+	findCmd := exec.Command("find", binDir, "-type", "f", "-name", "*-report.txt")
 	findCmd.Stdout = &findOutBuf
 	findCmd.Stderr = streams.Stderr
 	findCmd.Stdin = streams.Stdin

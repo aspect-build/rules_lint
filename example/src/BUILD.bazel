@@ -1,0 +1,19 @@
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+
+ts_project(
+    name = "ts",
+    srcs = ["file.ts"],
+)
+
+proto_library(
+    name = "unused",
+    srcs = ["unused.proto"],
+    visibility = ["//visibility:public"],
+)
+
+proto_library(
+    name = "foo_proto",
+    srcs = ["file.proto"],
+    deps = [":unused"],
+    visibility = ["//visibility:public"],
+)
