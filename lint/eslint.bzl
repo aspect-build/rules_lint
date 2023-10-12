@@ -1,4 +1,16 @@
-"Public API re-exports"
+"""API for calling declaring an ESLint lint aspect.
+
+Typical usage:
+
+```
+load("@aspect_rules_lint//lint:eslint.bzl", "eslint_aspect")
+
+eslint = eslint_aspect(
+    binary = "@@//path/to:eslint",
+    config = "@@//path/to:eslintrc",
+)
+```
+"""
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
@@ -32,6 +44,7 @@ def _eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     env = {"BAZEL_BINDIR": ctx.bin_dir.path}
 
     inputs = copy_files_to_bin_actions(ctx, srcs)
+
     # Add the config file along with any deps it has on npm packages
     inputs.extend(js_lib_helpers.gather_files_from_js_providers(
         [ctx.attr._config_file],
@@ -71,10 +84,18 @@ def _eslint_aspect_impl(target, ctx):
 
 def eslint_aspect(binary, config):
     """A factory function to create a linter aspect.
+
+    Args:
+        binary: the eslint binary, typically a rule like
+
+            ```
+            load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
+            eslint_bin.eslint_binary(name = "eslint")
+            ```
+        config: label of the eslint config file
     """
     return aspect(
         implementation = _eslint_aspect_impl,
-        # attr_aspects = ["deps"],
         attrs = {
             "_eslint": attr.label(
                 default = binary,

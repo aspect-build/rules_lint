@@ -19,21 +19,9 @@ cat << EOF
 
 \`\`\`starlark
 bazel_dep(name = "aspect_rules_eslint", version = "${TAG:1}")
+
+# Depending on which linters you setup, you may need more dependencies.
+# See example/MODULE.bazel in the rules_lint repository.
 \`\`\`
-
-## Using WORKSPACE
-
-Paste this snippet into your `WORKSPACE.bazel` file:
-
-\`\`\`starlark
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-http_archive(
-    name = "aspect_rules_eslint",
-    sha256 = "${SHA}",
-    strip_prefix = "${PREFIX}",
-    url = "https://github.com/aspect-build/rules_eslint/releases/download/${TAG}/${ARCHIVE}",
-)
 EOF
 
-awk 'f;/--SNIP--/{f=1}' e2e/smoke/WORKSPACE.bazel
-echo "\`\`\`" 
