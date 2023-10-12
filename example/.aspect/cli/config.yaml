@@ -4,6 +4,6 @@ plugins:
     from: ../bazel-bin/plugin
     log_level: warn
     properties:
-      aspects:
+      lint_aspects:
         - //:lint.bzl%eslint
         - //:lint.bzl%buf

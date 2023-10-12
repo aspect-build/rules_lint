@@ -27,9 +27,7 @@ var QUIET_BZL_ARGS = []string{"--output_filter", "DONT_MATCH_ANYTHING", "--nosho
 
 // main starts up the plugin as a child process of the CLI and connects the gRPC communication.
 func main() {
-	goplugin.Serve(config.NewConfigFor(&LintPlugin{
-		yamlUnmarshalStrict: yaml.UnmarshalStrict,
-	}))
+	goplugin.Serve(config.NewConfigFor(&LintPlugin{}))
 }
 
 // LintPlugin declares the fields on an instance of the plugin.
@@ -39,13 +37,11 @@ type LintPlugin struct {
 	aspectplugin.Base
 	// This plugin will store some state from the Build Events for use at the end of the build.
 	command_line.CommandLine
-	// Helper to parse our config section
-	yamlUnmarshalStrict    func(in []byte, out interface{}) (err error)
-	LintAspects []string `yaml:"aspects"`
+	LintAspects []string `yaml:"lint_aspects"`
 }
 
 func (plugin *LintPlugin) Setup(config *aspectplugin.SetupConfig) error {
-	if err := plugin.yamlUnmarshalStrict(config.Properties, &plugin); err != nil {
+	if err := yaml.UnmarshalStrict(config.Properties, &plugin); err != nil {
 		return fmt.Errorf("failed to setup: failed to parse properties: %w", err)
 	}
 
