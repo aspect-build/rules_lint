@@ -13,7 +13,7 @@ if [ "$#" -eq 0 ]; then
 fi
 
 # Produce report files
-bazel build --aspects //:lint.bzl%eslint,//:lint.bzl%buf --output_groups=report $@
+bazel build --aspects //:lint.bzl%eslint,//:lint.bzl%buf,//:lint.bzl%flake8 --output_groups=report $@
 
 # Show the results.
 # `-mtime -1`: only look at files modified in the last day, to mitigate showing stale results of old bazel runs.
