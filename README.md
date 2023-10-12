@@ -32,9 +32,17 @@ We have a separate project for formatting, see <https://github.com/aspect-build/
 [tricorder]: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/43322.pdf
 [reviewdog]: https://github.com/reviewdog/reviewdog
 
-## Adding a linter
+## Available linters
 
-TODO: step-by-step instructions to add a linter in this repo, and maybe how to add one in your repo.
+- Protocol Buffers
+  - `buf lint`: <https://buf.build/docs/lint/overview>
+- JavaScript
+  - `eslint`: https://eslint.org/
+
+### Adding a linter
+
+Please follow the steps in [lint/README.md](./lint/README.md) and then send us a PR.
+Thanks!!
 
 ## Installation
 
