@@ -12,4 +12,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//lint:eslint",
 )
 
+stardoc_with_diff_test(
+    name = "flake8",
+    bzl_library_target = "//lint:flake8",
+)
+
 update_docs(name = "update")

@@ -18,3 +18,9 @@ bzl_library(
         "@aspect_rules_js//js:libs",
     ],
 )
+
+bzl_library(
+    name = "flake8",
+    srcs = ["flake8.bzl"],
+    visibility = ["//visibility:public"],
+)
