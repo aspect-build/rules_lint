@@ -14,7 +14,7 @@ flake8 = flake8_aspect(
 
 def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
     """Run flake8 as an action under Bazel.
-    
+
     Based on https://flake8.pycqa.org/en/latest/user/invocation.html
 
     Args:
@@ -32,11 +32,11 @@ def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
     # https://flake8.pycqa.org/en/latest/user/options.html
     args = ctx.actions.args()
     args.add_all(srcs)
-    args.add(report, format="--output-file=%s")
-    args.add(config, format="--config=%s")
+    args.add(report, format = "--output-file=%s")
+    args.add(config, format = "--config=%s")
     if not use_exit_code:
         args.add("--exit-zero")
-    
+
     ctx.actions.run(
         inputs = inputs,
         outputs = outputs,
@@ -64,14 +64,13 @@ def flake8_aspect(binary, config):
     Attrs:
         binary: a flake8 executable. Can be obtained from rules_python like so:
 
-            ```
             load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 
             py_console_script_binary(
                 name = "flake8",
                 pkg = "@pip//flake8:pkg",
             )
-            ```
+
         config: the flake8 config file (`setup.cfg`, `tox.ini`, or `.flake8`)
     """
     return aspect(

@@ -1,4 +1,5 @@
 "Bazel dependencies"
+
 module(
     name = "aspect_rules_lint",
     version = "0.0.0",
@@ -13,8 +14,10 @@ bazel_dep(name = "platforms", version = "0.0.7")
 bazel_dep(name = "rules_go", version = "0.39.1", dev_dependency = True)
 bazel_dep(name = "gazelle", version = "0.31.0", dev_dependency = True)
 bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.4.1", dev_dependency = True)
+
 bazel_dep(name = "rules_proto", version = "5.3.0-21.7")
 bazel_dep(name = "rules_buf", version = "0.1.1")
+
 # Needed due to rules_proto leaking the dependency
 bazel_dep(name = "protobuf", version = "21.7", repo_name = "com_google_protobuf")
 

@@ -1,10 +1,10 @@
 """This module provides the macros for performing a release.
 """
 
-load("@rules_go//go:def.bzl", "go_binary")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_tools//tools/build_defs/hash:hash.bzl", "tools", _sha256 = "sha256")
+load("@rules_go//go:def.bzl", "go_binary")
 
 def _sha256_impl(ctx):
     out = _sha256(ctx, ctx.file.artifact)
@@ -25,6 +25,7 @@ sha256 = rule(
     provides = [DefaultInfo],
 )
 
+# buildifier: disable=function-docstring
 def local_plugin(name, binary, path, **kwargs):
     out = "_{}.out".format(name)
     sum = "_{}.sum".format(name)

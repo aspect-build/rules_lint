@@ -5,15 +5,15 @@
 These will be part of reviewing PRs to this repo:
 
 1. Avoid adding dependencies to rules_lint, they belong in the example instead. For example in adding
-  eslint or flake8, it's up to the user to provide us the binary to run.
-  This ensures that the user can select the versions of their tools and the toolchains used to run them
-  rather than us baking these into rules_lint.
+   eslint or flake8, it's up to the user to provide us the binary to run.
+   This ensures that the user can select the versions of their tools and the toolchains used to run them
+   rather than us baking these into rules_lint.
 
 2. Study the installation, CLI usage, and configuration documentation for the linter you want to add.
-    We'll need to adapt these to Bazel's idioms. As much as possible, copy or link to this documentation
-    in your code so that maintainers can understand it.
-    Usage of the linter under Bazel should be as similar as possible to how it's used outside Bazel,
-    so we don't end up with a unique bug "surface area" that only Bazel users encounter.
+   We'll need to adapt these to Bazel's idioms. As much as possible, copy or link to this documentation
+   in your code so that maintainers can understand it.
+   Usage of the linter under Bazel should be as similar as possible to how it's used outside Bazel,
+   so we don't end up with a unique bug "surface area" that only Bazel users encounter.
 
 ## Step 1: Run linter in the example
 

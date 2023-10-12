@@ -13,10 +13,18 @@ buf = buf_lint_aspect(
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
 
-def _short_path(file, dir_exp):
+def _short_path(file, _):
     return file.path
 
-def _buf_action(ctx, toolchain, target, report):
+def buf_lint_action(ctx, buf_toolchain, target, report):
+    """Runs the buf lint tool as a Bazel action.
+
+    Args:
+        ctx: Rule OR Aspect context
+        buf_toolchain: provides the buf-lint tool
+        target: the proto_library target to run on
+        report: output file to generate
+    """
     config = json.encode({
         "input_config": "" if ctx.file._config == None else ctx.file._config.short_path,
     })
@@ -39,7 +47,7 @@ def _buf_action(ctx, toolchain, target, report):
         )
 
     args = ctx.actions.args()
-    args.add_joined(["--plugin", "protoc-gen-buf-plugin", ctx.toolchains["@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"].cli], join_with = "=")
+    args.add_joined(["--plugin", "protoc-gen-buf-plugin", buf_toolchain.cli], join_with = "=")
     args.add_joined(["--buf-plugin_opt", config], join_with = "=")
     args.add_joined("--descriptor_set_in", deps, join_with = ":", map_each = _short_path)
     args.add_joined(["--buf-plugin_out", "."], join_with = "=")
@@ -49,7 +57,7 @@ def _buf_action(ctx, toolchain, target, report):
         inputs = depset([
             ctx.file._config,
             ctx.executable._protoc,
-            ctx.toolchains["@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"].cli,
+            buf_toolchain.cli,
         ], transitive = [deps]),
         outputs = [report],
         command = """\
@@ -61,7 +69,7 @@ def _buf_action(ctx, toolchain, target, report):
 def _buf_lint_aspect_impl(target, ctx):
     if ctx.rule.kind in ["proto_library"]:
         report = ctx.actions.declare_file(target.label.name + ".buf-report.txt")
-        _buf_action(ctx, ctx.attr._buf_toolchain, target, report)
+        buf_lint_action(ctx, ctx.toolchains[ctx.attr._buf_toolchain], target, report)
         results = depset([report])
     else:
         results = depset()
@@ -81,7 +89,7 @@ def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
         implementation = _buf_lint_aspect_impl,
         attr_aspects = ["deps"],
         attrs = {
-            "_buf_toolchain": attr.label(
+            "_buf_toolchain": attr.string(
                 default = toolchain,
             ),
             "_config": attr.label(
