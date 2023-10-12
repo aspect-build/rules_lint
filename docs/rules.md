@@ -1,3 +1,0 @@
-# ESLint
-
-TODO: API docs

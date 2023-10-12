@@ -1,6 +1,17 @@
-"API for calling buf lint as an aspect"
+"""API for calling declaring a buf lint aspect.
+
+Typical usage:
+
+```
+load("@aspect_rules_lint//lint:buf.bzl", "buf_lint_aspect")
+
+buf = buf_lint_aspect(
+    config = "@@//path/to:buf.yaml",
+)
+```
+"""
+
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
-load("@aspect_bazel_lib//lib:paths.bzl", "to_output_relative_path")
 
 def _short_path(file, dir_exp):
     return file.path
@@ -9,11 +20,6 @@ def _buf_action(ctx, toolchain, target, report):
     config = json.encode({
         "input_config": "" if ctx.file._config == None else ctx.file._config.short_path,
     })
-    # files_to_include = []
-    # if ctx.file.config != None:
-    #     files_to_include.append(ctx.file.config)
-    # return protoc_plugin_test(ctx, proto_infos, ctx.executable._protoc, ctx.toolchains[_TOOLCHAIN].cli, config, files_to_include)
-    # def protoc_plugin_test(ctx, proto_infos, protoc, plugin, config, files_to_include = []):
 
     deps = depset(
         [target[ProtoInfo].direct_descriptor_set],
@@ -23,7 +29,6 @@ def _buf_action(ctx, toolchain, target, report):
     sources = []
     source_files = []
 
-    
     for f in target[ProtoInfo].direct_sources:
         source_files.append(f)
 
@@ -44,7 +49,7 @@ def _buf_action(ctx, toolchain, target, report):
         inputs = depset([
             ctx.file._config,
             ctx.executable._protoc,
-            ctx.toolchains["@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"].cli
+            ctx.toolchains["@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"].cli,
         ], transitive = [deps]),
         outputs = [report],
         command = """\
@@ -52,7 +57,6 @@ def _buf_action(ctx, toolchain, target, report):
         """.format(protoc = ctx.executable._protoc.path, report = report.path),
         arguments = [args],
     )
-
 
 def _buf_lint_aspect_impl(target, ctx):
     if ctx.rule.kind in ["proto_library"]:
@@ -66,11 +70,14 @@ def _buf_lint_aspect_impl(target, ctx):
         OutputGroupInfo(report = results),
     ]
 
-
 def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"):
     """A factory function to create a linter aspect.
+
+    Args:
+        config: label of the the buf.yaml file
+        toolchain: override the default toolchain of the protoc-gen-buf-lint tool
     """
-    return aspect( 
+    return aspect(
         implementation = _buf_lint_aspect_impl,
         attr_aspects = ["deps"],
         attrs = {
