@@ -16,9 +16,9 @@ fi
 bazel build --aspects //:lint.bzl%eslint,//:lint.bzl%buf --output_groups=report $@
 
 # Show the results.
-# `-mtime -0.25`: only look at files modified in the last 15min, to avoid showing stale results of old bazel runs.
+# `-mtime -1`: only look at files modified in the last day, to mitigate showing stale results of old bazel runs.
 # `-size +1c`: don't show files containing zero bytes
-for report in $(find $(bazel info bazel-bin) -mtime -0.25 -size +1c -type f -name "*-report.txt"); do
+for report in $(find $(bazel info bazel-bin) -mtime -1 -size +1c -type f -name "*-report.txt"); do
     echo "From ${report}:"
     cat "${report}"
     echo
