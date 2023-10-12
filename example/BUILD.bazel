@@ -12,7 +12,13 @@ compile_pip_requirements(
 
 npm_link_all_packages(name = "node_modules")
 
-exports_files(["buf.yaml", ".flake8"], visibility = ["//visibility:public"])
+exports_files(
+    [
+        "buf.yaml",
+        ".flake8",
+    ],
+    visibility = ["//visibility:public"],
+)
 
 # We can test that it works with:
 # bazel run :flake8 -- --help
@@ -27,7 +33,7 @@ js_library(
     name = "eslintrc",
     srcs = [".eslintrc.cjs"],
     deps = [
-      ":node_modules/@typescript-eslint/eslint-plugin",
-      ":node_modules/@typescript-eslint/parser",
+        ":node_modules/@typescript-eslint/eslint-plugin",
+        ":node_modules/@typescript-eslint/parser",
     ],
 )

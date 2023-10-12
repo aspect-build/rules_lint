@@ -1,7 +1,7 @@
 "Define linter aspects"
 
-load("@aspect_rules_lint//lint:eslint.bzl", "eslint_aspect")
 load("@aspect_rules_lint//lint:buf.bzl", "buf_lint_aspect")
+load("@aspect_rules_lint//lint:eslint.bzl", "eslint_aspect")
 load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
 
 buf = buf_lint_aspect(

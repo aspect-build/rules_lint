@@ -14,8 +14,8 @@ proto_library(
 proto_library(
     name = "foo_proto",
     srcs = ["file.proto"],
-    deps = [":unused"],
     visibility = ["//visibility:public"],
+    deps = [":unused"],
 )
 
 py_library(
