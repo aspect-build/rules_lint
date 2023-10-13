@@ -1,1 +1,12 @@
 # Marker that this is the root of a Bazel workspace
+
+# Needed until Bazel 7 allows MODULE.bazel to directly call repository rules
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "net_sourceforge_pmd",
+    url = "https://github.com/pmd/pmd/releases/download/pmd_releases/6.55.0/pmd-bin-6.55.0.zip",
+    strip_prefix = "pmd-bin-6.55.0/lib",
+    sha256 = "21acf96d43cb40d591cacccc1c20a66fc796eaddf69ea61812594447bac7a11d",
+    build_file_content = """java_import(name = "net_sourceforge_pmd", jars = glob(["*.jar"]), visibility = ["//visibility:public"])""",
+)

@@ -22,3 +22,8 @@ py_library(
     name = "unused_import",
     srcs = ["unused_import.py"],
 )
+
+java_library(
+    name = "foo",
+    srcs = ["Foo.java"],
+)
