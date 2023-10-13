@@ -53,14 +53,13 @@ A factory function to create a linter aspect.
 Attrs:
     binary: a flake8 executable. Can be obtained from rules_python like so:
 
-        ```
         load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 
         py_console_script_binary(
             name = "flake8",
             pkg = "@pip//flake8:pkg",
         )
-        ```
+
     config: the flake8 config file (`setup.cfg`, `tox.ini`, or `.flake8`)
 
 **PARAMETERS**
