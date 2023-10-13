@@ -17,4 +17,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//lint:flake8",
 )
 
+stardoc_with_diff_test(
+    name = "pmd",
+    bzl_library_target = "//lint:pmd",
+)
+
 update_docs(name = "update")
