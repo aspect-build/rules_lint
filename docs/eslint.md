@@ -14,6 +14,32 @@ eslint = eslint_aspect(
 ```
 
 
+<a id="eslint_action"></a>
+
+## eslint_action
+
+<pre>
+eslint_action(<a href="#eslint_action-ctx">ctx</a>, <a href="#eslint_action-executable">executable</a>, <a href="#eslint_action-srcs">srcs</a>, <a href="#eslint_action-report">report</a>, <a href="#eslint_action-use_exit_code">use_exit_code</a>)
+</pre>
+
+Create a Bazel Action that spawns an eslint process.
+
+Adapter for wrapping Bazel around
+https://eslint.org/docs/latest/use/command-line-interface
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="eslint_action-ctx"></a>ctx |  an action context OR aspect context   |  none |
+| <a id="eslint_action-executable"></a>executable |  struct with an eslint field   |  none |
+| <a id="eslint_action-srcs"></a>srcs |  list of file objects to lint   |  none |
+| <a id="eslint_action-report"></a>report |  output to create   |  none |
+| <a id="eslint_action-use_exit_code"></a>use_exit_code |  whether an eslint process exiting non-zero will be a build failure   |  <code>False</code> |
+
+
 <a id="eslint_aspect"></a>
 
 ## eslint_aspect
