@@ -10,11 +10,7 @@ Features:
 - **No changes needed to rulesets**. Works with the Bazel rules you already use.
 - **No changes needed to BUILD files**. You don't need to add lint wrapper macros, and lint doesn't appear in `bazel query` output.
   Instead, users can lint their existing `*_library` targets.
-- Lint results can be **presented in various ways**, see below
-
-See it in action:
-
-[![asciicast](https://asciinema.org/a/prVnsvrEN3Vpvm5Wf7QVq7Ytt.svg)](https://asciinema.org/a/prVnsvrEN3Vpvm5Wf7QVq7Ytt?t=41)
+- Lint results can be **presented in various ways**, see "Usage" below.
 
 This project is inspired by the design for [Tricorder].
 This is how Googlers get their static analysis results in code review (Critique).
@@ -27,7 +23,7 @@ We have a separate project for formatting, see <https://github.com/aspect-build/
 [tricorder]: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/43322.pdf
 [reviewdog]: https://github.com/reviewdog/reviewdog
 
-## Ways to present results
+## Usage
 
 ### 1. Warnings in the terminal with `bazel lint`
 
@@ -37,6 +33,8 @@ Users just type `bazel lint //path/to:targets`.
 
 Reports are then written to the terminal.
 
+[![asciicast](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq.svg)](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq)
+
 ### 2. Warnings in the terminal with a wrapper
 
 You can use vanilla Bazel rather than Aspect CLI.
@@ -44,6 +42,8 @@ You can use vanilla Bazel rather than Aspect CLI.
 Placing a couple commands in a shell script, Makefile, or similar wrapper.
 
 See the `example/lint.sh` file as an example.
+
+[![asciicast](https://asciinema.org/a/gUUuQTCGIu85YMl6zz2GJIgD8.svg)](https://asciinema.org/a/gUUuQTCGIu85YMl6zz2GJIgD8)
 
 ### 3. Errors during `bazel build`
 

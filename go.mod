@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	aspect.build/cli v1.507.2
+	github.com/fatih/color v1.15.0
 	github.com/hashicorp/go-plugin v1.4.10
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -12,7 +13,6 @@ require (
 	github.com/bazelbuild/bazelisk v1.17.0 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
-	github.com/fatih/color v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/go-hclog v1.5.0 // indirect
