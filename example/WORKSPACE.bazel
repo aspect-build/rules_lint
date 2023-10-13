@@ -136,6 +136,7 @@ load(
     "fetch_jsonnet",
     "fetch_ktfmt",
     "fetch_pmd",
+    "fetch_ruff",
     "fetch_swiftformat",
     "fetch_terraform",
 )
@@ -151,3 +152,5 @@ fetch_java_format()
 fetch_ktfmt()
 
 fetch_swiftformat()
+
+fetch_ruff()

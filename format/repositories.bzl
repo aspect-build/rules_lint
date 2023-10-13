@@ -111,3 +111,22 @@ def fetch_swiftformat():
         sha256 = "978eaffdc3716bbc0859aecee0d83875cf3ab8d8725779448f0035309d9ad9f3",
         url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.49.17/swiftformat.zip",
     )
+
+def fetch_ruff():
+    http_archive(
+        name = "ruff_bin_linux_amd64",
+        build_file_content = """exports_files(["ruff"])""",
+        sha256 = "39a488a2e21d3bca379ba6ee2ec5cf2d641d578efb4b16c27c90272138dfa37d",
+        urls = [
+            "https://github.com/charliermarsh/ruff/releases/download/v0.0.292/ruff-x86_64-unknown-linux-gnu.tar.gz",
+        ],
+    )
+
+    http_archive(
+        name = "ruff_bin_darwin_aarch64",
+        build_file_content = """exports_files(["ruff"])""",
+        sha256 = "",
+        urls = [
+            "https://github.com/charliermarsh/ruff/releases/download/v0.0.292/ruff-aarch64-apple-darwin.tar.gz",
+        ],
+    )
