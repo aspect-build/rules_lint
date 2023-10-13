@@ -8,3 +8,4 @@ plugins:
         - //:lint.bzl%eslint
         - //:lint.bzl%buf
         - //:lint.bzl%flake8
+        - //:lint.bzl%pmd
