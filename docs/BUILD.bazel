@@ -32,4 +32,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//format:defs",
 )
 
+stardoc_with_diff_test(
+    name = "ruff",
+    bzl_library_target = "//lint:ruff",
+)
+
 update_docs(name = "update")

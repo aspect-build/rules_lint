@@ -37,3 +37,9 @@ bzl_library(
     srcs = ["pmd.bzl"],
     visibility = ["//visibility:public"],
 )
+
+bzl_library(
+    name = "ruff",
+    srcs = ["ruff.bzl"],
+    visibility = ["//visibility:public"],
+)
