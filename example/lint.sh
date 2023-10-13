@@ -14,7 +14,7 @@ fi
 
 # Produce report files
 # You can add --aspects_parameters=fail_on_violation=true to make this command fail instead.
-bazel build --aspects //:lint.bzl%eslint,//:lint.bzl%buf,//:lint.bzl%flake8 --output_groups=report $@
+bazel build --aspects //:lint.bzl%eslint,//:lint.bzl%buf,//:lint.bzl%flake8,//:lint.bzl%pmd --output_groups=report $@
 
 # Show the results.
 # `-mtime -1`: only look at files modified in the last day, to mitigate showing stale results of old bazel runs.

@@ -17,6 +17,7 @@ exports_files(
     [
         "buf.yaml",
         ".flake8",
+        "pmd.xml",
     ],
     visibility = ["//visibility:public"],
 )
