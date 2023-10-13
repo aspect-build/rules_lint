@@ -18,7 +18,7 @@ buf = buf_lint_aspect(
 ## buf_lint_action
 
 <pre>
-buf_lint_action(<a href="#buf_lint_action-ctx">ctx</a>, <a href="#buf_lint_action-buf_toolchain">buf_toolchain</a>, <a href="#buf_lint_action-target">target</a>, <a href="#buf_lint_action-report">report</a>)
+buf_lint_action(<a href="#buf_lint_action-ctx">ctx</a>, <a href="#buf_lint_action-buf_toolchain">buf_toolchain</a>, <a href="#buf_lint_action-target">target</a>, <a href="#buf_lint_action-report">report</a>, <a href="#buf_lint_action-use_exit_code">use_exit_code</a>)
 </pre>
 
 Runs the buf lint tool as a Bazel action.
@@ -32,6 +32,7 @@ Runs the buf lint tool as a Bazel action.
 | <a id="buf_lint_action-buf_toolchain"></a>buf_toolchain |  provides the buf-lint tool   |  none |
 | <a id="buf_lint_action-target"></a>target |  the proto_library target to run on   |  none |
 | <a id="buf_lint_action-report"></a>report |  output file to generate   |  none |
+| <a id="buf_lint_action-use_exit_code"></a>use_exit_code |  whether the protoc process exiting non-zero will be a build failure   |  <code>False</code> |
 
 
 <a id="buf_lint_aspect"></a>

@@ -49,7 +49,7 @@ def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
 def _flake8_aspect_impl(target, ctx):
     if ctx.rule.kind in ["py_library"]:
         report = ctx.actions.declare_file(target.label.name + ".flake8-report.txt")
-        flake8_action(ctx, ctx.executable._flake8, ctx.rule.files.srcs, ctx.file._config_file, report)
+        flake8_action(ctx, ctx.executable._flake8, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
         results = depset([report])
     else:
         results = depset()
@@ -79,6 +79,7 @@ def flake8_aspect(binary, config):
         # Needed for linters that need semantic information like transitive type declarations.
         # attr_aspects = ["deps"],
         attrs = {
+            "fail_on_violation": attr.bool(),
             "_flake8": attr.label(
                 default = binary,
                 executable = True,

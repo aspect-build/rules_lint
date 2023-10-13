@@ -16,7 +16,7 @@ load("@rules_proto//proto:defs.bzl", "ProtoInfo")
 def _short_path(file, _):
     return file.path
 
-def buf_lint_action(ctx, buf_toolchain, target, report):
+def buf_lint_action(ctx, buf_toolchain, target, report, use_exit_code = False):
     """Runs the buf lint tool as a Bazel action.
 
     Args:
@@ -24,6 +24,7 @@ def buf_lint_action(ctx, buf_toolchain, target, report):
         buf_toolchain: provides the buf-lint tool
         target: the proto_library target to run on
         report: output file to generate
+        use_exit_code: whether the protoc process exiting non-zero will be a build failure
     """
     config = json.encode({
         "input_config": "" if ctx.file._config == None else ctx.file._config.short_path,
@@ -61,15 +62,19 @@ def buf_lint_action(ctx, buf_toolchain, target, report):
         ], transitive = [deps]),
         outputs = [report],
         command = """\
-            {protoc} $@ 2>{report} || true
-        """.format(protoc = ctx.executable._protoc.path, report = report.path),
+            {protoc} $@ 2>{report} {exit_zero}
+        """.format(
+            protoc = ctx.executable._protoc.path,
+            report = report.path,
+            exit_zero = "" if use_exit_code else "|| true",
+        ),
         arguments = [args],
     )
 
 def _buf_lint_aspect_impl(target, ctx):
     if ctx.rule.kind in ["proto_library"]:
         report = ctx.actions.declare_file(target.label.name + ".buf-report.txt")
-        buf_lint_action(ctx, ctx.toolchains[ctx.attr._buf_toolchain], target, report)
+        buf_lint_action(ctx, ctx.toolchains[ctx.attr._buf_toolchain], target, report, ctx.attr.fail_on_violation)
         results = depset([report])
     else:
         results = depset()
@@ -89,6 +94,7 @@ def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
         implementation = _buf_lint_aspect_impl,
         attr_aspects = ["deps"],
         attrs = {
+            "fail_on_violation": attr.bool(),
             "_buf_toolchain": attr.string(
                 default = toolchain,
             ),

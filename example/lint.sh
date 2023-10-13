@@ -13,6 +13,7 @@ if [ "$#" -eq 0 ]; then
 fi
 
 # Produce report files
+# You can add --aspects_parameters=fail_on_violation=true to make this command fail instead.
 bazel build --aspects //:lint.bzl%eslint,//:lint.bzl%buf,//:lint.bzl%flake8 --output_groups=report $@
 
 # Show the results.

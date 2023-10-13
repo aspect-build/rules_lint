@@ -15,7 +15,7 @@ eslint = eslint_aspect(
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 
-def _eslint_action(ctx, executable, srcs, report, use_exit_code = False):
+def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     """Create a Bazel Action that spawns an eslint process.
 
     Adapter for wrapping Bazel around
@@ -73,7 +73,7 @@ def _eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 def _eslint_aspect_impl(target, ctx):
     if ctx.rule.kind in ["ts_project_rule"]:
         report = ctx.actions.declare_file(target.label.name + ".eslint-report.txt")
-        _eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report)
+        eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
         results = depset([report])
     else:
         results = depset()
@@ -97,6 +97,7 @@ def eslint_aspect(binary, config):
     return aspect(
         implementation = _eslint_aspect_impl,
         attrs = {
+            "fail_on_violation": attr.bool(),
             "_eslint": attr.label(
                 default = binary,
                 executable = True,
