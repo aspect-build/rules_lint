@@ -8,8 +8,10 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
+	"github.com/fatih/color"
 	goplugin "github.com/hashicorp/go-plugin"
 	"gopkg.in/yaml.v2"
 
@@ -81,7 +83,7 @@ func (plugin *LintPlugin) CustomCommands() ([]*aspectplugin.Command, error) {
 				}
 
 				// Find the lint result files.
-				lintFiles, err := plugin.findLintResultFiles(streams, bazelStartupArgs)
+				lintFiles, bazelBin, err := plugin.findLintResultFiles(streams, bazelStartupArgs)
 				if err != nil {
 					Log.Printf("Error collecting lint results: %v\n", err)
 
@@ -111,7 +113,13 @@ func (plugin *LintPlugin) CustomCommands() ([]*aspectplugin.Command, error) {
 
 					lineResult := strings.TrimSpace(string(lintResultBuf))
 					if len(lineResult) > 0 {
+						// We are a child process of the Aspect CLI
+						// but we should be using the plugin SDK to ask the CLI to print for us
+						color.NoColor = false
+						relpath, _ := filepath.Rel(bazelBin, f)
+						color.New(color.FgYellow).Fprintf(streams.Stdout, "From %s:\n", relpath)
 						fmt.Fprintln(streams.Stdout, lineResult)
+						fmt.Fprintln(streams.Stdout, "")
 					}
 				}
 
@@ -121,7 +129,7 @@ func (plugin *LintPlugin) CustomCommands() ([]*aspectplugin.Command, error) {
 	}, nil
 }
 
-func (plugin *LintPlugin) findLintResultFiles(streams ioutils.Streams, bazelStartupArgs []string) ([]string, error) {
+func (plugin *LintPlugin) findLintResultFiles(streams ioutils.Streams, bazelStartupArgs []string) ([]string, string, error) {
 	// TODO: use the Build Event Stream to learn of report files as actions write them
 
 	var infoOutBuf bytes.Buffer
@@ -134,7 +142,7 @@ func (plugin *LintPlugin) findLintResultFiles(streams ioutils.Streams, bazelStar
 	infoCmd := bazelStartupArgs
 	infoCmd = append(infoCmd, "info", "bazel-bin")
 	if exitCode, err := bazel.WorkspaceFromWd.RunCommand(infoStreams, nil, infoCmd...); exitCode != 0 {
-		return nil, err
+		return nil, "", err
 	}
 
 	binDir := strings.TrimSpace(infoOutBuf.String())
@@ -148,13 +156,13 @@ func (plugin *LintPlugin) findLintResultFiles(streams ioutils.Streams, bazelStar
 	findCmd.Stdin = streams.Stdin
 
 	if err := findCmd.Run(); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	lintFiles := strings.TrimSpace(findOutBuf.String())
 	if len(lintFiles) == 0 {
-		return []string{}, nil
+		return []string{}, "", nil
 	}
 
-	return strings.Split(lintFiles, "\n"), nil
+	return strings.Split(lintFiles, "\n"), binDir, nil
 }

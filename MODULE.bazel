@@ -7,6 +7,7 @@ module(
 )
 
 bazel_dep(name = "aspect_bazel_lib", version = "1.36.0")
+
 # Needed in the root because we use js_lib_helpers in our aspect impl
 bazel_dep(name = "aspect_rules_js", version = "1.32.6")
 bazel_dep(name = "bazel_skylib", version = "1.4.1")
@@ -14,8 +15,10 @@ bazel_dep(name = "platforms", version = "0.0.7")
 
 # Needed in the root because we dereference ProtoInfo in our aspect impl
 bazel_dep(name = "rules_proto", version = "5.3.0-21.7")
+
 # Needed in the root because we dereference the toolchain in our aspect impl
 bazel_dep(name = "rules_buf", version = "0.1.1")
+
 # Needed due to rules_proto leaking the dependency
 bazel_dep(name = "protobuf", version = "21.7", repo_name = "com_google_protobuf")
 
@@ -34,6 +37,7 @@ go_deps.gazelle_override(
 use_repo(
     go_deps,
     "build_aspect_cli",
+    "com_github_fatih_color",
     "com_github_hashicorp_go_plugin",
     "in_gopkg_yaml_v2",
 )
