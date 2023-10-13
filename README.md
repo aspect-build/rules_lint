@@ -71,6 +71,8 @@ part of your CI and reports the results (including suggested fixes) to your GitH
   - `eslint`: https://eslint.org/
 - Python
   - `flake8`: <https://flake8.pycqa.org/en/latest/index.html>
+- Java
+  - `pmd`: <https://docs.pmd-code.org/latest/index.html>
 
 ### Adding a linter
 

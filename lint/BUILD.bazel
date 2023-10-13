@@ -24,3 +24,9 @@ bzl_library(
     srcs = ["flake8.bzl"],
     visibility = ["//visibility:public"],
 )
+
+bzl_library(
+    name = "pmd",
+    srcs = ["pmd.bzl"],
+    visibility = ["//visibility:public"],
+)
