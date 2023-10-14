@@ -40,6 +40,38 @@ Formatting and Linting work a bit differently.
 
 This leads to some minor differences in how they are used in rules_lint.
 
+## Available tools
+
+| Language                  | Formatter                                                      | Linter(s)                                               |
+| ------------------------- | -------------------------------------------------------------- | ------------------------------------------------------- |
+| Python                    | [Black](https://pypi.org/project/black/)                       | [flake8](https://flake8.pycqa.org/en/latest/index.html) |
+| Java                      | [google-java-format]                                           | [pmd](https://docs.pmd-code.org/latest/index.html)      |
+| Kotlin                    | [ktfmt](https://github.com/facebook/ktfmt)                     |                                                         |
+| JavaScript/TypeScript/TSX | [Prettier]                                                     | [ESLint](https://eslint.org/)                           |
+| CSS/HTML                  | [Prettier]                                                     |                                                         |
+| JSON                      | [Prettier]                                                     |                                                         |
+| Markdown                  | [Prettier]                                                     |                                                         |
+| Bash                      | [prettier-plugin-sh](https://github.com/un-ts/prettier)        |                                                         |
+| SQL                       | [prettier-plugin-sql](https://github.com/un-ts/prettier)       |                                                         |
+| Starlark (Bazel)          | [Buildifier](https://github.com/keith/buildifier-prebuilt)     |                                                         |
+| Swift                     | [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) (1) |                                                         |
+| Go                        | [gofmt](https://pkg.go.dev/cmd/gofmt)                          |                                                         |
+| Protocol Buffers          | [buf](https://docs.buf.build/format/usage)                     | [buf](https://buf.build/docs/lint/overview)             |
+| Terraform                 | [terraform](https://github.com/hashicorp/terraform) fmt        |                                                         |
+| Jsonnet                   | [jsonnetfmt](https://github.com/google/go-jsonnet)             |                                                         |
+| Scala                     | [scalafmt](https://scalameta.org/scalafmt)                     |                                                         |
+
+[prettier]: https://prettier.io
+[google-java-format]: https://github.com/google/google-java-format
+
+1. Non-hermetic: requires that a swift toolchain is installed on the machine.
+   See https://github.com/bazelbuild/rules_swift#1-install-swift
+
+To add a linter, please follow the steps in [lint/README.md](./lint/README.md) and then send us a PR.
+Thanks!!
+
+> We'll add documentation on adding formatters as well.
+
 ## Usage: Formatting
 
 ### One-time re-format all files
@@ -128,38 +160,6 @@ You can wire the reports from bazel-out to a tool like [reviewdog].
 
 We're working on a demo with https://aspect.build/workflows that automatically runs `bazel lint` as
 part of your CI and reports the results (including suggested fixes) to your GitHub Code Review thread.
-
-## Available tools
-
-| Language                  | Formatter                                                      | Linter(s)                                               |
-| ------------------------- | -------------------------------------------------------------- | ------------------------------------------------------- |
-| Python                    | [Black](https://pypi.org/project/black/)                       | [flake8](https://flake8.pycqa.org/en/latest/index.html) |
-| Java                      | [google-java-format]                                           | [pmd](https://docs.pmd-code.org/latest/index.html)      |
-| Kotlin                    | [ktfmt](https://github.com/facebook/ktfmt)                     |                                                         |
-| JavaScript/TypeScript/TSX | [Prettier]                                                     | [ESLint](https://eslint.org/)                           |
-| CSS/HTML                  | [Prettier]                                                     |                                                         |
-| JSON                      | [Prettier]                                                     |                                                         |
-| Markdown                  | [Prettier]                                                     |                                                         |
-| Bash                      | [prettier-plugin-sh](https://github.com/un-ts/prettier)        |                                                         |
-| SQL                       | [prettier-plugin-sql](https://github.com/un-ts/prettier)       |                                                         |
-| Starlark (Bazel)          | [Buildifier](https://github.com/keith/buildifier-prebuilt)     |                                                         |
-| Swift                     | [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) (1) |                                                         |
-| Go                        | [gofmt](https://pkg.go.dev/cmd/gofmt)                          |                                                         |
-| Protocol Buffers          | [buf](https://docs.buf.build/format/usage)                     | [buf](https://buf.build/docs/lint/overview)             |
-| Terraform                 | [terraform](https://github.com/hashicorp/terraform) fmt        |                                                         |
-| Jsonnet                   | [jsonnetfmt](https://github.com/google/go-jsonnet)             |                                                         |
-| Scala                     | [scalafmt](https://scalameta.org/scalafmt)                     |                                                         |
-
-[prettier]: https://prettier.io
-[google-java-format]: https://github.com/google/google-java-format
-
-1. Non-hermetic: requires that a swift toolchain is installed on the machine.
-   See https://github.com/bazelbuild/rules_swift#1-install-swift
-
-To add a linter, please follow the steps in [lint/README.md](./lint/README.md) and then send us a PR.
-Thanks!!
-
-> We'll add documentation on adding formatters as well.
 
 ## Installation
 

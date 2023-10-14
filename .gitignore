@@ -3,3 +3,5 @@ bazel-*
 .idea/
 .ijwb/
 node_modules
+# alex experiment...
+protobuf/
