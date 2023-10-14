@@ -5,7 +5,7 @@ plugins:
     log_level: warn
     properties:
       lint_aspects:
-        - //:lint.bzl%eslint
-        - //:lint.bzl%buf
-        - //:lint.bzl%flake8
-        - //:lint.bzl%pmd
+        - //tools:lint.bzl%eslint
+        - //tools:lint.bzl%buf
+        - //tools:lint.bzl%flake8
+        - //tools:lint.bzl%pmd

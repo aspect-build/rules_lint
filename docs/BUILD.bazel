@@ -22,4 +22,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//lint:pmd",
 )
 
+stardoc_with_diff_test(
+    name = "format",
+    bzl_library_target = "//format:defs",
+)
+
 update_docs(name = "update")

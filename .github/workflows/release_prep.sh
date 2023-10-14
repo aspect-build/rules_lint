@@ -20,8 +20,9 @@ cat << EOF
 \`\`\`starlark
 bazel_dep(name = "aspect_rules_eslint", version = "${TAG:1}")
 
-# Depending on which linters you setup, you may need more dependencies.
-# See example/MODULE.bazel in the rules_lint repository.
+# Next, follow the install instructions for
+# - linting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/linting.md
+# - formatting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/formatting.md
 \`\`\`
 EOF
 
