@@ -73,13 +73,13 @@ alias(
 multi_formatter_binary(
     name = "format",
     formatters = {
-        # "Python": ":black",
-        # "Starlark": "@buildifier_prebuilt//:buildifier",
-        # "Jsonnet": ":jsonnet",
-        #"Terraform": ":terraform",
-        # "JavaScript": ":prettier",
-        # "Kotlin": ":ktfmt",
-        # "Java": ":java-format",
+        "Python": ":black",
+        "Starlark": "@buildifier_prebuilt//:buildifier",
+        "Jsonnet": ":jsonnet",
+        "Terraform": ":terraform",
+        "JavaScript": ":prettier",
+        "Kotlin": ":ktfmt",
+        "Java": ":java-format",
         # FIXME: doesn't work with bzlmod
         # "Go": "@go_sdk//:bin/gofmt",
         "Swift": ":swiftformat",
