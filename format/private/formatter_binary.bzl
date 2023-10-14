@@ -12,27 +12,26 @@ def _formatter_binary_impl(ctx):
     # We need to fill in the rlocation paths in the shell script
     substitutions = {}
     for formatter, lang in ctx.attr.formatters.items():
-        rlocation = to_rlocation_path(ctx, formatter.files_to_run.executable)
-
         if lang.lower() == "python":
-            substitutions["{{black}}"] = rlocation
+            tool = "black"
         elif lang.lower() == "starlark":
-            substitutions["{{buildifier}}"] = rlocation
+            tool = "buildifier"
         elif lang.lower() == "jsonnet":
-            substitutions["{{jsonnet}}"] = rlocation
+            tool = "jsonnet"
         elif lang.lower() == "terraform":
-            substitutions["{{terraform}}"] = rlocation
+            tool = "terraform"
         elif lang.lower() in ["javascript", "sql", "bash"]:
-            substitutions["{{prettier}}"] = rlocation
+            tool = "prettier"
         elif lang.lower() == "kotlin":
-            substitutions["{{ktfmt}}"] = rlocation
+            tool = "ktfmt"
         elif lang.lower() == "java":
-            substitutions["{{java-format}}"] = rlocation
+            tool = "java-format"
         elif lang.lower() == "swift":
-            substitutions["{{swiftformat}}"] = rlocation
+            tool = "swiftformat"
         else:
             fail("lang {} not recognized".format(lang))
 
+        substitutions["{{%s}}" % tool] = to_rlocation_path(ctx, formatter.files_to_run.executable)
     bin = ctx.actions.declare_file("format.sh")
     ctx.actions.expand_template(
         template = ctx.file._bin,
@@ -40,23 +39,16 @@ def _formatter_binary_impl(ctx):
         substitutions = substitutions,
         is_executable = True,
     )
-    r = [
-        ctx.file._runfiles_lib,
-    ] + [
+
+    runfiles = ctx.runfiles(files = [ctx.file._runfiles_lib] + [
         f.files_to_run.executable
         for f in ctx.attr.formatters.keys()
-        if f.files_to_run.executable
     ] + [
         f.files_to_run.runfiles_manifest
         for f in ctx.attr.formatters.keys()
         if f.files_to_run.runfiles_manifest
-    ]
-
-    runfiles = ctx.runfiles(
-        r,
-    ).merge_all(
-        [f.default_runfiles for f in ctx.attr.formatters.keys()],
-    )
+    ])
+    runfiles = runfiles.merge_all([f.default_runfiles for f in ctx.attr.formatters.keys()])
 
     return [
         DefaultInfo(
