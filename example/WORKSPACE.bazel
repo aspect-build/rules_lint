@@ -1,7 +1,7 @@
 # Marker that this is the root of a Bazel workspace
 
 # Needed until Bazel 7 allows MODULE.bazel to directly call repository rules
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_jar")
 
 http_archive(
     name = "net_sourceforge_pmd",
@@ -62,4 +62,15 @@ http_archive(
     build_file_content = "exports_files([\"terraform\"])",
     sha256 = "5da60da508d6d1941ffa8b9216147456a16bbff6db7622ae9ad01d314cbdd188",
     urls = ["https://releases.hashicorp.com/terraform/{0}/terraform_{0}_linux_amd64.zip".format(tf_version)],
+)
+
+http_jar(
+    name = "google-java-format",
+    sha256 = "33068bbbdce1099982ec1171f5e202898eb35f2919cf486141e439fc6e3a4203",
+    url = "https://github.com/google/google-java-format/releases/download/v1.17.0/google-java-format-1.17.0-all-deps.jar",
+)
+
+http_jar(
+    name = "ktfmt",
+    url = "https://repo1.maven.org/maven2/com/facebook/ktfmt/0.46/ktfmt-0.46-jar-with-dependencies.jar",
 )

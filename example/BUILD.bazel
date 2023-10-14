@@ -54,6 +54,8 @@ multi_formatter_binary(
         # "Starlark": "@buildifier_prebuilt//:buildifier",
         # "Jsonnet": "//formatters:jsonnet",
         #"Terraform": "//formatters:terraform",
-        "JavaScript": "//formatters:prettier",
+        # "JavaScript": "//formatters:prettier",
+        "Kotlin": "//formatters:ktfmt",
+        "Java": "//formatters:java-format",
     },
 )

@@ -139,7 +139,7 @@ if [ "$#" -eq 0 ]; then
 else
   files=$(find "$@" -name '*.java')
 fi
-bin=$(rlocation aspect_rules_format/format/java-format)
+bin=$(rlocation {{java-format}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Running java-format..."
   # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
@@ -151,7 +151,7 @@ if [ "$#" -eq 0 ]; then
 else
   files=$(find "$@" -name '*.kt')
 fi
-bin=$(rlocation aspect_rules_format/format/ktfmt)
+bin=$(rlocation {{ktfmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Running ktfmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $ktmode

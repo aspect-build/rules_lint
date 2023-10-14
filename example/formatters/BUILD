@@ -33,3 +33,22 @@ prettier.prettier_binary(
     # Allow the binary to be run outside bazel
     env = {"BAZEL_BINDIR": "."},
 )
+
+java_binary(
+    name = "java-format",
+    jvm_flags = [
+        "--add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+    ],
+    main_class = "com.google.googlejavaformat.java.Main",
+    runtime_deps = ["@google-java-format//jar"],
+)
+
+java_binary(
+    name = "ktfmt",
+    main_class = "com.facebook.ktfmt.cli.Main",
+    runtime_deps = ["@ktfmt//jar"],
+)

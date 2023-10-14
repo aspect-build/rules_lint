@@ -23,6 +23,10 @@ def _formatter_binary_impl(ctx):
             substitutions["{{terraform}}"] = rlocation
         elif lang.lower() in ["javascript", "sql", "bash"]:
             substitutions["{{prettier}}"] = rlocation
+        elif lang.lower() == "kotlin":
+            substitutions["{{ktfmt}}"] = rlocation
+        elif lang.lower() == "java":
+            substitutions["{{java-format}}"] = rlocation
         else:
             fail("lang {} not recognized".format(lang))
 
@@ -35,7 +39,8 @@ def _formatter_binary_impl(ctx):
     )
     runfiles = ctx.runfiles(
         [ctx.file._runfiles_lib] +
-        [f.files_to_run.executable for f in ctx.attr.formatters.keys()],
+        [f.files_to_run.executable for f in ctx.attr.formatters.keys()] +
+        [f.files_to_run.runfiles_manifest for f in ctx.attr.formatters.keys()],
     ).merge_all(
         [f.default_runfiles for f in ctx.attr.formatters.keys()],
     )
