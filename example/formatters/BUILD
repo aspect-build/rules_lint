@@ -1,3 +1,10 @@
+"""BUILD definition for the formatter binary
+
+This is in its own package because it has so many loading-time symbols,
+we don't want to trigger eager fetches of these for builds that don't want to run format.
+"""
+
+load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 
@@ -51,4 +58,30 @@ java_binary(
     name = "ktfmt",
     main_class = "com.facebook.ktfmt.cli.Main",
     runtime_deps = ["@ktfmt//jar"],
+)
+
+alias(
+    name = "swiftformat",
+    # TODO: keith says it would be okay to upstream a proper toolchain for this
+    # https://github.com/bazelbuild/rules_swift/issues/864
+    actual = select({
+        "@bazel_tools//src/conditions:linux": "@swiftformat",
+        "@bazel_tools//src/conditions:darwin": "@swiftformat_mac",
+    }),
+)
+
+multi_formatter_binary(
+    name = "format",
+    formatters = {
+        # "Python": ":black",
+        # "Starlark": "@buildifier_prebuilt//:buildifier",
+        # "Jsonnet": ":jsonnet",
+        #"Terraform": ":terraform",
+        # "JavaScript": ":prettier",
+        # "Kotlin": ":ktfmt",
+        # "Java": ":java-format",
+        # FIXME: doesn't work with bzlmod
+        # "Go": "@go_sdk//:bin/gofmt",
+        "Swift": ":swiftformat",
+    },
 )

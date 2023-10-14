@@ -13,6 +13,7 @@ def _formatter_binary_impl(ctx):
     substitutions = {}
     for formatter, lang in ctx.attr.formatters.items():
         rlocation = to_rlocation_path(ctx, formatter.files_to_run.executable)
+
         if lang.lower() == "python":
             substitutions["{{black}}"] = rlocation
         elif lang.lower() == "starlark":
@@ -27,6 +28,8 @@ def _formatter_binary_impl(ctx):
             substitutions["{{ktfmt}}"] = rlocation
         elif lang.lower() == "java":
             substitutions["{{java-format}}"] = rlocation
+        elif lang.lower() == "swift":
+            substitutions["{{swiftformat}}"] = rlocation
         else:
             fail("lang {} not recognized".format(lang))
 
@@ -37,10 +40,20 @@ def _formatter_binary_impl(ctx):
         substitutions = substitutions,
         is_executable = True,
     )
+    r = [
+        ctx.file._runfiles_lib,
+    ] + [
+        f.files_to_run.executable
+        for f in ctx.attr.formatters.keys()
+        if f.files_to_run.executable
+    ] + [
+        f.files_to_run.runfiles_manifest
+        for f in ctx.attr.formatters.keys()
+        if f.files_to_run.runfiles_manifest
+    ]
+
     runfiles = ctx.runfiles(
-        [ctx.file._runfiles_lib] +
-        [f.files_to_run.executable for f in ctx.attr.formatters.keys()] +
-        [f.files_to_run.runfiles_manifest for f in ctx.attr.formatters.keys()],
+        r,
     ).merge_all(
         [f.default_runfiles for f in ctx.attr.formatters.keys()],
     )

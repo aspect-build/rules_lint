@@ -157,50 +157,48 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "$files" | tr \\n \\0 | xargs -0 $bin $ktmode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.scala')
-else
-  files=$(find "$@" -name '*.scala')
-fi
-bin=$(rlocation aspect_rules_format/format/scalafmt)
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running scalafmt..."
-  # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
-  echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $scalamode
-fi
+# TODO: wire scala - needs rules_jvm_external
+# if [ "$#" -eq 0 ]; then
+#   files=$(git ls-files '*.scala')
+# else
+#   files=$(find "$@" -name '*.scala')
+# fi
+# bin=$(rlocation aspect_rules_format/format/scalafmt)
+# if [ -n "$files" ] && [ -n "$bin" ]; then
+#   echo "Running scalafmt..."
+#   # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
+#   echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $scalamode
+# fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.go')
-else
-  files=$(find "$@" -name '*.go')
-fi
-bin=$(rlocation go_sdk/bin/gofmt)
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running gofmt..."
-  # gofmt doesn't produce non-zero exit code so we must check for non-empty output
-  # https://github.com/golang/go/issues/24230
-  if [ "$mode" == "check" ]; then
-    NEED_FMT=$(echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode)
-    if [ -n "$NEED_FMT" ]; then
-       echo "Go files not formatted:"
-       echo "$NEED_FMT"
-       exit 1
-    fi
-  else
-    echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode
-  fi
-fi
+# TODO: wire go - see https://bazelbuild.slack.com/archives/CDBP88Z0D/p1697247228172919
+# if [ "$#" -eq 0 ]; then
+#   files=$(git ls-files '*.go')
+# else
+#   files=$(find "$@" -name '*.go')
+# fi
+# bin=$(rlocation {{gofmt}})
+# if [ -n "$files" ] && [ -n "$bin" ]; then
+#   echo "Running gofmt..."
+#   # gofmt doesn't produce non-zero exit code so we must check for non-empty output
+#   # https://github.com/golang/go/issues/24230
+#   if [ "$mode" == "check" ]; then
+#     NEED_FMT=$(echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode)
+#     if [ -n "$NEED_FMT" ]; then
+#        echo "Go files not formatted:"
+#        echo "$NEED_FMT"
+#        exit 1
+#     fi
+#   else
+#     echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode
+#   fi
+# fi
 
 if [ "$#" -eq 0 ]; then
   files=$(git ls-files '*.swift')
 else
   files=$(find "$@" -name '*.swift')
 fi
-if [[ $OSTYPE == 'darwin'* ]]; then
-  bin=$(rlocation swiftformat_mac/swiftformat)
-else
-  bin=$(rlocation swiftformat/swiftformat_linux)
-fi
+bin=$(rlocation {{swiftformat}})
 
 if [ -n "$files" ] && [ -n "$bin" ]; then
   # swiftformat itself prints Running SwiftFormat...
