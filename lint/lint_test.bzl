@@ -7,7 +7,7 @@ To use this, in your `lint.bzl` where you define the aspect, just create a test 
 For example, with `flake8`:
 
 ```starlark
-load("@aspect_rules_lint//lint:assert_no_lint_warnings.bzl", "assert_no_lint_warnings")
+load("@aspect_rules_lint//lint:lint_test.bzl", "make_lint_test")
 load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
 
 flake8 = flake8_aspect(
@@ -15,7 +15,7 @@ flake8 = flake8_aspect(
     config = "@@//:.flake8",
 )
 
-flake8_test = assert_no_lint_warnings(aspect = flake8)
+flake8_test = make_lint_test(aspect = flake8)
 ```
 
 Now in your BUILD files you can add a test:
@@ -43,7 +43,7 @@ def _test_impl(ctx):
         for report in src[OutputGroupInfo].report.to_list():
             reports.append(report)
 
-    bin = ctx.actions.declare_file("assert_no_lint_warnings.sh")
+    bin = ctx.actions.declare_file("lint_test.sh")
     ctx.actions.expand_template(
         template = ctx.file._bin,
         output = bin,
@@ -55,13 +55,15 @@ def _test_impl(ctx):
         runfiles = ctx.runfiles(reports + [ctx.file._runfiles_lib]),
     )]
 
-def assert_no_lint_warnings(aspect):
+def make_lint_test(aspect):
     return rule(
         implementation = _test_impl,
         attrs = {
             "srcs": attr.label_list(doc = "*_library targets", aspects = [aspect]),
+            # Note, we don't use this in the test, but the user passes an aspect that has this aspect_attribute,
+            # and that requires that we list it here as well.
             "fail_on_violation": attr.bool(),
-            "_bin": attr.label(default = ":assert_no_lint_warnings.sh", allow_single_file = True, executable = True, cfg = "exec"),
+            "_bin": attr.label(default = ":lint_test.sh", allow_single_file = True, executable = True, cfg = "exec"),
             "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
         },
         test = True,

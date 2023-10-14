@@ -9,7 +9,7 @@ To use this, in your `lint.bzl` where you define the aspect, just create a test 
 For example, with `flake8`:
 
 ```starlark
-load("@aspect_rules_lint//lint:assert_no_lint_warnings.bzl", "assert_no_lint_warnings")
+load("@aspect_rules_lint//lint:lint_test.bzl", "make_lint_test")
 load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
 
 flake8 = flake8_aspect(
@@ -17,7 +17,7 @@ flake8 = flake8_aspect(
     config = "@@//:.flake8",
 )
 
-flake8_test = assert_no_lint_warnings(aspect = flake8)
+flake8_test = make_lint_test(aspect = flake8)
 ```
 
 Now in your BUILD files you can add a test:
@@ -37,12 +37,12 @@ flake8_test(
 ```
 
 
-<a id="assert_no_lint_warnings"></a>
+<a id="make_lint_test"></a>
 
-## assert_no_lint_warnings
+## make_lint_test
 
 <pre>
-assert_no_lint_warnings(<a href="#assert_no_lint_warnings-aspect">aspect</a>)
+make_lint_test(<a href="#make_lint_test-aspect">aspect</a>)
 </pre>
 
 
@@ -52,6 +52,6 @@ assert_no_lint_warnings(<a href="#assert_no_lint_warnings-aspect">aspect</a>)
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="assert_no_lint_warnings-aspect"></a>aspect |  <p align="center"> - </p>   |  none |
+| <a id="make_lint_test-aspect"></a>aspect |  <p align="center"> - </p>   |  none |
 
 
