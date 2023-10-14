@@ -12,8 +12,10 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
   { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v3 ---
 
-report=$(rlocation {{report}})
-if [ -s "${report}" ]; then      
-  cat ${report}
-  exit 1
-fi
+for report in {{reports}}; do
+  report_file=$(rlocation "$report")
+  if [ -s "${report_file}" ]; then      
+        cat ${report_file}
+        exit 1
+  fi
+done

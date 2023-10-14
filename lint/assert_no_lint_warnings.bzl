@@ -47,8 +47,7 @@ def _test_impl(ctx):
     ctx.actions.expand_template(
         template = ctx.file._bin,
         output = bin,
-        # FIXME: not [0] - need to loop over all reports
-        substitutions = {"{{report}}": to_rlocation_path(ctx, reports[0])},
+        substitutions = {"{{reports}}": " ".join([to_rlocation_path(ctx, r) for r in reports])},
         is_executable = True,
     )
     return [DefaultInfo(
