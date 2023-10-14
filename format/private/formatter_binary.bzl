@@ -19,6 +19,8 @@ def _formatter_binary_impl(ctx):
             substitutions["{{buildifier}}"] = rlocation
         elif lang.lower() == "jsonnet":
             substitutions["{{jsonnet}}"] = rlocation
+        elif lang.lower() == "terraform":
+            substitutions["{{terraform}}"] = rlocation
         else:
             fail("lang {} not recognized".format(lang))
 

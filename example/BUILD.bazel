@@ -52,6 +52,7 @@ multi_formatter_binary(
     formatters = {
         # "Python": "//formatters:black",
         # "Starlark": "@buildifier_prebuilt//:buildifier",
-        "Jsonnet": "//formatters:jsonnet",
+        # "Jsonnet": "//formatters:jsonnet",
+        "Terraform": "//formatters:terraform",
     },
 )

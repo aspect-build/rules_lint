@@ -12,6 +12,15 @@ alias(
     }),
 )
 
+alias(
+    name = "terraform",
+    actual = select({
+        "@bazel_tools//src/conditions:linux": "@terraform_linux_x86_64//:terraform",
+        "@bazel_tools//src/conditions:darwin_arm64": "@terraform_macos_aarch64//:terraform",
+        "@bazel_tools//src/conditions:darwin_x86_64": "@terraform_macos_x86_64//:terraform",
+    }),
+)
+
 # bazel run :black -- --help
 py_console_script_binary(
     name = "black",

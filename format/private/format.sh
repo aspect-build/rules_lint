@@ -117,15 +117,7 @@ if [ "$#" -eq 0 ]; then
 else
   files=$(find "$@" -name '*.tf')
 fi
-if [[ $OSTYPE == 'darwin'* ]]; then
-  if [[ $(uname -p) == 'arm' ]]; then
-    bin=$(rlocation terraform_macos_aarch64/terraform)
-  else
-    bin=$(rlocation terraform_macos_x86_64/terraform)
-  fi
-else
-  bin=$(rlocation terraform_linux_x86_64/terraform)
-fi
+bin=$(rlocation {{terraform}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Running terraform..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin fmt $tfmode
