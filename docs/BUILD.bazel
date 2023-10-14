@@ -3,6 +3,11 @@
 load("@aspect_bazel_lib//lib:docs.bzl", "stardoc_with_diff_test", "update_docs")
 
 stardoc_with_diff_test(
+    name = "assert_no_lint_warnings",
+    bzl_library_target = "//lint:assert_no_lint_warnings",
+)
+
+stardoc_with_diff_test(
     name = "buf",
     bzl_library_target = "//lint:buf",
 )

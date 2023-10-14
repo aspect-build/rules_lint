@@ -20,6 +20,13 @@ bzl_library(
 )
 
 bzl_library(
+    name = "assert_no_lint_warnings",
+    srcs = ["assert_no_lint_warnings.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@aspect_bazel_lib//lib:paths"],
+)
+
+bzl_library(
     name = "flake8",
     srcs = ["flake8.bzl"],
     visibility = ["//visibility:public"],
