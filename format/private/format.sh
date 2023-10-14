@@ -84,7 +84,7 @@ if [ "$#" -eq 0 ]; then
 else
   files=$(find "$@" -name 'BUILD' -or -name '*.bzl' -or -name '*.BUILD' -or -name 'WORKSPACE' -or -name '*.bazel')
 fi
-bin=$(rlocation buildifier_prebuilt/buildifier/buildifier)
+bin=$(rlocation {{buildifier}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Running Buildifier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin -mode="$mode"

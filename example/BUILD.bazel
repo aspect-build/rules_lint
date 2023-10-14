@@ -57,5 +57,6 @@ formatter_binary(
     name = "format",
     formatters = {
         ":black": "python",
+        "@buildifier_prebuilt//:buildifier": "starlark",
     },
 )

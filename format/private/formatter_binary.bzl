@@ -12,8 +12,11 @@ def _formatter_binary_impl(ctx):
     # We need to fill in the rlocation paths in the shell script
     substitutions = {}
     for formatter, lang in ctx.attr.formatters.items():
+        rlocation = to_rlocation_path(ctx, formatter.files_to_run.executable)
         if lang == "python":
-            substitutions["{{black}}"] = to_rlocation_path(ctx, formatter.files_to_run.executable)
+            substitutions["{{black}}"] = rlocation
+        elif lang == "starlark":
+            substitutions["{{buildifier}}"] = rlocation
         else:
             fail("lang {} not recognized".format(lang))
 
