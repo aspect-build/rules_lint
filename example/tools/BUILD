@@ -11,7 +11,7 @@ load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_cons
 package(default_visibility = ["//:__pkg__"])
 
 alias(
-    name = "jsonnet",
+    name = "jsonnetfmt",
     actual = select({
         "@bazel_tools//src/conditions:linux_x86_64": "@jsonnet_linux_x86_64//:jsonnetfmt",
         "@bazel_tools//src/conditions:linux_aarch64": "@jsonnet_linux_aarch64//:jsonnetfmt",
@@ -72,16 +72,13 @@ alias(
 
 multi_formatter_binary(
     name = "format",
-    formatters = {
-        "Python": ":black",
-        "Starlark": "@buildifier_prebuilt//:buildifier",
-        "Jsonnet": ":jsonnet",
-        "Terraform": ":terraform",
-        "JavaScript": ":prettier",
-        "Kotlin": ":ktfmt",
-        "Java": ":java-format",
-        # FIXME: doesn't work with bzlmod
-        # "Go": "@go_sdk//:bin/gofmt",
-        "Swift": ":swiftformat",
-    },
+    go = "@go_sdk//:bin/gofmt",
+    java = ":java-format",
+    javascript = ":prettier",
+    jsonnet = ":jsonnetfmt",
+    kotlin = ":ktfmt",
+    python = ":black",
+    starlark = "@buildifier_prebuilt//:buildifier",
+    swift = ":swiftformat",
+    terraform = ":terraform",
 )

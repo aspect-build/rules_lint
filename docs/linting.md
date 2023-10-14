@@ -22,10 +22,10 @@ If you use the Aspect CLI, then include a block like the following in `.aspect/c
 ```yaml
 plugins:
   - name: lint-plugin
+    from: rules_lint
     properties:
       lint_aspects:
         - //tools:lint.bzl%eslint
-        - //tools:lint.bzl%buf
 ```
 
 If you don't use Aspect CLI, you can put these in some other wrapper like a shell script that runs the linter aspects over the requested targets.

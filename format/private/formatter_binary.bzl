@@ -3,7 +3,15 @@
 load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
 
 _attrs = {
-    "formatters": attr.label_keyed_string_dict(mandatory = True, allow_files = True),
+    "javascript": attr.label(doc = "a binary target that runs prettier", executable = True, cfg = "exec", allow_files = True),
+    "python": attr.label(doc = "a binary target that runs black", executable = True, cfg = "exec", allow_files = True),
+    "starlark": attr.label(doc = "a binary target that runs buildifier", executable = True, cfg = "exec", allow_files = True),
+    "jsonnet": attr.label(doc = "a binary target that runs jsonnetfmt", executable = True, cfg = "exec", allow_files = True),
+    "terraform": attr.label(doc = "a binary target that runs terraform", executable = True, cfg = "exec", allow_files = True),
+    "kotlin": attr.label(doc = "a binary target that runs ktfmt", executable = True, cfg = "exec", allow_files = True),
+    "java": attr.label(doc = "a binary target that runs google-java-format", executable = True, cfg = "exec", allow_files = True),
+    "swift": attr.label(doc = "a binary target that runs swiftformat", executable = True, cfg = "exec", allow_files = True),
+    "go": attr.label(doc = "a binary target that runs go fmt", executable = True, cfg = "exec", allow_files = True),
     "_bin": attr.label(default = "//format/private:format.sh", allow_single_file = True),
     "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
 }
@@ -11,27 +19,21 @@ _attrs = {
 def _formatter_binary_impl(ctx):
     # We need to fill in the rlocation paths in the shell script
     substitutions = {}
-    for formatter, lang in ctx.attr.formatters.items():
-        if lang.lower() == "python":
-            tool = "black"
-        elif lang.lower() == "starlark":
-            tool = "buildifier"
-        elif lang.lower() == "jsonnet":
-            tool = "jsonnet"
-        elif lang.lower() == "terraform":
-            tool = "terraform"
-        elif lang.lower() in ["javascript", "sql", "bash"]:
-            tool = "prettier"
-        elif lang.lower() == "kotlin":
-            tool = "ktfmt"
-        elif lang.lower() == "java":
-            tool = "java-format"
-        elif lang.lower() == "swift":
-            tool = "swiftformat"
-        else:
-            fail("lang {} not recognized".format(lang))
+    tools = {
+        "black": ctx.attr.python,
+        "buildifier": ctx.attr.starlark,
+        "jsonnetfmt": ctx.attr.jsonnet,
+        "terraform": ctx.attr.terraform,
+        "prettier": ctx.attr.javascript,
+        "ktfmt": ctx.attr.kotlin,
+        "java-format": ctx.attr.java,
+        "swiftformat": ctx.attr.swift,
+        "gofmt": ctx.attr.go,
+    }
+    for tool, attr in tools.items():
+        if attr:
+            substitutions["{{%s}}" % tool] = to_rlocation_path(ctx, attr.files_to_run.executable)
 
-        substitutions["{{%s}}" % tool] = to_rlocation_path(ctx, formatter.files_to_run.executable)
     bin = ctx.actions.declare_file("format.sh")
     ctx.actions.expand_template(
         template = ctx.file._bin,
@@ -42,13 +44,18 @@ def _formatter_binary_impl(ctx):
 
     runfiles = ctx.runfiles(files = [ctx.file._runfiles_lib] + [
         f.files_to_run.executable
-        for f in ctx.attr.formatters.keys()
+        for f in tools.values()
+        if f
     ] + [
         f.files_to_run.runfiles_manifest
-        for f in ctx.attr.formatters.keys()
-        if f.files_to_run.runfiles_manifest
+        for f in tools.values()
+        if f and f.files_to_run.runfiles_manifest
     ])
-    runfiles = runfiles.merge_all([f.default_runfiles for f in ctx.attr.formatters.keys()])
+    runfiles = runfiles.merge_all([
+        f.default_runfiles
+        for f in tools.values()
+        if f
+    ])
 
     return [
         DefaultInfo(

@@ -25,23 +25,17 @@ if [ "$1" == "--mode" ]; then
   shift 2
 fi
 
-# --- begin runfiles.bash initialization v2 ---
-# Copy-pasted from the Bazel Bash runfiles library v2:
+# --- begin runfiles.bash initialization v3 ---
+# Copy-pasted from the Bazel Bash runfiles library v3.
 # https://github.com/bazelbuild/bazel/blob/master/tools/bash/runfiles/runfiles.bash
-set -o nounset -o pipefail
-f=bazel_tools/tools/bash/runfiles/runfiles.bash
-source "${RUNFILES_DIR:-/dev/null}/$f" 2> /dev/null \
-  || source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2> /dev/null \
-  || source "$0.runfiles/$f" 2> /dev/null \
-  || source "$(grep -sm1 "^$f " "$0.runfiles_manifest" | cut -f2- -d' ')" 2> /dev/null \
-  || source "$(grep -sm1 "^$f " "$0.exe.runfiles_manifest" | cut -f2- -d' ')" 2> /dev/null \
-  || {
-    echo >&2 "ERROR: cannot find $f"
-    exit 1
-  }
-f=
-set -o errexit
-# --- end runfiles.bash initialization v2 ---
+set -uo pipefail; set +e; f=bazel_tools/tools/bash/runfiles/runfiles.bash
+source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
+  source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2>/dev/null || \
+  source "$0.runfiles/$f" 2>/dev/null || \
+  source "$(grep -sm1 "^$f " "$0.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
+  source "$(grep -sm1 "^$f " "$0.exe.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
+  { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
+# --- end runfiles.bash initialization v3 ---
 
 cd $BUILD_WORKSPACE_DIRECTORY
 
@@ -128,7 +122,7 @@ if [ "$#" -eq 0 ]; then
 else
   files=$(find "$@" -name '*.jsonnet' -or -name '*.libsonnet')
 fi
-bin=$(rlocation {{jsonnet}})
+bin=$(rlocation {{jsonnetfmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Running jsonnetfmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $jsonnetmode
@@ -170,28 +164,27 @@ fi
 #   echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $scalamode
 # fi
 
-# TODO: wire go - see https://bazelbuild.slack.com/archives/CDBP88Z0D/p1697247228172919
-# if [ "$#" -eq 0 ]; then
-#   files=$(git ls-files '*.go')
-# else
-#   files=$(find "$@" -name '*.go')
-# fi
-# bin=$(rlocation {{gofmt}})
-# if [ -n "$files" ] && [ -n "$bin" ]; then
-#   echo "Running gofmt..."
-#   # gofmt doesn't produce non-zero exit code so we must check for non-empty output
-#   # https://github.com/golang/go/issues/24230
-#   if [ "$mode" == "check" ]; then
-#     NEED_FMT=$(echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode)
-#     if [ -n "$NEED_FMT" ]; then
-#        echo "Go files not formatted:"
-#        echo "$NEED_FMT"
-#        exit 1
-#     fi
-#   else
-#     echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode
-#   fi
-# fi
+if [ "$#" -eq 0 ]; then
+  files=$(git ls-files '*.go')
+else
+  files=$(find "$@" -name '*.go')
+fi
+bin=$(rlocation {{gofmt}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Running gofmt..."
+  # gofmt doesn't produce non-zero exit code so we must check for non-empty output
+  # https://github.com/golang/go/issues/24230
+  if [ "$mode" == "check" ]; then
+    NEED_FMT=$(echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode)
+    if [ -n "$NEED_FMT" ]; then
+       echo "Go files not formatted:"
+       echo "$NEED_FMT"
+       exit 1
+    fi
+  else
+    echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode
+  fi
+fi
 
 if [ "$#" -eq 0 ]; then
   files=$(git ls-files '*.swift')

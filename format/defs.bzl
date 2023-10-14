@@ -24,24 +24,12 @@ load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 
 multi_formatter_binary(
     name = "format",
-    formatters = {
-        "JavaScript": ":prettier",
-    },
+    javascript = ":prettier",
+    ...
 )
 ```
 """
 
 load("//format/private:formatter_binary.bzl", _fmt = "multi_formatter_binary")
 
-def multi_formatter_binary(name, formatters):
-    """Declares a formatter aggregator
-
-    Args:
-        name: name of the resulting executable target, typically "format"
-        formatters: a dictionary: each key is a supported language, and the value is the formatter binary to use
-    """
-    _fmt(
-        name = name,
-        # reverse the dictionary - bazel only supports labels as keys
-        formatters = {v: k for k, v in formatters.items()},
-    )
+multi_formatter_binary = _fmt
