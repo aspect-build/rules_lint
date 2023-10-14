@@ -8,7 +8,8 @@ It contains sources in multiple languages.
 We haven't published the plugin from this repo yet, so build it from source:
 
 ```bash
-cd ..; bazel build dev
+cd ..
+bazel build dev
 ```
 
 Then you can run `bazel lint src:all`

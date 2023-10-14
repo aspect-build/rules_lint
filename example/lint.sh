@@ -8,8 +8,8 @@
 set -o errexit -o pipefail -o nounset
 
 if [ "$#" -eq 0 ]; then
-    echo "usage: lint.sh [target pattern...]"
-    exit 1
+  echo "usage: lint.sh [target pattern...]"
+  exit 1
 fi
 
 # Produce report files
@@ -20,7 +20,7 @@ bazel build --aspects //:lint.bzl%eslint,//:lint.bzl%buf,//:lint.bzl%flake8,//:l
 # `-mtime -1`: only look at files modified in the last day, to mitigate showing stale results of old bazel runs.
 # `-size +1c`: don't show files containing zero bytes
 for report in $(find $(bazel info bazel-bin) -mtime -1 -size +1c -type f -name "*-report.txt"); do
-    echo "From ${report}:"
-    cat "${report}"
-    echo
+  echo "From ${report}:"
+  cat "${report}"
+  echo
 done

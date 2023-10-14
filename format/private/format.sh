@@ -13,7 +13,7 @@ function on_exit {
   code=$?
   if [[ $code != 0 ]]; then
     echo >&2 "FAILED: A formatter tool exited with code $code"
-    echo >&2 "Try running 'bazel run @aspect_rules_format//format' to fix this."
+    echo >&2 "Try running 'bazel run //:format' to fix this."
   fi
 }
 
@@ -95,7 +95,7 @@ if [ "$#" -eq 0 ]; then
 else
   files=$(find "$@" -name '*.js' -or -name '*.cjs' -or -name '*.mjs' -or -name '*.sh' -or -name '*.ts' -or -name '*.tsx' -or -name '*.mts' -or -name '*.cts' -or -name '*.json' -or -name '*.css' -or -name '*.html' -or -name '*.md' -or -name '*.sql')
 fi
-bin=$(rlocation aspect_rules_format/format/prettier.sh)
+bin=$(rlocation {{prettier}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Running Prettier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
