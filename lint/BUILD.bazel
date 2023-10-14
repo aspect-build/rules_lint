@@ -1,6 +1,6 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-exports_files(glob(["*.bzl"]))
+exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
 
 bzl_library(
     name = "buf",
@@ -17,6 +17,13 @@ bzl_library(
         "@aspect_bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
     ],
+)
+
+bzl_library(
+    name = "lint_test",
+    srcs = ["lint_test.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@aspect_bazel_lib//lib:paths"],
 )
 
 bzl_library(
