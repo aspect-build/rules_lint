@@ -1,5 +1,7 @@
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 
+package(default_visibility = ["//visibility:public"])
+
 ts_project(
     name = "ts",
     srcs = ["file.ts"],
@@ -8,13 +10,11 @@ ts_project(
 proto_library(
     name = "unused",
     srcs = ["unused.proto"],
-    visibility = ["//visibility:public"],
 )
 
 proto_library(
     name = "foo_proto",
     srcs = ["file.proto"],
-    visibility = ["//visibility:public"],
     deps = [":unused"],
 )
 
