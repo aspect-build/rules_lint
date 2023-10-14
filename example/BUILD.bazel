@@ -45,8 +45,3 @@ java_binary(
     main_class = "net.sourceforge.pmd.PMD",
     runtime_deps = ["@net_sourceforge_pmd"],
 )
-
-alias(
-    name = "format",
-    actual = "//formatters:format",
-)
