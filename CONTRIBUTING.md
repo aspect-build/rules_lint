@@ -43,6 +43,7 @@ This means that any usage of `@rules_eslint` on your system will point to this f
 1. Watch the automation run on GitHub actions
 
 ## Recording a demo
+
 Install from https://asciinema.org/
 Then cd example and start recording, pasting these commands:
 
