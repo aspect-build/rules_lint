@@ -3,11 +3,11 @@
 TODO: user docs
 """
 
-load("//format/private:formatter_binary.bzl", "formatter_binary_lib")
+load("//format/private:formatter_binary.bzl", _fmt = "multi_formatter_binary")
 
-formatter_binary = rule(
-    doc = "Produces an executable that aggregates the supplied formatter binaries",
-    implementation = formatter_binary_lib.implementation,
-    attrs = formatter_binary_lib.attrs,
-    executable = True,
-)
+def multi_formatter_binary(name, formatters):
+    _fmt(
+        name = name,
+        # reverse the dictionary - bazel only supports labels as keys
+        formatters = {v: k for k, v in formatters.items()},
+    )

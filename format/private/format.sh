@@ -136,19 +136,7 @@ if [ "$#" -eq 0 ]; then
 else
   files=$(find "$@" -name '*.jsonnet' -or -name '*.libsonnet')
 fi
-if [[ $OSTYPE == 'darwin'* ]]; then
-  if [[ $(uname -p) == 'arm' ]]; then
-    bin=$(rlocation jsonnet_macos_aarch64/jsonnetfmt)
-  else
-    bin=$(rlocation jsonnet_macos_x86_64/jsonnetfmt)
-  fi
-else
-  if [[ $(uname -p) == 'arm' ]]; then
-      bin=$(rlocation jsonnet_linux_aarch64/jsonnetfmt)
-  else
-      bin=$(rlocation jsonnet_linux_x86_64/jsonnetfmt)
-  fi
-fi
+bin=$(rlocation {{jsonnet}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Running jsonnetfmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $jsonnetmode

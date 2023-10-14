@@ -10,3 +10,33 @@ http_archive(
     strip_prefix = "pmd-bin-6.55.0/lib",
     url = "https://github.com/pmd/pmd/releases/download/pmd_releases/6.55.0/pmd-bin-6.55.0.zip",
 )
+
+jsonnet_version = "0.20.0"
+
+http_archive(
+    name = "jsonnet_macos_aarch64",
+    build_file_content = "exports_files([\"jsonnetfmt\"])",
+    sha256 = "a15a699a58eb172c6d91f4cbddf3681095a649008628e0cfd84f564db4244ee3",
+    urls = ["https://github.com/google/go-jsonnet/releases/download/v{0}/go-jsonnet_{0}_Darwin_arm64.tar.gz".format(jsonnet_version)],
+)
+
+http_archive(
+    name = "jsonnet_macos_x86_64",
+    build_file_content = "exports_files([\"jsonnetfmt\"])",
+    sha256 = "76901637f60589bb9bf91b3481d4aecbc31efcd35ca99ae72bcb510b00270ad9",
+    urls = ["https://github.com/google/go-jsonnet/releases/download/v{0}/go-jsonnet_{0}_Darwin_x86_64.tar.gz".format(jsonnet_version)],
+)
+
+http_archive(
+    name = "jsonnet_linux_x86_64",
+    build_file_content = "exports_files([\"jsonnetfmt\"])",
+    sha256 = "a137c5e969609c3995c4d05817a247cfef8a92760c5306c3ad7df0355dd62970",
+    urls = ["https://github.com/google/go-jsonnet/releases/download/v{0}/go-jsonnet_{0}_Linux_x86_64.tar.gz".format(jsonnet_version)],
+)
+
+http_archive(
+    name = "jsonnet_linux_aarch64",
+    build_file_content = "exports_files([\"jsonnetfmt\"])",
+    sha256 = "49fbc99c91dcd2be53fa856307de3b8708c91dc5c74740714fdf9317957322e0",
+    urls = ["https://github.com/google/go-jsonnet/releases/download/v{0}/go-jsonnet_{0}_Linux_arm64.tar.gz".format(jsonnet_version)],
+)
