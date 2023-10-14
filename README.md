@@ -103,11 +103,11 @@ Follow instructions from the release you wish to use:
 
 To format files, run the target you create when you install rules_lint.
 
-For example, `bazel run tools:format` will re-format all files:
+We recommend using a Git pre-commit hook to format changed files by running `bazel run tools:format [changed files...]`.
 
 [![asciicast](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT.svg)](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT)
 
-See [./docs/formatting.md] for more ways to use the formatter, such as a pre-commit hook or a CI check.
+See [Formatting](./docs/formatting.md) for more ways to use the formatter, for example as a CI check.
 
 ### Lint
 
@@ -117,7 +117,7 @@ For example, running `bazel lint //src:all` prints lint warnings to the terminal
 
 [![asciicast](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq.svg)](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq)
 
-See [./docs/linting.md] for more ways to use the linter, such as running as a test target, or presenting results as code review comments.
+See [Linting](./docs/linting.md) for more ways to use the linter, such as using vanilla Bazel, running as a test target, or presenting results as code review comments.
 
 ### Ignoring files
 
