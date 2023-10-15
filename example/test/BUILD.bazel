@@ -1,6 +1,6 @@
 "Demonstrates how to enforce zero-lint-tolerance policy with tests"
 
-load("//:lint.bzl", "flake8_test", "pmd_test")
+load("//tools:lint.bzl", "flake8_test", "pmd_test")
 
 flake8_test(
     name = "flake8",

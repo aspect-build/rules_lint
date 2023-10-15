@@ -1,7 +1,13 @@
 {
-  "homepage": "https://github.com/aspect-build/rules_eslint",
-  "maintainers": [],
-  "repository": ["github:aspect-build/rules_eslint"],
+  "homepage": "https://github.com/aspect-build/rules_lint",
+  "maintainers": [
+    {
+      "email": "hello@aspect.dev",
+      "github": "aspect-build",
+      "name": "Aspect team"
+    }
+  ],
+  "repository": ["github:aspect-build/rules_lint"],
   "versions": [],
   "yanked_versions": {}
 }
