@@ -10,6 +10,6 @@ on:
 
 jobs:
   release:
-    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v2
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v5
     with:
       release_files: rules_lint-*.tar.gz
