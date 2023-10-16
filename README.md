@@ -10,7 +10,7 @@ Features:
 - **No changes needed to rulesets**. Works with the Bazel rules you already use.
 - **No changes needed to BUILD files**. You don't need to add lint wrapper macros, and lint doesn't appear in `bazel query` output.
   Instead, users can lint their existing `*_library` targets.
-- Lint results can be **presented in various ways**, see "Usage" below.
+- Lint results can be **presented in various ways**, see [Usage](https://github.com/aspect-build/rules_lint/blob/main/docs/linting.md#usage) below.
 - **Can format files not known to Bazel**. Formatting just runs directly on the file tree.
   No need to create `sh_library` targets for your shell scripts, for example.
 - Honors the same configuration files you use for these tools outside Bazel (e.g. in the editor)
