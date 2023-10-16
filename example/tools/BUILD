@@ -34,6 +34,8 @@ py_console_script_binary(
     name = "black_w_bzlmod",
     pkg = "@pip//black:pkg",
     script = "black",
+    # Doesn't build without --enable_bzlmod
+    tags = ["manual"],
 )
 
 # bazel run :black -- --help

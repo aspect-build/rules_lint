@@ -27,6 +27,8 @@ py_console_script_binary(
     name = "flake8_w_bzlmod",
     pkg = "@pip//flake8:pkg",
     script = "flake8",
+    # Doesn't build without --enable_bzlmod
+    tags = ["manual"],
 )
 
 # We can test that it works with:
