@@ -22,11 +22,21 @@ exports_files(
     visibility = ["//visibility:public"],
 )
 
+# Need different target for bzlmod: https://github.com/bazelbuild/rules_python/issues/1493
+py_console_script_binary(
+    name = "flake8_w_bzlmod",
+    pkg = "@pip//flake8:pkg",
+    script = "flake8",
+)
+
 # We can test that it works with:
 # bazel run :flake8 -- --help
-py_console_script_binary(
+alias(
     name = "flake8",
-    pkg = "@pip//flake8:pkg",
+    actual = select({
+        "@aspect_bazel_lib//lib:bzlmod": ":flake8_w_bzlmod",
+        "//conditions:default": "@pip_flake8//:rules_python_wheel_entry_point_flake8",
+    }),
 )
 
 eslint_bin.eslint_binary(name = "eslint")
