@@ -12,13 +12,10 @@ Then register them on the `formatters` attribute, for example:
 ```starlark
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 
-# A target "black" is declared here
-
 multi_formatter_binary(
     name = "format",
-    formatters = {
-        "Python": ":black",
-    },
+    # register languages, e.g.
+    # python = "@pip_black//:rules_python_wheel_entry_point_black",
 )
 ```
 
