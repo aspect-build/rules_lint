@@ -15,6 +15,8 @@ eslint = eslint_aspect(
     config = "@@//:eslintrc",
 )
 
+eslint_test = make_lint_test(aspect = eslint)
+
 flake8 = flake8_aspect(
     binary = "@@//:flake8",
     config = "@@//:.flake8",

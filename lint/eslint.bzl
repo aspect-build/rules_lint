@@ -56,7 +56,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     outputs = [report]
 
     if not use_exit_code:
-        exit_code_out = ctx.actions.declare_file("exit_code_out")
+        exit_code_out = ctx.actions.declare_file("_{}.exit_code_out".format(ctx.label.name))
         outputs.append(exit_code_out)
         env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code_out.path
 
