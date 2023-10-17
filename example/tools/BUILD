@@ -29,22 +29,10 @@ alias(
     }),
 )
 
-# Need different target for bzlmod: https://github.com/bazelbuild/rules_python/issues/1493
-py_console_script_binary(
-    name = "black_w_bzlmod",
-    pkg = "@pip//black:pkg",
-    script = "black",
-    # Doesn't build without --enable_bzlmod
-    tags = ["manual"],
-)
-
 # bazel run :black -- --help
-alias(
+py_console_script_binary(
     name = "black",
-    actual = select({
-        "@aspect_bazel_lib//lib:bzlmod": ":black_w_bzlmod",
-        "//conditions:default": "@pip_black//:rules_python_wheel_entry_point_black",
-    }),
+    pkg = "@pip//black:pkg",
 )
 
 prettier.prettier_binary(
