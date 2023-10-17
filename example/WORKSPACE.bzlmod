@@ -11,8 +11,8 @@ load(
     "fetch_pmd",
     "fetch_swiftformat",
     "fetch_terraform",
-    "fetch_ruff",
 )
+load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
 
 fetch_pmd()
 

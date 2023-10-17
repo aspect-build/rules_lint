@@ -9,4 +9,4 @@ plugins:
         - //tools:lint.bzl%buf
         - //tools:lint.bzl%flake8
         - //tools:lint.bzl%pmd
-        - //:lint.bzl%ruff
+        - //tools:lint.bzl%ruff
