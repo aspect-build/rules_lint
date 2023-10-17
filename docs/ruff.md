@@ -14,6 +14,24 @@ ruff = ruff_aspect(
 ```
 
 
+<a id="fetch_ruff"></a>
+
+## fetch_ruff
+
+<pre>
+fetch_ruff(<a href="#fetch_ruff-version">version</a>)
+</pre>
+
+A repository macro used from WORKSPACE to fetch ruff binaries
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="fetch_ruff-version"></a>version |  a version of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  <code>"v0.1.0"</code> |
+
+
 <a id="ruff_action"></a>
 
 ## ruff_action

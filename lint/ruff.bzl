@@ -139,6 +139,11 @@ RUFF_VERSIONS = {
 }
 
 def fetch_ruff(version = RUFF_VERSIONS.keys()[0]):
+    """A repository macro used from WORKSPACE to fetch ruff binaries
+
+    Args:
+        version: a version of ruff that we have mirrored, e.g. `v0.1.0`
+    """
     for plat, sha256 in RUFF_VERSIONS[version].items():
         maybe(
             http_archive,
