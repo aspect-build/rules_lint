@@ -31,16 +31,16 @@ def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
     args = ctx.actions.args()
     args.add("check")
     args.add(config, format = "--config=%s")
+    args.add(report, format = "--ouput-file=%s")
     if not use_exit_code:
         args.add("--exit-zero")
 
     args.add_all(srcs)
 
-    ctx.actions.run_shell(
+    ctx.actions.run(
         inputs = inputs,
         outputs = outputs,
-        tools = [executable],
-        command = "%s $@ > %s" % (executable.path, report.path),
+        executable = executable,
         arguments = [args],
         mnemonic = "ruff",
     )
@@ -94,4 +94,3 @@ def ruff_aspect(binary, config):
             ),
         },
     )
-
