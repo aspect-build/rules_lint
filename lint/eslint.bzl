@@ -56,14 +56,19 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     outputs = [report]
 
     if not use_exit_code:
-        exit_code_out = ctx.actions.declare_file("exit_code_out")
+        exit_code_out = ctx.actions.declare_file("_{}.exit_code_out".format(ctx.label.name))
         outputs.append(exit_code_out)
         env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code_out.path
 
-    ctx.actions.run(
-        inputs = inputs,
+    ctx.actions.run_shell(
+        inputs = inputs + [executable._eslint],
         outputs = outputs,
-        executable = executable._eslint,
+        # Workaround https://github.com/eslint/eslint/issues/17660
+        # If the output wasn't created, then put empty file there.
+        command = "./{eslint} $@; [ -f {output} ] || touch {output}".format(
+            eslint = executable._eslint.path,
+            output = report.path,
+        ),
         arguments = [args],
         env = env,
         mnemonic = "ESLint",
@@ -71,7 +76,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
-    if ctx.rule.kind in ["ts_project_rule"]:
+    if ctx.rule.kind in ["ts_project", "ts_project_rule"]:
         report = ctx.actions.declare_file(target.label.name + ".eslint-report.txt")
         eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
         results = depset([report])
