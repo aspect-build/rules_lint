@@ -89,11 +89,6 @@ Thanks!!
 
 ## Installation
 
-rules_lint currently only works with bzlmod under Bazel 6+.
-This is because we accumulate dependencies which are difficult to express
-in a WORKSPACE file.
-We might add support for WORKSPACE in the future.
-
 Follow instructions from the release you wish to use:
 <https://github.com/aspect-build/rules_lint/releases>
 

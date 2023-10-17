@@ -1,0 +1,26 @@
+# Marker that this is the root of a Bazel workspace
+# This file shadows WORKSPACE.bazel under --enable_bzlmod.
+
+# Support repos that aren't on bazel central registry
+# Needed until Bazel 7 allows MODULE.bazel to directly call repository rules
+load(
+    "@aspect_rules_lint//format:repositories.bzl",
+    "fetch_java_format",
+    "fetch_jsonnet",
+    "fetch_ktfmt",
+    "fetch_pmd",
+    "fetch_swiftformat",
+    "fetch_terraform",
+)
+
+fetch_pmd()
+
+fetch_jsonnet()
+
+fetch_terraform()
+
+fetch_java_format()
+
+fetch_ktfmt()
+
+fetch_swiftformat()

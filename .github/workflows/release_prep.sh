@@ -24,5 +24,20 @@ bazel_dep(name = "aspect_rules_lint", version = "${TAG:1}")
 # - linting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/linting.md
 # - formatting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/formatting.md
 \`\`\`
+
+## Using WORKSPACE
+
+Paste this snippet into your `WORKSPACE.bazel` file:
+
+\`\`\`starlark
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_archive(
+    name = "aspect_rules_lint",
+    sha256 = "${SHA}",
+    strip_prefix = "${PREFIX}",
+    url = "https://github.com/aspect-build/rules_lint/releases/download/${TAG}/${ARCHIVE}",
+)
 EOF
 
+awk 'f;/--SNIP--/{f=1}' example/WORKSPACE.bazel
+echo "\`\`\`" 
