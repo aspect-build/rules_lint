@@ -1,6 +1,13 @@
+load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
+
+js_library(
+    name = "eslint.workaround_17660",
+    srcs = ["eslint.workaround_17660.js"],
+    visibility = ["//visibility:public"],
+)
 
 bzl_library(
     name = "buf",

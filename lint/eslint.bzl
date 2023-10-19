@@ -31,6 +31,10 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     args = ctx.actions.args()
 
+    # Workaround: create an empty report file in case eslint doesn't write one
+    # Use `../../..` to return to the execroot?
+    args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
+
     # require explicit path to the eslintrc file, don't search for one
     args.add("--no-eslintrc")
 
@@ -47,7 +51,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     # Add the config file along with any deps it has on npm packages
     inputs.extend(js_lib_helpers.gather_files_from_js_providers(
-        [ctx.attr._config_file],
+        [ctx.attr._config_file, ctx.attr._workaround_17660],
         include_transitive_sources = True,
         include_declarations = False,
         include_npm_linked_packages = True,
@@ -56,7 +60,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     outputs = [report]
 
     if not use_exit_code:
-        exit_code_out = ctx.actions.declare_file("exit_code_out")
+        exit_code_out = ctx.actions.declare_file("_{}.exit_code_out".format(ctx.label.name))
         outputs.append(exit_code_out)
         env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code_out.path
 
@@ -71,7 +75,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
-    if ctx.rule.kind in ["ts_project_rule"]:
+    if ctx.rule.kind in ["ts_project", "ts_project_rule"]:
         report = ctx.actions.declare_file(target.label.name + ".eslint-report.txt")
         eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
         results = depset([report])
@@ -106,6 +110,11 @@ def eslint_aspect(binary, config):
             "_config_file": attr.label(
                 default = config,
                 allow_single_file = True,
+            ),
+            "_workaround_17660": attr.label(
+                default = "@aspect_rules_lint//lint:eslint.workaround_17660",
+                allow_single_file = True,
+                cfg = "exec",
             ),
         },
     )

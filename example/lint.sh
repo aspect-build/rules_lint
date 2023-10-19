@@ -2,7 +2,7 @@
 #
 # Shows an end-to-end workflow for linting without failing the build.
 # This is meant to mimic the behavior of the `bazel lint` command that you'd have
-# by using the Aspect CLI with the plugin in this repository.
+# by using the Aspect CLI.
 #
 # We recommend using Aspect CLI instead!
 set -o errexit -o pipefail -o nounset
