@@ -20,10 +20,9 @@ in the lint runner.
 If you use the Aspect CLI, then include a block like the following in `.aspect/cli/config.yaml`:
 
 ```yaml
-plugins:
-    lint:
-      aspects:
-        - //tools:lint.bzl%eslint
+lint:
+  aspects:
+    - //tools:lint.bzl%eslint
 ```
 
 If you don't use Aspect CLI, you can put these in some other wrapper like a shell script that runs the linter aspects over the requested targets.
