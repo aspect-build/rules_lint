@@ -20,12 +20,9 @@ in the lint runner.
 If you use the Aspect CLI, then include a block like the following in `.aspect/cli/config.yaml`:
 
 ```yaml
-plugins:
-  - name: lint-plugin
-    from: rules_lint
-    properties:
-      lint_aspects:
-        - //tools:lint.bzl%eslint
+lint:
+  aspects:
+    - //tools:lint.bzl%eslint
 ```
 
 If you don't use Aspect CLI, you can put these in some other wrapper like a shell script that runs the linter aspects over the requested targets.
@@ -35,9 +32,7 @@ See the `lint.sh` script in the `example/` folder.
 
 ### 1. Warnings in the terminal with `bazel lint`
 
-This ruleset provides an Aspect CLI plugin, so it can register the missing 'lint' command.
-
-Users just type `bazel lint //path/to:targets`.
+Aspect CLI adds the missing 'lint' command, so users just type `bazel lint //path/to:targets`.
 
 Reports are then written to the terminal.
 

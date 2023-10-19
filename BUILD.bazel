@@ -1,60 +1,11 @@
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
-load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
-load("@rules_go//go:def.bzl", "go_binary", "go_library")
-load("//release:release.bzl", "local_plugin")
+load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
 
 gazelle_binary(
     name = "gazelle_bin",
-    languages = DEFAULT_LANGUAGES + [
-        "@bazel_skylib_gazelle_plugin//bzl",
-    ],
+    languages = ["@bazel_skylib_gazelle_plugin//bzl"],
 )
 
 gazelle(
     name = "gazelle",
     gazelle = "gazelle_bin",
-)
-
-# gazelle:prefix github.com/aspect-build/rules_lint
-# Buildozer ships with BUILD files but doesn't follow our naming convention
-# gazelle:resolve go github.com/bazelbuild/buildtools/edit @com_github_bazelbuild_buildtools//edit:go_default_library
-go_library(
-    name = "lint-plugin_lib",
-    srcs = ["plugin.go"],
-    importpath = "github.com/aspect-build/rules_lint",
-    visibility = ["//:__subpackages__"],
-    deps = [
-        "@build_aspect_cli//bazel/command_line",
-        "@build_aspect_cli//pkg/aspecterrors",
-        "@build_aspect_cli//pkg/bazel",
-        "@build_aspect_cli//pkg/ioutils",
-        "@build_aspect_cli//pkg/plugin/sdk/v1alpha4/config",
-        "@build_aspect_cli//pkg/plugin/sdk/v1alpha4/plugin",
-        "@com_github_fatih_color//:color",
-        "@com_github_hashicorp_go_plugin//:go-plugin",
-        "@in_gopkg_yaml_v2//:yaml_v2",
-    ],
-)
-
-# Only used for local development.
-# Release binaries are created by the target in /release
-go_binary(
-    name = "lint-plugin",
-    embed = [":lint-plugin_lib"],
-    visibility = ["//visibility:public"],
-)
-
-# TODO: add a Go unit test of the plugin logic.
-# For now we just test that it builds.
-build_test(
-    name = "test",
-    targets = [":lint-plugin"],
-)
-
-# Build this target to copy the plugin to bazel-bin/plugin and checksum it.
-# Referenced by the .aspect/cli/config.yaml in the `From:` line.
-local_plugin(
-    name = "dev",
-    binary = ":lint-plugin",
-    path = "plugin",
 )
