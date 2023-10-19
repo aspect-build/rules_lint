@@ -5,14 +5,9 @@ It contains sources in multiple languages.
 
 ### With Aspect CLI
 
-We haven't published the plugin from this repo yet, so build it from source:
+Run `bazel lint src:all`
 
-```bash
-cd ..
-bazel build dev
-```
-
-Then you can run `bazel lint src:all`
+> If the 'lint' command isn't found, make sure you have a new enough version of Aspect CLI.
 
 ### Without Aspect CLI
 

@@ -1,11 +1,6 @@
-plugins:
-  - name: lint-plugin
-    # For this to work, you must first `bazel build dev` in the root of the repo
-    from: ../bazel-bin/plugin
-    log_level: warn
-    properties:
-      lint_aspects:
-        - //tools:lint.bzl%eslint
-        - //tools:lint.bzl%buf
-        - //tools:lint.bzl%flake8
-        - //tools:lint.bzl%pmd
+lint:
+  aspects:
+    - //tools:lint.bzl%eslint
+    - //tools:lint.bzl%buf
+    - //tools:lint.bzl%flake8
+    - //tools:lint.bzl%pmd
