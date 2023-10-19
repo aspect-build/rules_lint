@@ -31,6 +31,10 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     args = ctx.actions.args()
 
+    # Workaround: create an empty report file in case eslint doesn't write one
+    # Use `../../..` to return to the execroot?
+    args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
+
     # require explicit path to the eslintrc file, don't search for one
     args.add("--no-eslintrc")
 
@@ -47,7 +51,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     # Add the config file along with any deps it has on npm packages
     inputs.extend(js_lib_helpers.gather_files_from_js_providers(
-        [ctx.attr._config_file],
+        [ctx.attr._config_file, ctx.attr._workaround_17660],
         include_transitive_sources = True,
         include_declarations = False,
         include_npm_linked_packages = True,
@@ -60,15 +64,10 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
         outputs.append(exit_code_out)
         env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code_out.path
 
-    ctx.actions.run_shell(
-        inputs = inputs + [executable._eslint],
+    ctx.actions.run(
+        inputs = inputs,
         outputs = outputs,
-        # Workaround https://github.com/eslint/eslint/issues/17660
-        # If the output wasn't created, then put empty file there.
-        command = "./{eslint} $@; [ -f {output} ] || touch {output}".format(
-            eslint = executable._eslint.path,
-            output = report.path,
-        ),
+        executable = executable._eslint,
         arguments = [args],
         env = env,
         mnemonic = "ESLint",
@@ -111,6 +110,11 @@ def eslint_aspect(binary, config):
             "_config_file": attr.label(
                 default = config,
                 allow_single_file = True,
+            ),
+            "_workaround_17660": attr.label(
+                default = "@aspect_rules_lint//lint:eslint.workaround_17660",
+                allow_single_file = True,
+                cfg = "exec",
             ),
         },
     )
