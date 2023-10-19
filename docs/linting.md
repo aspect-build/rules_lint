@@ -62,7 +62,7 @@ This makes the build fail when any lint violations are present.
 
 ### 4. Failures during `bazel test`
 
-We haven't implemented this yet, follow https://github.com/aspect-build/rules_lint/issues/11
+Add a [make_lint_test](./lint_test.md) call to the `lint.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
 
 ### 5. Code review comments
 
