@@ -80,7 +80,7 @@ def _buf_lint_aspect_impl(target, ctx):
         results = depset()
 
     return [
-        OutputGroupInfo(report = results),
+        OutputGroupInfo(rules_lint_report = results),
     ]
 
 def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"):

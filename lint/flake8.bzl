@@ -55,7 +55,7 @@ def _flake8_aspect_impl(target, ctx):
         results = depset()
 
     return [
-        OutputGroupInfo(report = results),
+        OutputGroupInfo(rules_lint_report = results),
     ]
 
 def flake8_aspect(binary, config):

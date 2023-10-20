@@ -83,7 +83,7 @@ def _eslint_aspect_impl(target, ctx):
         results = depset()
 
     return [
-        OutputGroupInfo(report = results),
+        OutputGroupInfo(rules_lint_report = results),
     ]
 
 def eslint_aspect(binary, config):
