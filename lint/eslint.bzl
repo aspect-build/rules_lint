@@ -14,6 +14,7 @@ eslint = eslint_aspect(
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
+load("//lint/private:lint_aspect.bzl", "report_file")
 
 def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     """Create a Bazel Action that spawns an eslint process.
@@ -75,16 +76,12 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
-    if ctx.rule.kind in ["ts_project", "ts_project_rule"]:
-        report = ctx.actions.declare_file(target.label.name + ".eslint-report.txt")
-        eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
-        results = depset([report])
-    else:
-        results = depset()
+    if ctx.rule.kind not in ["ts_project", "ts_project_rule"]:
+        return []
 
-    return [
-        OutputGroupInfo(rules_lint_report = results),
-    ]
+    report, info = report_file(target, ctx)
+    eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
+    return [info]
 
 def eslint_aspect(binary, config):
     """A factory function to create a linter aspect.

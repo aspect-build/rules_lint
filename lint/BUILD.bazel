@@ -13,7 +13,10 @@ bzl_library(
     name = "buf",
     srcs = ["buf.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["@rules_proto//proto:defs"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "@rules_proto//proto:defs",
+    ],
 )
 
 bzl_library(
@@ -21,6 +24,7 @@ bzl_library(
     srcs = ["eslint.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "//lint/private:lint_aspect",
         "@aspect_bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
     ],
@@ -28,7 +32,7 @@ bzl_library(
 
 bzl_library(
     name = "lint_test",
-    srcs = ["lint_test.bzl"],
+    srcs = ["lint_test.bzl"],  # keep
     visibility = ["//visibility:public"],
     deps = ["@aspect_bazel_lib//lib:paths"],
 )
@@ -37,10 +41,12 @@ bzl_library(
     name = "flake8",
     srcs = ["flake8.bzl"],
     visibility = ["//visibility:public"],
+    deps = ["//lint/private:lint_aspect"],
 )
 
 bzl_library(
     name = "pmd",
     srcs = ["pmd.bzl"],
     visibility = ["//visibility:public"],
+    deps = ["//lint/private:lint_aspect"],
 )
