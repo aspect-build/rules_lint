@@ -2,6 +2,10 @@
 
 set -o errexit -o nounset -o pipefail
 
+# Don't include our example in the distribution artifact, to reduce size.
+# See https://git-scm.com/docs/git-archive#ATTRIBUTES
+echo >>.git/info/attributes "example export-ignore"
+
 # Set by GH actions, see
 # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
 TAG=${GITHUB_REF_NAME}
