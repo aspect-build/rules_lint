@@ -40,7 +40,7 @@ load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
 def _test_impl(ctx):
     reports = []
     for src in ctx.attr.srcs:
-        for report in src[OutputGroupInfo].report.to_list():
+        for report in src[OutputGroupInfo].rules_lint_report.to_list():
             reports.append(report)
 
     bin = ctx.actions.declare_file("lint_test.sh")
