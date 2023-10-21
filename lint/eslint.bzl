@@ -43,6 +43,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     # args.add("--debug")
 
     args.add_all(["--config", ctx.file._config_file.short_path])
+    args.add_all(["--format", "../../../" + ctx.file._formatter.path])
     args.add_all(["--output-file", report.short_path])
     args.add_all([s.short_path for s in srcs])
 
@@ -52,7 +53,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     # Add the config file along with any deps it has on npm packages
     inputs.extend(js_lib_helpers.gather_files_from_js_providers(
-        [ctx.attr._config_file, ctx.attr._workaround_17660],
+        [ctx.attr._config_file, ctx.attr._workaround_17660, ctx.attr._formatter],
         include_transitive_sources = True,
         include_declarations = False,
         include_npm_linked_packages = True,
@@ -110,6 +111,11 @@ def eslint_aspect(binary, config):
             ),
             "_workaround_17660": attr.label(
                 default = "@aspect_rules_lint//lint:eslint.workaround_17660",
+                allow_single_file = True,
+                cfg = "exec",
+            ),
+            "_formatter": attr.label(
+                default = "@aspect_rules_lint//lint:eslint.bazel-formatter",
                 allow_single_file = True,
                 cfg = "exec",
             ),
