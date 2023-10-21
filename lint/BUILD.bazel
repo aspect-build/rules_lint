@@ -9,6 +9,12 @@ js_library(
     visibility = ["//visibility:public"],
 )
 
+js_library(
+    name = "eslint.bazel-formatter",
+    srcs = ["eslint.bazel-formatter.js"],
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "buf",
     srcs = ["buf.bzl"],
