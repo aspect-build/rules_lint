@@ -14,6 +14,7 @@ eslint = eslint_aspect(
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
+load("//lint/private:lint_aspect.bzl", "report_file")
 
 def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     """Create a Bazel Action that spawns an eslint process.
@@ -42,6 +43,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     # args.add("--debug")
 
     args.add_all(["--config", ctx.file._config_file.short_path])
+    args.add_all(["--format", "../../../" + ctx.file._formatter.path])
     args.add_all(["--output-file", report.short_path])
     args.add_all([s.short_path for s in srcs])
 
@@ -51,7 +53,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     # Add the config file along with any deps it has on npm packages
     inputs.extend(js_lib_helpers.gather_files_from_js_providers(
-        [ctx.attr._config_file, ctx.attr._workaround_17660],
+        [ctx.attr._config_file, ctx.attr._workaround_17660, ctx.attr._formatter],
         include_transitive_sources = True,
         include_declarations = False,
         include_npm_linked_packages = True,
@@ -75,16 +77,12 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
-    if ctx.rule.kind in ["ts_project", "ts_project_rule"]:
-        report = ctx.actions.declare_file(target.label.name + ".eslint-report.txt")
-        eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
-        results = depset([report])
-    else:
-        results = depset()
+    if ctx.rule.kind not in ["ts_project", "ts_project_rule"]:
+        return []
 
-    return [
-        OutputGroupInfo(report = results),
-    ]
+    report, info = report_file(target, ctx)
+    eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
+    return [info]
 
 def eslint_aspect(binary, config):
     """A factory function to create a linter aspect.
@@ -113,6 +111,11 @@ def eslint_aspect(binary, config):
             ),
             "_workaround_17660": attr.label(
                 default = "@aspect_rules_lint//lint:eslint.workaround_17660",
+                allow_single_file = True,
+                cfg = "exec",
+            ),
+            "_formatter": attr.label(
+                default = "@aspect_rules_lint//lint:eslint.bazel-formatter",
                 allow_single_file = True,
                 cfg = "exec",
             ),

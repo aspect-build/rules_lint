@@ -12,6 +12,8 @@ flake8 = flake8_aspect(
 ```
 """
 
+load("//lint/private:lint_aspect.bzl", "report_file")
+
 def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
     """Run flake8 as an action under Bazel.
 
@@ -47,16 +49,12 @@ def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _flake8_aspect_impl(target, ctx):
-    if ctx.rule.kind in ["py_library"]:
-        report = ctx.actions.declare_file(target.label.name + ".flake8-report.txt")
-        flake8_action(ctx, ctx.executable._flake8, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
-        results = depset([report])
-    else:
-        results = depset()
+    if ctx.rule.kind not in ["py_library"]:
+        return []
 
-    return [
-        OutputGroupInfo(report = results),
-    ]
+    report, info = report_file(target, ctx)
+    flake8_action(ctx, ctx.executable._flake8, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
+    return [info]
 
 def flake8_aspect(binary, config):
     """A factory function to create a linter aspect.

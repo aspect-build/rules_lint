@@ -12,6 +12,7 @@ buf = buf_lint_aspect(
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
+load("//lint/private:lint_aspect.bzl", "report_file")
 
 def _short_path(file, _):
     return file.path
@@ -72,16 +73,12 @@ def buf_lint_action(ctx, buf_toolchain, target, report, use_exit_code = False):
     )
 
 def _buf_lint_aspect_impl(target, ctx):
-    if ctx.rule.kind in ["proto_library"]:
-        report = ctx.actions.declare_file(target.label.name + ".buf-report.txt")
-        buf_lint_action(ctx, ctx.toolchains[ctx.attr._buf_toolchain], target, report, ctx.attr.fail_on_violation)
-        results = depset([report])
-    else:
-        results = depset()
+    if ctx.rule.kind not in ["proto_library"]:
+        return []
 
-    return [
-        OutputGroupInfo(report = results),
-    ]
+    report, info = report_file(target, ctx)
+    buf_lint_action(ctx, ctx.toolchains[ctx.attr._buf_toolchain], target, report, ctx.attr.fail_on_violation)
+    return [info]
 
 def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"):
     """A factory function to create a linter aspect.

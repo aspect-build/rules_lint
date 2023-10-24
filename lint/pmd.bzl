@@ -12,6 +12,8 @@ pmd = pmd_aspect(
 ```
 """
 
+load("//lint/private:lint_aspect.bzl", "report_file")
+
 def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
     """Run PMD as an action under Bazel.
 
@@ -26,7 +28,6 @@ def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
         use_exit_code: whether to fail the build when a lint violation is reported
     """
     inputs = srcs + rulesets
-    outputs = [report]
 
     # Wire command-line options, see
     # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
@@ -44,7 +45,7 @@ def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
 
     ctx.actions.run(
         inputs = inputs,
-        outputs = outputs,
+        outputs = [report],
         executable = executable,
         arguments = [args, "--file-list", src_args],
         mnemonic = "PMD",
@@ -52,16 +53,12 @@ def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _pmd_aspect_impl(target, ctx):
-    if ctx.rule.kind in ["java_library"]:
-        report = ctx.actions.declare_file(target.label.name + ".PMD-report.txt")
-        pmd_action(ctx, ctx.executable._pmd, ctx.rule.files.srcs, ctx.files._rulesets, report, ctx.attr.fail_on_violation)
-        results = depset([report])
-    else:
-        results = depset()
+    if ctx.rule.kind not in ["java_library"]:
+        return []
 
-    return [
-        OutputGroupInfo(report = results),
-    ]
+    report, info = report_file(target, ctx)
+    pmd_action(ctx, ctx.executable._pmd, ctx.rule.files.srcs, ctx.files._rulesets, report, ctx.attr.fail_on_violation)
+    return [info]
 
 def pmd_aspect(binary, rulesets):
     """A factory function to create a linter aspect.
