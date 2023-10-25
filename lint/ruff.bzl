@@ -11,9 +11,9 @@ ruff = ruff_aspect(
 )
 ```
 """
-
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+load("//lint/private:lint_aspect.bzl", "report_file")
 
 def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
     """Run ruff as an action under Bazel.
@@ -50,16 +50,13 @@ def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _ruff_aspect_impl(target, ctx):
-    if ctx.rule.kind in ["py_library"]:
-        report = ctx.actions.declare_file(target.label.name + ".ruff-report.txt")
-        ruff_action(ctx, ctx.executable._ruff, ctx.rule.files.srcs, ctx.file._config_file, report)
-        results = depset([report])
-    else:
-        results = depset()
+    if ctx.rule.kind not in ["py_library"]:
+        return []
 
-    return [
-        OutputGroupInfo(report = results),
-    ]
+    report, info = report_file(target, ctx)
+    ruff_action(ctx, ctx.executable._ruff, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
+    return [info]
+
 
 def ruff_aspect(binary, config):
     """A factory function to create a linter aspect.
@@ -86,6 +83,7 @@ def ruff_aspect(binary, config):
         # Needed for linters that need semantic information like transitive type declarations.
         # attr_aspects = ["deps"],
         attrs = {
+	    "fail_on_violation": attr.bool(),
             "_ruff": attr.label(
                 default = binary,
                 executable = True,
