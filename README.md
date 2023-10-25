@@ -42,24 +42,24 @@ This leads to some minor differences in how they are used in rules_lint.
 
 ## Available tools
 
-| Language                  | Formatter             | Linter(s)  |
-| ------------------------- | --------------------- | ---------- |
-| Python                    | [Black]               | [flake8]   |
-| Java                      | [google-java-format]  | [pmd]      |
-| Kotlin                    | [ktfmt]               |            |
-| JavaScript/TypeScript/TSX | [Prettier]            | [ESLint]   |
-| CSS/HTML                  | [Prettier]            |            |
-| JSON                      | [Prettier]            |            |
-| Markdown                  | [Prettier]            |            |
-| Bash                      | [prettier-plugin-sh]  |            |
-| SQL                       | [prettier-plugin-sql] |            |
-| Starlark (Bazel)          | [Buildifier]          |            |
-| Swift                     | [SwiftFormat] (1)     |            |
-| Go                        | [gofmt]               |            |
-| Protocol Buffers          | [buf]                 | [buf lint] |
-| Terraform                 | [terraform] fmt       |            |
-| Jsonnet                   | [jsonnetfmt]          |            |
-| Scala                     | [scalafmt]            |            |
+| Language                  | Formatter             | Linter(s)        |
+| ------------------------- | --------------------- | ---------------- |
+| Python                    | [Black]               | [flake8], [ruff] |
+| Java                      | [google-java-format]  | [pmd]            |
+| Kotlin                    | [ktfmt]               |                  |
+| JavaScript/TypeScript/TSX | [Prettier]            | [ESLint]         |
+| CSS/HTML                  | [Prettier]            |                  |
+| JSON                      | [Prettier]            |                  |
+| Markdown                  | [Prettier]            |                  |
+| Bash                      | [prettier-plugin-sh]  |                  |
+| SQL                       | [prettier-plugin-sql] |                  |
+| Starlark (Bazel)          | [Buildifier]          |                  |
+| Swift                     | [SwiftFormat] (1)     |                  |
+| Go                        | [gofmt]               |                  |
+| Protocol Buffers          | [buf]                 | [buf lint]       |
+| Terraform                 | [terraform] fmt       |                  |
+| Jsonnet                   | [jsonnetfmt]          |                  |
+| Scala                     | [scalafmt]            |                  |
 
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
@@ -78,6 +78,7 @@ This leads to some minor differences in how they are used in rules_lint.
 [gofmt]: https://pkg.go.dev/cmd/gofmt
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
+[ruff]: https://docs.astral.sh/ruff/
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift

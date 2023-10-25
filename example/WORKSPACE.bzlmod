@@ -12,6 +12,7 @@ load(
     "fetch_swiftformat",
     "fetch_terraform",
 )
+load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
 
 fetch_pmd()
 
@@ -24,3 +25,5 @@ fetch_java_format()
 fetch_ktfmt()
 
 fetch_swiftformat()
+
+fetch_ruff()

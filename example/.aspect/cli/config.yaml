@@ -4,3 +4,5 @@ lint:
     - //tools:lint.bzl%buf
     - //tools:lint.bzl%flake8
     - //tools:lint.bzl%pmd
+    - //tools:lint.bzl%ruff
+
