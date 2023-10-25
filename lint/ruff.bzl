@@ -11,6 +11,7 @@ ruff = ruff_aspect(
 )
 ```
 """
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "report_file")
@@ -57,7 +58,6 @@ def _ruff_aspect_impl(target, ctx):
     ruff_action(ctx, ctx.executable._ruff, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
     return [info]
 
-
 def ruff_aspect(binary, config):
     """A factory function to create a linter aspect.
 
@@ -83,7 +83,7 @@ def ruff_aspect(binary, config):
         # Needed for linters that need semantic information like transitive type declarations.
         # attr_aspects = ["deps"],
         attrs = {
-	    "fail_on_violation": attr.bool(),
+            "fail_on_violation": attr.bool(),
             "_ruff": attr.label(
                 default = binary,
                 executable = True,
