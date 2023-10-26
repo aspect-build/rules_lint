@@ -27,3 +27,8 @@ java_library(
     name = "foo",
     srcs = ["Foo.java"],
 )
+
+sh_library(
+    name = "hello_shell",
+    srcs = ["hello.sh"],
+)

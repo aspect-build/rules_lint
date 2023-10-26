@@ -27,3 +27,7 @@ fetch_ktfmt()
 fetch_swiftformat()
 
 fetch_ruff()
+
+load("@aspect_rules_lint//lint:shellcheck.bzl", "fetch_shellcheck")
+
+fetch_shellcheck()
