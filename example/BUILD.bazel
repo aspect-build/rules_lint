@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
@@ -49,22 +50,6 @@ java_binary(
     runtime_deps = ["@net_sourceforge_pmd"],
 )
 
-config_setting(
-    name = "linux_x86",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:x86_64",
-    ],
-)
-
-config_setting(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:aarch64",
-    ],
-)
-
 # We can test that it works with:
 # bazel run :ruff -- help
 native_binary(
@@ -81,16 +66,4 @@ native_binary(
 )
 
 # bazel run :shellcheck -- --help
-native_binary(
-    name = "shellcheck",
-    src = select(
-        {
-            "@platforms//os:osx": "@shellcheck_darwin.x86_64//:shellcheck",
-            ":linux_x86": "@shellcheck_linux.x86_64//:shellcheck",
-            ":linux_aarch64": "@shellcheck_linux.aarch64//:shellcheck",
-        },
-        no_match_error = "Shellcheck hasn't been fetched for your platform",
-    ),
-    out = "shellcheck",
-    visibility = ["//visibility:public"],
-)
+shellcheck_binary(name = "shellcheck")

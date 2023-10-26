@@ -14,7 +14,7 @@ fi
 
 # Produce report files
 # You can add --aspects_parameters=fail_on_violation=true to make this command fail instead.
-# Note: can only run one of 
+# TODO: put back ruff after the output paths don't collide
 bazel build --aspects //tools:lint.bzl%eslint,//tools:lint.bzl%buf,//tools:lint.bzl%flake8,//tools:lint.bzl%pmd,//tools:lint.bzl%shellcheck --output_groups=rules_lint_report $@
 
 

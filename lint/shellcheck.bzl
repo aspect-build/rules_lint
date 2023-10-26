@@ -12,9 +12,25 @@ shellcheck = shellcheck_aspect(
 ```
 """
 
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "report_file")
+
+def shellcheck_binary(name):
+    native_binary(
+        name = name,
+        src = select(
+            {
+                "@platforms//os:osx": "@shellcheck_darwin.x86_64//:shellcheck",
+                "@aspect_rules_lint//lint:linux_x86": "@shellcheck_linux.x86_64//:shellcheck",
+                "@aspect_rules_lint//lint:linux_aarch64": "@shellcheck_linux.aarch64//:shellcheck",
+            },
+            no_match_error = "Shellcheck hasn't been fetched for your platform",
+        ),
+        out = "shellcheck",
+        visibility = ["//visibility:public"],
+    )
 
 def shellcheck_action(ctx, executable, srcs, config, report, use_exit_code = False):
     """Run shellcheck as an action under Bazel.
