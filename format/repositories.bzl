@@ -3,11 +3,14 @@
 Needed until Bazel 7 allows MODULE.bazel to directly call repository rules.
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", _http_archive = "http_archive", _http_jar = "http_jar")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", _http_archive = "http_archive", _http_file = "http_file", _http_jar = "http_jar")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
 def http_archive(name, **kwargs):
     maybe(_http_archive, name = name, **kwargs)
+
+def http_file(name, **kwargs):
+    maybe(_http_file, name = name, **kwargs)
 
 def http_jar(name, **kwargs):
     maybe(_http_jar, name = name, **kwargs)
@@ -51,6 +54,42 @@ def fetch_jsonnet():
         build_file_content = "exports_files([\"jsonnetfmt\"])",
         sha256 = "49fbc99c91dcd2be53fa856307de3b8708c91dc5c74740714fdf9317957322e0",
         urls = ["https://github.com/google/go-jsonnet/releases/download/v{0}/go-jsonnet_{0}_Linux_arm64.tar.gz".format(jsonnet_version)],
+    )
+
+# buildifier: disable=function-docstring
+def fetch_shfmt():
+    shfmt_version = "3.7.0"
+
+    http_file(
+        name = "shfmt_darwin_x86_64",
+        downloaded_file_path = "shfmt",
+        executable = True,
+        sha256 = "ae1d1ab961c113fb3dc2ff1150f33c3548983550d91da889b3171a5bcfaab14f",
+        urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_darwin_amd64".format(shfmt_version)],
+    )
+
+    http_file(
+        name = "shfmt_darwin_aarch64",
+        downloaded_file_path = "shfmt",
+        executable = True,
+        sha256 = "ad7ff6f666adba3d801eb17365a15539f07296718d39fb62cc2fde6b527178aa",
+        urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_darwin_arm64".format(shfmt_version)],
+    )
+
+    http_file(
+        name = "shfmt_linux_x86_64",
+        downloaded_file_path = "shfmt",
+        executable = True,
+        sha256 = "0264c424278b18e22453fe523ec01a19805ce3b8ebf18eaf3aadc1edc23f42e3",
+        urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_linux_amd64".format(shfmt_version)],
+    )
+
+    http_file(
+        name = "shfmt_linux_aarch64",
+        downloaded_file_path = "shfmt",
+        executable = True,
+        sha256 = "111612560d15bd53d8e8f8f85731176ce12f3b418ec473d39a40ed6bbec772de",
+        urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_linux_arm64".format(shfmt_version)],
     )
 
 def fetch_terraform():

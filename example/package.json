@@ -5,7 +5,6 @@
     "@typescript-eslint/eslint-plugin": "*",
     "typescript": "4.9.5",
     "prettier": "^2.8.7",
-    "prettier-plugin-sh": "^0.12.8",
     "prettier-plugin-sql": "^0.14.0"
   },
   "//FIXME(alexeagle)": "This section shouldn't be needed since these are plugins",
@@ -13,7 +12,6 @@
     "packageExtensions": {
       "prettier": {
         "peerDependencies": {
-          "prettier-plugin-sh": "*",
           "prettier-plugin-sql": "*"
         }
       }

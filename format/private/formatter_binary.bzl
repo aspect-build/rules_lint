@@ -12,6 +12,7 @@ _attrs = {
     "java": attr.label(doc = "a binary target that runs google-java-format", executable = True, cfg = "exec", allow_files = True),
     "swift": attr.label(doc = "a binary target that runs swiftformat", executable = True, cfg = "exec", allow_files = True),
     "go": attr.label(doc = "a binary target that runs go fmt", executable = True, cfg = "exec", allow_files = True),
+    "sh": attr.label(doc = "a binary target that runs shfmt", executable = True, cfg = "exec", allow_files = True),
     "_bin": attr.label(default = "//format/private:format.sh", allow_single_file = True),
     "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
 }
@@ -29,6 +30,7 @@ def _formatter_binary_impl(ctx):
         "java-format": ctx.attr.java,
         "swiftformat": ctx.attr.swift,
         "gofmt": ctx.attr.go,
+        "shfmt": ctx.attr.sh,
     }
     for tool, attr in tools.items():
         if attr:

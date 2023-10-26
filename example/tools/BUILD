@@ -6,7 +6,6 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
-load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 
 package(default_visibility = ["//:__pkg__"])
 
@@ -65,6 +64,16 @@ java_binary(
 )
 
 alias(
+    name = "shfmt",
+    actual = select({
+        "@bazel_tools//src/conditions:linux_x86_64": "@shfmt_linux_x86_64//file:shfmt",
+        "@bazel_tools//src/conditions:linux_aarch64": "@shfmt_linux_aarch64//file:shfmt",
+        "@bazel_tools//src/conditions:darwin_arm64": "@shfmt_darwin_aarch64//file:shfmt",
+        "@bazel_tools//src/conditions:darwin_x86_64": "@shfmt_darwin_x86_64//file:shfmt",
+    }),
+)
+
+alias(
     name = "swiftformat",
     # TODO: keith says it would be okay to upstream a proper toolchain for this
     # https://github.com/bazelbuild/rules_swift/issues/864
@@ -82,7 +91,8 @@ multi_formatter_binary(
     jsonnet = ":jsonnetfmt",
     kotlin = ":ktfmt",
     python = ":ruff",
+    sh = ":shfmt",
     starlark = "@buildifier_prebuilt//:buildifier",
-    swift = ":swiftformat",
+    #swift = ":swiftformat",
     terraform = ":terraform",
 )
