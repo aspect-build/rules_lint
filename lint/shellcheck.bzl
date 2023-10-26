@@ -41,7 +41,7 @@ def shellcheck_action(ctx, executable, srcs, config, report, use_exit_code = Fal
         inputs = inputs + [executable],
         outputs = outputs,
         command = """\
-            {shellcheck} $@ 2>{report} {exit_zero}
+            {shellcheck} $@ >{report} {exit_zero}
         """.format(
             shellcheck = executable.path,
             report = report.path,
