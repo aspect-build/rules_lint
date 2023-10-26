@@ -15,7 +15,8 @@ fi
 # Produce report files
 # You can add --aspects_parameters=fail_on_violation=true to make this command fail instead.
 
-bazel build --aspects //tools:lint.bzl%eslint,//tools:lint.bzl%buf,//tools:lint.bzl%flake8,//tools:lint.bzl%pmd,//tools:lint.bzl%ruff --output_groups=rules_lint_report $@
+# //tools:lint.bzl%eslint,//tools:lint.bzl%buf,//tools:lint.bzl%flake8,//tools:lint.bzl%pmd,//tools:lint.bzl%ruff
+bazel build --aspects //tools:lint.bzl%shellcheck --output_groups=rules_lint_report $@
 
 
 # Show the results.

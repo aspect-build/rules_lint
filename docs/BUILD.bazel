@@ -37,4 +37,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//lint:ruff",
 )
 
+stardoc_with_diff_test(
+    name = "shellcheck",
+    bzl_library_target = "//lint:shellcheck",
+)
+
 update_docs(name = "update")

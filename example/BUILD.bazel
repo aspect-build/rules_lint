@@ -20,6 +20,7 @@ exports_files(
         ".flake8",
         "pmd.xml",
         ".ruff.toml",
+        ".shellcheckrc",
     ],
     visibility = ["//visibility:public"],
 )
@@ -48,14 +49,48 @@ java_binary(
     runtime_deps = ["@net_sourceforge_pmd"],
 )
 
+config_setting(
+    name = "linux_x86",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+config_setting(
+    name = "linux_aarch64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
 # We can test that it works with:
 # bazel run :ruff -- help
 native_binary(
     name = "ruff",
-    src = select({
-        "@platforms//os:osx": "@ruff_aarch64-apple-darwin//:ruff",
-        "//conditions:default": "@ruff_x86_64-unknown-linux-gnu//:ruff",
-    }),
+    src = select(
+        {
+            "@platforms//os:osx": "@ruff_aarch64-apple-darwin//:ruff",
+            ":linux_x86": "@ruff_x86_64-unknown-linux-gnu//:ruff",
+        },
+        no_match_error = "Ruff has not been fetched for your platform",
+    ),
     out = "ruff",
+    visibility = ["//visibility:public"],
+)
+
+# bazel run :shellcheck -- --help
+native_binary(
+    name = "shellcheck",
+    src = select(
+        {
+            "@platforms//os:osx": "@shellcheck_darwin.x86_64//:shellcheck",
+            ":linux_x86": "@shellcheck_linux.x86_64//:shellcheck",
+            ":linux_aarch64": "@shellcheck_linux.aarch64//:shellcheck",
+        },
+        no_match_error = "Shellcheck hasn't been fetched for your platform",
+    ),
+    out = "shellcheck",
     visibility = ["//visibility:public"],
 )

@@ -1,7 +1,7 @@
 "Demonstrates how to enforce zero-lint-tolerance policy with tests"
 
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
-load("//tools:lint.bzl", "eslint_test", "flake8_test", "pmd_test")
+load("//tools:lint.bzl", "eslint_test", "flake8_test", "pmd_test", "shellcheck_test")
 
 ts_project(
     name = "no_violations",
@@ -36,4 +36,8 @@ eslint_test(
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
     tags = ["manual"],
+)
+
+shellcheck_test(
+    srcs = ["//src:hello_sh"],
 )
