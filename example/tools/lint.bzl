@@ -6,6 +6,7 @@ load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "make_lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
+load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_aspect")
 
 buf = buf_lint_aspect(
     config = "@@//:buf.yaml",
@@ -36,3 +37,10 @@ ruff = ruff_aspect(
     binary = "@@//:ruff",
     config = "@@//:.ruff.toml",
 )
+
+shellcheck = shellcheck_aspect(
+    binary = "@@//:shellcheck",
+    config = "@@//:.shellcheckrc",
+)
+
+shellcheck_test = make_lint_test(aspect = shellcheck)

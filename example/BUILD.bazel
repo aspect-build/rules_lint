@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
@@ -20,6 +21,7 @@ exports_files(
         ".flake8",
         "pmd.xml",
         ".ruff.toml",
+        ".shellcheckrc",
     ],
     visibility = ["//visibility:public"],
 )
@@ -59,3 +61,6 @@ native_binary(
     out = "ruff",
     visibility = ["//visibility:public"],
 )
+
+# bazel run :shellcheck -- --help
+shellcheck_binary(name = "shellcheck")

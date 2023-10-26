@@ -170,3 +170,7 @@ fetch_swiftformat()
 load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
 
 fetch_ruff()
+
+load("@aspect_rules_lint//lint:shellcheck.bzl", "fetch_shellcheck")
+
+fetch_shellcheck()

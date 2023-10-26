@@ -51,7 +51,7 @@ This leads to some minor differences in how they are used in rules_lint.
 | CSS/HTML                  | [Prettier]            |                  |
 | JSON                      | [Prettier]            |                  |
 | Markdown                  | [Prettier]            |                  |
-| Bash                      | [prettier-plugin-sh]  |                  |
+| Bash                      | [prettier-plugin-sh]  | [shellcheck]     |
 | SQL                       | [prettier-plugin-sql] |                  |
 | Starlark (Bazel)          | [Buildifier]          |                  |
 | Swift                     | [SwiftFormat] (1)     |                  |
@@ -79,6 +79,7 @@ This leads to some minor differences in how they are used in rules_lint.
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
 [ruff]: https://docs.astral.sh/ruff/
+[shellcheck]: https://www.shellcheck.net/
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift
