@@ -4,9 +4,9 @@ API for declaring a shellcheck lint aspect that visits sh_library rules.
 
 Typical usage:
 
-1. Use [fetch_shellcheck] in WORKSPACE to call the `http_archive` calls to download binaries.
-2. Use [shellcheck_binary] in `tools/BUILD.bazel` to declare the shellcheck target
-3. Use [shellcheck_aspect] in `tools/lint.bzl` to declare the shellcheck linter aspect:
+1. Use [fetch_shellcheck](#fetch_shellcheck) in WORKSPACE to call the `http_archive` calls to download binaries.
+2. Use [shellcheck_binary](#shellcheck_binary) in `tools/BUILD.bazel` to declare the shellcheck target
+3. Use [shellcheck_aspect](#shellcheck_aspect) in `tools/lint.bzl` to declare the shellcheck linter aspect:
 
 ```
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_aspect")
