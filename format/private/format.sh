@@ -49,7 +49,7 @@ case "$mode" in
  check)
    swiftmode="--lint"
    prettiermode="--check"
-   blackmode="--check"
+   ruffmode="format --check"
    javamode="--set-exit-if-changed --dry-run"
    ktmode="--set-exit-if-changed --dry-run"
    gofmtmode="-l"
@@ -61,7 +61,7 @@ case "$mode" in
  fix)
    swiftmode=""
    prettiermode="--write"
-   blackmode=""
+   ruffmode="format"
    javamode="--replace"
    ktmode=""
    gofmtmode="-w"
@@ -100,10 +100,10 @@ if [ "$#" -eq 0 ]; then
 else
   files=$(find "$@" -name '*.py' -or -name '*.pyi')
 fi
-bin=$(rlocation {{black}})
+bin=$(rlocation {{ruff}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running black..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $blackmode
+  echo "Running ruff..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $ruffmode
 fi
 
 if [ "$#" -eq 0 ]; then

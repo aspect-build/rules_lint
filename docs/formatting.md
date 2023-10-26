@@ -15,7 +15,7 @@ load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 multi_formatter_binary(
     name = "format",
     # register languages, e.g.
-    # python = "@pip_black//:rules_python_wheel_entry_point_black",
+    # python = "//:ruff",
 )
 ```
 

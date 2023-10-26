@@ -47,15 +47,3 @@ java_binary(
     main_class = "net.sourceforge.pmd.PMD",
     runtime_deps = ["@net_sourceforge_pmd"],
 )
-
-# We can test that it works with:
-# bazel run :ruff -- help
-native_binary(
-    name = "ruff",
-    src = select({
-        "@platforms//os:osx": "@ruff_aarch64-apple-darwin//:ruff",
-        "//conditions:default": "@ruff_x86_64-unknown-linux-gnu//:ruff",
-    }),
-    out = "ruff",
-    visibility = ["//visibility:public"],
-)

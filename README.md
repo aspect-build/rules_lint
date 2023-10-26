@@ -44,7 +44,7 @@ This leads to some minor differences in how they are used in rules_lint.
 
 | Language                  | Formatter             | Linter(s)        |
 | ------------------------- | --------------------- | ---------------- |
-| Python                    | [Black]               | [flake8], [ruff] |
+| Python                    | [ruff]                | [flake8], [ruff] |
 | Java                      | [google-java-format]  | [pmd]            |
 | Kotlin                    | [ktfmt]               |                  |
 | JavaScript/TypeScript/TSX | [Prettier]            | [ESLint]         |
@@ -63,7 +63,6 @@ This leads to some minor differences in how they are used in rules_lint.
 
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
-[black]: https://pypi.org/project/black/
 [flake8]: https://flake8.pycqa.org/en/latest/index.html
 [pmd]: https://docs.pmd-code.org/latest/index.html
 [buf lint]: https://buf.build/docs/lint/overview

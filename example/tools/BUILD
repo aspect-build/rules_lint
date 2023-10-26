@@ -29,10 +29,14 @@ alias(
     }),
 )
 
-# bazel run :black -- --help
-py_console_script_binary(
-    name = "black",
-    pkg = "@pip//black:pkg",
+alias(
+    name = "ruff",
+    actual = select({
+        "@bazel_tools//src/conditions:linux_x86_64": "@ruff_x86_64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:linux_aarch64": "@ruff_aarch64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:darwin_arm64": "@ruff_aarch64-apple-darwin//:ruff",
+        "@bazel_tools//src/conditions:darwin_x86_64": "@ruff_x86_64-apple-darwin//:ruff",
+    }),
 )
 
 prettier.prettier_binary(
@@ -77,7 +81,7 @@ multi_formatter_binary(
     javascript = ":prettier",
     jsonnet = ":jsonnetfmt",
     kotlin = ":ktfmt",
-    python = ":black",
+    python = ":ruff",
     starlark = "@buildifier_prebuilt//:buildifier",
     swift = ":swiftformat",
     terraform = ":terraform",
