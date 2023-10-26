@@ -5,8 +5,8 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 """
 
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
+load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
-load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 
 package(default_visibility = ["//:__pkg__"])
 
@@ -26,16 +26,6 @@ alias(
         "@bazel_tools//src/conditions:linux": "@terraform_linux_x86_64//:terraform",
         "@bazel_tools//src/conditions:darwin_arm64": "@terraform_macos_aarch64//:terraform",
         "@bazel_tools//src/conditions:darwin_x86_64": "@terraform_macos_x86_64//:terraform",
-    }),
-)
-
-alias(
-    name = "ruff",
-    actual = select({
-        "@bazel_tools//src/conditions:linux_x86_64": "@ruff_x86_64-unknown-linux-gnu//:ruff",
-        "@bazel_tools//src/conditions:linux_aarch64": "@ruff_aarch64-unknown-linux-gnu//:ruff",
-        "@bazel_tools//src/conditions:darwin_arm64": "@ruff_aarch64-apple-darwin//:ruff",
-        "@bazel_tools//src/conditions:darwin_x86_64": "@ruff_x86_64-apple-darwin//:ruff",
     }),
 )
 
@@ -74,6 +64,9 @@ alias(
     }),
 )
 
+# bazel run :shellcheck -- --help
+shellcheck_binary(name = "shellcheck")
+
 multi_formatter_binary(
     name = "format",
     go = "@go_sdk//:bin/gofmt",
@@ -81,7 +74,7 @@ multi_formatter_binary(
     javascript = ":prettier",
     jsonnet = ":jsonnetfmt",
     kotlin = ":ktfmt",
-    python = ":ruff",
+    python = "@ruff",
     starlark = "@buildifier_prebuilt//:buildifier",
     swift = ":swiftformat",
     terraform = ":terraform",

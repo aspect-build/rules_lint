@@ -34,12 +34,12 @@ pmd = pmd_aspect(
 pmd_test = make_lint_test(aspect = pmd)
 
 ruff = ruff_aspect(
-    binary = "@@//tools:ruff",
+    binary = "@@ruff",
     config = "@@//:.ruff.toml",
 )
 
 shellcheck = shellcheck_aspect(
-    binary = "@@//:shellcheck",
+    binary = "@@shellcheck",
     config = "@@//:.shellcheckrc",
 )
 
