@@ -89,7 +89,7 @@ Attrs:
 shellcheck_binary(<a href="#shellcheck_binary-name">name</a>)
 </pre>
 
-
+Wrapper around native_binary to select the correct shellcheck executable for the execution platform.
 
 **PARAMETERS**
 

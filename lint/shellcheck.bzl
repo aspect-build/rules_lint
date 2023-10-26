@@ -18,6 +18,7 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "report_file")
 
 def shellcheck_binary(name):
+    """Wrapper around native_binary to select the correct shellcheck executable for the execution platform."""
     native_binary(
         name = name,
         src = select(
