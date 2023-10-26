@@ -4,7 +4,7 @@ load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
 
 _attrs = {
     "javascript": attr.label(doc = "a binary target that runs prettier", executable = True, cfg = "exec", allow_files = True),
-    "python": attr.label(doc = "a binary target that runs black", executable = True, cfg = "exec", allow_files = True),
+    "python": attr.label(doc = "a binary target that runs ruff", executable = True, cfg = "exec", allow_files = True),
     "starlark": attr.label(doc = "a binary target that runs buildifier", executable = True, cfg = "exec", allow_files = True),
     "jsonnet": attr.label(doc = "a binary target that runs jsonnetfmt", executable = True, cfg = "exec", allow_files = True),
     "terraform": attr.label(doc = "a binary target that runs terraform", executable = True, cfg = "exec", allow_files = True),
@@ -20,7 +20,7 @@ def _formatter_binary_impl(ctx):
     # We need to fill in the rlocation paths in the shell script
     substitutions = {}
     tools = {
-        "black": ctx.attr.python,
+        "ruff": ctx.attr.python,
         "buildifier": ctx.attr.starlark,
         "jsonnetfmt": ctx.attr.jsonnet,
         "terraform": ctx.attr.terraform,

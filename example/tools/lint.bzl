@@ -34,7 +34,7 @@ pmd = pmd_aspect(
 pmd_test = make_lint_test(aspect = pmd)
 
 ruff = ruff_aspect(
-    binary = "@@//:ruff",
+    binary = "@@//tools:ruff",
     config = "@@//:.ruff.toml",
 )
 
