@@ -81,3 +81,21 @@ Attrs:
 | <a id="shellcheck_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
 
 
+<a id="shellcheck_binary"></a>
+
+## shellcheck_binary
+
+<pre>
+shellcheck_binary(<a href="#shellcheck_binary-name">name</a>)
+</pre>
+
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="shellcheck_binary-name"></a>name |  <p align="center"> - </p>   |  none |
+
+
