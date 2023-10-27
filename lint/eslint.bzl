@@ -16,6 +16,8 @@ load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//lint/private:lint_aspect.bzl", "report_file")
 
+_MNEMONIC = "ESLint"
+
 def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     """Create a Bazel Action that spawns an eslint process.
 
@@ -72,7 +74,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
         executable = executable._eslint,
         arguments = [args],
         env = env,
-        mnemonic = "ESLint",
+        mnemonic = _MNEMONIC,
     )
 
 # buildifier: disable=function-docstring
@@ -80,7 +82,7 @@ def _eslint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["ts_project", "ts_project_rule"]:
         return []
 
-    report, info = report_file(target, ctx)
+    report, info = report_file(_MNEMONIC, target, ctx)
     eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
     return [info]
 
