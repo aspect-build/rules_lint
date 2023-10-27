@@ -21,6 +21,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "report_file")
 
+_MNEMONIC = "shellcheck"
+
 def shellcheck_binary(name):
     """Wrapper around native_binary to select the correct shellcheck executable for the execution platform."""
     native_binary(
@@ -69,7 +71,7 @@ def shellcheck_action(ctx, executable, srcs, config, report, use_exit_code = Fal
             exit_zero = "" if use_exit_code else "|| true",
         ),
         arguments = [args],
-        mnemonic = "shellcheck",
+        mnemonic = _MNEMONIC,
     )
 
 # buildifier: disable=function-docstring
@@ -77,7 +79,7 @@ def _shellcheck_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["sh_library"]:
         return []
 
-    report, info = report_file(target, ctx)
+    report, info = report_file(_MNEMONIC, target, ctx)
     shellcheck_action(ctx, ctx.executable._shellcheck, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
     return [info]
 

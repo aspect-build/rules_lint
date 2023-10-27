@@ -14,6 +14,8 @@ pmd = pmd_aspect(
 
 load("//lint/private:lint_aspect.bzl", "report_file")
 
+_MNEMONIC = "PMD"
+
 def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
     """Run PMD as an action under Bazel.
 
@@ -48,7 +50,7 @@ def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
         outputs = [report],
         executable = executable,
         arguments = [args, "--file-list", src_args],
-        mnemonic = "PMD",
+        mnemonic = _MNEMONIC,
     )
 
 # buildifier: disable=function-docstring
@@ -56,7 +58,7 @@ def _pmd_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["java_library"]:
         return []
 
-    report, info = report_file(target, ctx)
+    report, info = report_file(_MNEMONIC, target, ctx)
     pmd_action(ctx, ctx.executable._pmd, ctx.rule.files.srcs, ctx.files._rulesets, report, ctx.attr.fail_on_violation)
     return [info]
 
