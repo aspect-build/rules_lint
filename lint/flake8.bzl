@@ -14,6 +14,8 @@ flake8 = flake8_aspect(
 
 load("//lint/private:lint_aspect.bzl", "report_file")
 
+_MNEMONIC = "flake8"
+
 def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
     """Run flake8 as an action under Bazel.
 
@@ -44,7 +46,7 @@ def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
         outputs = outputs,
         executable = executable,
         arguments = [args],
-        mnemonic = "flake8",
+        mnemonic = _MNEMONIC,
     )
 
 # buildifier: disable=function-docstring
@@ -52,7 +54,7 @@ def _flake8_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["py_library"]:
         return []
 
-    report, info = report_file(target, ctx)
+    report, info = report_file(_MNEMONIC, target, ctx)
     flake8_action(ctx, ctx.executable._flake8, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
     return [info]
 
