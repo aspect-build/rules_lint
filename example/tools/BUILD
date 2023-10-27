@@ -93,6 +93,6 @@ multi_formatter_binary(
     python = ":ruff",
     sh = ":shfmt",
     starlark = "@buildifier_prebuilt//:buildifier",
-    #swift = ":swiftformat",
+    swift = ":swiftformat",
     terraform = ":terraform",
 )
