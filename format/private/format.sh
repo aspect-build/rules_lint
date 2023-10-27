@@ -50,6 +50,7 @@ case "$mode" in
    swiftmode="--lint"
    prettiermode="--check"
    ruffmode="format --check"
+   shfmtmode="-l"
    javamode="--set-exit-if-changed --dry-run"
    ktmode="--set-exit-if-changed --dry-run"
    gofmtmode="-l"
@@ -62,6 +63,7 @@ case "$mode" in
    swiftmode=""
    prettiermode="--write"
    ruffmode="format"
+   shfmtmode="-w"
    javamode="--replace"
    ktmode=""
    gofmtmode="-w"
@@ -85,9 +87,9 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.js' '*.cjs' '*.mjs' '*.sh' '*.ts' '*.tsx' '*.mts' '*.cts' '*.json' '*.css' '*.html' '*.md' '*.sql')
+  files=$(git ls-files '*.js' '*.cjs' '*.mjs' '*.ts' '*.tsx' '*.mts' '*.cts' '*.json' '*.css' '*.html' '*.md' '*.sql')
 else
-  files=$(find "$@" -name '*.js' -or -name '*.cjs' -or -name '*.mjs' -or -name '*.sh' -or -name '*.ts' -or -name '*.tsx' -or -name '*.mts' -or -name '*.cts' -or -name '*.json' -or -name '*.css' -or -name '*.html' -or -name '*.md' -or -name '*.sql')
+  files=$(find "$@" -name '*.js' -or -name '*.cjs' -or -name '*.mjs' -or -name '*.ts' -or -name '*.tsx' -or -name '*.mts' -or -name '*.cts' -or -name '*.json' -or -name '*.css' -or -name '*.html' -or -name '*.md' -or -name '*.sql')
 fi
 bin=$(rlocation {{prettier}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
@@ -184,6 +186,17 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   else
     echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode
   fi
+fi
+
+if [ "$#" -eq 0 ]; then
+  files=$(git ls-files '*.sh' '*.bash')
+else
+  files=$(find "$@" -name '*.sh' -or -name '*.bash')
+fi
+bin=$(rlocation {{shfmt}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Running shfmt..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $shfmtmode
 fi
 
 if [ "$#" -eq 0 ]; then
