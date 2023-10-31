@@ -53,7 +53,7 @@ def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _ruff_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["py_library"]:
+    if ctx.rule.kind not in ["py_binary", "py_library"]:
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)

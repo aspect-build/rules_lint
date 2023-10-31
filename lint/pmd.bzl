@@ -55,7 +55,7 @@ def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _pmd_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["java_library"]:
+    if ctx.rule.kind not in ["java_binary", "java_library"]:
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
