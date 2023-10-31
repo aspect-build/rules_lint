@@ -58,7 +58,7 @@ If you don't use pre-commit, you can just wire directly into the git hook, howev
 this option will always run the formatter over all files, not just changed files.
 
 ```bash
-$ echo "bazel run //tools:format" >> .git/hooks/pre-commit
+$ echo "bazel run //tools:format -- --mode check" >> .git/hooks/pre-commit
 $ chmod u+x .git/hooks/pre-commit
 ```
 
