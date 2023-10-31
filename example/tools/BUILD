@@ -7,7 +7,7 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 
-package(default_visibility = ["//:__pkg__"])
+package(default_visibility = ["//:__subpackages__"])
 
 alias(
     name = "jsonnetfmt",
