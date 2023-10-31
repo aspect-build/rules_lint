@@ -88,6 +88,7 @@ def ruff_aspect(binary, config):
             "fail_on_violation": attr.bool(),
             "_ruff": attr.label(
                 default = binary,
+                allow_single_file = True,
                 executable = True,
                 cfg = "exec",
             ),
