@@ -43,7 +43,7 @@ def _test_impl(ctx):
         for report in src[OutputGroupInfo].rules_lint_report.to_list():
             reports.append(report)
 
-    bin = ctx.actions.declare_file("lint_test.sh")
+    bin = ctx.actions.declare_file("{}.lint_test.sh".format(ctx.label.name))
     ctx.actions.expand_template(
         template = ctx.file._bin,
         output = bin,
