@@ -99,7 +99,7 @@ Follow instructions from the release you wish to use:
 
 To format files, run the target you create when you install rules_lint.
 
-We recommend using a Git pre-commit hook to format changed files, by running `bazel run //tools:format [changed file ...]`.
+We recommend using a Git pre-commit hook to format changed files, by running `bazel run //:format [changed file ...]`.
 
 [![asciicast](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT.svg)](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT)
 
