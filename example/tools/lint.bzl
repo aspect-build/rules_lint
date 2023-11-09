@@ -13,21 +13,21 @@ buf = buf_lint_aspect(
 )
 
 eslint = eslint_aspect(
-    binary = "@@//:eslint",
+    binary = "@@//tools:eslint",
     config = "@@//:eslintrc",
 )
 
 eslint_test = make_lint_test(aspect = eslint)
 
 flake8 = flake8_aspect(
-    binary = "@@//:flake8",
+    binary = "@@//tools:flake8",
     config = "@@//:.flake8",
 )
 
 flake8_test = make_lint_test(aspect = flake8)
 
 pmd = pmd_aspect(
-    binary = "@@//:pmd",
+    binary = "@@//tools:pmd",
     rulesets = ["@@//:pmd.xml"],
 )
 
@@ -39,7 +39,7 @@ ruff = ruff_aspect(
 )
 
 shellcheck = shellcheck_aspect(
-    binary = "@@//:shellcheck",
+    binary = "@@//tools:shellcheck",
     config = "@@//:.shellcheckrc",
 )
 
