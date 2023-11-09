@@ -19,7 +19,9 @@ _attrs = {
 
 def _formatter_binary_impl(ctx):
     # We need to fill in the rlocation paths in the shell script
-    substitutions = {}
+    substitutions = {
+        "{{fix_target}}": str(ctx.label)
+    }
     tools = {
         "ruff": ctx.attr.python,
         "buildifier": ctx.attr.starlark,

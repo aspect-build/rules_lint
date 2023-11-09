@@ -13,7 +13,7 @@ function on_exit {
   code=$?
   if [[ $code != 0 ]]; then
     echo >&2 "FAILED: A formatter tool exited with code $code"
-    echo >&2 "Try running 'bazel run //:format' to fix this."
+    echo >&2 "Try running 'bazel run {{fix_target}}' to fix this."
   fi
 }
 
