@@ -5,7 +5,11 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 """
 
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
+load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
+load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
+load("@rules_java//java:defs.bzl", "java_binary")
+load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -89,6 +93,24 @@ java_binary(
     main_class = "org.scalafmt.cli.Cli",
     runtime_deps = ["@maven//:org_scalameta_scalafmt_cli_2_13"],
 )
+
+# We can test that it works with:
+# bazel run :flake8 -- --help
+py_console_script_binary(
+    name = "flake8",
+    pkg = "@pip//flake8:pkg",
+)
+
+eslint_bin.eslint_binary(name = "eslint")
+
+java_binary(
+    name = "pmd",
+    main_class = "net.sourceforge.pmd.PMD",
+    runtime_deps = ["@net_sourceforge_pmd"],
+)
+
+# bazel run :shellcheck -- --help
+shellcheck_binary(name = "shellcheck")
 
 multi_formatter_binary(
     name = "format",

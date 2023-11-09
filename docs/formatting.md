@@ -19,13 +19,22 @@ multi_formatter_binary(
 )
 ```
 
+Finally, we recommend an alias in the root BUILD file:
+
+```starlark
+alias(
+    name = "format",
+    actual = "//tools:format",
+)
+```
+
 ## Usage
 
 ### One-time re-format all files
 
 Assuming you installed with the typical layout:
 
-`bazel run tools:format`
+`bazel run :format`
 
 > Note that mass-reformatting can be disruptive in an active repo.
 > You may want to instruct developers with in-flight changes to reformat their branches as well, to avoid merge conflicts.
@@ -35,7 +44,7 @@ Assuming you installed with the typical layout:
 
 ### Re-format specific file(s)
 
-`bazel run tools:format some/file.md other/file.json`
+`bazel run format some/file.md other/file.json`
 
 ### Install as a pre-commit hook
 
@@ -47,7 +56,7 @@ If you use [pre-commit.com](https://pre-commit.com/), add this in your `.pre-com
     - id: bazel-super-formatter
       name: Format
       language: system
-      entry: bazel run //tools:format
+      entry: bazel run //:format
       files: .*
 ```
 
@@ -58,7 +67,7 @@ If you don't use pre-commit, you can just wire directly into the git hook, howev
 this option will always run the formatter over all files, not just changed files.
 
 ```bash
-$ echo "bazel run //tools:format -- --mode check" >> .git/hooks/pre-commit
+$ echo "bazel run //:format -- --mode check" >> .git/hooks/pre-commit
 $ chmod u+x .git/hooks/pre-commit
 ```
 
@@ -66,4 +75,4 @@ $ chmod u+x .git/hooks/pre-commit
 
 This will exit non-zero if formatting is needed. You would typically run the check mode on CI.
 
-`bazel run //tools:format -- --mode check`
+`bazel run //:format -- --mode check`
