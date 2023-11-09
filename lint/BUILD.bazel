@@ -78,6 +78,7 @@ bzl_library(
     srcs = ["ruff.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        ":ruff_versions",
         "//lint/private:lint_aspect",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
@@ -94,4 +95,10 @@ bzl_library(
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ],
+)
+
+bzl_library(
+    name = "ruff_versions",
+    srcs = ["ruff_versions.bzl"],
+    visibility = ["//visibility:public"],
 )
