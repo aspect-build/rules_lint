@@ -83,6 +83,13 @@ alias(
     }),
 )
 
+java_binary(
+    name = "scalafmt",
+    data = ["//:.scalafmt.conf"],
+    main_class = "org.scalafmt.cli.Cli",
+    runtime_deps = ["@maven//:org_scalameta_scalafmt_cli_2_13"],
+)
+
 multi_formatter_binary(
     name = "format",
     go = "@go_sdk//:bin/gofmt",
@@ -91,6 +98,7 @@ multi_formatter_binary(
     jsonnet = ":jsonnetfmt",
     kotlin = ":ktfmt",
     python = ":ruff",
+    scala = ":scalafmt",
     sh = ":shfmt",
     starlark = "@buildifier_prebuilt//:buildifier",
     swift = ":swiftformat",

@@ -37,8 +37,8 @@ multi_formatter_binary(
 ## multi_formatter_binary
 
 <pre>
-multi_formatter_binary(<a href="#multi_formatter_binary-name">name</a>, <a href="#multi_formatter_binary-go">go</a>, <a href="#multi_formatter_binary-java">java</a>, <a href="#multi_formatter_binary-javascript">javascript</a>, <a href="#multi_formatter_binary-jsonnet">jsonnet</a>, <a href="#multi_formatter_binary-kotlin">kotlin</a>, <a href="#multi_formatter_binary-python">python</a>, <a href="#multi_formatter_binary-sh">sh</a>, <a href="#multi_formatter_binary-starlark">starlark</a>, <a href="#multi_formatter_binary-swift">swift</a>,
-                       <a href="#multi_formatter_binary-terraform">terraform</a>)
+multi_formatter_binary(<a href="#multi_formatter_binary-name">name</a>, <a href="#multi_formatter_binary-go">go</a>, <a href="#multi_formatter_binary-java">java</a>, <a href="#multi_formatter_binary-javascript">javascript</a>, <a href="#multi_formatter_binary-jsonnet">jsonnet</a>, <a href="#multi_formatter_binary-kotlin">kotlin</a>, <a href="#multi_formatter_binary-python">python</a>, <a href="#multi_formatter_binary-scala">scala</a>, <a href="#multi_formatter_binary-sh">sh</a>, <a href="#multi_formatter_binary-starlark">starlark</a>,
+                       <a href="#multi_formatter_binary-swift">swift</a>, <a href="#multi_formatter_binary-terraform">terraform</a>)
 </pre>
 
 Produces an executable that aggregates the supplied formatter binaries
@@ -55,6 +55,7 @@ Produces an executable that aggregates the supplied formatter binaries
 | <a id="multi_formatter_binary-jsonnet"></a>jsonnet |  a binary target that runs jsonnetfmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-kotlin"></a>kotlin |  a binary target that runs ktfmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-python"></a>python |  a binary target that runs ruff   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="multi_formatter_binary-scala"></a>scala |  a binary target that runs scalafmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-sh"></a>sh |  a binary target that runs shfmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-starlark"></a>starlark |  a binary target that runs buildifier   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-swift"></a>swift |  a binary target that runs swiftformat   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |

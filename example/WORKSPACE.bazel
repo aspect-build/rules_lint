@@ -142,6 +142,31 @@ rules_buf_dependencies()
 
 rules_buf_toolchains(version = "v1.5.0")
 
+load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
+
+rules_jvm_external_deps()
+
+load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
+
+rules_jvm_external_setup()
+
+load("@rules_jvm_external//:defs.bzl", "maven_install")
+
+maven_install(
+    artifacts = [
+        "org.scalameta:scalafmt-cli_2.13:3.7.14",
+    ],
+    maven_install_json = "//:maven_install.json",
+    repositories = [
+        "https://maven.google.com",
+        "https://repo1.maven.org/maven2",
+    ],
+)
+
+load("@maven//:defs.bzl", "pinned_maven_install")
+
+pinned_maven_install()
+
 #---SNIP--- Below here is re-used in the workspace snippet published on releases
 
 # Use whichever formatter binaries you need:
