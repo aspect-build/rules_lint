@@ -53,7 +53,7 @@ If you use [pre-commit.com](https://pre-commit.com/), add this in your `.pre-com
 ```yaml
 - repo: local
   hooks:
-    - id: bazel-super-formatter
+    - id: aspect_rules_lint
       name: Format
       language: system
       entry: bazel run //:format
