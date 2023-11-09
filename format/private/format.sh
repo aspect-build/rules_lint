@@ -153,18 +153,17 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "$files" | tr \\n \\0 | xargs -0 $bin $ktmode
 fi
 
-# TODO: wire scala - needs rules_jvm_external
-# if [ "$#" -eq 0 ]; then
-#   files=$(git ls-files '*.scala')
-# else
-#   files=$(find "$@" -name '*.scala')
-# fi
-# bin=$(rlocation aspect_rules_format/format/scalafmt)
-# if [ -n "$files" ] && [ -n "$bin" ]; then
-#   echo "Running scalafmt..."
-#   # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
-#   echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $scalamode
-# fi
+if [ "$#" -eq 0 ]; then
+  files=$(git ls-files '*.scala')
+else
+  files=$(find "$@" -name '*.scala')
+fi
+bin=$(rlocation {{scalafmt}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Running scalafmt..."
+  # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
+  echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $scalamode
+fi
 
 if [ "$#" -eq 0 ]; then
   files=$(git ls-files '*.go')

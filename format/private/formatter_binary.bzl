@@ -10,6 +10,7 @@ _attrs = {
     "terraform": attr.label(doc = "a binary target that runs terraform", executable = True, cfg = "exec", allow_files = True),
     "kotlin": attr.label(doc = "a binary target that runs ktfmt", executable = True, cfg = "exec", allow_files = True),
     "java": attr.label(doc = "a binary target that runs google-java-format", executable = True, cfg = "exec", allow_files = True),
+    "scala": attr.label(doc = "a binary target that runs scalafmt", executable = True, cfg = "exec", allow_files = True),
     "swift": attr.label(doc = "a binary target that runs swiftformat", executable = True, cfg = "exec", allow_files = True),
     "go": attr.label(doc = "a binary target that runs go fmt", executable = True, cfg = "exec", allow_files = True),
     "sh": attr.label(doc = "a binary target that runs shfmt", executable = True, cfg = "exec", allow_files = True),
@@ -31,6 +32,7 @@ def _formatter_binary_impl(ctx):
         "ktfmt": ctx.attr.kotlin,
         "java-format": ctx.attr.java,
         "swiftformat": ctx.attr.swift,
+        "scalafmt": ctx.attr.scala,
         "gofmt": ctx.attr.go,
         "shfmt": ctx.attr.sh,
     }
