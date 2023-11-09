@@ -15,6 +15,7 @@ jobs:
       - run: git checkout -b mirror_releases
       - run: |
           ./lint/mirror_ruff.sh
+          bazel run docs:update
       # NB: make sure "Allow GitHub Actions to create and approve pull requests" is checked
       # on https://github.com/[my-org/my-repo]/settings/actions
       - name: create pull request
