@@ -34,7 +34,7 @@ alias(
 
 Assuming you installed with the typical layout:
 
-`bazel run :format`
+`bazel run //:format`
 
 > Note that mass-reformatting can be disruptive in an active repo.
 > You may want to instruct developers with in-flight changes to reformat their branches as well, to avoid merge conflicts.
@@ -44,7 +44,7 @@ Assuming you installed with the typical layout:
 
 ### Re-format specific file(s)
 
-`bazel run format some/file.md other/file.json`
+`bazel run //:format some/file.md other/file.json`
 
 ### Install as a pre-commit hook
 
