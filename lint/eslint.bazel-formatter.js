@@ -16,6 +16,7 @@ function pluralize(word, count) {
 
 module.exports = function (results, context) {
   let output = "";
+  (fixableErrorCount = 0), (fixableWarningCount = 0);
 
   results.forEach((result) => {
     const messages = result.messages;
@@ -26,6 +27,9 @@ module.exports = function (results, context) {
 
     const relpath = path.relative(context.cwd, result.filePath);
 
+    fixableErrorCount += result.fixableErrorCount;
+    fixableWarningCount += result.fixableWarningCount;
+
     messages.forEach((message) => {
       const msgtext = message.message.replace(/([^ ])\.$/u, "$1");
       const severity =
@@ -35,7 +39,20 @@ module.exports = function (results, context) {
         message.ruleId || ""
       }]\n`;
     });
-  });
 
-  return output;
+    if (fixableErrorCount > 0 || fixableWarningCount > 0) {
+      console.error(
+        `${fixableErrorCount} ${pluralize(
+          "error",
+          fixableErrorCount
+        )} and ${fixableWarningCount} ${pluralize(
+          "warning",
+          fixableWarningCount
+        )} potentially fixable by running`
+      );
+      console.error(
+        `    BAZEL_BINDIR="." bazel run --run_under="cd $PWD &&" -- ${process.env["BAZEL_FIX_COMMAND"]}`
+      );
+    }
+  });
 };

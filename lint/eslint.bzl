@@ -34,22 +34,32 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     args = ctx.actions.args()
 
+    # TODO: can we use an Args object here, even though we don't pass to actions.run#arguments ?
+    fix_command = []
+    fix_command.extend([str(ctx.attr._eslint.label), "--fix"])
+
     # Workaround: create an empty report file in case eslint doesn't write one
     # Use `../../..` to return to the execroot?
     args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
 
     # require explicit path to the eslintrc file, don't search for one
-    args.add("--no-eslintrc")
+    config_args = ["--no-eslintrc", "--config", ctx.file._config_file.short_path]
+    args.add_all(config_args)
+    fix_command.extend(config_args)
 
     # TODO: enable if debug config, similar to rules_ts
     # args.add("--debug")
 
-    args.add_all(["--config", ctx.file._config_file.short_path])
     args.add_all(["--format", "../../../" + ctx.file._formatter.path])
     args.add_all(["--output-file", report.short_path])
-    args.add_all([s.short_path for s in srcs])
 
-    env = {"BAZEL_BINDIR": ctx.bin_dir.path}
+    args.add_all([s.short_path for s in srcs])
+    fix_command.extend([s.short_path for s in srcs])
+
+    env = {
+        "BAZEL_BINDIR": ctx.bin_dir.path,
+        "BAZEL_FIX_COMMAND": " ".join(fix_command),
+    }
 
     inputs = copy_files_to_bin_actions(ctx, srcs)
 
