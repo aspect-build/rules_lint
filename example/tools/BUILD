@@ -122,6 +122,7 @@ multi_formatter_binary(
     python = ":ruff",
     scala = ":scalafmt",
     sh = ":shfmt",
+    sql = ":prettier",
     starlark = "@buildifier_prebuilt//:buildifier",
     swift = ":swiftformat",
     terraform = ":terraform",
