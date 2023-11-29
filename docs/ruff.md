@@ -9,7 +9,7 @@ load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
 
 ruff = ruff_aspect(
     binary = "@@//:ruff",
-    config = "@@//:.ruff.toml",
+    configs = "@@//:.ruff.toml",
 )
 ```
 
@@ -42,6 +42,20 @@ ruff_action(<a href="#ruff_action-ctx">ctx</a>, <a href="#ruff_action-executable
 
 Run ruff as an action under Bazel.
 
+Ruff will select the configuration file to use for each source file, as documented here:
+https://docs.astral.sh/ruff/configuration/#config-file-discovery
+
+Note: all config files are passed to the action.
+This means that a change to any config file invalidates the action cache entries for ALL
+ruff actions.
+
+However this is needed because:
+
+1. ruff has an `extend` field, so it may need to read more than one config file
+2. ruff's logic for selecting the appropriate config needs to read the file content to detect
+  a `[tool.ruff]` section.
+
+
 **PARAMETERS**
 
 
@@ -50,7 +64,7 @@ Run ruff as an action under Bazel.
 | <a id="ruff_action-ctx"></a>ctx |  Bazel Rule or Aspect evaluation context   |  none |
 | <a id="ruff_action-executable"></a>executable |  label of the the ruff program   |  none |
 | <a id="ruff_action-srcs"></a>srcs |  python files to be linted   |  none |
-| <a id="ruff_action-config"></a>config |  label of the ruff config file (pyproject.toml, ruff.toml, or .ruff.toml)   |  none |
+| <a id="ruff_action-config"></a>config |  labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)   |  none |
 | <a id="ruff_action-report"></a>report |  output file to generate   |  none |
 | <a id="ruff_action-use_exit_code"></a>use_exit_code |  whether to fail the build when a lint violation is reported   |  <code>False</code> |
 
@@ -60,7 +74,7 @@ Run ruff as an action under Bazel.
 ## ruff_aspect
 
 <pre>
-ruff_aspect(<a href="#ruff_aspect-binary">binary</a>, <a href="#ruff_aspect-config">config</a>)
+ruff_aspect(<a href="#ruff_aspect-binary">binary</a>, <a href="#ruff_aspect-configs">configs</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -79,7 +93,7 @@ Attrs:
             build_file_content = """exports_files(["ruff"])""",
         )
 
-    config: the ruff config file (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
+    configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
 
 **PARAMETERS**
 
@@ -87,6 +101,6 @@ Attrs:
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="ruff_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
-| <a id="ruff_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
+| <a id="ruff_aspect-configs"></a>configs |  <p align="center"> - </p>   |  none |
 
 

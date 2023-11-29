@@ -7,7 +7,7 @@ load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
 
 ruff = ruff_aspect(
     binary = "@@//:ruff",
-    config = "@@//:.ruff.toml",
+    configs = "@@//:.ruff.toml",
 )
 ```
 """
@@ -22,11 +22,24 @@ _MNEMONIC = "ruff"
 def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
     """Run ruff as an action under Bazel.
 
+    Ruff will select the configuration file to use for each source file, as documented here:
+    https://docs.astral.sh/ruff/configuration/#config-file-discovery
+
+    Note: all config files are passed to the action.
+    This means that a change to any config file invalidates the action cache entries for ALL
+    ruff actions.
+
+    However this is needed because:
+
+    1. ruff has an `extend` field, so it may need to read more than one config file
+    2. ruff's logic for selecting the appropriate config needs to read the file content to detect
+      a `[tool.ruff]` section.
+
     Args:
         ctx: Bazel Rule or Aspect evaluation context
         executable: label of the the ruff program
         srcs: python files to be linted
-        config: label of the ruff config file (pyproject.toml, ruff.toml, or .ruff.toml)
+        config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
         report: output file to generate
         use_exit_code: whether to fail the build when a lint violation is reported
     """
@@ -57,7 +70,7 @@ def _ruff_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    ruff_action(ctx, ctx.executable._ruff, ctx.rule.files.srcs, ctx.files._config_file, report, ctx.attr.fail_on_violation)
+    ruff_action(ctx, ctx.executable._ruff, ctx.rule.files.srcs, ctx.files._config_files, report, ctx.attr.fail_on_violation)
     return [info]
 
 def ruff_aspect(binary, configs):
@@ -97,7 +110,7 @@ def ruff_aspect(binary, configs):
                 executable = True,
                 cfg = "exec",
             ),
-            "_config_file": attr.label_list(
+            "_config_files": attr.label_list(
                 default = configs,
                 allow_files = True,
             ),
