@@ -30,14 +30,13 @@ def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
         report: output file to generate
         use_exit_code: whether to fail the build when a lint violation is reported
     """
-    inputs = srcs + [config]
+    inputs = srcs + config
     outputs = [report]
 
     # Wire command-line options, see
     # `ruff help check` to see available options
     args = ctx.actions.args()
     args.add("check")
-    args.add(config, format = "--config=%s")
     args.add(report, format = "--output-file=%s")
     if not use_exit_code:
         args.add("--exit-zero")
@@ -58,10 +57,10 @@ def _ruff_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    ruff_action(ctx, ctx.executable._ruff, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
+    ruff_action(ctx, ctx.executable._ruff, ctx.rule.files.srcs, ctx.files._config_file, report, ctx.attr.fail_on_violation)
     return [info]
 
-def ruff_aspect(binary, config):
+def ruff_aspect(binary, configs):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -78,8 +77,13 @@ def ruff_aspect(binary, config):
                 build_file_content = \"""exports_files(["ruff"])\""",
             )
 
-        config: the ruff config file (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
+        configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
     """
+
+    # syntax-sugar: allow a single config file in addition to a list
+    if type(configs) == "string":
+        configs = [configs]
+
     return aspect(
         implementation = _ruff_aspect_impl,
         # Edges we need to walk up the graph from the selected targets.
@@ -93,9 +97,9 @@ def ruff_aspect(binary, config):
                 executable = True,
                 cfg = "exec",
             ),
-            "_config_file": attr.label(
-                default = config,
-                allow_single_file = True,
+            "_config_file": attr.label_list(
+                default = configs,
+                allow_files = True,
             ),
         },
     )

@@ -35,7 +35,10 @@ pmd_test = make_lint_test(aspect = pmd)
 
 ruff = ruff_aspect(
     binary = "@@//tools:ruff",
-    config = "@@//:.ruff.toml",
+    configs = [
+        "@@//:.ruff.toml",
+        "@@//src/subdir:ruff.toml",
+    ],
 )
 
 shellcheck = shellcheck_aspect(
