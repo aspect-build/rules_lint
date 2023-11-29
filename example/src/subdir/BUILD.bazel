@@ -1,0 +1,6 @@
+exports_files(["ruff.toml"])
+
+py_library(
+    name = "unused_import",
+    srcs = ["unused_import.py"],
+)
