@@ -22,8 +22,8 @@ bazel build \
   --aspects $(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck} | tr ' ' ',') \
   --build_event_json_file="$buildevents" \
   --output_groups=rules_lint_report \
+  --remote_download_regex='.*aspect_rules_lint.report' \
   $@
-  #--remote_download_regex='.*aspect_rules_lint.report' \
 
 valid_reports=$(jq --raw-output "$filter" "$buildevents")
 exit_code=0
