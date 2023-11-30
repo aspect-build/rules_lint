@@ -12,16 +12,34 @@ if [ "$#" -eq 0 ]; then
 	exit 1
 fi
 
+buildevents=$(mktemp)
+filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" + .name)'
+
 # Produce report files
 # You can add --aspects_parameters=fail_on_violation=true to make this command fail instead.
-# TODO: put back ruff after the output paths don't collide
-bazel build --aspects //tools:lint.bzl%eslint,//tools:lint.bzl%buf,//tools:lint.bzl%flake8,//tools:lint.bzl%pmd,//tools:lint.bzl%shellcheck --output_groups=rules_lint_report $@
+# NB: perhaps --remote_download_toplevel is needed as well with remote execution?
+bazel build \
+  --aspects $(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck} | tr ' ' ',') \
+  --build_event_json_file="$buildevents" \
+  --output_groups=rules_lint_report \
+  --remote_download_regex='.*aspect_rules_lint.report' \
+  $@
+
+valid_reports=$(jq --raw-output "$filter" "$buildevents")
+exit_code=0
 
 # Show the results.
-# `-mtime -1`: only look at files modified in the last day, to mitigate showing stale results of old bazel runs.
-# `-size +1c`: don't show files containing zero bytes
-for report in $(find $(bazel info bazel-bin) -mtime -1 -size +1c -type f -name "*.aspect_rules_lint.report"); do
-	echo "From ${report}:"
-	cat "${report}"
-	echo
-done
+while IFS= read -r report; do
+    # Exclude coverage reports, and check if the report is empty.
+    if [[ "$report" == *coverage.dat ]] || [[ ! -s "$report" ]]; then
+        # Report is empty. No linting errors.
+        continue
+    fi
+    echo "From ${report}:"
+    cat "${report}"
+    echo
+
+    exit_code=1
+done <<<"$valid_reports"
+
+exit $exit_code
