@@ -53,25 +53,27 @@ def shellcheck_action(ctx, executable, srcs, config, report, use_exit_code = Fal
         use_exit_code: whether to fail the build when a lint violation is reported
     """
     inputs = srcs + [config]
-    outputs = [report]
 
     # Wire command-line options, see
     # https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#options
     args = ctx.actions.args()
     args.add_all(srcs)
 
+    if use_exit_code:
+        command = "{shellcheck} $@ && touch {report}"
+    else:
+        command = "{shellcheck} $@ >{report} || true"
+
     ctx.actions.run_shell(
-        inputs = inputs + [executable],
-        outputs = outputs,
-        command = """\
-            {shellcheck} $@ >{report} {exit_zero}
-        """.format(
+        inputs = inputs,
+        outputs = [report],
+        command = command.format(
             shellcheck = executable.path,
             report = report.path,
-            exit_zero = "" if use_exit_code else "|| true",
         ),
         arguments = [args],
         mnemonic = _MNEMONIC,
+        tools = [executable],
     )
 
 # buildifier: disable=function-docstring

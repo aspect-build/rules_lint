@@ -36,18 +36,27 @@ def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
     # https://flake8.pycqa.org/en/latest/user/options.html
     args = ctx.actions.args()
     args.add_all(srcs)
-    args.add(report, format = "--output-file=%s")
     args.add(config, format = "--config=%s")
-    if not use_exit_code:
+    if use_exit_code:
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = outputs,
+            tools = [executable],
+            command = executable.path + " $@ && touch " + report.path,
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+        )
+    else:
+        args.add(report, format = "--output-file=%s")
         args.add("--exit-zero")
 
-    ctx.actions.run(
-        inputs = inputs,
-        outputs = outputs,
-        executable = executable,
-        arguments = [args],
-        mnemonic = _MNEMONIC,
-    )
+        ctx.actions.run(
+            inputs = inputs,
+            outputs = outputs,
+            executable = executable,
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+        )
 
 # buildifier: disable=function-docstring
 def _flake8_aspect_impl(target, ctx):

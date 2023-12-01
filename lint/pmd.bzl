@@ -34,24 +34,34 @@ def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
     # Wire command-line options, see
     # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
     args = ctx.actions.args()
-    args.add_all(["--report-file", report])
     args.add("--rulesets")
     args.add_joined(rulesets, join_with = ",")
-    if not use_exit_code:
-        # NB: this arg changes in PMD 7
-        args.add_all(["--fail-on-violation", "false"])
 
     src_args = ctx.actions.args()
     src_args.use_param_file("%s", use_always = True)
     src_args.add_all(srcs)
 
-    ctx.actions.run(
-        inputs = inputs,
-        outputs = [report],
-        executable = executable,
-        arguments = [args, "--file-list", src_args],
-        mnemonic = _MNEMONIC,
-    )
+    if use_exit_code:
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = [report],
+            command = executable.path + " $@ && touch " + report.path,
+            arguments = [args, "--file-list", src_args],
+            mnemonic = _MNEMONIC,
+            tools = [executable],
+        )
+    else:
+        args.add_all(["--report-file", report])
+
+        # NB: this arg changes in PMD 7
+        args.add_all(["--fail-on-violation", "false"])
+        ctx.actions.run(
+            inputs = inputs,
+            outputs = [report],
+            executable = executable,
+            arguments = [args, "--file-list", src_args],
+            mnemonic = _MNEMONIC,
+        )
 
 # buildifier: disable=function-docstring
 def _pmd_aspect_impl(target, ctx):

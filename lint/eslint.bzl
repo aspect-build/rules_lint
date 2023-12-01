@@ -34,10 +34,6 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     args = ctx.actions.args()
 
-    # Workaround: create an empty report file in case eslint doesn't write one
-    # Use `../../..` to return to the execroot?
-    args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
-
     # require explicit path to the eslintrc file, don't search for one
     args.add("--no-eslintrc")
 
@@ -46,7 +42,6 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     args.add_all(["--config", ctx.file._config_file.short_path])
     args.add_all(["--format", "../../../" + ctx.file._formatter.path])
-    args.add_all(["--output-file", report.short_path])
     args.add_all([s.short_path for s in srcs])
 
     env = {"BAZEL_BINDIR": ctx.bin_dir.path}
@@ -61,21 +56,33 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
         include_npm_linked_packages = True,
     ).to_list())
 
-    outputs = [report]
+    if use_exit_code:
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = [report],
+            tools = [executable._eslint],
+            arguments = [args],
+            command = executable._eslint.path + " $@ && touch " + report.path,
+            env = env,
+            mnemonic = _MNEMONIC,
+        )
+    else:
+        # Workaround: create an empty report file in case eslint doesn't write one
+        # Use `../../..` to return to the execroot?
+        args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
 
-    if not use_exit_code:
+        args.add_all(["--output-file", report.short_path])
         exit_code_out = ctx.actions.declare_file("_{}.exit_code_out".format(ctx.label.name))
-        outputs.append(exit_code_out)
         env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code_out.path
 
-    ctx.actions.run(
-        inputs = inputs,
-        outputs = outputs,
-        executable = executable._eslint,
-        arguments = [args],
-        env = env,
-        mnemonic = _MNEMONIC,
-    )
+        ctx.actions.run(
+            inputs = inputs,
+            outputs = [report, exit_code_out],
+            executable = executable._eslint,
+            arguments = [args],
+            env = env,
+            mnemonic = _MNEMONIC,
+        )
 
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
