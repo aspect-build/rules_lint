@@ -39,11 +39,11 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "report_file")
+load("//lint/private:lint_aspect.bzl", "report_and_patch_files")
 
 _MNEMONIC = "ESLint"
 
-def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
+def eslint_actions(ctx, executable, srcs, report, patch, use_exit_code = False):
     """Create a Bazel Action that spawns an eslint process.
 
     Adapter for wrapping Bazel around
@@ -53,7 +53,8 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
         ctx: an action context OR aspect context
         executable: struct with an eslint field
         srcs: list of file objects to lint
-        report: output to create
+        report: output: the stdout of eslint containing any violations found
+        patch: output: a file that can be applied with the patch(1) command.
         use_exit_code: whether an eslint process exiting non-zero will be a build failure
     """
 
@@ -63,7 +64,12 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
     # args.add("--debug")
 
     args.add_all(["--format", "../../../" + ctx.file._formatter.path])
-    args.add_all([s.short_path for s in srcs])
+    
+    report_args = ctx.actions.args()
+    report_args.add("--output-file", report.short_path)
+
+    srcs_args = ctx.actions.args()
+    srcs_args.add_all([s.short_path for s in srcs])
 
     env = {"BAZEL_BINDIR": ctx.bin_dir.path}
 
@@ -105,13 +111,39 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
             mnemonic = _MNEMONIC,
         )
 
+    # Generate patch file.
+    files_to_lint = ctx.actions.declare_file("_{}.files_to_lint".format(ctx.label.name))
+
+    ctx.actions.write(
+        output = files_to_lint,
+        content = srcs_args,
+    )
+
+    patch_args = ctx.actions.args()
+    patch_args.add("--fix")
+    patch_args.add("$$FILES")
+
+    ctx.actions.run(
+        inputs = inputs + [files_to_lint],
+        outputs = [patch],
+        executable = executable._patcher,
+        arguments = [args, patch_args],
+        env = env | {
+            "LINTER_PATH": executable._eslint.path,
+            "FILES_TO_LINT_PATH": files_to_lint.short_path,
+            "PATCH_PATH": patch.short_path,
+        },
+        tools = [executable._eslint],
+        mnemonic = _MNEMONIC,
+    )
+
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["js_library", "ts_project", "ts_project_rule"]:
         return []
 
-    report, info = report_file(_MNEMONIC, target, ctx)
-    eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
+    report, patch, info = report_and_patch_files(_MNEMONIC, target, ctx)
+    eslint_actions(ctx, ctx.executable, ctx.rule.files.srcs, report, patch, ctx.attr.fail_on_violation)
     return [info]
 
 def eslint_aspect(binary, configs):
@@ -142,6 +174,11 @@ def eslint_aspect(binary, configs):
             "_config_files": attr.label_list(
                 default = configs,
                 allow_files = True,
+            ),
+            "_patcher": attr.label(
+                default = "@aspect_rules_lint//lint/private:patcher",
+                executable = True,
+                cfg = "exec",
             ),
             "_workaround_17660": attr.label(
                 default = "@aspect_rules_lint//lint:eslint.workaround_17660",

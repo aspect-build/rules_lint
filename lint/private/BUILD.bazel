@@ -1,7 +1,15 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@aspect_rules_js//js:defs.bzl", "js_binary")
 
 bzl_library(
     name = "lint_aspect",
     srcs = ["lint_aspect.bzl"],
     visibility = ["//lint:__subpackages__"],
+)
+
+js_binary(
+    name = "patcher",
+    entry_point = "patcher.mjs",
+    # Because aspect visibility rules are not on by default.
+    visibility = ["//visibility:public"],
 )

@@ -35,6 +35,7 @@ fi
 # Produce report files
 bazel build ${args[@]} $@
 
+# TODO: Maybe this could be hermetic with bazel run @aspect_bazel_lib//tools:jq or sth
 valid_reports=$(jq --raw-output "$filter" "$buildevents")
 
 # Show the results.
