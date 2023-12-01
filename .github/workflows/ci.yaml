@@ -16,9 +16,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  bazel-test:
     uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v5
     with:
       folders: '[".", "example"]'
       # Only test with Bazel 6. And we don't try for Windows support yet.
       exclude: '[{"bazelversion": "5.4.0"}, {"os": "windows-latest"}]'
+
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup bats
+        uses: mig4/setup-bats@v1
+        with:
+          bats-version: "1.8.2"
+      - name: Setup bats helpers
+        uses: brokenpip3/setup-bats-libs@0.0.3
+        with:
+          support-path: /usr/lib/bats/bats-support
+          support-version: "0.3.0"
+          assert-path: /usr/lib/bats/bats-assert
+          assert-version: "2.1.0"
+      - name: Integration test
+        working-directory: example
+        run: bats -r test
