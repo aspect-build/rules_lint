@@ -57,6 +57,11 @@ def buf_lint_action(ctx, buf_toolchain, target, report, use_exit_code = False):
     args.add_joined(["--buf-plugin_out", "."], join_with = "=")
     args.add_all(sources)
 
+    if use_exit_code:
+        command = "{protoc} $@ && touch {report}"
+    else:
+        command = "{protoc} $@ 2>{report} || true"
+
     ctx.actions.run_shell(
         inputs = depset([
             ctx.file._config,
@@ -64,12 +69,9 @@ def buf_lint_action(ctx, buf_toolchain, target, report, use_exit_code = False):
             buf_toolchain.cli,
         ], transitive = [deps]),
         outputs = [report],
-        command = """\
-            {protoc} $@ 2>{report} {exit_zero}
-        """.format(
+        command = command.format(
             protoc = ctx.executable._protoc.path,
             report = report.path,
-            exit_zero = "" if use_exit_code else "|| true",
         ),
         arguments = [args],
         mnemonic = _MNEMONIC,
