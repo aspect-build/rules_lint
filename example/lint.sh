@@ -4,6 +4,8 @@
 # This is meant to mimic the behavior of the `bazel lint` command that you'd have
 # by using the Aspect CLI.
 #
+# To make the build fail when a linter warning is present, run with --fail-on-violation
+#
 # We recommend using Aspect CLI instead!
 set -o errexit -o pipefail -o nounset
 
@@ -15,19 +17,25 @@ fi
 buildevents=$(mktemp)
 filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" + .name)'
 
-# Produce report files
-# To make the command fail when there's a lint warning, you can add arguments:
-#  --aspects_parameters=fail_on_violation=true --keep_going
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
-bazel build \
-  --aspects $(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck} | tr ' ' ',') \
-  --build_event_json_file="$buildevents" \
-  --output_groups=rules_lint_report \
-  --remote_download_regex='.*aspect_rules_lint.report' \
-  $@
+args=(
+  "--aspects=$(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck} | tr ' ' ',')"
+  "--build_event_json_file=$buildevents"
+  "--output_groups=rules_lint_report"
+  "--remote_download_regex='.*aspect_rules_lint.report'"
+)
+if [ $1 == "--fail-on-violation" ]; then
+  args+=(
+    "--aspects_parameters=fail_on_violation=true"
+    "--keep_going"
+  )
+  shift
+fi
+
+# Produce report files
+bazel build ${args[@]} $@
 
 valid_reports=$(jq --raw-output "$filter" "$buildevents")
-exit_code=0
 
 # Show the results.
 while IFS= read -r report; do
@@ -39,8 +47,4 @@ while IFS= read -r report; do
     echo "From ${report}:"
     cat "${report}"
     echo
-
-    exit_code=1
 done <<<"$valid_reports"
-
-exit $exit_code
