@@ -50,19 +50,28 @@ def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
     # `ruff help check` to see available options
     args = ctx.actions.args()
     args.add("check")
-    args.add(report, format = "--output-file=%s")
-    if not use_exit_code:
-        args.add("--exit-zero")
-
     args.add_all(srcs)
 
-    ctx.actions.run(
-        inputs = inputs,
-        outputs = outputs,
-        executable = executable,
-        arguments = [args],
-        mnemonic = _MNEMONIC,
-    )
+    if use_exit_code:
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = outputs,
+            command = executable.path + " $@ && touch " + report.path,
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+            tools = [executable],
+        )
+    else:
+        args.add(report, format = "--output-file=%s")
+        args.add("--exit-zero")
+
+        ctx.actions.run(
+            inputs = inputs,
+            outputs = outputs,
+            executable = executable,
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+        )
 
 # buildifier: disable=function-docstring
 def _ruff_aspect_impl(target, ctx):

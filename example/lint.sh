@@ -16,7 +16,8 @@ buildevents=$(mktemp)
 filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" + .name)'
 
 # Produce report files
-# You can add --aspects_parameters=fail_on_violation=true to make this command fail instead.
+# To make the command fail when there's a lint warning, you can add arguments:
+#  --aspects_parameters=fail_on_violation=true --keep_going
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
 bazel build \
   --aspects $(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck} | tr ' ' ',') \
