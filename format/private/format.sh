@@ -221,18 +221,16 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "$files" | tr \\n \\0 | xargs -0 $bin $swiftmode
 fi
 
-# TODO: wire buf
-# after https://github.com/bufbuild/rules_buf/pull/42
-# if [ "$#" -eq 0 ]; then
-#   files=$(git ls-files '*.proto')
-# else
-#   files=$(find "$@" -name '*.proto')
-# fi
-# bin=$(rlocation {buf})
+if [ "$#" -eq 0 ]; then
+  files=$(git ls-files '*.proto')
+else
+  files=$(find "$@" -name '*.proto')
+fi
+bin=$(rlocation {{buf}})
 
-# if [ -n "$files" ] && [ -n "$bin" ]; then
-#   echo "Running buf..."
-#   for file in $files; do
-#     $bin $bufmode $file
-#   done
-# fi
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Running buf..."
+  for file in $files; do
+    $bin $bufmode $file
+  done
+fi
