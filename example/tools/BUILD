@@ -42,6 +42,11 @@ alias(
     }),
 )
 
+alias(
+    name = "buf",
+    actual = "@rules_buf_toolchains//:buf",
+)
+
 prettier.prettier_binary(
     name = "prettier",
     # Allow the binary to be run outside bazel
@@ -119,6 +124,7 @@ multi_formatter_binary(
     javascript = ":prettier",
     jsonnet = ":jsonnetfmt",
     kotlin = ":ktfmt",
+    protobuf = ":buf",
     python = ":ruff",
     scala = ":scalafmt",
     sh = ":shfmt",

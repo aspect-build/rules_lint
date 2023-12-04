@@ -15,6 +15,7 @@ _attrs = {
     "go": attr.label(doc = "a binary target that runs go fmt", executable = True, cfg = "exec", allow_files = True),
     "sql": attr.label(doc = "a binary target that runs prettier on sql", executable = True, cfg = "exec", allow_files = True),
     "sh": attr.label(doc = "a binary target that runs shfmt", executable = True, cfg = "exec", allow_files = True),
+    "protobuf": attr.label(doc = "a binary target that runs buf", executable = True, cfg = "exec", allow_files = True),
     "_bin": attr.label(default = "//format/private:format.sh", allow_single_file = True),
     "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
 }
@@ -22,7 +23,7 @@ _attrs = {
 def _formatter_binary_impl(ctx):
     # We need to fill in the rlocation paths in the shell script
     substitutions = {
-        "{{fix_target}}": str(ctx.label)
+        "{{fix_target}}": str(ctx.label),
     }
     tools = {
         "ruff": ctx.attr.python,
@@ -37,6 +38,7 @@ def _formatter_binary_impl(ctx):
         "scalafmt": ctx.attr.scala,
         "gofmt": ctx.attr.go,
         "shfmt": ctx.attr.sh,
+        "buf": ctx.attr.protobuf,
     }
     for tool, attr in tools.items():
         if attr:

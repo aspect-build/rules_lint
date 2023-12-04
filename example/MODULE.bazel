@@ -4,6 +4,7 @@ bazel_dep(name = "aspect_rules_lint", version = "0.0.0")
 bazel_dep(name = "aspect_bazel_lib", version = "1.36.0")
 bazel_dep(name = "aspect_rules_js", version = "1.32.6")
 bazel_dep(name = "aspect_rules_ts", version = "1.3.3")
+bazel_dep(name = "rules_buf", version = "0.2.0")
 bazel_dep(name = "bazel_skylib", version = "1.4.2")
 bazel_dep(name = "rules_java", version = "5.5.0")
 bazel_dep(name = "rules_jvm_external", version = "4.5")
@@ -73,3 +74,6 @@ use_repo(
     "maven",
     "unpinned_maven",
 )
+
+buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
+use_repo(buf, "rules_buf_toolchains")
