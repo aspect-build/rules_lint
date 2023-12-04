@@ -1,8 +1,5 @@
 # Run linters and formatters under Bazel
 
-> It is currently EXPERIMENTAL and pre-release. No support is promised.
-> There may be breaking changes, or we may archive and abandon the repository.
-
 This ruleset integrates linting and formatting as first-class concepts under Bazel.
 
 Features:
