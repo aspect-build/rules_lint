@@ -88,6 +88,8 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 def _eslint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["js_binary", "js_library", "ts_project", "ts_project_rule"]:
         return []
+    if not hasattr(ctx.rule.files, "srcs"):
+        return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
     eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
