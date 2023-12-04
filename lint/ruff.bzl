@@ -126,6 +126,26 @@ def ruff_aspect(binary, configs):
         },
     )
 
+def _ruff_workaround_20269_impl(rctx):
+    # download_and_extract has a bug due to the use of Apache Commons library within Bazel,
+    # see https://issues.apache.org/jira/projects/COMPRESS/issues/COMPRESS-654
+    # To workaround, we fetch the file and then use the BSD tar on the system to extract it.
+    rctx.download(sha256 = rctx.attr.sha256, url = rctx.attr.url, output = "ruff.tar.gz")
+    result = rctx.execute([rctx.which("tar"), "xzf", "ruff.tar.gz"])
+    if result.return_code:
+        fail("Couldn't extract ruff: \nSTDOUT:\n{}\nSTDERR:\n{}".format(result.stdout, result.stderr))
+    rctx.file("BUILD", rctx.attr.build_file_content)
+
+ruff_workaround_20269 = repository_rule(
+    _ruff_workaround_20269_impl,
+    doc = "Workaround for https://github.com/bazelbuild/bazel/issues/20269",
+    attrs = {
+        "build_file_content": attr.string(),
+        "sha256": attr.string(),
+        "url": attr.string(),
+    },
+)
+
 def fetch_ruff(version = RUFF_VERSIONS.keys()[0]):
     """A repository macro used from WORKSPACE to fetch ruff binaries
 
@@ -133,8 +153,12 @@ def fetch_ruff(version = RUFF_VERSIONS.keys()[0]):
         version: a version of ruff that we have mirrored, e.g. `v0.1.0`
     """
     for plat, sha256 in RUFF_VERSIONS[version].items():
+        fetch_rule = http_archive
+        if plat.endswith("darwin"):
+            fetch_rule = ruff_workaround_20269
+
         maybe(
-            http_archive,
+            fetch_rule,
             name = "ruff_" + plat,
             url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{plat}.tar.gz".format(
                 tag = version,
