@@ -86,9 +86,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["js_binary", "js_library", "ts_project", "ts_project_rule"]:
-        return []
-    if not hasattr(ctx.rule.files, "srcs"):
+    if ctx.rule.kind not in ["js_library", "ts_project", "ts_project_rule"]:
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
