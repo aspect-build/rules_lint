@@ -2,22 +2,21 @@
 
 load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
 
-_attrs = {
-    "javascript": attr.label(doc = "a binary target that runs prettier", executable = True, cfg = "exec", allow_files = True),
-    "python": attr.label(doc = "a binary target that runs ruff", executable = True, cfg = "exec", allow_files = True),
-    "starlark": attr.label(doc = "a binary target that runs buildifier", executable = True, cfg = "exec", allow_files = True),
-    "jsonnet": attr.label(doc = "a binary target that runs jsonnetfmt", executable = True, cfg = "exec", allow_files = True),
-    "terraform": attr.label(doc = "a binary target that runs terraform", executable = True, cfg = "exec", allow_files = True),
-    "kotlin": attr.label(doc = "a binary target that runs ktfmt", executable = True, cfg = "exec", allow_files = True),
-    "java": attr.label(doc = "a binary target that runs google-java-format", executable = True, cfg = "exec", allow_files = True),
-    "scala": attr.label(doc = "a binary target that runs scalafmt", executable = True, cfg = "exec", allow_files = True),
-    "swift": attr.label(doc = "a binary target that runs swiftformat", executable = True, cfg = "exec", allow_files = True),
-    "go": attr.label(doc = "a binary target that runs go fmt", executable = True, cfg = "exec", allow_files = True),
-    "sql": attr.label(doc = "a binary target that runs prettier on sql", executable = True, cfg = "exec", allow_files = True),
-    "sh": attr.label(doc = "a binary target that runs shfmt", executable = True, cfg = "exec", allow_files = True),
-    "protobuf": attr.label(doc = "a binary target that runs buf", executable = True, cfg = "exec", allow_files = True),
-    "_bin": attr.label(default = "//format/private:format.sh", allow_single_file = True),
-    "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
+# Per the formatter design, each language can only have a single formatter binary
+_TOOLS = {
+    "javascript": "prettier",
+    "python": "ruff",
+    "starlark": "buildifier",
+    "jsonnet": "jsonnetfmt",
+    "terraform": "terraform",
+    "kotlin": "ktfmt",
+    "java": "java-format",
+    "scala": "scalafmt",
+    "swift": "swiftformat",
+    "go": "gofmt",
+    "sql": "prettier-sql",
+    "sh": "shfmt",
+    "protobuf": "buf",
 }
 
 def _formatter_binary_impl(ctx):
@@ -25,21 +24,7 @@ def _formatter_binary_impl(ctx):
     substitutions = {
         "{{fix_target}}": str(ctx.label),
     }
-    tools = {
-        "ruff": ctx.attr.python,
-        "buildifier": ctx.attr.starlark,
-        "jsonnetfmt": ctx.attr.jsonnet,
-        "terraform": ctx.attr.terraform,
-        "prettier": ctx.attr.javascript,
-        "prettier-sql": ctx.attr.sql,
-        "ktfmt": ctx.attr.kotlin,
-        "java-format": ctx.attr.java,
-        "swiftformat": ctx.attr.swift,
-        "scalafmt": ctx.attr.scala,
-        "gofmt": ctx.attr.go,
-        "shfmt": ctx.attr.sh,
-        "buf": ctx.attr.protobuf,
-    }
+    tools = {v: getattr(ctx.attr, k) for k, v in _TOOLS.items()}
     for tool, attr in tools.items():
         if attr:
             substitutions["{{%s}}" % tool] = to_rlocation_path(ctx, attr.files_to_run.executable)
@@ -76,7 +61,13 @@ def _formatter_binary_impl(ctx):
 
 formatter_binary_lib = struct(
     implementation = _formatter_binary_impl,
-    attrs = _attrs,
+    attrs = dict({
+        k: attr.label(doc = "a binary target that runs {}".format(v), executable = True, cfg = "exec", allow_files = True)
+        for k, v in _TOOLS.items()
+    }, **{
+        "_bin": attr.label(default = "//format/private:format.sh", allow_single_file = True),
+        "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
+    }),
 )
 
 multi_formatter_binary = rule(

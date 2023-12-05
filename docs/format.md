@@ -49,8 +49,8 @@ Produces an executable that aggregates the supplied formatter binaries
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="multi_formatter_binary-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="multi_formatter_binary-go"></a>go |  a binary target that runs go fmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-java"></a>java |  a binary target that runs google-java-format   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="multi_formatter_binary-go"></a>go |  a binary target that runs gofmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="multi_formatter_binary-java"></a>java |  a binary target that runs java-format   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-javascript"></a>javascript |  a binary target that runs prettier   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-jsonnet"></a>jsonnet |  a binary target that runs jsonnetfmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-kotlin"></a>kotlin |  a binary target that runs ktfmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
@@ -58,7 +58,7 @@ Produces an executable that aggregates the supplied formatter binaries
 | <a id="multi_formatter_binary-python"></a>python |  a binary target that runs ruff   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-scala"></a>scala |  a binary target that runs scalafmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-sh"></a>sh |  a binary target that runs shfmt   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-sql"></a>sql |  a binary target that runs prettier on sql   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="multi_formatter_binary-sql"></a>sql |  a binary target that runs prettier-sql   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-starlark"></a>starlark |  a binary target that runs buildifier   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-swift"></a>swift |  a binary target that runs swiftformat   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-terraform"></a>terraform |  a binary target that runs terraform   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
