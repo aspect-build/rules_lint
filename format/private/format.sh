@@ -62,7 +62,7 @@ case "$mode" in
  fix)
    swiftmode=""
    prettiermode="--write"
-   ruffmode="format"
+   ruffmode="format --force-exclude"
    shfmtmode="-w"
    javamode="--replace"
    ktmode=""
