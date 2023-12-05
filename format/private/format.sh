@@ -62,7 +62,10 @@ case "$mode" in
  fix)
    swiftmode=""
    prettiermode="--write"
-   ruffmode="format"
+   # Force exclusions in the configuration file to be honored even when file paths are supplied
+   # as command-line arguments; see
+   # https://github.com/astral-sh/ruff/discussions/5857#discussioncomment-6583943
+   ruffmode="format --force-exclude"
    shfmtmode="-w"
    javamode="--replace"
    ktmode=""
