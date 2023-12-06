@@ -1,6 +1,20 @@
+load("@aspect_rules_js//js:defs.bzl", "js_library")
+
 exports_files(["ruff.toml"])
 
 py_library(
     name = "unused_import",
     srcs = ["unused_import.py"],
+)
+
+js_library(
+    name = "eslintrc",
+    srcs = [".eslintrc.cjs"],
+    visibility = ["//:__subpackages__"],
+    deps = ["//:eslintrc"],
+)
+
+js_library(
+    name = "eslint-override",
+    srcs = ["index.js"],
 )

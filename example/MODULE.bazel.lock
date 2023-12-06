@@ -18328,7 +18328,7 @@
     },
     "@@rules_python~0.26.0//python/extensions:pip.bzl%pip": {
       "os:linux,arch:amd64": {
-        "bzlTransitiveDigest": "ulqacOnpbbD/73S6kLYDfIss3G+PLM6dnZaf7Af1T1I=",
+        "bzlTransitiveDigest": "uvG05kvclj3UlHJx/o4IC553EqvPVQiNUzQqIogOBAI=",
         "accumulatedFileDigests": {
           "@@//:requirements.txt": "b74becf56fb690b8419e6c6cb9feba567a5e4a71232a580e501d2657c865b64b"
         },

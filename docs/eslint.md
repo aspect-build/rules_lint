@@ -9,7 +9,7 @@ load("@aspect_rules_lint//lint:eslint.bzl", "eslint_aspect")
 
 eslint = eslint_aspect(
     binary = "@@//path/to:eslint",
-    config = "@@//path/to:eslintrc",
+    configs = "@@//path/to:eslintrc",
 )
 ```
 
@@ -45,7 +45,7 @@ https://eslint.org/docs/latest/use/command-line-interface
 ## eslint_aspect
 
 <pre>
-eslint_aspect(<a href="#eslint_aspect-binary">binary</a>, <a href="#eslint_aspect-config">config</a>)
+eslint_aspect(<a href="#eslint_aspect-binary">binary</a>, <a href="#eslint_aspect-configs">configs</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -56,6 +56,6 @@ A factory function to create a linter aspect.
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="eslint_aspect-binary"></a>binary |  the eslint binary, typically a rule like<br><br><pre><code> load("@npm//:eslint/package_json.bzl", eslint_bin = "bin") eslint_bin.eslint_binary(name = "eslint") </code></pre>   |  none |
-| <a id="eslint_aspect-config"></a>config |  label of the eslint config file   |  none |
+| <a id="eslint_aspect-configs"></a>configs |  label(s) of the eslint config file(s)   |  none |
 
 
