@@ -40,3 +40,9 @@ EOF
     assert_failure
     assert_lints
 }
+
+@test "should use nearest ancestor .eslintrc file" {
+    run $BATS_TEST_DIRNAME/../lint.sh //src/subdir:eslint-override
+    assert_success
+    refute_output --partial "Unexpected 'debugger' statement"
+}

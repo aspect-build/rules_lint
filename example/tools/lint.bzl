@@ -14,7 +14,12 @@ buf = buf_lint_aspect(
 
 eslint = eslint_aspect(
     binary = "@@//tools:eslint",
-    config = "@@//:eslintrc",
+    # We trust that eslint will locate the correct configuration file for a given source file.
+    # See https://eslint.org/docs/latest/use/configure/configuration-files#cascading-and-hierarchy
+    configs = [
+        "@@//:eslintrc",
+        "@@//src/subdir:eslintrc",
+    ],
 )
 
 eslint_test = make_lint_test(aspect = eslint)
