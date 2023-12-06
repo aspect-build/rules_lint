@@ -84,8 +84,6 @@ alias(
 
 alias(
     name = "swiftformat",
-    # TODO: keith says it would be okay to upstream a proper toolchain for this
-    # https://github.com/bazelbuild/rules_swift/issues/864
     actual = select({
         "@bazel_tools//src/conditions:linux": "@swiftformat",
         "@bazel_tools//src/conditions:darwin": "@swiftformat_mac",
