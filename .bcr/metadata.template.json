@@ -2,9 +2,9 @@
   "homepage": "https://github.com/aspect-build/rules_lint",
   "maintainers": [
     {
-      "email": "hello@aspect.dev",
-      "github": "aspect-build",
-      "name": "Aspect team"
+      "email": "alex@aspect.dev",
+      "github": "alexeagle",
+      "name": "Alex Eagle"
     }
   ],
   "repository": ["github:aspect-build/rules_lint"],
