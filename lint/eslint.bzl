@@ -12,7 +12,7 @@ eslint = eslint_aspect(
 ```
 """
 
-load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_files_to_bin_actions")
+load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//lint/private:lint_aspect.bzl", "report_file")
 
@@ -129,4 +129,5 @@ def eslint_aspect(binary, configs):
                 cfg = "exec",
             ),
         },
+        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS,
     )
