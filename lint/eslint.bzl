@@ -19,7 +19,7 @@ see https://github.com/aspect-build/rules_ts/blob/main/docs/transpiler.md#macro-
 
 Since you want to lint the original TypeScript source files, the `ts_project` rule produced
 by the macro is the one you want to lint, so when used with an `eslint_test` you should use
-the `[name]_typecheck` label:
+the `[name]_typings` label:
 
 ```
 ts_project(
@@ -30,9 +30,11 @@ ts_project(
 
 eslint_test(
     name = "lint_my_ts",
-    srcs = [":my_ts_typecheck"],
+    srcs = [":my_ts_typings"],
 )
 ```
+
+See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b2028b531ceffbd10cc89530814a177/frontend/react/src/BUILD.bazel#L86-L92)
 """
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
