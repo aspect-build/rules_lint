@@ -13,6 +13,29 @@ eslint = eslint_aspect(
 )
 ```
 
+### With ts_project
+
+Note, when used with `ts_project` and a custom `transpiler`,
+the macro expands to several targets,
+see https://github.com/aspect-build/rules_ts/blob/main/docs/transpiler.md#macro-expansion.
+
+Since you want to lint the original TypeScript source files, the `ts_project` rule produced
+by the macro is the one you want to lint, so when used with an `eslint_test` you should use
+the `[name]_typecheck` label:
+
+```
+ts_project(
+    name = "my_ts",
+    transpiler = swc,
+    ...
+)
+
+eslint_test(
+    name = "lint_my_ts",
+    srcs = [":my_ts_typecheck"],
+)
+```
+
 
 <a id="eslint_action"></a>
 
