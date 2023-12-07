@@ -6,7 +6,7 @@ module(
     compatibility_level = 1,
 )
 
-bazel_dep(name = "aspect_bazel_lib", version = "1.36.0")
+bazel_dep(name = "aspect_bazel_lib", version = "1.38.0")
 
 # Needed in the root because we use js_lib_helpers in our aspect impl
 bazel_dep(name = "aspect_rules_js", version = "1.32.6")
