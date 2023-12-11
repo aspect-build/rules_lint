@@ -8,6 +8,7 @@ load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
+load("@npm//:pyright/package_json.bzl", pyright = "bin")
 load("@rules_java//java:defs.bzl", "java_binary")
 load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 
@@ -49,6 +50,12 @@ alias(
 
 prettier.prettier_binary(
     name = "prettier",
+    # Allow the binary to be run outside bazel
+    env = {"BAZEL_BINDIR": "."},
+)
+
+pyright.pyright_binary(
+    name = "pyright",
     # Allow the binary to be run outside bazel
     env = {"BAZEL_BINDIR": "."},
 )
