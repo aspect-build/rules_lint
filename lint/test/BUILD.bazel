@@ -1,0 +1,8 @@
+load(":mypy_tests.bzl", "mypy_test_suite")
+
+sh_binary(
+    name = "mypy_fake",
+    srcs = ["mypy_fake.sh"],
+)
+
+mypy_test_suite(name = "mypy_test_suite")

@@ -42,4 +42,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//lint:shellcheck",
 )
 
+stardoc_with_diff_test(
+    name = "mypy",
+    bzl_library_target = "//lint:mypy",
+)
+
 update_docs(name = "update")

@@ -99,6 +99,16 @@ bzl_library(
 )
 
 bzl_library(
+    name = "mypy",
+    srcs = ["mypy.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "@bazel_skylib//lib:paths",
+    ],
+)
+
+bzl_library(
     name = "ruff_versions",
     srcs = ["ruff_versions.bzl"],
     visibility = ["//visibility:public"],

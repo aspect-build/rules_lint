@@ -17,11 +17,11 @@ fi
 buildevents=$(mktemp)
 filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" + .name)'
 
-# NB: perhaps --remote_download_toplevel is needed as well with remote execution?
 args=(
-	"--aspects=$(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck} | tr ' ' ',')"
+	"--aspects=$(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck,mypy} | tr ' ' ',')"
 	"--build_event_json_file=$buildevents"
 	"--output_groups=rules_lint_report"
+	# NB: perhaps --remote_download_toplevel is needed as well with remote execution?
 	"--remote_download_regex='.*aspect_rules_lint.report'"
 )
 if [ $1 == "--fail-on-violation" ]; then

@@ -104,6 +104,11 @@ py_console_script_binary(
     pkg = "@pip//flake8:pkg",
 )
 
+py_console_script_binary(
+    name = "mypy",
+    pkg = "@pip//mypy:pkg",
+)
+
 eslint_bin.eslint_binary(name = "eslint")
 
 java_binary(

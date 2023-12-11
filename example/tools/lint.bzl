@@ -4,6 +4,7 @@ load("@aspect_rules_lint//lint:buf.bzl", "buf_lint_aspect")
 load("@aspect_rules_lint//lint:eslint.bzl", "eslint_aspect")
 load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "make_lint_test")
+load("@aspect_rules_lint//lint:mypy.bzl", "mypy_aspect")
 load("@aspect_rules_lint//lint:pmd.bzl", "pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_aspect")
@@ -30,6 +31,11 @@ flake8 = flake8_aspect(
 )
 
 flake8_test = make_lint_test(aspect = flake8)
+
+mypy = mypy_aspect(
+    binary = "@@//tools:mypy",
+    configs = ["@@//:mypy.ini"],
+)
 
 pmd = pmd_aspect(
     binary = "@@//tools:pmd",
