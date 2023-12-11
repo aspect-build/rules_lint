@@ -5,6 +5,7 @@ load("@aspect_rules_lint//lint:eslint.bzl", "eslint_aspect")
 load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "make_lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "pmd_aspect")
+load("@aspect_rules_lint//lint:pyright.bzl", "pyright_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_aspect")
 
@@ -37,6 +38,11 @@ pmd = pmd_aspect(
 )
 
 pmd_test = make_lint_test(aspect = pmd)
+
+pyright = pyright_aspect(
+    binary = "@@//tools:pyright",
+    config = "@@//:pyproject.toml",
+)
 
 ruff = ruff_aspect(
     binary = "@@//tools:ruff",

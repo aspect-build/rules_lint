@@ -2389,7 +2389,7 @@
         "bzlTransitiveDigest": "spSrWoZgfQt3TYEgngED5A1K5PU/vbYqPcrKPomkw9k=",
         "accumulatedFileDigests": {
           "@@//:.npmrc": "d94d573d5aa644cdd09ff46d9b9c5e9b59185533420308c9a55ad5dc3176f22b",
-          "@@//:pnpm-lock.yaml": "c81ff637fd3726817340dcada29e507dd2553c6bddb18fbc00493d21331fd7f2"
+          "@@//:pnpm-lock.yaml": "b9c27b5e470e74da11596aab890ffc31a2f2bab040e956fd9091545aa3447c57"
         },
         "envVariables": {},
         "generatedRepoSpecs": {
