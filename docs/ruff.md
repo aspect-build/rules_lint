@@ -41,7 +41,7 @@ Workaround for https://github.com/bazelbuild/bazel/issues/20269
 ## fetch_ruff
 
 <pre>
-fetch_ruff(<a href="#fetch_ruff-version">version</a>)
+fetch_ruff(<a href="#fetch_ruff-tag">tag</a>)
 </pre>
 
 A repository macro used from WORKSPACE to fetch ruff binaries
@@ -51,7 +51,7 @@ A repository macro used from WORKSPACE to fetch ruff binaries
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="fetch_ruff-version"></a>version |  a version of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  <code>"v0.1.8"</code> |
+| <a id="fetch_ruff-tag"></a>tag |  a tag of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  <code>"v0.1.8"</code> |
 
 
 <a id="ruff_action"></a>

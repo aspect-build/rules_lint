@@ -80,6 +80,7 @@ bzl_library(
     deps = [
         ":ruff_versions",
         "//lint/private:lint_aspect",
+        "@bazel_skylib//lib:versions",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ],

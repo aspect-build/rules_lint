@@ -12,6 +12,7 @@ ruff = ruff_aspect(
 ```
 """
 
+load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "report_file")
@@ -146,23 +147,31 @@ ruff_workaround_20269 = repository_rule(
     },
 )
 
-def fetch_ruff(version = RUFF_VERSIONS.keys()[0]):
+def fetch_ruff(tag = RUFF_VERSIONS.keys()[0]):
     """A repository macro used from WORKSPACE to fetch ruff binaries
 
     Args:
-        version: a version of ruff that we have mirrored, e.g. `v0.1.0`
+        tag: a tag of ruff that we have mirrored, e.g. `v0.1.0`
     """
-    for plat, sha256 in RUFF_VERSIONS[version].items():
+    version = tag.lstrip("v")
+
+    # ruff changed their release artifact naming starting with v0.1.8
+    if versions.is_at_least("0.1.8", version):
+        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{version}-{plat}.tar.gz"
+    else:
+        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{plat}.tar.gz"
+
+    for plat, sha256 in RUFF_VERSIONS[tag].items():
         fetch_rule = http_archive
         if plat.endswith("darwin"):
             fetch_rule = ruff_workaround_20269
-
         maybe(
             fetch_rule,
             name = "ruff_" + plat,
-            url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{plat}.tar.gz".format(
-                tag = version,
+            url = url.format(
+                tag = tag,
                 plat = plat,
+                version = version,
             ),
             sha256 = sha256,
             build_file_content = """exports_files(["ruff"])""",

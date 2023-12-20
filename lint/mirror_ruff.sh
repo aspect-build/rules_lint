@@ -14,7 +14,7 @@ JQ_FILTER=\
     "value": .assets
         | map(select((.name | contains("ruff-")) and (.name | contains("sha256") | not) ))
         | map({
-            "key": .name | ltrimstr("ruff-") | rtrimstr(".tar.gz") | rtrimstr(".zip"),
+            "key": .name | capture("ruff-[0-9\\.]+-(?<platform>.*)\\.(tar\\.gz|zip)") | .platform,
             "value": (.browser_download_url + ".sha256"),
         })
         | from_entries
