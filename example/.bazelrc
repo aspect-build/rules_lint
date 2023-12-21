@@ -3,3 +3,7 @@
 build --repo_env=JAVA_HOME=../bazel_tools/jdk
 
 startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+
+# Keep us honest about loading Provider symbols we shouldn't see
+# TODO: it's broken, see https://github.com/bazelbuild/rules_python/issues/1645
+# common --incompatible_python_disallow_native_rules

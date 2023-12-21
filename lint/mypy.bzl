@@ -22,7 +22,7 @@ build --aspects=//tools:lint.bzl%mypy
 ### Reporting
 
 Unlike most linters hosted in rules_lint, mypy produces only error semantics.
-That means that typecheck violations will input_depsets in failed build actions, rather than
+That means that typecheck violations will result in failed build actions, rather than
 a report of warnings which can be handled in various ways.
 See https://github.com/aspect-build/rules_lint/blob/main/docs/linting.md
 
@@ -37,6 +37,9 @@ especially [Jonathon Belotti](https://github.com/thundergolfer) and [David Zbars
 
 ### TODO
 
+- Set the working directory when executing mypy so it selects the right configuration file:
+  https://mypy.readthedocs.io/en/stable/config_file.html
+- Support mypy plugins and show example.
 - Allow configured typeshed repo, e.g. args.add("--custom-typeshed-dir", "external/my_typeshed")
 - Avoid invalidating caches whenever mypy.ini changes
 - Remote cache: bootstrap the stdlib since it will remain in cache, making other actions slightly faster
@@ -66,17 +69,16 @@ def _extract_transitive_inputs(deps):
         if MypyInfo in dep:
             input_depsets.append(dep[MypyInfo].transitive_cache_map)
 
-        # NB: relies on PyInfo being a Bazel global symbol, one day we should be forced to load it
-        # TODO: maybe we can avoid passing .py source files when the cache-map files were found?
+        # TODO: relies on PyInfo being a Bazel global symbol.
+        # When https://github.com/bazelbuild/rules_python/issues/1645 is fixed we can flip that flag to keep us honest.
         if PyInfo in dep:
+            # TODO: maybe we can avoid passing .py source files when the cache-map files were found?
             input_depsets.append(dep[PyInfo].transitive_sources)
 
             # rules_python puts .pyi files into the data attribute of a py_library
             # so the transitive_sources is not sufficient.
             # TODO: should we change rules_python to pass .pyi files in some provider?
             if dep.label.workspace_root.startswith("external/"):
-                # includes:
-                # external/rules_python~0.26.0~pip~pip_39_types_requests/site-packages/requests-stubs/utils.pyi
                 input_depsets.append(dep[DefaultInfo].default_runfiles.files)
 
     return input_depsets
@@ -168,14 +170,6 @@ def mypy_action(ctx, executable, srcs, deps, configs):
     # Enable with --aspects_parameters=rules_lint_verbose=True
     if ctx.attr.rules_lint_verbose:
         args.add("--verbose")
-
-    # TODO: need some of these? Seen at RH
-    # COVERAGE_FLAGS=(
-    #     --linecount-report $report_output_dir
-    #     --linecoverage-report $report_output_dir
-    #     --lineprecision-report $report_output_dir
-    #     --any-exprs-report $report_output_dir
-    # )
 
     ctx.actions.run(
         inputs = inputs,

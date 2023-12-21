@@ -24,7 +24,7 @@ build --aspects=//tools:lint.bzl%mypy
 ### Reporting
 
 Unlike most linters hosted in rules_lint, mypy produces only error semantics.
-That means that typecheck violations will input_depsets in failed build actions, rather than
+That means that typecheck violations will result in failed build actions, rather than
 a report of warnings which can be handled in various ways.
 See https://github.com/aspect-build/rules_lint/blob/main/docs/linting.md
 
@@ -39,6 +39,9 @@ especially [Jonathon Belotti](https://github.com/thundergolfer) and [David Zbars
 
 ### TODO
 
+- Set the working directory when executing mypy so it selects the right configuration file:
+  https://mypy.readthedocs.io/en/stable/config_file.html
+- Support mypy plugins and show example.
 - Allow configured typeshed repo, e.g. args.add("--custom-typeshed-dir", "external/my_typeshed")
 - Avoid invalidating caches whenever mypy.ini changes
 - Remote cache: bootstrap the stdlib since it will remain in cache, making other actions slightly faster

@@ -18470,8 +18470,8 @@
       }
     },
     "@@rules_python~0.26.0//python/extensions:pip.bzl%pip": {
-      "os:linux,arch:amd64": {
-        "bzlTransitiveDigest": "uvG05kvclj3UlHJx/o4IC553EqvPVQiNUzQqIogOBAI=",
+      "os:osx,arch:aarch64": {
+        "bzlTransitiveDigest": "4/qxu5Wdpa3Lu2hgx3u86A56kdHTTmRDLLJHgdH5loQ=",
         "accumulatedFileDigests": {
           "@@//:requirements.txt": "aeacf5948393fef362ee3bcc6e3e17983c1774010f66fce85f0fa1b2f50a2f2a"
         },
@@ -18486,7 +18486,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18506,7 +18506,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18526,7 +18526,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18546,7 +18546,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18566,7 +18566,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18586,7 +18586,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18606,7 +18606,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18626,7 +18626,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18699,7 +18699,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18719,7 +18719,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18739,7 +18739,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18759,7 +18759,7 @@
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
+              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
               "quiet": true,
               "timeout": 600,
               "isolated": true,
@@ -18776,210 +18776,6 @@
             "attributes": {
               "name": "rules_python~0.26.0~pip~pip_39_certifi",
               "requirement": "certifi==2023.11.17     --hash=sha256:9b469f3a900bf28dc19b8cfbf8019bf47f7fdd1a65a1d4ffb98fc14166beb4d1     --hash=sha256:e036ab49d5b79556f99cfc2d9320b34cfbe5be05c5871b51de9329f0603b0474",
-              "repo": "pip_39",
-              "repo_prefix": "pip_39_",
-              "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
-              "quiet": true,
-              "timeout": 600,
-              "isolated": true,
-              "extra_pip_args": [],
-              "download_only": false,
-              "pip_data_exclude": [],
-              "enable_implicit_namespace_pkgs": false,
-              "environment": {}
-            }
-          },
-          "pip_39_pyflakes": {
-            "bzlFile": "@@rules_python~0.26.0//python/pip_install:pip_repository.bzl",
-            "ruleClassName": "whl_library",
-            "attributes": {
-              "name": "rules_python~0.26.0~pip~pip_39_pyflakes",
-              "requirement": "pyflakes==3.1.0     --hash=sha256:4132f6d49cb4dae6819e5379898f2b8cce3c5f23994194c24b77d5da2e36f774     --hash=sha256:a0aae034c444db0071aa077972ba4768d40c830d9539fd45bf4cd3f8f6992efc",
-              "repo": "pip_39",
-              "repo_prefix": "pip_39_",
-              "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_x86_64-unknown-linux-gnu//:bin/python3",
-              "quiet": true,
-              "timeout": 600,
-              "isolated": true,
-              "extra_pip_args": [],
-              "download_only": false,
-              "pip_data_exclude": [],
-              "enable_implicit_namespace_pkgs": false,
-              "environment": {}
-            }
-          }
-        }
-      },
-      "os:osx,arch:aarch64": {
-        "bzlTransitiveDigest": "4/qxu5Wdpa3Lu2hgx3u86A56kdHTTmRDLLJHgdH5loQ=",
-        "accumulatedFileDigests": {
-          "@@//:requirements.txt": "21093cdf2964f9c2c610522d75bfb29ccbc09b29c0a446851234e818f6c73d7d"
-        },
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "pip_39_tomli": {
-            "bzlFile": "@@rules_python~0.26.0//python/pip_install:pip_repository.bzl",
-            "ruleClassName": "whl_library",
-            "attributes": {
-              "name": "rules_python~0.26.0~pip~pip_39_tomli",
-              "requirement": "tomli==2.0.1     --hash=sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc     --hash=sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f",
-              "repo": "pip_39",
-              "repo_prefix": "pip_39_",
-              "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
-              "quiet": true,
-              "timeout": 600,
-              "isolated": true,
-              "extra_pip_args": [],
-              "download_only": false,
-              "pip_data_exclude": [],
-              "enable_implicit_namespace_pkgs": false,
-              "environment": {}
-            }
-          },
-          "pip_39_mypy_extensions": {
-            "bzlFile": "@@rules_python~0.26.0//python/pip_install:pip_repository.bzl",
-            "ruleClassName": "whl_library",
-            "attributes": {
-              "name": "rules_python~0.26.0~pip~pip_39_mypy_extensions",
-              "requirement": "mypy-extensions==1.0.0     --hash=sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d     --hash=sha256:75dbf8955dc00442a438fc4d0666508a9a97b6bd41aa2f0ffe9d2f2725af0782",
-              "repo": "pip_39",
-              "repo_prefix": "pip_39_",
-              "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
-              "quiet": true,
-              "timeout": 600,
-              "isolated": true,
-              "extra_pip_args": [],
-              "download_only": false,
-              "pip_data_exclude": [],
-              "enable_implicit_namespace_pkgs": false,
-              "environment": {}
-            }
-          },
-          "pip_39_flake8": {
-            "bzlFile": "@@rules_python~0.26.0//python/pip_install:pip_repository.bzl",
-            "ruleClassName": "whl_library",
-            "attributes": {
-              "name": "rules_python~0.26.0~pip~pip_39_flake8",
-              "requirement": "flake8==6.1.0     --hash=sha256:d5b3857f07c030bdb5bf41c7f53799571d75c4491748a3adcd47de929e34cd23     --hash=sha256:ffdfce58ea94c6580c77888a86506937f9a1a227dfcd15f245d694ae20a6b6e5",
-              "repo": "pip_39",
-              "repo_prefix": "pip_39_",
-              "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
-              "quiet": true,
-              "timeout": 600,
-              "isolated": true,
-              "extra_pip_args": [],
-              "download_only": false,
-              "pip_data_exclude": [],
-              "enable_implicit_namespace_pkgs": false,
-              "environment": {}
-            }
-          },
-          "pip": {
-            "bzlFile": "@@rules_python~0.26.0//python/pip_install:pip_repository.bzl",
-            "ruleClassName": "pip_hub_repository_bzlmod",
-            "attributes": {
-              "name": "rules_python~0.26.0~pip~pip",
-              "repo_name": "pip",
-              "whl_map": {
-                "flake8": [
-                  "3.9.18"
-                ],
-                "mccabe": [
-                  "3.9.18"
-                ],
-                "mypy": [
-                  "3.9.18"
-                ],
-                "mypy_extensions": [
-                  "3.9.18"
-                ],
-                "pycodestyle": [
-                  "3.9.18"
-                ],
-                "pyflakes": [
-                  "3.9.18"
-                ],
-                "tomli": [
-                  "3.9.18"
-                ],
-                "typing_extensions": [
-                  "3.9.18"
-                ]
-              },
-              "default_version": "3.9.18"
-            }
-          },
-          "pip_39_mypy": {
-            "bzlFile": "@@rules_python~0.26.0//python/pip_install:pip_repository.bzl",
-            "ruleClassName": "whl_library",
-            "attributes": {
-              "name": "rules_python~0.26.0~pip~pip_39_mypy",
-              "requirement": "mypy==1.7.1     --hash=sha256:12cce78e329838d70a204293e7b29af9faa3ab14899aec397798a4b41be7f340     --hash=sha256:1484b8fa2c10adf4474f016e09d7a159602f3239075c7bf9f1627f5acf40ad49     --hash=sha256:204e0d6de5fd2317394a4eff62065614c4892d5a4d1a7ee55b765d7a3d9e3f82     --hash=sha256:2643d145af5292ee956aa0a83c2ce1038a3bdb26e033dadeb2f7066fb0c9abce     --hash=sha256:2c6e4464ed5f01dc44dc9821caf67b60a4e5c3b04278286a85c067010653a0eb     --hash=sha256:2f7f6985d05a4e3ce8255396df363046c28bea790e40617654e91ed580ca7c51     --hash=sha256:31902408f4bf54108bbfb2e35369877c01c95adc6192958684473658c322c8a5     --hash=sha256:40716d1f821b89838589e5b3106ebbc23636ffdef5abc31f7cd0266db936067e     --hash=sha256:4b901927f16224d0d143b925ce9a4e6b3a758010673eeded9b748f250cf4e8f7     --hash=sha256:4fc3d14ee80cd22367caaaf6e014494415bf440980a3045bf5045b525680ac33     --hash=sha256:5cf3f0c5ac72139797953bd50bc6c95ac13075e62dbfcc923571180bebb662e9     --hash=sha256:6dbdec441c60699288adf051f51a5d512b0d818526d1dcfff5a41f8cd8b4aaf1     --hash=sha256:72cf32ce7dd3562373f78bd751f73c96cfb441de147cc2448a92c1a308bd0ca6     --hash=sha256:75aa828610b67462ffe3057d4d8a4112105ed211596b750b53cbfe182f44777a     --hash=sha256:75c4d2a6effd015786c87774e04331b6da863fc3fc4e8adfc3b40aa55ab516fe     --hash=sha256:78e25b2fd6cbb55ddfb8058417df193f0129cad5f4ee75d1502248e588d9e0d7     --hash=sha256:84860e06ba363d9c0eeabd45ac0fde4b903ad7aa4f93cd8b648385a888e23200     --hash=sha256:8c5091ebd294f7628eb25ea554852a52058ac81472c921150e3a61cdd68f75a7     --hash=sha256:944bdc21ebd620eafefc090cdf83158393ec2b1391578359776c00de00e8907a     --hash=sha256:9c7ac372232c928fff0645d85f273a726970c014749b924ce5710d7d89763a28     --hash=sha256:d9b338c19fa2412f76e17525c1b4f2c687a55b156320acb588df79f2e6fa9fea     --hash=sha256:ee5d62d28b854eb61889cde4e1dbc10fbaa5560cb39780c3995f6737f7e82120     --hash=sha256:f2c2521a8e4d6d769e3234350ba7b65ff5d527137cdcde13ff4d99114b0c8e7d     --hash=sha256:f6efc9bd72258f89a3816e3a98c09d36f079c223aa345c659622f056b760ab42     --hash=sha256:f7c5d642db47376a0cc130f0de6d055056e010debdaf0707cd2b0fc7e7ef30ea     --hash=sha256:fcb6d9afb1b6208b4c712af0dafdc650f518836065df0d4fb1d800f5d6773db2     --hash=sha256:fcd2572dd4519e8a6642b733cd3a8cfc1ef94bafd0c1ceed9c94fe736cb65b6a",
-              "repo": "pip_39",
-              "repo_prefix": "pip_39_",
-              "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
-              "quiet": true,
-              "timeout": 600,
-              "isolated": true,
-              "extra_pip_args": [],
-              "download_only": false,
-              "pip_data_exclude": [],
-              "enable_implicit_namespace_pkgs": false,
-              "environment": {}
-            }
-          },
-          "pip_39_pycodestyle": {
-            "bzlFile": "@@rules_python~0.26.0//python/pip_install:pip_repository.bzl",
-            "ruleClassName": "whl_library",
-            "attributes": {
-              "name": "rules_python~0.26.0~pip~pip_39_pycodestyle",
-              "requirement": "pycodestyle==2.11.0     --hash=sha256:259bcc17857d8a8b3b4a2327324b79e5f020a13c16074670f9c8c8f872ea76d0     --hash=sha256:5d1013ba8dc7895b548be5afb05740ca82454fd899971563d2ef625d090326f8",
-              "repo": "pip_39",
-              "repo_prefix": "pip_39_",
-              "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
-              "quiet": true,
-              "timeout": 600,
-              "isolated": true,
-              "extra_pip_args": [],
-              "download_only": false,
-              "pip_data_exclude": [],
-              "enable_implicit_namespace_pkgs": false,
-              "environment": {}
-            }
-          },
-          "pip_39_typing_extensions": {
-            "bzlFile": "@@rules_python~0.26.0//python/pip_install:pip_repository.bzl",
-            "ruleClassName": "whl_library",
-            "attributes": {
-              "name": "rules_python~0.26.0~pip~pip_39_typing_extensions",
-              "requirement": "typing-extensions==4.9.0     --hash=sha256:23478f88c37f27d76ac8aee6c905017a143b0b1b886c3c9f66bc2fd94f9f5783     --hash=sha256:af72aea155e91adfc61c3ae9e0e342dbc0cba726d6cba4b6c72c1f34e47291cd",
-              "repo": "pip_39",
-              "repo_prefix": "pip_39_",
-              "python_interpreter": "",
-              "python_interpreter_target": "@@rules_python~0.26.0~python~python_3_9_aarch64-apple-darwin//:bin/python3",
-              "quiet": true,
-              "timeout": 600,
-              "isolated": true,
-              "extra_pip_args": [],
-              "download_only": false,
-              "pip_data_exclude": [],
-              "enable_implicit_namespace_pkgs": false,
-              "environment": {}
-            }
-          },
-          "pip_39_mccabe": {
-            "bzlFile": "@@rules_python~0.26.0//python/pip_install:pip_repository.bzl",
-            "ruleClassName": "whl_library",
-            "attributes": {
-              "name": "rules_python~0.26.0~pip~pip_39_mccabe",
-              "requirement": "mccabe==0.7.0     --hash=sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325     --hash=sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e",
               "repo": "pip_39",
               "repo_prefix": "pip_39_",
               "python_interpreter": "",
