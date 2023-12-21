@@ -37,6 +37,21 @@ Formatting and Linting work a bit differently.
 
 This leads to some minor differences in how they are used in rules_lint.
 
+We treat type-checkers as a build tool, not as a linter. This is for a few reasons:
+
+- They are commonly distributed along with compilers.
+  In compiled languages like Java, types are required in order for the compiler to emit executable bytecode at all.
+  In interpreted languages they're still often linked, e.g. TypeScript does both "compiling" to JavaScript and also type-checking.
+  This suggests that rules for a language should include the type-checker,
+  e.g. we expect Sorbet to be integrated with rules_ruby.
+- We think most developers want "error" semantics for type-checks:
+  the whole repository should successfully type-check or you cannot commit the change.
+  rules_lint is optimized for "warning" semantics, where we produce report files and it's up to the
+  Dev Infra team how to present those, for example only on changed files.
+- You can only type-check a library if its dependencies were checkable, which means short-circuiting
+  execution. rules_lint currently runs linters on every node in the dependency graph, including any
+  whose dependencies have lint warnings.
+
 ## Available tools
 
 | Language                  | Formatter             | Linter(s)        |
