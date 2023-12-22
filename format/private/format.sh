@@ -79,7 +79,7 @@ case "$mode" in
 esac
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files 'BUILD' '*/BUILD.bazel' '*.bzl' '*.BUILD' 'WORKSPACE' '*.bazel' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard 'BUILD' '*/BUILD.bazel' '*.bzl' '*.BUILD' 'WORKSPACE' '*.bazel' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name 'BUILD' -or -name '*.bzl' -or -name '*.BUILD' -or -name 'WORKSPACE' -or -name '*.bazel')
 fi
@@ -90,7 +90,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.js' '*.cjs' '*.mjs' '*.ts' '*.tsx' '*.mts' '*.cts' '*.json' '*.css' '*.html' '*.md' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.js' '*.cjs' '*.mjs' '*.ts' '*.tsx' '*.mts' '*.cts' '*.json' '*.css' '*.html' '*.md' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.js' -or -name '*.cjs' -or -name '*.mjs' -or -name '*.ts' -or -name '*.tsx' -or -name '*.mts' -or -name '*.cts' -or -name '*.json' -or -name '*.css' -or -name '*.html' -or -name '*.md')
 fi
@@ -101,7 +101,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.sql' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.sql' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.sql')
 fi
@@ -112,7 +112,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.py' '*.pyi' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.py' '*.pyi' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.py' -or -name '*.pyi')
 fi
@@ -123,7 +123,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.tf' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.tf' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.tf')
 fi
@@ -134,7 +134,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.jsonnet' '*.libsonnet' | { grep -vE "^$(git ls-files -d)$" || true; } )
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.jsonnet' '*.libsonnet' | { grep -vE "^$(git ls-files --deleted)$" || true; } )
 else
   files=$(find "$@" -name '*.jsonnet' -or -name '*.libsonnet')
 fi
@@ -145,7 +145,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.java' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.java' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.java')
 fi
@@ -157,7 +157,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.kt' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.kt' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.kt')
 fi
@@ -168,7 +168,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.scala' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.scala' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.scala')
 fi
@@ -180,7 +180,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.go' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.go' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.go')
 fi
@@ -202,7 +202,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.sh' '*.bash' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.sh' '*.bash' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.sh' -or -name '*.bash')
 fi
@@ -213,7 +213,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.swift' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.swift' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.swift')
 fi
@@ -225,7 +225,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  files=$(git ls-files '*.proto' | { grep -vE "^$(git ls-files -d)$" || true; })
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.proto' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.proto')
 fi
