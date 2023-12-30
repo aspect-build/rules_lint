@@ -117,31 +117,25 @@ def eslint_fix(ctx, executable, srcs, patch):
         srcs: list of file objects to lint
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
     """
-    srcs_args = ctx.actions.args()
-    srcs_args.add_all([s.short_path for s in srcs + ctx.files._config_files])
-
-    files_to_lint = ctx.actions.declare_file("_{}.files_to_lint".format(ctx.label.name))
+    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
     ctx.actions.write(
-        output = files_to_lint,
-        content = srcs_args,
+        output = patch_cfg,
+        content = json.encode({
+            "linter": executable._eslint.path,
+            "argv": ["--fix"] + [s.path for s in srcs],
+            "files_to_diff": [s.path for s in srcs],
+            "additional_files": [s.path for s in ctx.files._config_files],
+            "output": patch.path,
+        }),
     )
 
-    args = ctx.actions.args()
-    args.add("--fix")
-    args.add("$$FILES")
-
     ctx.actions.run(
-        inputs = _gather_inputs(ctx, srcs) + [files_to_lint],
+        inputs = _gather_inputs(ctx, srcs) + [patch_cfg],
         outputs = [patch],
         executable = executable._patcher,
-        arguments = [args],
-        env = {
-            "BAZEL_BINDIR": ctx.bin_dir.path,
-            "LINTER_PATH": executable._eslint.path,
-            "FILES_TO_LINT_PATH": files_to_lint.short_path,
-            "PATCH_PATH": patch.short_path,
-        },
+        arguments = [patch_cfg.path],
+        env = {"BAZEL_BINDIR": ctx.bin_dir.path},
         tools = [executable._eslint],
         mnemonic = _MNEMONIC,
     )
