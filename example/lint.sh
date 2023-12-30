@@ -21,7 +21,7 @@ filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" 
 args=(
 	"--aspects=$(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck} | tr ' ' ',')"
 	"--build_event_json_file=$buildevents"
-	"--output_groups=rules_lint_report"
+	"--output_groups=rules_lint_report,rules_lint_patch"
 	"--remote_download_regex='.*aspect_rules_lint.report'"
 )
 if [ $1 == "--fail-on-violation" ]; then
