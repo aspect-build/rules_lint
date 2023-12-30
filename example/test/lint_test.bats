@@ -44,5 +44,12 @@ EOF
 @test "should use nearest ancestor .eslintrc file" {
     run $BATS_TEST_DIRNAME/../lint.sh //src/subdir:eslint-override
     assert_success
+    # This lint check is disabled in the .eslintrc.cjs file
     refute_output --partial "Unexpected 'debugger' statement"
+}
+
+@test "should create a patch file" {
+    run $BATS_TEST_DIRNAME/../lint.sh //src:all
+    assert_success
+    
 }

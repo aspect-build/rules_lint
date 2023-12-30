@@ -1,1 +1,1 @@
-  const a = "this is fine"
+export const a = "this is fine";

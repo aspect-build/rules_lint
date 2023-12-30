@@ -3,6 +3,5 @@ bazel-*
 .idea/
 .ijwb/
 node_modules
-.DS_Store
 # alex experiment...
 protobuf/
