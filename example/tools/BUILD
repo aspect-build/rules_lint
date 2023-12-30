@@ -122,6 +122,7 @@ multi_formatter_binary(
     javascript = ":prettier",
     jsonnet = ":jsonnetfmt",
     kotlin = ":ktfmt",
+    markdown = ":prettier",
     protobuf = ":buf",
     python = ":ruff",
     scala = ":scalafmt",

@@ -85,8 +85,19 @@ else
 fi
 bin=$(rlocation {{buildifier}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running Buildifier..."
+  echo "Formatting Starlark with Buildifier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin -mode="$mode"
+fi
+
+if [ "$#" -eq 0 ]; then
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.md' | { grep -vE "^$(git ls-files --deleted)$" || true; })
+else
+  files=$(find "$@" -name '*.md')
+fi
+bin=$(rlocation {{prettier}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Formatting Markdown with Prettier..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
 
 if [ "$#" -eq 0 ]; then
@@ -96,7 +107,7 @@ else
 fi
 bin=$(rlocation {{prettier}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running Prettier..."
+  echo "Formatting JavaScript with Prettier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
 
@@ -107,7 +118,7 @@ else
 fi
 bin=$(rlocation {{prettier-sql}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running Prettier (sql)..."
+  echo "Running SQL with Prettier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
 
@@ -118,7 +129,7 @@ else
 fi
 bin=$(rlocation {{ruff}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running ruff..."
+  echo "Formatting Python with ruff..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $ruffmode
 fi
 
@@ -129,7 +140,7 @@ else
 fi
 bin=$(rlocation {{terraform}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running terraform..."
+  echo "Formatting terraform..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin fmt $tfmode
 fi
 
@@ -140,7 +151,7 @@ else
 fi
 bin=$(rlocation {{jsonnetfmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running jsonnetfmt..."
+  echo "Formatting Jsonnet with jsonnetfmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $jsonnetmode
 fi
 
@@ -151,7 +162,7 @@ else
 fi
 bin=$(rlocation {{java-format}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running java-format..."
+  echo "Formatting Java with java-format..."
   # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
   echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $javamode
 fi
@@ -163,7 +174,7 @@ else
 fi
 bin=$(rlocation {{ktfmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running ktfmt..."
+  echo "Formatting Kotlin with ktfmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $ktmode
 fi
 
@@ -174,7 +185,7 @@ else
 fi
 bin=$(rlocation {{scalafmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running scalafmt..."
+  echo "Formatting Scala with scalafmt..."
   # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
   echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $scalamode
 fi
@@ -186,7 +197,7 @@ else
 fi
 bin=$(rlocation {{gofmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running gofmt..."
+  echo "Formatting Go with gofmt..."
   # gofmt doesn't produce non-zero exit code so we must check for non-empty output
   # https://github.com/golang/go/issues/24230
   if [ "$mode" == "check" ]; then
@@ -208,7 +219,7 @@ else
 fi
 bin=$(rlocation {{shfmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running shfmt..."
+  echo "Formatting Bash/Shell with shfmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $shfmtmode
 fi
 
@@ -232,7 +243,7 @@ fi
 bin=$(rlocation {{buf}})
 
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running buf..."
+  echo "Formatting Protobuf with buf..."
   for file in $files; do
     $bin $bufmode $file
   done

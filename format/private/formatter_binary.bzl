@@ -5,6 +5,7 @@ load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
 # Per the formatter design, each language can only have a single formatter binary
 _TOOLS = {
     "javascript": "prettier",
+    "markdown": "prettier",
     "python": "ruff",
     "starlark": "buildifier",
     "jsonnet": "jsonnetfmt",
@@ -62,7 +63,7 @@ def _formatter_binary_impl(ctx):
 formatter_binary_lib = struct(
     implementation = _formatter_binary_impl,
     attrs = dict({
-        k: attr.label(doc = "a binary target that runs {}".format(v), executable = True, cfg = "exec", allow_files = True)
+        k: attr.label(doc = "a binary target that runs {} (or another tool with compatible CLI arguments)".format(v), executable = True, cfg = "exec", allow_files = True)
         for k, v in _TOOLS.items()
     }, **{
         "_bin": attr.label(default = "//format/private:format.sh", allow_single_file = True),
