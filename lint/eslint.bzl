@@ -118,7 +118,7 @@ def eslint_fix(ctx, executable, srcs, patch):
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
     """
     srcs_args = ctx.actions.args()
-    srcs_args.add_all([s.short_path for s in srcs])
+    srcs_args.add_all([s.short_path for s in srcs + ctx.files._config_files])
 
     files_to_lint = ctx.actions.declare_file("_{}.files_to_lint".format(ctx.label.name))
 
