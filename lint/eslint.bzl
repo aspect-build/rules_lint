@@ -39,40 +39,11 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "report_and_patch_files")
+load("//lint/private:lint_aspect.bzl", "patch_file", "report_file")
 
 _MNEMONIC = "ESLint"
 
-def eslint_actions(ctx, executable, srcs, report, patch, use_exit_code = False):
-    """Create a Bazel Action that spawns an eslint process.
-
-    Adapter for wrapping Bazel around
-    https://eslint.org/docs/latest/use/command-line-interface
-
-    Args:
-        ctx: an action context OR aspect context
-        executable: struct with an eslint field
-        srcs: list of file objects to lint
-        report: output: the stdout of eslint containing any violations found
-        patch: output: a file that can be applied with the patch(1) command.
-        use_exit_code: whether an eslint process exiting non-zero will be a build failure
-    """
-
-    args = ctx.actions.args()
-
-    # TODO: enable if debug config, similar to rules_ts
-    # args.add("--debug")
-
-    args.add_all(["--format", "../../../" + ctx.file._formatter.path])
-    
-    report_args = ctx.actions.args()
-    report_args.add("--output-file", report.short_path)
-
-    srcs_args = ctx.actions.args()
-    srcs_args.add_all([s.short_path for s in srcs])
-
-    env = {"BAZEL_BINDIR": ctx.bin_dir.path}
-
+def _gather_inputs(ctx, srcs):
     inputs = copy_files_to_bin_actions(ctx, srcs)
 
     # Add the config file along with any deps it has on npm packages
@@ -83,9 +54,35 @@ def eslint_actions(ctx, executable, srcs, report, patch, use_exit_code = False):
         include_npm_linked_packages = True,
     ).to_list())
 
+    return inputs
+
+def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
+    """Create a Bazel Action that spawns an eslint process.
+
+    Adapter for wrapping Bazel around
+    https://eslint.org/docs/latest/use/command-line-interface
+
+    Args:
+        ctx: an action context OR aspect context
+        executable: struct with an eslint field
+        srcs: list of file objects to lint
+        report: output: the stdout of eslint containing any violations found
+        use_exit_code: whether an eslint process exiting non-zero will be a build failure
+    """
+
+    args = ctx.actions.args()
+
+    # TODO: enable if debug config, similar to rules_ts
+    # args.add("--debug")
+
+    args.add_all(["--format", "../../../" + ctx.file._formatter.path])
+    args.add_all([s.short_path for s in srcs])
+
+    env = {"BAZEL_BINDIR": ctx.bin_dir.path}
+
     if use_exit_code:
         ctx.actions.run_shell(
-            inputs = inputs,
+            inputs = _gather_inputs(ctx, srcs),
             outputs = [report],
             tools = [executable._eslint],
             arguments = [args],
@@ -103,7 +100,7 @@ def eslint_actions(ctx, executable, srcs, report, patch, use_exit_code = False):
         env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code_out.path
 
         ctx.actions.run(
-            inputs = inputs,
+            inputs = _gather_inputs(ctx, srcs),
             outputs = [report, exit_code_out],
             executable = executable._eslint,
             arguments = [args],
@@ -111,7 +108,18 @@ def eslint_actions(ctx, executable, srcs, report, patch, use_exit_code = False):
             mnemonic = _MNEMONIC,
         )
 
-    # Generate patch file.
+def eslint_fix(ctx, executable, srcs, patch):
+    """Create a Bazel Action that spawns eslint with --fix.
+
+    Args:
+        ctx: an action context OR aspect context
+        executable: struct with an eslint field
+        srcs: list of file objects to lint
+        patch: output file containing the applied fixes that can be applied with the patch(1) command.
+    """
+    srcs_args = ctx.actions.args()
+    srcs_args.add_all([s.short_path for s in srcs])
+
     files_to_lint = ctx.actions.declare_file("_{}.files_to_lint".format(ctx.label.name))
 
     ctx.actions.write(
@@ -119,16 +127,17 @@ def eslint_actions(ctx, executable, srcs, report, patch, use_exit_code = False):
         content = srcs_args,
     )
 
-    patch_args = ctx.actions.args()
-    patch_args.add("--fix")
-    patch_args.add("$$FILES")
+    args = ctx.actions.args()
+    args.add("--fix")
+    args.add("$$FILES")
 
     ctx.actions.run(
-        inputs = inputs + [files_to_lint],
+        inputs = _gather_inputs(ctx, srcs) + [files_to_lint],
         outputs = [patch],
         executable = executable._patcher,
-        arguments = [args, patch_args],
-        env = env | {
+        arguments = [args],
+        env = {
+            "BAZEL_BINDIR": ctx.bin_dir.path,
             "LINTER_PATH": executable._eslint.path,
             "FILES_TO_LINT_PATH": files_to_lint.short_path,
             "PATCH_PATH": patch.short_path,
@@ -142,9 +151,11 @@ def _eslint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["js_library", "ts_project", "ts_project_rule"]:
         return []
 
-    report, patch, info = report_and_patch_files(_MNEMONIC, target, ctx)
-    eslint_actions(ctx, ctx.executable, ctx.rule.files.srcs, report, patch, ctx.attr.fail_on_violation)
-    return [info]
+    report, report_info = report_file(_MNEMONIC, target, ctx)
+    patch, patch_info = patch_file(_MNEMONIC, target, ctx)
+    eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
+    eslint_fix(ctx, ctx.executable, ctx.rule.files.srcs, patch)
+    return [patch_info, report_info]
 
 def eslint_aspect(binary, configs):
     """A factory function to create a linter aspect.
