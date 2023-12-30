@@ -61,7 +61,7 @@ https://eslint.org/docs/latest/use/command-line-interface
 | <a id="eslint_action-ctx"></a>ctx |  an action context OR aspect context   |  none |
 | <a id="eslint_action-executable"></a>executable |  struct with an eslint field   |  none |
 | <a id="eslint_action-srcs"></a>srcs |  list of file objects to lint   |  none |
-| <a id="eslint_action-report"></a>report |  output to create   |  none |
+| <a id="eslint_action-report"></a>report |  output: the stdout of eslint containing any violations found   |  none |
 | <a id="eslint_action-use_exit_code"></a>use_exit_code |  whether an eslint process exiting non-zero will be a build failure   |  <code>False</code> |
 
 
@@ -82,5 +82,26 @@ A factory function to create a linter aspect.
 | :------------- | :------------- | :------------- |
 | <a id="eslint_aspect-binary"></a>binary |  the eslint binary, typically a rule like<br><br><pre><code> load("@npm//:eslint/package_json.bzl", eslint_bin = "bin") eslint_bin.eslint_binary(name = "eslint") </code></pre>   |  none |
 | <a id="eslint_aspect-configs"></a>configs |  label(s) of the eslint config file(s)   |  none |
+
+
+<a id="eslint_fix"></a>
+
+## eslint_fix
+
+<pre>
+eslint_fix(<a href="#eslint_fix-ctx">ctx</a>, <a href="#eslint_fix-executable">executable</a>, <a href="#eslint_fix-srcs">srcs</a>, <a href="#eslint_fix-patch">patch</a>)
+</pre>
+
+Create a Bazel Action that spawns eslint with --fix.
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="eslint_fix-ctx"></a>ctx |  an action context OR aspect context   |  none |
+| <a id="eslint_fix-executable"></a>executable |  struct with an eslint field   |  none |
+| <a id="eslint_fix-srcs"></a>srcs |  list of file objects to lint   |  none |
+| <a id="eslint_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
 
 
