@@ -1,5 +1,5 @@
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 bzl_library(
     name = "lint_aspect",
@@ -10,6 +10,10 @@ bzl_library(
 js_binary(
     name = "patcher",
     entry_point = "patcher.mjs",
+    log_level = select({
+        "@aspect_rules_lint//lint:verbose_flag": "debug",
+        "//conditions:default": "error",
+    }),
     # Because aspect visibility rules are not on by default.
     visibility = ["//visibility:public"],
 )

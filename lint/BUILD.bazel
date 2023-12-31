@@ -1,5 +1,6 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
 exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
 
@@ -17,6 +18,19 @@ config_setting(
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
     ],
+)
+
+bool_flag(
+    name = "verbose",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "verbose_flag",
+    flag_values = {
+        ":verbose": "true",
+    },
 )
 
 js_library(
