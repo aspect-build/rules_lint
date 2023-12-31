@@ -51,4 +51,5 @@ EOF
 @test "should create a patch file" {
     run $BATS_TEST_DIRNAME/../lint.sh //src:all
     assert_success
+    # TODO: assert contents of patch file
 }

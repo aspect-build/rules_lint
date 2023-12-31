@@ -21,15 +21,15 @@ config_setting(
 )
 
 bool_flag(
-    name = "verbose",
+    name = "debug",
     build_setting_default = False,
     visibility = ["//visibility:public"],
 )
 
 config_setting(
-    name = "verbose_flag",
+    name = "debug_flag",
     flag_values = {
-        ":verbose": "true",
+        ":debug": "true",
     },
 )
 
