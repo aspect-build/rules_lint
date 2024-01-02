@@ -50,6 +50,8 @@ async function main(args, sandbox) {
 
   debug("sandbox", sandbox);
   debug("config", JSON.stringify(config, null, 2));
+  // JS-specific workaround where sources are copied-to-bin
+  const sourcePrefix = config.env?.BAZEL_BINDIR || ".";
 
   // sync the execroot to a custom sandbox; files_to_diff are copied
   // and all other files in the execroot are symlinked at their lowest
@@ -59,7 +61,7 @@ async function main(args, sandbox) {
     process.cwd(),
     sandbox,
     ".",
-    config.files_to_diff.map((f) => path.join(config.env.BAZEL_BINDIR, f))
+    config.files_to_diff.map((f) => path.join(sourcePrefix, f))
   );
 
   debug(
@@ -81,8 +83,8 @@ async function main(args, sandbox) {
   const diffOut = fs.createWriteStream(config.output);
 
   for (const f of config.files_to_diff) {
-    const origF = path.join(process.cwd(), config.env.BAZEL_BINDIR, f);
-    const newF = path.join(sandbox, config.env.BAZEL_BINDIR, f);
+    const origF = path.join(process.cwd(), sourcePrefix, f);
+    const newF = path.join(sandbox, sourcePrefix, f);
     debug(`diffing ${origF} to ${newF}`);
     // TODO: don't rely on the system diff, it may not be installed i.e. on a minimal CI machine image.
     // Likely replacement:
@@ -93,7 +95,7 @@ async function main(args, sandbox) {
     // NB: use a/ and b/ prefixes, intended so the result is applied with 'patch -p1'
     const results = childProcess.spawnSync(
       "diff",
-      [`--label=a/${f}`, `--label=b/${f}`, "--unified=8", origF, newF],
+      [`--label=a/${f}`, `--label=b/${f}`, "--unified", origF, newF],
       {
         encoding: "utf8",
       }

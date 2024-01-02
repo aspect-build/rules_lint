@@ -52,3 +52,8 @@ while IFS= read -r report; do
 	cat "${report}"
 	echo
 done <<<"$valid_reports"
+
+# TODO: offer to apply the patches when $1 == "--fix"
+# This happens to make output of the linter such as ruff's
+# [*] 1 fixable with the `--fix` option.
+# so that the naive thing of pasting that flag to lint.sh will do what the user expects.
