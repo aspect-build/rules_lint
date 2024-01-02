@@ -48,6 +48,12 @@ See the `example/lint.sh` file as an example.
 
 [![asciicast](https://asciinema.org/a/gUUuQTCGIu85YMl6zz2GJIgD8.svg)](https://asciinema.org/a/gUUuQTCGIu85YMl6zz2GJIgD8)
 
+Note that you can also apply fixes from linters that provide them.
+Pass the `--fix` flag to the `lint.sh` script.
+This is the same flag many linters support.
+
+[![asciicast](https://asciinema.org/a/r9JKJ8uKgAZTzlUPdDdHlY1CB.svg)](https://asciinema.org/a/r9JKJ8uKgAZTzlUPdDdHlY1CB)
+
 ### 3. Errors during `bazel build`
 
 By adding `--aspects_parameters=fail_on_violation=true` to the command-line, we pass a parameter
@@ -59,12 +65,15 @@ This makes the build fail when any lint violations are present.
 
 Add a [make_lint_test](./lint_test.md) call to the `lint.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
 
+See the `example/test/BUILD.bazel` file in this repo for some examples.
+
 ### 5. Code review comments
 
 You can wire the reports from bazel-out to a tool like [reviewdog].
 
 We're working on a demo with https://aspect.build/workflows that automatically runs `bazel lint` as
-part of your CI and reports the results (including suggested fixes) to your GitHub Code Review thread.
+part of your CI and reports the results to your GitHub Code Review thread.
+The `--fix` patches produced by the tools are shown as suggested changes.
 
 ## Debugging
 
