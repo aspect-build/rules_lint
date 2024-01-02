@@ -1,3 +1,3 @@
 // this is a linting violation
-const a = "a";
+const a: string = "a";
 console.log(a);
