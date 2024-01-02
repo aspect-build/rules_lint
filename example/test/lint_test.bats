@@ -33,6 +33,19 @@ EOF
     run $BATS_TEST_DIRNAME/../lint.sh //src:all
     assert_success
     assert_lints
+
+    # Check that we created a 'patch -p1' format file that fixes the ESLint violation
+    run cat bazel-bin/src/ESLint.ts.aspect_rules_lint.patch
+    assert_success
+    echo <<"EOF" | assert_output --partial
+--- a/src/file.ts
++++ b/src/file.ts
+@@ -1,3 +1,3 @@
+ // this is a linting violation
+-const a: string = "a";
++const a = "a";
+ console.log(a);
+EOF
 }
 
 @test "should fail when --fail-on-violation is passed" {
@@ -46,10 +59,4 @@ EOF
     assert_success
     # This lint check is disabled in the .eslintrc.cjs file
     refute_output --partial "Unexpected 'debugger' statement"
-}
-
-@test "should create a patch file" {
-    run $BATS_TEST_DIRNAME/../lint.sh //src:all
-    assert_success
-    # TODO: assert contents of patch file
 }

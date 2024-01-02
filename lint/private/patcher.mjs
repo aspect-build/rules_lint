@@ -1,3 +1,11 @@
+/**
+ * @fileoverview wrapper around linter tools to create a writeable sandbox of source files,
+ * then collect the resulting modifications as a patch file.
+ *
+ * The design philosophy is that the linters should be run exactly the same way as they were to
+ * produce the report of violations. This program should work with any linter tool, using any
+ * language runtime.
+ */
 import childProcess from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
@@ -47,7 +55,12 @@ async function main(args, sandbox) {
   // and all other files in the execroot are symlinked at their lowest
   // point that is not a root of any files_to_diff.
   debug(`syncing ${process.cwd()} to ${sandbox}`);
-  await sync(process.cwd(), sandbox, ".", config.files_to_diff);
+  await sync(
+    process.cwd(),
+    sandbox,
+    ".",
+    config.files_to_diff.map((f) => path.join(config.env.BAZEL_BINDIR, f))
+  );
 
   debug(
     `spawning linter: ${config.linter} ${config.args.join(
@@ -68,12 +81,23 @@ async function main(args, sandbox) {
   const diffOut = fs.createWriteStream(config.output);
 
   for (const f of config.files_to_diff) {
-    const origF = path.join(process.cwd(), f);
-    const newF = path.join(sandbox, f);
+    const origF = path.join(process.cwd(), config.env.BAZEL_BINDIR, f);
+    const newF = path.join(sandbox, config.env.BAZEL_BINDIR, f);
     debug(`diffing ${origF} to ${newF}`);
-    const results = childProcess.spawnSync("diff", ["-U8", origF, newF], {
-      encoding: "utf8",
-    });
+    // TODO: don't rely on the system diff, it may not be installed i.e. on a minimal CI machine image.
+    // Likely replacement:
+    // https://github.com/google/diff-match-patch/wiki/Language:-JavaScript
+    // Then we should bundle up this app so the dependency doesn't appear to users, maybe with
+    // vercel/pkg like we do for the Rosetta binary in Silo - then even the nodejs interpreter can
+    // be packaged up.
+    // NB: use a/ and b/ prefixes, intended so the result is applied with 'patch -p1'
+    const results = childProcess.spawnSync(
+      "diff",
+      [`--label=a/${f}`, `--label=b/${f}`, "--unified=8", origF, newF],
+      {
+        encoding: "utf8",
+      }
+    );
     debug(results.stdout);
     diffOut.write(results.stdout);
     if (results.error) {

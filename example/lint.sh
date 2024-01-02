@@ -21,6 +21,9 @@ filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" 
 args=(
 	"--aspects=$(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck} | tr ' ' ',')"
 	"--build_event_json_file=$buildevents"
+	# TODO(performance): we request the patch file all the time.
+	# This means running an additional action for all linters that declare a patch output group,
+	# whether they had any violations reported or not.
 	"--output_groups=rules_lint_report,rules_lint_patch"
 	"--remote_download_regex='.*aspect_rules_lint.report'"
 )

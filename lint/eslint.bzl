@@ -119,15 +119,13 @@ def eslint_fix(ctx, executable, srcs, patch):
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
-    bin_srcs = copy_files_to_bin_actions(ctx, srcs)
-
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
             "linter": executable._eslint.path,
             "args": ["--fix"] + [s.short_path for s in srcs],
             "env": {"BAZEL_BINDIR": ctx.bin_dir.path},
-            "files_to_diff": [s.path for s in bin_srcs],
+            "files_to_diff": [s.path for s in srcs],
             "output": patch.path,
         }),
     )

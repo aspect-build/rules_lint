@@ -65,3 +65,8 @@ You can wire the reports from bazel-out to a tool like [reviewdog].
 
 We're working on a demo with https://aspect.build/workflows that automatically runs `bazel lint` as
 part of your CI and reports the results (including suggested fixes) to your GitHub Code Review thread.
+
+## Debugging
+
+Some linters honor the debug flag in this repo. To enable it, add a Bazel flag:
+`--@aspect_rules_lint//lint:debug`
