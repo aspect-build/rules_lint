@@ -15,7 +15,7 @@ ruff = ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "report_file")
+load("//lint/private:lint_aspect.bzl", "patch_and_report_files")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "ruff"
@@ -74,13 +74,46 @@ def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
             mnemonic = _MNEMONIC,
         )
 
+def ruff_fix(ctx, executable, srcs, config, patch):
+    """Create a Bazel Action that spawns ruff with --fix.
+
+    Args:
+        ctx: an action context OR aspect context
+        executable: struct with _ruff and _patcher field
+        srcs: list of file objects to lint
+        config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
+        patch: output file containing the applied fixes that can be applied with the patch(1) command.
+    """
+    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
+
+    ctx.actions.write(
+        output = patch_cfg,
+        content = json.encode({
+            "linter": executable._ruff.path,
+            "args": ["check", "--fix"] + [s.short_path for s in srcs],
+            "files_to_diff": [s.path for s in srcs],
+            "output": patch.path,
+        }),
+    )
+
+    ctx.actions.run(
+        inputs = srcs + config + [patch_cfg],
+        outputs = [patch],
+        executable = executable._patcher,
+        arguments = [patch_cfg.path],
+        env = {"BAZEL_BINDIR": "."},
+        tools = [executable._ruff],
+        mnemonic = _MNEMONIC,
+    )
+
 # buildifier: disable=function-docstring
 def _ruff_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["py_binary", "py_library"]:
         return []
 
-    report, info = report_file(_MNEMONIC, target, ctx)
+    patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
     ruff_action(ctx, ctx.executable._ruff, ctx.rule.files.srcs, ctx.files._config_files, report, ctx.attr.fail_on_violation)
+    ruff_fix(ctx, ctx.executable, ctx.rule.files.srcs, ctx.files._config_files, patch)
     return [info]
 
 def ruff_aspect(binary, configs):
@@ -117,6 +150,11 @@ def ruff_aspect(binary, configs):
             "_ruff": attr.label(
                 default = binary,
                 allow_single_file = True,
+                executable = True,
+                cfg = "exec",
+            ),
+            "_patcher": attr.label(
+                default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
                 cfg = "exec",
             ),

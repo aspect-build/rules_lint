@@ -15,7 +15,11 @@ function pluralize(word, count) {
 }
 
 module.exports = function (results, context) {
-  let output = "";
+  let output = "",
+    errorCount = 0,
+    warningCount = 0,
+    fixableErrorCount = 0,
+    fixableWarningCount = 0;
 
   results.forEach((result) => {
     const messages = result.messages;
@@ -23,6 +27,11 @@ module.exports = function (results, context) {
     if (messages.length === 0) {
       return;
     }
+
+    errorCount += result.errorCount;
+    warningCount += result.warningCount;
+    fixableErrorCount += result.fixableErrorCount;
+    fixableWarningCount += result.fixableWarningCount;
 
     const relpath = path.relative(context.cwd, result.filePath);
 
@@ -37,5 +46,33 @@ module.exports = function (results, context) {
     });
   });
 
+  const total = errorCount + warningCount;
+  if (total > 0) {
+    output += [
+      "\n",
+      "\u2716 ",
+      total,
+      pluralize(" problem", total),
+      " (",
+      errorCount,
+      pluralize(" error", errorCount),
+      ", ",
+      warningCount,
+      pluralize(" warning", warningCount),
+      ")\n",
+    ].join("");
+
+    if (fixableErrorCount > 0 || fixableWarningCount > 0) {
+      output += [
+        "  ",
+        fixableErrorCount,
+        pluralize(" error", fixableErrorCount),
+        " and ",
+        fixableWarningCount,
+        pluralize(" warning", fixableWarningCount),
+        " potentially fixable with the `--fix` option.\n",
+      ].join("");
+    }
+  }
   return output;
 };

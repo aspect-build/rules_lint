@@ -33,6 +33,33 @@ EOF
     run $BATS_TEST_DIRNAME/../lint.sh //src:all
     assert_success
     assert_lints
+
+    run $BATS_TEST_DIRNAME/../lint.sh --fix --dry-run //src:all
+    # Check that we created a 'patch -p1' format file that fixes the ESLint violation
+    run cat bazel-bin/src/ESLint.ts.aspect_rules_lint.patch
+    assert_success
+    echo <<"EOF" | assert_output --partial
+--- a/src/file.ts
++++ b/src/file.ts
+@@ -1,3 +1,3 @@
+ // this is a linting violation
+-const a: string = "a";
++const a = "a";
+ console.log(a);
+EOF
+
+    # Check that we created a 'patch -p1' format file that fixes the ruff violation
+    run cat bazel-bin/src/ruff.unused_import.aspect_rules_lint.patch
+    assert_success
+    echo <<"EOF" | assert_output --partial
+--- a/src/unused_import.py
++++ b/src/unused_import.py
+@@ -10,4 +10,3 @@
+ # src/unused_import.py:12:8: F401 [*] `os` imported but unused
+ # Found 1 error.
+ # [*] 1 potentially fixable with the --fix option.
+-import os
+EOF
 }
 
 @test "should fail when --fail-on-violation is passed" {
@@ -44,5 +71,6 @@ EOF
 @test "should use nearest ancestor .eslintrc file" {
     run $BATS_TEST_DIRNAME/../lint.sh //src/subdir:eslint-override
     assert_success
+    # This lint check is disabled in the .eslintrc.cjs file
     refute_output --partial "Unexpected 'debugger' statement"
 }

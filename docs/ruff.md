@@ -126,3 +126,25 @@ Attrs:
 | <a id="ruff_aspect-configs"></a>configs |  <p align="center"> - </p>   |  none |
 
 
+<a id="ruff_fix"></a>
+
+## ruff_fix
+
+<pre>
+ruff_fix(<a href="#ruff_fix-ctx">ctx</a>, <a href="#ruff_fix-executable">executable</a>, <a href="#ruff_fix-srcs">srcs</a>, <a href="#ruff_fix-config">config</a>, <a href="#ruff_fix-patch">patch</a>)
+</pre>
+
+Create a Bazel Action that spawns ruff with --fix.
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="ruff_fix-ctx"></a>ctx |  an action context OR aspect context   |  none |
+| <a id="ruff_fix-executable"></a>executable |  struct with _ruff and _patcher field   |  none |
+| <a id="ruff_fix-srcs"></a>srcs |  list of file objects to lint   |  none |
+| <a id="ruff_fix-config"></a>config |  labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)   |  none |
+| <a id="ruff_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
+
+
