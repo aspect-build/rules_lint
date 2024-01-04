@@ -9,7 +9,9 @@ module(
 bazel_dep(name = "aspect_bazel_lib", version = "1.38.0")
 
 # Needed in the root because we use js_lib_helpers in our aspect impl
-bazel_dep(name = "aspect_rules_js", version = "1.32.6")
+# Minimum version needs 'chore: bump bazel-lib to 2.0 by @alexeagle in #1311'
+# to allow users on bazel-lib 2.0
+bazel_dep(name = "aspect_rules_js", version = "1.33.1")
 bazel_dep(name = "bazel_skylib", version = "1.4.2")
 bazel_dep(name = "platforms", version = "0.0.7")
 
