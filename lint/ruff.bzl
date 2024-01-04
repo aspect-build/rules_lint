@@ -195,14 +195,16 @@ def fetch_ruff(tag = RUFF_VERSIONS.keys()[0]):
 
     # ruff changed their release artifact naming starting with v0.1.8
     if versions.is_at_least("0.1.8", version):
-        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{version}-{plat}.tar.gz"
+        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{version}-{plat}.{ext}"
     else:
-        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{plat}.tar.gz"
+        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{plat}.{ext}"
 
     for plat, sha256 in RUFF_VERSIONS[tag].items():
         fetch_rule = http_archive
         if plat.endswith("darwin"):
             fetch_rule = ruff_workaround_20269
+        is_windows = plat.endswith("windows-msvc")
+
         maybe(
             fetch_rule,
             name = "ruff_" + plat,
@@ -210,7 +212,8 @@ def fetch_ruff(tag = RUFF_VERSIONS.keys()[0]):
                 tag = tag,
                 plat = plat,
                 version = version,
+                ext = "zip" if is_windows else "tar.gz",
             ),
             sha256 = sha256,
-            build_file_content = """exports_files(["ruff"])""",
+            build_file_content = """exports_files(["ruff", "ruff.exe"])""",
         )
