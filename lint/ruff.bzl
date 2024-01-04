@@ -108,7 +108,7 @@ def ruff_fix(ctx, executable, srcs, config, patch):
 
 # buildifier: disable=function-docstring
 def _ruff_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["py_binary", "py_library"]:
+    if ctx.rule.kind not in ["py_binary", "py_library", "py_test"]:
         return []
 
     patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
