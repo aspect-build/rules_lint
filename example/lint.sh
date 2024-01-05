@@ -21,7 +21,7 @@ filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" 
 
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
 args=(
-	"--aspects=$(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck} | tr ' ' ',')"
+	"--aspects=$(echo //tools:lint.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck,golangci_lint} | tr ' ' ',')"
 	"--build_event_json_file=$buildevents"
 )
 report_args=(
@@ -50,7 +50,7 @@ fi
 if [ $1 == "--dry-run" ]; then
 	fix="print"
 	shift
-fi 
+fi
 
 # Produce report files
 bazel build ${args[@]} ${report_args[@]} $@

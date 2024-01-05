@@ -206,6 +206,10 @@ load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
 
 fetch_ruff()
 
+load("@aspect_rules_lint//lint:golangci-lint.bzl", "fetch_golangci_lint")
+
+fetch_golangci_lint()
+
 load("@aspect_rules_lint//lint:shellcheck.bzl", "fetch_shellcheck")
 
 fetch_shellcheck()

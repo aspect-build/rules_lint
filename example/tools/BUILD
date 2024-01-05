@@ -5,6 +5,7 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 """
 
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
+load("@aspect_rules_lint//lint:golangci-lint.bzl", "golangci_lint_binary")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
@@ -111,6 +112,8 @@ java_binary(
     main_class = "net.sourceforge.pmd.PMD",
     runtime_deps = ["@net_sourceforge_pmd"],
 )
+
+golangci_lint_binary(name = "golangci_lint")
 
 # bazel run :shellcheck -- --help
 shellcheck_binary(name = "shellcheck")

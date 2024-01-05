@@ -101,6 +101,19 @@ bzl_library(
 )
 
 bzl_library(
+    name = "golangci-lint",
+    srcs = ["golangci-lint.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "@bazel_skylib//rules:native_binary",
+        "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "@bazel_tools//tools/build_defs/repo:utils.bzl",
+        "@io_bazel_rules_go//go:def",
+    ],
+)
+
+bzl_library(
     name = "shellcheck",
     srcs = ["shellcheck.bzl"],
     visibility = ["//visibility:public"],
