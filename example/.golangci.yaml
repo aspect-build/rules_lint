@@ -3,6 +3,12 @@
 
 run:
   timeout: 5m
+
+  # Prevent non-hermetic behavior. Per the documentation:
+  # > If invoked with -mod=readonly, the go command is disallowed from the implicit
+  # > automatic updating of go.mod described above. Instead, it fails when any changes
+  # > to go.mod are needed. This setting is most useful to check that go.mod does
+  # > not need updates, such as in a continuous integration and testing system.
   modules-download-mode: readonly
 
 linters:
