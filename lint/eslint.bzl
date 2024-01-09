@@ -146,8 +146,9 @@ def _eslint_aspect_impl(target, ctx):
         return []
 
     patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
-    eslint_action(ctx, ctx.executable, ctx.rule.files.srcs, report, ctx.attr.fail_on_violation)
-    eslint_fix(ctx, ctx.executable, ctx.rule.files.srcs, patch)
+    files_to_lint = [s for s in ctx.rule.files.srcs if s.is_source]
+    eslint_action(ctx, ctx.executable, files_to_lint, report, ctx.attr.fail_on_violation)
+    eslint_fix(ctx, ctx.executable, files_to_lint, patch)
     return [info]
 
 def eslint_aspect(binary, configs):

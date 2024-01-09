@@ -64,7 +64,7 @@ def _flake8_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    flake8_action(ctx, ctx.executable._flake8, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
+    flake8_action(ctx, ctx.executable._flake8, [s for s in ctx.rule.files.srcs if s.is_source], ctx.file._config_file, report, ctx.attr.fail_on_violation)
     return [info]
 
 def flake8_aspect(binary, config):

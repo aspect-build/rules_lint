@@ -1,17 +1,64 @@
 "Demonstrates how to enforce zero-lint-tolerance policy with tests"
 
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
-load("//tools:lint.bzl", "eslint_test", "flake8_test", "pmd_test", "shellcheck_test")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//tools:lint.bzl", "eslint_test", "flake8_test", "pmd_test", "ruff_test", "shellcheck_test")
+
+write_file(
+    name = "ts_code_generator",
+    out = "generated.ts",
+    content = ["export const a: number = 1"],
+)
+
+write_file(
+    name = "py_code_generator",
+    out = "generated.py",
+    content = ["import os"],
+)
+
+write_file(
+    name = "java_code_generator",
+    out = "generated.java",
+    content = ["public class generated { protected void finalize(int a) {} }"],
+)
 
 ts_project(
     name = "no_violations",
-    srcs = ["no_violations.ts"],
+    srcs = [
+        "generated.ts",
+        "no_violations.ts",
+    ],
     tsconfig = {},
 )
 
 eslint_test(
     name = "eslint_empty_report",
     srcs = [":no_violations"],
+)
+
+py_library(
+    name = "generated_py",
+    srcs = ["generated.py"],
+)
+
+java_library(
+    name = "generated_java",
+    srcs = ["generated.java"],
+)
+
+flake8_test(
+    name = "flake8_should_ignore_generated",
+    srcs = [":generated_py"],
+)
+
+ruff_test(
+    name = "ruff_should_ignore_generated",
+    srcs = [":generated_py"],
+)
+
+pmd_test(
+    name = "pmd_should_ignore_generated",
+    srcs = [":generated_java"],
 )
 
 flake8_test(
