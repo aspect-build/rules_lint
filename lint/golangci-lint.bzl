@@ -96,33 +96,39 @@ def golangci_lint_aspect(binary, config):
         toolchains = ["@io_bazel_rules_go//go:toolchain"],
     )
 
-# buildifier: disable=function-docstring
-def fetch_golangci_lint():
+def fetch_golangci_lint(version = "1.55.2"):
+    """Naive macro that fetches a specific version of the golangci-lint from GitHub releases, for commonly-used platforms
+
+    Args:
+        version: must be the default value. In the future this could be honored when we support multiple versions.
+    """
+    if version != "1.55.2":
+        fail("Only a single version of golangci-lint is currently mirrored. Please file an issue if you need a different version.")
     http_archive(
         name = "golangci_lint_linux_x86_64",
         build_file_content = "exports_files([\"golangci-lint\"])",
-        strip_prefix = "golangci-lint-1.55.2-linux-amd64",
+        strip_prefix = "golangci-lint-{}-linux-amd64".format(version),
         sha256 = "ca21c961a33be3bc15e4292dc40c98c8dcc5463a7b6768a3afc123761630c09c",
-        urls = ["https://github.com/golangci/golangci-lint/releases/download/v1.55.2/golangci-lint-1.55.2-linux-amd64.tar.gz"],
+        urls = ["https://github.com/golangci/golangci-lint/releases/download/v{0}/golangci-lint-{0}-linux-amd64.tar.gz".format(version)],
     )
     http_archive(
         name = "golangci_lint_linux_aarch64",
         build_file_content = "exports_files([\"golangci-lint\"])",
-        strip_prefix = "golangci-lint-1.55.2-linux-arm64",
+        strip_prefix = "golangci-lint-{}-linux-arm64".format(version),
         sha256 = "8eb0cee9b1dbf0eaa49871798c7f8a5b35f2960c52d776a5f31eb7d886b92746",
-        urls = ["https://github.com/golangci/golangci-lint/releases/download/v1.55.2/golangci-lint-1.55.2-linux-arm64.tar.gz"],
+        urls = ["https://github.com/golangci/golangci-lint/releases/download/v{0}/golangci-lint-{0}-linux-arm64.tar.gz".format(version)],
     )
     http_archive(
         name = "golangci_lint_macos_x86_64",
         build_file_content = "exports_files([\"golangci-lint\"])",
-        strip_prefix = "golangci-lint-1.55.2-darwin-amd64",
+        strip_prefix = "golangci-lint-{}-darwin-amd64".format(version),
         sha256 = "632e96e6d5294fbbe7b2c410a49c8fa01c60712a0af85a567de85bcc1623ea21",
-        urls = ["https://github.com/golangci/golangci-lint/releases/download/v1.55.2/golangci-lint-1.55.2-darwin-amd64.tar.gz"],
+        urls = ["https://github.com/golangci/golangci-lint/releases/download/v{0}/golangci-lint-{0}-darwin-amd64.tar.gz".format(version)],
     )
     http_archive(
         name = "golangci_lint_macos_aarch64",
         build_file_content = "exports_files([\"golangci-lint\"])",
-        strip_prefix = "golangci-lint-1.55.2-darwin-arm64",
+        strip_prefix = "golangci-lint-{}-darwin-arm64".format(version),
         sha256 = "234463f059249f82045824afdcdd5db5682d0593052f58f6a3039a0a1c3899f6",
-        urls = ["https://github.com/golangci/golangci-lint/releases/download/v1.55.2/golangci-lint-1.55.2-darwin-arm64.tar.gz"],
+        urls = ["https://github.com/golangci/golangci-lint/releases/download/v{0}/golangci-lint-{0}-darwin-arm64.tar.gz".format(version)],
     )

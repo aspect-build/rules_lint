@@ -17,11 +17,17 @@ golangci_lint = golangci_lint_aspect(
 ## fetch_golangci_lint
 
 <pre>
-fetch_golangci_lint()
+fetch_golangci_lint(<a href="#fetch_golangci_lint-version">version</a>)
 </pre>
 
+Naive macro that fetches a specific version of the golangci-lint from GitHub releases, for commonly-used platforms
+
+**PARAMETERS**
 
 
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="fetch_golangci_lint-version"></a>version |  must be the default value. In the future this could be honored when we support multiple versions.   |  <code>"1.55.2"</code> |
 
 
 <a id="golangci_lint_action"></a>
