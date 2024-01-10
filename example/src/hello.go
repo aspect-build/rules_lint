@@ -9,5 +9,6 @@ const (
 )
 
 func main() {
-	fmt.Printf("Hello %s\n", w)
+	hello := fmt.Sprintf("Hello %s\n", w)
+	fmt.Printf(hello)
 }
