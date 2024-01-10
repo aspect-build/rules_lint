@@ -10,7 +10,6 @@ golangci_lint = golangci_lint_aspect(
 ```
 """
 
-load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@io_bazel_rules_go//go:def.bzl", "go_context")
 load("//lint/private:lint_aspect.bzl", "report_file")
@@ -95,23 +94,6 @@ def golangci_lint_aspect(binary, config):
             ),
         },
         toolchains = ["@io_bazel_rules_go//go:toolchain"],
-    )
-
-def golangci_lint_binary(name):
-    """Wrapper around native_binary to select the correct golangci-lint executable for the execution platform."""
-    native_binary(
-        name = name,
-        src = select(
-            {
-                "@bazel_tools//src/conditions:linux_x86_64": "@golangci_lint_linux_x86_64//:golangci-lint",
-                "@bazel_tools//src/conditions:linux_aarch64": "@golangci_lint_linux_aarch64//:golangci-lint",
-                "@bazel_tools//src/conditions:darwin_x86_64": "@golangci_lint_macos_x86_64//:golangci-lint",
-                "@bazel_tools//src/conditions:darwin_arm64": "@golangci_lint_macos_aarch64//:golangci-lint",
-            },
-            no_match_error = "golangci-lint hasn't been fetched for your platform",
-        ),
-        out = "golangci-lint",
-        visibility = ["//visibility:public"],
     )
 
 # buildifier: disable=function-docstring

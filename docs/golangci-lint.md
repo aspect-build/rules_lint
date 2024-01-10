@@ -73,21 +73,3 @@ Attrs:
 | <a id="golangci_lint_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
 
 
-<a id="golangci_lint_binary"></a>
-
-## golangci_lint_binary
-
-<pre>
-golangci_lint_binary(<a href="#golangci_lint_binary-name">name</a>)
-</pre>
-
-Wrapper around native_binary to select the correct golangci-lint executable for the execution platform.
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="golangci_lint_binary-name"></a>name |  <p align="center"> - </p>   |  none |
-
-

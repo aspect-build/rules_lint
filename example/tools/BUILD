@@ -5,8 +5,8 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 """
 
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
-load("@aspect_rules_lint//lint:golangci-lint.bzl", "golangci_lint_binary")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 load("@rules_java//java:defs.bzl", "java_binary")
@@ -113,7 +113,18 @@ java_binary(
     runtime_deps = ["@net_sourceforge_pmd"],
 )
 
-golangci_lint_binary(name = "golangci_lint")
+native_binary(
+    name = "golangci_lint",
+    src = select(
+        {
+            "@bazel_tools//src/conditions:linux_x86_64": "@golangci_lint_linux_x86_64//:golangci-lint",
+            "@bazel_tools//src/conditions:linux_aarch64": "@golangci_lint_linux_aarch64//:golangci-lint",
+            "@bazel_tools//src/conditions:darwin_x86_64": "@golangci_lint_macos_x86_64//:golangci-lint",
+            "@bazel_tools//src/conditions:darwin_arm64": "@golangci_lint_macos_aarch64//:golangci-lint",
+        },
+    ),
+    out = "golangci-lint",
+)
 
 # bazel run :shellcheck -- --help
 shellcheck_binary(name = "shellcheck")
@@ -132,6 +143,6 @@ multi_formatter_binary(
     sh = ":shfmt",
     sql = ":prettier",
     starlark = "@buildifier_prebuilt//:buildifier",
-    swift = ":swiftformat",
+    #swift = ":swiftformat",
     terraform = ":terraform",
 )
