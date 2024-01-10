@@ -143,6 +143,6 @@ multi_formatter_binary(
     sh = ":shfmt",
     sql = ":prettier",
     starlark = "@buildifier_prebuilt//:buildifier",
-    #swift = ":swiftformat",
+    swift = ":swiftformat",
     terraform = ":terraform",
 )
