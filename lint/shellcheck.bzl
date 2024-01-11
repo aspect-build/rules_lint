@@ -78,7 +78,7 @@ def shellcheck_action(ctx, executable, srcs, config, report, use_exit_code = Fal
 
 # buildifier: disable=function-docstring
 def _shellcheck_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["sh_library"]:
+    if ctx.rule.kind not in ["sh_binary", "sh_library"]:
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
