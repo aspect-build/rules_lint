@@ -94,7 +94,7 @@ if [ "$#" -eq 0 ]; then
 else
   files=$(find "$@" -name '*.md')
 fi
-bin=$(rlocation {{prettier}})
+bin=$(rlocation {{prettier-md}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Markdown with Prettier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
