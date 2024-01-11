@@ -5,7 +5,7 @@ load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
 # Per the formatter design, each language can only have a single formatter binary
 _TOOLS = {
     "javascript": "prettier",
-    "markdown": "prettier",
+    "markdown": "prettier-md",
     "python": "ruff",
     "starlark": "buildifier",
     "jsonnet": "jsonnetfmt",
