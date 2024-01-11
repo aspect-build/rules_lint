@@ -46,6 +46,8 @@ ruff = ruff_aspect(
     ],
 )
 
+ruff_test = make_lint_test(aspect = ruff)
+
 shellcheck = shellcheck_aspect(
     binary = "@@//tools:shellcheck",
     config = "@@//:.shellcheckrc",

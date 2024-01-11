@@ -90,7 +90,7 @@ def ruff_fix(ctx, executable, srcs, config, patch):
         output = patch_cfg,
         content = json.encode({
             "linter": executable._ruff.path,
-            "args": ["check", "--fix"] + [s.short_path for s in srcs],
+            "args": ["check", "--fix"] + [s.path for s in srcs],
             "files_to_diff": [s.path for s in srcs],
             "output": patch.path,
         }),
@@ -112,8 +112,9 @@ def _ruff_aspect_impl(target, ctx):
         return []
 
     patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
-    ruff_action(ctx, ctx.executable._ruff, ctx.rule.files.srcs, ctx.files._config_files, report, ctx.attr.fail_on_violation)
-    ruff_fix(ctx, ctx.executable, ctx.rule.files.srcs, ctx.files._config_files, patch)
+    files_to_lint = [s for s in ctx.rule.files.srcs if s.is_source]
+    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, ctx.attr.fail_on_violation)
+    ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch)
     return [info]
 
 def ruff_aspect(binary, configs):
