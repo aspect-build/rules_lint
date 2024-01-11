@@ -38,6 +38,11 @@ stardoc_with_diff_test(
 )
 
 stardoc_with_diff_test(
+    name = "golangci-lint",
+    bzl_library_target = "//lint:golangci-lint",
+)
+
+stardoc_with_diff_test(
     name = "shellcheck",
     bzl_library_target = "//lint:shellcheck",
 )

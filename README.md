@@ -69,7 +69,7 @@ We treat type-checkers as a build tool, not as a linter. This is for a few reaso
 | SQL                       | [prettier-plugin-sql] |                  |
 | Starlark (Bazel)          | [Buildifier]          |                  |
 | Swift                     | [SwiftFormat] (1)     |                  |
-| Go                        | [gofmt]               |                  |
+| Go                        | [gofmt]               | [golangci-lint]  |
 | Protocol Buffers          | [buf]                 | [buf lint]       |
 | Terraform                 | [terraform] fmt       |                  |
 | Jsonnet                   | [jsonnetfmt]          |                  |
@@ -93,6 +93,7 @@ We treat type-checkers as a build tool, not as a linter. This is for a few reaso
 [ruff]: https://docs.astral.sh/ruff/
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
+[golangci-lint]: https://github.com/golangci/golangci-lint
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift
