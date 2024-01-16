@@ -37,7 +37,7 @@ multi_formatter_binary(
 ## multi_formatter_binary
 
 <pre>
-multi_formatter_binary(<a href="#multi_formatter_binary-name">name</a>, <a href="#multi_formatter_binary-go">go</a>, <a href="#multi_formatter_binary-java">java</a>, <a href="#multi_formatter_binary-javascript">javascript</a>, <a href="#multi_formatter_binary-jsonnet">jsonnet</a>, <a href="#multi_formatter_binary-kotlin">kotlin</a>, <a href="#multi_formatter_binary-markdown">markdown</a>, <a href="#multi_formatter_binary-protobuf">protobuf</a>, <a href="#multi_formatter_binary-python">python</a>,
+multi_formatter_binary(<a href="#multi_formatter_binary-name">name</a>, <a href="#multi_formatter_binary-cc">cc</a>, <a href="#multi_formatter_binary-go">go</a>, <a href="#multi_formatter_binary-java">java</a>, <a href="#multi_formatter_binary-javascript">javascript</a>, <a href="#multi_formatter_binary-jsonnet">jsonnet</a>, <a href="#multi_formatter_binary-kotlin">kotlin</a>, <a href="#multi_formatter_binary-markdown">markdown</a>, <a href="#multi_formatter_binary-protobuf">protobuf</a>, <a href="#multi_formatter_binary-python">python</a>,
                        <a href="#multi_formatter_binary-scala">scala</a>, <a href="#multi_formatter_binary-sh">sh</a>, <a href="#multi_formatter_binary-sql">sql</a>, <a href="#multi_formatter_binary-starlark">starlark</a>, <a href="#multi_formatter_binary-swift">swift</a>, <a href="#multi_formatter_binary-terraform">terraform</a>)
 </pre>
 
@@ -49,6 +49,7 @@ Produces an executable that aggregates the supplied formatter binaries
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="multi_formatter_binary-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="multi_formatter_binary-cc"></a>cc |  a binary target that runs clang-format (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-go"></a>go |  a binary target that runs gofmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-java"></a>java |  a binary target that runs java-format (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-javascript"></a>javascript |  a binary target that runs prettier (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |

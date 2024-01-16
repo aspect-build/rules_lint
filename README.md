@@ -74,6 +74,7 @@ We treat type-checkers as a build tool, not as a linter. This is for a few reaso
 | Terraform                 | [terraform] fmt       |                  |
 | Jsonnet                   | [jsonnetfmt]          |                  |
 | Scala                     | [scalafmt]            |                  |
+| C / C++                   | [clang-format]        |                  |
 
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
@@ -94,6 +95,7 @@ We treat type-checkers as a build tool, not as a linter. This is for a few reaso
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
 [golangci-lint]: https://github.com/golangci/golangci-lint
+[clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift

@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "9d432ff89f0562c91ec0cd8fd7d084ca1108cf557bde2d8bae21cdba1195db60",
+  "moduleFileHash": "31dd4a7cb2e6591e61f946fb39a0f28251b94f911a157959bc598a06ff2ba6ec",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -31,7 +31,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 22,
+            "line": 23,
             "column": 29
           },
           "imports": {
@@ -45,8 +45,39 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 23,
+                "line": 24,
                 "column": 18
+              }
+            }
+          ],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        },
+        {
+          "extensionBzlFile": "@toolchains_llvm//toolchain/extensions:llvm.bzl",
+          "extensionName": "llvm",
+          "usingModule": "<root>",
+          "location": {
+            "file": "@@//:MODULE.bazel",
+            "line": 28,
+            "column": 21
+          },
+          "imports": {
+            "llvm_toolchain": "llvm_toolchain",
+            "llvm_toolchain_llvm": "llvm_toolchain_llvm"
+          },
+          "devImports": [],
+          "tags": [
+            {
+              "tagName": "toolchain",
+              "attributeValues": {
+                "llvm_version": "16.0.0"
+              },
+              "devDependency": false,
+              "location": {
+                "file": "@@//:MODULE.bazel",
+                "line": 29,
+                "column": 15
               }
             }
           ],
@@ -59,7 +90,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 26,
+            "line": 34,
             "column": 20
           },
           "imports": {
@@ -85,7 +116,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 27,
+                "line": 35,
                 "column": 23
               }
             }
@@ -99,7 +130,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 40,
+            "line": 48,
             "column": 23
           },
           "imports": {},
@@ -113,7 +144,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 41,
+                "line": 49,
                 "column": 17
               }
             }
@@ -127,7 +158,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 45,
+            "line": 53,
             "column": 20
           },
           "imports": {
@@ -145,7 +176,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 46,
+                "line": 54,
                 "column": 10
               }
             }
@@ -159,7 +190,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 53,
+            "line": 61,
             "column": 23
           },
           "imports": {
@@ -176,7 +207,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 54,
+                "line": 62,
                 "column": 16
               }
             }
@@ -190,7 +221,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 63,
+            "line": 71,
             "column": 22
           },
           "imports": {
@@ -214,7 +245,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 64,
+                "line": 72,
                 "column": 14
               }
             }
@@ -228,7 +259,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 78,
+            "line": 86,
             "column": 20
           },
           "imports": {
@@ -247,6 +278,7 @@
         "aspect_rules_ts": "aspect_rules_ts@1.3.3",
         "rules_buf": "rules_buf@0.2.0",
         "bazel_skylib": "bazel_skylib@1.5.0",
+        "toolchains_llvm": "toolchains_llvm@0.10.3",
         "rules_java": "rules_java@7.1.0",
         "rules_jvm_external": "rules_jvm_external@4.5",
         "io_bazel_rules_go": "rules_go@0.42.0",
@@ -654,6 +686,36 @@
           ],
           "integrity": "sha256-zVWgYudjuTSZIfD124w5MyiNyLpPdt2UFqrGis7jy5Q=",
           "strip_prefix": "",
+          "remote_patches": {},
+          "remote_patch_strip": 0
+        }
+      }
+    },
+    "toolchains_llvm@0.10.3": {
+      "name": "toolchains_llvm",
+      "version": "0.10.3",
+      "key": "toolchains_llvm@0.10.3",
+      "repoName": "toolchains_llvm",
+      "executionPlatformsToRegister": [],
+      "toolchainsToRegister": [],
+      "extensionUsages": [],
+      "deps": {
+        "bazel_skylib": "bazel_skylib@1.5.0",
+        "rules_cc": "rules_cc@0.0.9",
+        "platforms": "platforms@0.0.7",
+        "bazel_tools": "bazel_tools@_",
+        "local_config_platform": "local_config_platform@_"
+      },
+      "repoSpec": {
+        "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "ruleClassName": "http_archive",
+        "attributes": {
+          "name": "toolchains_llvm~0.10.3",
+          "urls": [
+            "https://github.com/grailbio/bazel-toolchain/releases/download/0.10.3/toolchains_llvm-0.10.3.tar.gz"
+          ],
+          "integrity": "sha256-t80wHvew7OKNINPneGl6XjuBgoOTFQvtBIOMDFKWOgE=",
+          "strip_prefix": "toolchains_llvm-0.10.3",
           "remote_patches": {},
           "remote_patch_strip": 0
         }
@@ -19887,6 +19949,59 @@
               "sha256": "939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
               "type": "zip",
               "build_file_content": "package(default_visibility = [\"//visibility:public\"])\n\nload(\"@rules_python//python:defs.bzl\", \"py_library\")\n\npy_library(\n    name = \"lib\",\n    srcs = glob([\"**/*.py\"]),\n    data = glob([\"**/*\"], exclude=[\n        # These entries include those put into user-installed dependencies by\n        # data_exclude in /python/pip_install/tools/bazel.py\n        # to avoid non-determinism following pip install's behavior.\n        \"**/*.py\",\n        \"**/*.pyc\",\n        \"**/*.pyc.*\",  # During pyc creation, temp files named *.pyc.NNN are created\n        \"**/* *\",\n        \"**/*.dist-info/RECORD\",\n        \"BUILD\",\n        \"WORKSPACE\",\n    ]),\n    # This makes this directory a top-level in the python import\n    # search path for anything that depends on this.\n    imports = [\".\"],\n)\n"
+            }
+          }
+        }
+      }
+    },
+    "@@toolchains_llvm~0.10.3//toolchain/extensions:llvm.bzl%llvm": {
+      "general": {
+        "bzlTransitiveDigest": "BazUosLKBs5ydZiCi9OwI9dYPBph5aEeG/bcpD+yBkM=",
+        "accumulatedFileDigests": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "llvm_toolchain": {
+            "bzlFile": "@@toolchains_llvm~0.10.3//toolchain:rules.bzl",
+            "ruleClassName": "toolchain",
+            "attributes": {
+              "name": "toolchains_llvm~0.10.3~llvm~llvm_toolchain",
+              "absolute_paths": false,
+              "compile_flags": {},
+              "coverage_compile_flags": {},
+              "coverage_link_flags": {},
+              "cxx_builtin_include_directories": {},
+              "cxx_flags": {},
+              "cxx_standard": {},
+              "dbg_compile_flags": {},
+              "link_flags": {},
+              "link_libs": {},
+              "llvm_versions": {
+                "": "16.0.0"
+              },
+              "opt_compile_flags": {},
+              "opt_link_flags": {},
+              "stdlib": {},
+              "sysroot": {},
+              "target_settings": {},
+              "toolchain_roots": {},
+              "unfiltered_compile_flags": {}
+            }
+          },
+          "llvm_toolchain_llvm": {
+            "bzlFile": "@@toolchains_llvm~0.10.3//toolchain:rules.bzl",
+            "ruleClassName": "llvm",
+            "attributes": {
+              "name": "toolchains_llvm~0.10.3~llvm~llvm_toolchain_llvm",
+              "alternative_llvm_sources": [],
+              "auth_patterns": {},
+              "distribution": "auto",
+              "llvm_mirror": "",
+              "llvm_version": "16.0.0",
+              "llvm_versions": {},
+              "netrc": "",
+              "sha256": {},
+              "strip_prefix": {},
+              "urls": {}
             }
           }
         }

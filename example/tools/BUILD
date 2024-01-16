@@ -131,6 +131,7 @@ shellcheck_binary(name = "shellcheck")
 
 multi_formatter_binary(
     name = "format",
+    cc = "@llvm_toolchain_llvm//:bin/clang-format",
     go = "@go_sdk//:bin/gofmt",
     java = ":java-format",
     javascript = ":prettier",
