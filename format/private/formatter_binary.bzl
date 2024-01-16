@@ -18,6 +18,7 @@ _TOOLS = {
     "sql": "prettier-sql",
     "sh": "shfmt",
     "protobuf": "buf",
+    "clangformat": "clang-format",
 }
 
 def _formatter_binary_impl(ctx):

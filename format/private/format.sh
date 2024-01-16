@@ -58,6 +58,7 @@ case "$mode" in
    tfmode="-check -diff"
    jsonnetmode="--test"
    scalamode="--test"
+   clangformatmode="--style=file --fallback-style=none --dry-run"
    ;;
  fix)
    swiftmode=""
@@ -74,6 +75,7 @@ case "$mode" in
    tfmode=""
    jsonnetmode="--in-place"
    scalamode=""
+   clangformatmode="-style=file --fallback-style=none -i"
    ;;
  *) echo >&2 "unknown mode $mode";;
 esac
@@ -213,6 +215,17 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
+  files=$(git ls-files --cached --modified --other --exclude-standard '*.cc' '*.cpp' '*.cxx' '*.c++' '*.C' '*.c' '*.h' '*.hh' '*.hpp' '*.ipp' '*.hxx' '*.h++' '*.inc' '*.inl' '*.tlh' '*.tli' '*.H' | { grep -vE "^$(git ls-files --deleted)$" || true; } )
+else
+  files=$(find "$@" -name '*.cc' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.c++' -or -name '*.C' -or -name '*.c' -or -name '*.h' -or -name '*.hh' -or -name '*.hpp' -or -name '*.ipp' -or -name '*.hxx' -or -name '*.h++' -or -name '*.inc' -or -name '*.inl' -or -name '*.tlh' -or -name '*.tli' -or -name '*.H')
+fi
+bin=$(rlocation {{clang-format}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Formatting C/C++ with clang-format..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $clangformatmode
+fi
+
+if [ "$#" -eq 0 ]; then
   files=$(git ls-files --cached --modified --other --exclude-standard '*.sh' '*.bash' | { grep -vE "^$(git ls-files --deleted)$" || true; })
 else
   files=$(find "$@" -name '*.sh' -or -name '*.bash')
@@ -248,3 +261,4 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
     $bin $bufmode $file
   done
 fi
+
