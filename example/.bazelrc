@@ -2,4 +2,9 @@
 # see https://github.com/bazelbuild/rules_jvm_external/issues/445
 build --repo_env=JAVA_HOME=../bazel_tools/jdk
 
+# Let's not use the bzlmod lockfile yet.
+# It has some stability issues and causes a ton of merge conflicts.
+# We also don't have a reproducibility problem that necessitates it.
+common --lockfile_mode=off
+
 startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
