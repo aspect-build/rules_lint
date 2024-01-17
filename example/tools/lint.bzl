@@ -8,6 +8,7 @@ load("@aspect_rules_lint//lint:lint_test.bzl", "make_lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_aspect")
+load("@aspect_rules_lint//lint:vale.bzl", "vale_aspect")
 
 buf = buf_lint_aspect(
     config = "@@//:buf.yaml",
@@ -62,3 +63,9 @@ golangci_lint = golangci_lint_aspect(
 )
 
 golangci_lint_test = make_lint_test(aspect = golangci_lint)
+
+vale = vale_aspect(
+    binary = "@@//tools:vale",
+    configs = ["@@//:.vale.ini"],
+    styles = "@@//tools:vale_styles",
+)

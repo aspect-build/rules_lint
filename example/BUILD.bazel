@@ -19,6 +19,7 @@ exports_files(
         ".shellcheckrc",
         ".scalafmt.conf",
         ".golangci.yaml",
+        ".vale.ini",
     ],
     visibility = ["//visibility:public"],
 )

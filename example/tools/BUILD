@@ -4,6 +4,7 @@ This is in its own package because it has so many loading-time symbols,
 we don't want to trigger eager fetches of these for builds that don't want to run format.
 """
 
+load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
@@ -146,6 +147,15 @@ native_binary(
         },
     ),
     out = "vale",
+)
+
+copy_to_directory(
+    name = "vale_styles",
+    srcs = [
+        "@vale_Google//:Google",
+        "@vale_write-good//:write-good",
+    ],
+    include_external_repositories = ["vale_*"],
 )
 
 # bazel run :shellcheck -- --help
