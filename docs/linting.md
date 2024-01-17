@@ -14,35 +14,38 @@ custom Bazel configuration, commonly in `tools/`.
 This `lint.bzl` should contain linter aspect declarations.
 See the `docs/` folder for "aspect factory functions" that declare your linters.
 
-Finally, reference those linters as `//path/to:lint.bzl%mylinter`
-in the lint runner.
-
-If you use the Aspect CLI, then include a block like the following in `.aspect/cli/config.yaml`:
-
-```yaml
-lint:
-  aspects:
-    - //tools:lint.bzl%eslint
-```
-
-If you don't use Aspect CLI, you can put these in some other wrapper like a shell script that runs the linter aspects over the requested targets.
-See the `lint.sh` script in the `example/` folder.
+Finally, register those linter aspects in the lint runner. See details below.
 
 ## Usage
 
-### 1. Warnings in the terminal with `bazel lint`
+### 1. (Coming Soon) Linter as Code Review Bot
+
+An upcoming release of [Aspect Workflows](https://docs.aspect.build/workflows/) will include a `lint` task, which wires the reports from bazel-out directly into your code review.
+The fixes produced by the tool are shown as suggested edits, so you can just accept without a context-switch back to your development machine.
+
+![lint suggestions in code review](./lint_workflow.png)
+
+### 2. Warnings in the terminal with `bazel lint`
 
 Aspect CLI adds the missing 'lint' command, so users just type `bazel lint //path/to:targets`.
 
 Reports are then written to the terminal.
 
+To configure it, add a block like the following in `.aspect/cli/config.yaml` to point to the `*_lint` definition symbols.
+The syntax is the same as [aspects declared on the command-line](https://bazel.build/extending/aspects#invoking_the_aspect_using_the_command_line)
+
+```yaml
+lint:
+  aspects:
+    # Format: <extension file label>%<aspect top-level name>
+    - //tools:lint.bzl%eslint
+```
+
 [![asciicast](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq.svg)](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq)
 
-### 2. Warnings in the terminal with a wrapper
+### 3. Warnings in the terminal with a wrapper
 
-You can use vanilla Bazel rather than Aspect CLI.
-
-Placing a couple commands in a shell script, Makefile, or similar wrapper.
+If you don't use Aspect CLI, you can use vanilla Bazel with some wrapper like a shell script that runs the linter aspects over the requested targets.
 
 See the `example/lint.sh` file as an example.
 
@@ -54,26 +57,18 @@ This is the same flag many linters support.
 
 [![asciicast](https://asciinema.org/a/r9JKJ8uKgAZTzlUPdDdHlY1CB.svg)](https://asciinema.org/a/r9JKJ8uKgAZTzlUPdDdHlY1CB)
 
-### 3. Errors during `bazel build`
+### 4. Errors during `bazel build`
 
 By adding `--aspects_parameters=fail_on_violation=true` to the command-line, we pass a parameter
 to our linter aspects that cause them to honor the exit code of the lint tool.
 
 This makes the build fail when any lint violations are present.
 
-### 4. Failures during `bazel test`
+### 5. Failures during `bazel test`
 
 Add a [make_lint_test](./lint_test.md) call to the `lint.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
 
 See the `example/test/BUILD.bazel` file in this repo for some examples.
-
-### 5. Code review comments
-
-You can wire the reports from bazel-out to a tool like [reviewdog].
-
-We're working on a demo with https://aspect.build/workflows that automatically runs `bazel lint` as
-part of your CI and reports the results to your GitHub Code Review thread.
-The `--fix` patches produced by the tools are shown as suggested changes.
 
 ## Debugging
 
