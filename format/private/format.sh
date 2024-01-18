@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
-# TODO:
-# - should this program be written in a different language?
-# - if bash, we could reuse https://github.com/github/super-linter/blob/main/lib/functions/worker.sh
-# - can we detect what version control system is used? (start with git)
+# Template file for a formatter binary. This is expanded by a Bazel action in formatter_binary.bzl
+# to produce an actual Bash script.
+# Expansions are written in "mustache" syntax like {{interpolate_this}}.
+
+{{BASH_RLOCATION_FUNCTION}}
 
 if [[ -z "$BUILD_WORKSPACE_DIRECTORY" ]]; then
-  echo >&2 "$0: FATAL: This program must be executed under 'bazel run'"
+  echo >&2 "$0: FATAL: \$BUILD_WORKSPACE_DIRECTORY not set. This program should be executed under 'bazel run'."
   exit 1
 fi
+
+cd $BUILD_WORKSPACE_DIRECTORY
 
 function on_exit {
   code=$?
@@ -19,31 +22,71 @@ function on_exit {
 
 trap on_exit EXIT
 
+# ls-files <language> [<file>...]
+function ls-files {
+    language="$1" && shift;
+    # Copied file patterns from
+    # https://github.com/github-linguist/linguist/blob/559a6426942abcae16b6d6b328147476432bf6cb/lib/linguist/languages.yml
+    # using the ./mirror_linguist_languages.sh tool to transform to Bash code
+    case "$language" in
+      'C++') patterns=('*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
+      'CSS') patterns=('*.css') ;;
+      'Go') patterns=('*.go') ;;
+      'HCL') patterns=('*.hcl' '*.nomad' '*.tf' '*.tfvars' '*.workflow') ;;
+      'HTML') patterns=('*.html' '*.hta' '*.htm' '*.html.hl' '*.inc' '*.xht' '*.xhtml') ;;
+      'JSON') patterns=('.all-contributorsrc' '.arcconfig' '.auto-changelog' '.c8rc' '.htmlhintrc' '.imgbotconfig' '.nycrc' '.tern-config' '.tern-project' '.watchmanconfig' 'Pipfile.lock' 'composer.lock' 'deno.lock' 'flake.lock' 'mcmod.info' '*.json' '*.4DForm' '*.4DProject' '*.avsc' '*.geojson' '*.gltf' '*.har' '*.ice' '*.JSON-tmLanguage' '*.jsonl' '*.mcmeta' '*.tfstate' '*.tfstate.backup' '*.topojson' '*.webapp' '*.webmanifest' '*.yy' '*.yyp') ;;
+      'Java') patterns=('*.java' '*.jav' '*.jsh') ;;
+      'JavaScript') patterns=('Jakefile' '*.js' '*._js' '*.bones' '*.cjs' '*.es' '*.es6' '*.frag' '*.gs' '*.jake' '*.javascript' '*.jsb' '*.jscad' '*.jsfl' '*.jslib' '*.jsm' '*.jspre' '*.jss' '*.jsx' '*.mjs' '*.njs' '*.pac' '*.sjs' '*.ssjs' '*.xsjs' '*.xsjslib') ;;
+      'Jsonnet') patterns=('*.jsonnet' '*.libsonnet') ;;
+      'Kotlin') patterns=('*.kt' '*.ktm' '*.kts') ;;
+      'Markdown') patterns=('contents.lr' '*.md' '*.livemd' '*.markdown' '*.mdown' '*.mdwn' '*.mkd' '*.mkdn' '*.mkdown' '*.ronn' '*.scd' '*.workbook') ;;
+      'Protocol Buffer') patterns=('*.proto') ;;
+      'Python') patterns=('.gclient' 'DEPS' 'SConscript' 'SConstruct' 'wscript' '*.py' '*.cgi' '*.fcgi' '*.gyp' '*.gypi' '*.lmi' '*.py3' '*.pyde' '*.pyi' '*.pyp' '*.pyt' '*.pyw' '*.rpy' '*.spec' '*.tac' '*.wsgi' '*.xpy') ;;
+      'SQL') patterns=('*.sql' '*.cql' '*.ddl' '*.inc' '*.mysql' '*.prc' '*.tab' '*.udf' '*.viw') ;;
+      'Scala') patterns=('*.scala' '*.kojo' '*.sbt' '*.sc') ;;
+      'Shell') patterns=('.bash_aliases' '.bash_functions' '.bash_history' '.bash_logout' '.bash_profile' '.bashrc' '.cshrc' '.flaskenv' '.kshrc' '.login' '.profile' '.zlogin' '.zlogout' '.zprofile' '.zshenv' '.zshrc' '9fs' 'PKGBUILD' 'bash_aliases' 'bash_logout' 'bash_profile' 'bashrc' 'cshrc' 'gradlew' 'kshrc' 'login' 'man' 'profile' 'zlogin' 'zlogout' 'zprofile' 'zshenv' 'zshrc' '*.sh' '*.bash' '*.bats' '*.cgi' '*.command' '*.fcgi' '*.ksh' '*.sh.in' '*.tmux' '*.tool' '*.trigger' '*.zsh' '*.zsh-theme') ;;
+      'Starlark') patterns=('BUCK' 'BUILD' 'BUILD.bazel' 'MODULE.bazel' 'Tiltfile' 'WORKSPACE' 'WORKSPACE.bazel' '*.bzl' '*.star') ;;
+      'Swift') patterns=('*.swift') ;;
+      'TSX') patterns=('*.tsx') ;;
+      'TypeScript') patterns=('*.ts' '*.cts' '*.mts') ;;
+      *)
+        echo >&2 "Internal error: unknown language $language"
+        exit 1
+        ;;
+    esac
+    
+    if [ "$#" -eq 0 ]; then
+        # When the formatter is run with no arguments, we run over "all files in the repo".
+        # However, we want to ignore anything that is in .gitignore, is marked for delete, etc.
+        # So we use `git ls-files` with some additional care.
+
+        # TODO: determine which staged changes we should format; avoid formatting unstaged changes
+        # TODO: try to format only modified regions of the file (where supported)
+        git ls-files --cached --modified --other --exclude-standard ${patterns[@]} | {
+          grep -vE "^$(git ls-files --deleted)$" || true;
+        }
+    else
+        # When given arguments, they are glob patterns of the superset of files to format.
+        # We just need to filter those so we only select files for this language
+        # Construct a command-line like
+        #  find src/* -name *.ext1 -or -name *.ext2
+        find_args=()
+        for (( i=0; i<${#patterns[@]}; i++ )); do
+          if [[ i -gt 0 ]]; then
+            find_args+=('-or')
+          fi
+          find_args+=("-name" "${patterns[$i]}")
+        done
+        find "$@" "${find_args[@]}"
+    fi
+}
+
+# Define the flags for the tools based on the mode of operation
 mode=fix
-if [ "$1" == "--mode" ]; then
+if [ "${1:-}" == "--mode" ]; then
   readonly mode=$2
   shift 2
 fi
-
-# --- begin runfiles.bash initialization v3 ---
-# Copy-pasted from the Bazel Bash runfiles library v3.
-# https://github.com/bazelbuild/bazel/blob/master/tools/bash/runfiles/runfiles.bash
-set -uo pipefail; set +e; f=bazel_tools/tools/bash/runfiles/runfiles.bash
-source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
-  source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2>/dev/null || \
-  source "$0.runfiles/$f" 2>/dev/null || \
-  source "$(grep -sm1 "^$f " "$0.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
-  source "$(grep -sm1 "^$f " "$0.exe.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
-  { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
-# --- end runfiles.bash initialization v3 ---
-
-cd $BUILD_WORKSPACE_DIRECTORY
-
-# NOTE: we need to honor .gitignore, so we use git ls-files below
-# TODO: talk to version control to determine which staged changes we should format
-# TODO: avoid formatting unstaged changes
-# TODO: try to format only regions where supported
-# TODO: run them concurrently, not serial
 
 case "$mode" in
  check)
@@ -80,88 +123,87 @@ case "$mode" in
  *) echo >&2 "unknown mode $mode";;
 esac
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard 'BUILD' '*/BUILD.bazel' '*.bzl' '*.BUILD' 'WORKSPACE' '*.bazel' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name 'BUILD' -or -name '*.bzl' -or -name '*.BUILD' -or -name 'WORKSPACE' -or -name '*.bazel')
-fi
+# Run each supplied formatter over the files it owns
+# TODO: run them concurrently, not serial
+
+files=$(ls-files Starlark $@)
 bin=$(rlocation {{buildifier}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Starlark with Buildifier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin -mode="$mode"
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.md' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.md')
-fi
+files=$(ls-files Markdown $@)
 bin=$(rlocation {{prettier-md}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Markdown with Prettier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.js' '*.cjs' '*.mjs' '*.ts' '*.tsx' '*.mts' '*.cts' '*.json' '*.css' '*.html' '*.md' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.js' -or -name '*.cjs' -or -name '*.mjs' -or -name '*.ts' -or -name '*.tsx' -or -name '*.mts' -or -name '*.cts' -or -name '*.json' -or -name '*.css' -or -name '*.html' -or -name '*.md')
-fi
+files=$(ls-files JavaScript $@)
 bin=$(rlocation {{prettier}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting JavaScript with Prettier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.sql' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.sql')
+files=$(ls-files CSS $@)
+bin=$(rlocation {{prettier}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Formatting CSS with Prettier..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
+
+files=$(ls-files HTML $@)
+bin=$(rlocation {{prettier}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Formatting HTML with Prettier..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
+fi
+
+files=$(ls-files TypeScript $@)
+bin=$(rlocation {{prettier}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Formatting TypeScript with Prettier..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
+fi
+
+files=$(ls-files TSX $@)
+bin=$(rlocation {{prettier}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Formatting TSX with Prettier..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
+fi
+
+files=$(ls-files SQL $@)
 bin=$(rlocation {{prettier-sql}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Running SQL with Prettier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.py' '*.pyi' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.py' -or -name '*.pyi')
-fi
+files=$(ls-files Python $@)
 bin=$(rlocation {{ruff}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Python with ruff..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $ruffmode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.tf' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.tf')
-fi
-bin=$(rlocation {{terraform}})
+files=$(ls-files HCL $@)
+bin=$(rlocation {{terraform-fmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting terraform..."
+  echo "Formatting Hashicorp Config Language with terraform fmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin fmt $tfmode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.jsonnet' '*.libsonnet' | { grep -vE "^$(git ls-files --deleted)$" || true; } )
-else
-  files=$(find "$@" -name '*.jsonnet' -or -name '*.libsonnet')
-fi
+files=$(ls-files Jsonnet $@)
 bin=$(rlocation {{jsonnetfmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Jsonnet with jsonnetfmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $jsonnetmode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.java' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.java')
-fi
+files=$(ls-files Java $@)
 bin=$(rlocation {{java-format}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Java with java-format..."
@@ -169,22 +211,14 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $javamode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.kt' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.kt')
-fi
+files=$(ls-files Kotlin $@)
 bin=$(rlocation {{ktfmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Kotlin with ktfmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $ktmode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.scala' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.scala')
-fi
+files=$(ls-files Scala $@)
 bin=$(rlocation {{scalafmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Scala with scalafmt..."
@@ -192,11 +226,7 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $scalamode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.go' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.go')
-fi
+files=$(ls-files Go $@)
 bin=$(rlocation {{gofmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Go with gofmt..."
@@ -214,51 +244,32 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   fi
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.cc' '*.cpp' '*.cxx' '*.c++' '*.C' '*.c' '*.h' '*.hh' '*.hpp' '*.ipp' '*.hxx' '*.h++' '*.inc' '*.inl' '*.tlh' '*.tli' '*.H' | { grep -vE "^$(git ls-files --deleted)$" || true; } )
-else
-  files=$(find "$@" -name '*.cc' -or -name '*.cpp' -or -name '*.cxx' -or -name '*.c++' -or -name '*.C' -or -name '*.c' -or -name '*.h' -or -name '*.hh' -or -name '*.hpp' -or -name '*.ipp' -or -name '*.hxx' -or -name '*.h++' -or -name '*.inc' -or -name '*.inl' -or -name '*.tlh' -or -name '*.tli' -or -name '*.H')
-fi
+files=$(ls-files C++ $@)
 bin=$(rlocation {{clang-format}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting C/C++ with clang-format..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $clangformatmode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.sh' '*.bash' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.sh' -or -name '*.bash')
-fi
+files=$(ls-files Shell $@)
 bin=$(rlocation {{shfmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Bash/Shell with shfmt..."
+  echo "Formatting Shell with shfmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $shfmtmode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.swift' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.swift')
-fi
+files=$(ls-files Swift $@)
 bin=$(rlocation {{swiftformat}})
-
 if [ -n "$files" ] && [ -n "$bin" ]; then
   # swiftformat itself prints Running SwiftFormat...
   echo "$files" | tr \\n \\0 | xargs -0 $bin $swiftmode
 fi
 
-if [ "$#" -eq 0 ]; then
-  files=$(git ls-files --cached --modified --other --exclude-standard '*.proto' | { grep -vE "^$(git ls-files --deleted)$" || true; })
-else
-  files=$(find "$@" -name '*.proto')
-fi
+files=$(ls-files 'Protocol Buffer' $@)
 bin=$(rlocation {{buf}})
-
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Protobuf with buf..."
   for file in $files; do
     $bin $bufmode $file
   done
 fi
-

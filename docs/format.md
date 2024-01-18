@@ -63,6 +63,6 @@ Produces an executable that aggregates the supplied formatter binaries
 | <a id="multi_formatter_binary-sql"></a>sql |  a binary target that runs prettier-sql (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-starlark"></a>starlark |  a binary target that runs buildifier (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-swift"></a>swift |  a binary target that runs swiftformat (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-terraform"></a>terraform |  a binary target that runs terraform (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="multi_formatter_binary-terraform"></a>terraform |  a binary target that runs terraform-fmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 
 
