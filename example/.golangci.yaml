@@ -13,7 +13,7 @@ run:
 
 linters:
   enable:
-  # Default
+    # Default
     - errcheck
     - gosimple
     - govet
