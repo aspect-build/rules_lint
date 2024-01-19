@@ -3,5 +3,5 @@
 raw=$(mktemp --suffix=.yml)
 json=$(mktemp --suffix=.json)
 wget -O "$raw" https://raw.githubusercontent.com/github-linguist/linguist/master/lib/linguist/languages.yml
-yq -o=json '.' "$raw" > "$json"
-jq --from-file=filter.jq --raw-output < "$json"
+# We could do this entirely in yq, but the author happens to already know JQ :shrug:
+yq -o=json '.' "$raw" | jq --from-file=filter.jq --raw-output
