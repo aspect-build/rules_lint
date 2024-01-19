@@ -1,6 +1,6 @@
 "Implementation of formatter_binary"
 
-load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
+load("@aspect_bazel_lib//lib:paths.bzl", "BASH_RLOCATION_FUNCTION", "to_rlocation_path")
 
 # Per the formatter design, each language can only have a single formatter binary
 _TOOLS = {
@@ -9,7 +9,7 @@ _TOOLS = {
     "python": "ruff",
     "starlark": "buildifier",
     "jsonnet": "jsonnetfmt",
-    "terraform": "terraform",
+    "terraform": "terraform-fmt",
     "kotlin": "ktfmt",
     "java": "java-format",
     "scala": "scalafmt",
@@ -24,6 +24,7 @@ _TOOLS = {
 def _formatter_binary_impl(ctx):
     # We need to fill in the rlocation paths in the shell script
     substitutions = {
+        "{{BASH_RLOCATION_FUNCTION}}": BASH_RLOCATION_FUNCTION,
         "{{fix_target}}": str(ctx.label),
     }
     tools = {v: getattr(ctx.attr, k) for k, v in _TOOLS.items()}
