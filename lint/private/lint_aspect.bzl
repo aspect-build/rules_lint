@@ -17,3 +17,9 @@ def patch_and_report_files(*args):
         rules_lint_report = depset([report]),
         rules_lint_patch = depset([patch]),
     )
+
+def filter_srcs(rule):
+    if "lint-genfiles" in rule.attr.tags:
+        return rule.files.srcs
+    else:
+        return [s for s in rule.files.srcs if s.is_source]

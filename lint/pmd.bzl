@@ -12,7 +12,7 @@ pmd = pmd_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "report_file")
+load("//lint/private:lint_aspect.bzl", "filter_srcs", "report_file")
 
 _MNEMONIC = "PMD"
 
@@ -69,7 +69,7 @@ def _pmd_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    pmd_action(ctx, ctx.executable._pmd, [s for s in ctx.rule.files.srcs if s.is_source], ctx.files._rulesets, report, ctx.attr.fail_on_violation)
+    pmd_action(ctx, ctx.executable._pmd, filter_srcs(ctx.rule), ctx.files._rulesets, report, ctx.attr.fail_on_violation)
     return [info]
 
 def pmd_aspect(binary, rulesets):

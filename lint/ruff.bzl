@@ -15,7 +15,7 @@ ruff = ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "patch_and_report_files")
+load("//lint/private:lint_aspect.bzl", "filter_srcs", "patch_and_report_files")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "ruff"
@@ -112,7 +112,7 @@ def _ruff_aspect_impl(target, ctx):
         return []
 
     patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
-    files_to_lint = [s for s in ctx.rule.files.srcs if s.is_source]
+    files_to_lint = filter_srcs(ctx.rule)
     ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, ctx.attr.fail_on_violation)
     ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch)
     return [info]

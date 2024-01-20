@@ -12,7 +12,7 @@ golangci_lint = golangci_lint_aspect(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@io_bazel_rules_go//go:def.bzl", "go_context")
-load("//lint/private:lint_aspect.bzl", "report_file")
+load("//lint/private:lint_aspect.bzl", "filter_srcs", "report_file")
 
 _MNEMONIC = "golangcilint"
 
@@ -69,7 +69,7 @@ def _golangci_lint_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    golangci_lint_action(ctx, ctx.executable._golangci_lint, ctx.rule.files.srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
+    golangci_lint_action(ctx, ctx.executable._golangci_lint, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr.fail_on_violation)
     return [info]
 
 def golangci_lint_aspect(binary, config):
