@@ -23,6 +23,61 @@ It is also inspired by <https://github.com/github/super-linter>.
 [tricorder]: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/43322.pdf
 [reviewdog]: https://github.com/reviewdog/reviewdog
 
+## Supported tools
+
+| Language               | Formatter             | Linter(s)        |
+| ---------------------- | --------------------- | ---------------- |
+| C / C++                | [clang-format]        | ([#112])         |
+| CSS                    | [Prettier]            |                  |
+| Go                     | [gofmt]               | [golangci-lint]  |
+| HCL (Hashicorp Config) | [terraform] fmt       |                  |
+| HTML                   | [Prettier]            |                  |
+| JSON                   | [Prettier]            |                  |
+| Java                   | [google-java-format]  | [pmd]            |
+| JavaScript             | [Prettier]            | [ESLint]         |
+| Jsonnet                | [jsonnetfmt]          |                  |
+| Kotlin                 | [ktfmt]               |                  |
+| Markdown               | [Prettier]            |                  |
+| Protocol Buffer        | [buf]                 | [buf lint]       |
+| Python                 | [ruff]                | [flake8], [ruff] |
+| SQL                    | [prettier-plugin-sql] |                  |
+| Scala                  | [scalafmt]            |                  |
+| Shell                  | [shfmt]               | [shellcheck]     |
+| Starlark               | [Buildifier]          |                  |
+| Swift                  | [SwiftFormat] (1)     |                  |
+| TSX                    | [Prettier]            | [ESLint]         |
+| TypeScript             | [Prettier]            | [ESLint]         |
+
+[prettier]: https://prettier.io
+[google-java-format]: https://github.com/google/google-java-format
+[flake8]: https://flake8.pycqa.org/en/latest/index.html
+[pmd]: https://docs.pmd-code.org/latest/index.html
+[buf lint]: https://buf.build/docs/lint/overview
+[eslint]: https://eslint.org/
+[swiftformat]: https://github.com/nicklockwood/SwiftFormat
+[terraform]: https://github.com/hashicorp/terraform
+[buf]: https://docs.buf.build/format/usage
+[ktfmt]: https://github.com/facebook/ktfmt
+[buildifier]: https://github.com/keith/buildifier-prebuilt
+[prettier-plugin-sql]: https://github.com/un-ts/prettier
+[gofmt]: https://pkg.go.dev/cmd/gofmt
+[jsonnetfmt]: https://github.com/google/go-jsonnet
+[scalafmt]: https://scalameta.org/scalafmt
+[ruff]: https://docs.astral.sh/ruff/
+[shellcheck]: https://www.shellcheck.net/
+[shfmt]: https://github.com/mvdan/sh
+[golangci-lint]: https://github.com/golangci/golangci-lint
+[clang-format]: https://clang.llvm.org/docs/ClangFormat.html
+[#112]: https://github.com/aspect-build/rules_lint/issues/112
+
+1. Non-hermetic: requires that a swift toolchain is installed on the machine.
+   See https://github.com/bazelbuild/rules_swift#1-install-swift
+
+To add a linter, please follow the steps in [lint/README.md](./lint/README.md) and then send us a PR.
+Thanks!!
+
+> We'll add documentation on adding formatters as well.
+
 ## Design
 
 Formatting and Linting work a bit differently.
@@ -53,57 +108,6 @@ We treat type-checkers as a build tool, not as a linter. This is for a few reaso
 - You can only type-check a library if its dependencies were checkable, which means short-circuiting
   execution. rules_lint currently runs linters on every node in the dependency graph, including any
   whose dependencies have lint warnings.
-
-## Available tools
-
-| Language                  | Formatter             | Linter(s)        |
-| ------------------------- | --------------------- | ---------------- |
-| Python                    | [ruff]                | [flake8], [ruff] |
-| Java                      | [google-java-format]  | [pmd]            |
-| Kotlin                    | [ktfmt]               |                  |
-| JavaScript/TypeScript/TSX | [Prettier]            | [ESLint]         |
-| CSS/HTML                  | [Prettier]            |                  |
-| JSON                      | [Prettier]            |                  |
-| Markdown                  | [Prettier]            |                  |
-| Bash                      | [shfmt]               | [shellcheck]     |
-| SQL                       | [prettier-plugin-sql] |                  |
-| Starlark (Bazel)          | [Buildifier]          |                  |
-| Swift                     | [SwiftFormat] (1)     |                  |
-| Go                        | [gofmt]               | [golangci-lint]  |
-| Protocol Buffers          | [buf]                 | [buf lint]       |
-| Terraform                 | [terraform] fmt       |                  |
-| Jsonnet                   | [jsonnetfmt]          |                  |
-| Scala                     | [scalafmt]            |                  |
-| C / C++                   | [clang-format]        |                  |
-
-[prettier]: https://prettier.io
-[google-java-format]: https://github.com/google/google-java-format
-[flake8]: https://flake8.pycqa.org/en/latest/index.html
-[pmd]: https://docs.pmd-code.org/latest/index.html
-[buf lint]: https://buf.build/docs/lint/overview
-[eslint]: https://eslint.org/
-[swiftformat]: https://github.com/nicklockwood/SwiftFormat
-[terraform]: https://github.com/hashicorp/terraform
-[buf]: https://docs.buf.build/format/usage
-[ktfmt]: https://github.com/facebook/ktfmt
-[buildifier]: https://github.com/keith/buildifier-prebuilt
-[prettier-plugin-sql]: https://github.com/un-ts/prettier
-[gofmt]: https://pkg.go.dev/cmd/gofmt
-[jsonnetfmt]: https://github.com/google/go-jsonnet
-[scalafmt]: https://scalameta.org/scalafmt
-[ruff]: https://docs.astral.sh/ruff/
-[shellcheck]: https://www.shellcheck.net/
-[shfmt]: https://github.com/mvdan/sh
-[golangci-lint]: https://github.com/golangci/golangci-lint
-[clang-format]: https://clang.llvm.org/docs/ClangFormat.html
-
-1. Non-hermetic: requires that a swift toolchain is installed on the machine.
-   See https://github.com/bazelbuild/rules_swift#1-install-swift
-
-To add a linter, please follow the steps in [lint/README.md](./lint/README.md) and then send us a PR.
-Thanks!!
-
-> We'll add documentation on adding formatters as well.
 
 ## Installation
 
@@ -154,30 +158,3 @@ But we're not trying to stop anyone, either!
 
 You could probably configure the editor to always run the same Bazel command, any time a file is changed.
 Instructions to do this are out-of-scope for this repo, particularly since they have to be formulated and updated for so many editors.
-
-### Using a formatter from a BUILD rule
-
-Generally, you should just allow code generators to make messy files.
-You can exclude them from formatting by changing the file extension,
-adding a suppression comment at the top (following the formatter's docs)
-or adding to the formatter's ignore file (e.g. `.prettierignore`).
-
-However there are some valid cases where you really want to run a formatter as a build step.
-You can just reach into the external repository where we've installed them.
-
-For example, to run Prettier:
-
-```starlark
-load("@aspect_rules_format_npm//:prettier/package_json.bzl", prettier = "bin")
-
-prettier.prettier_binary(name = "prettier")
-
-js_run_binary(
-    name = "fmt",
-    srcs = ["raw_file.md"],
-    args = ["raw_file.md"],
-    chdir = package_name(),
-    stdout = "formatted_file.md",
-    tool = "prettier",
-)
-```
