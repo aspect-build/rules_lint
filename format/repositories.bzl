@@ -150,3 +150,48 @@ def fetch_swiftformat():
         sha256 = "978eaffdc3716bbc0859aecee0d83875cf3ab8d8725779448f0035309d9ad9f3",
         url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.49.17/swiftformat.zip",
     )
+
+def fetch_gofumpt():
+    http_file(
+        name = "com_github_mvdan_gofumpt_linux_amd64",
+        downloaded_file_path = "gofumpt",
+        executable = True,
+        sha256 = "759c6ab56bfbf62cafb35944aef1e0104a117e0aebfe44816fd79ef4b28521e4",
+        urls = [
+            "https://cdn.confidential.cloud/constellation/cas/sha256/759c6ab56bfbf62cafb35944aef1e0104a117e0aebfe44816fd79ef4b28521e4",
+            "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_linux_amd64",
+        ],
+    )
+
+    http_file(
+        name = "com_github_mvdan_gofumpt_linux_arm64",
+        downloaded_file_path = "gofumpt",
+        executable = True,
+        sha256 = "fba20ffd06606c89a500e3cc836408a09e4767e2f117c97724237ae4ecadf82e",
+        urls = [
+            "https://cdn.confidential.cloud/constellation/cas/sha256/fba20ffd06606c89a500e3cc836408a09e4767e2f117c97724237ae4ecadf82e",
+            "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_linux_arm64",
+        ],
+    )
+
+    http_file(
+        name = "com_github_mvdan_gofumpt_darwin_amd64",
+        downloaded_file_path = "gofumpt",
+        executable = True,
+        sha256 = "870f05a23541aad3d20d208a3ea17606169a240f608ac1cf987426198c14b2ed",
+        urls = [
+            "https://cdn.confidential.cloud/constellation/cas/sha256/870f05a23541aad3d20d208a3ea17606169a240f608ac1cf987426198c14b2ed",
+            "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_darwin_amd64",
+        ],
+    )
+
+    http_file(
+        name = "com_github_mvdan_gofumpt_darwin_arm64",
+        downloaded_file_path = "gofumpt",
+        executable = True,
+        sha256 = "f2df95d5fad8498ad8eeb0be8abdb8bb8d05e8130b332cb69751dfd090fabac4",
+        urls = [
+            "https://cdn.confidential.cloud/constellation/cas/sha256/f2df95d5fad8498ad8eeb0be8abdb8bb8d05e8130b332cb69751dfd090fabac4",
+            "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_darwin_arm64",
+        ],
+    )
