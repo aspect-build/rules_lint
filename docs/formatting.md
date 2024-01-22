@@ -19,7 +19,7 @@ multi_formatter_binary(
 )
 ```
 
-Finally, we recommend an alias in the root BUILD file:
+Finally, we recommend an alias in the root BUILD file, so that developers can just type `bazel run format`:
 
 ```starlark
 alias(
