@@ -201,6 +201,7 @@ pinned_maven_install()
 # Use whichever formatter binaries you need:
 load(
     "@aspect_rules_lint//format:repositories.bzl",
+    "fetch_gofumpt",
     "fetch_java_format",
     "fetch_jsonnet",
     "fetch_ktfmt",
@@ -209,6 +210,8 @@ load(
     "fetch_swiftformat",
     "fetch_terraform",
 )
+
+fetch_gofumpt()
 
 fetch_pmd()
 

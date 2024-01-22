@@ -84,6 +84,15 @@ alias(
 )
 
 alias(
+    name = "gofumpt",
+    actual = select({
+        "@io_bazel_rules_go//go/platform:darwin_amd64": "@com_github_mvdan_gofumpt_darwin_amd64//file",
+        "@io_bazel_rules_go//go/platform:darwin_arm64": "@com_github_mvdan_gofumpt_darwin_arm64//file",
+        "@io_bazel_rules_go//go/platform:linux_amd64": "@com_github_mvdan_gofumpt_linux_amd64//file",
+        "@io_bazel_rules_go//go/platform:linux_arm64": "@com_github_mvdan_gofumpt_linux_arm64//file",
+    }),
+)
+alias(
     name = "swiftformat",
     actual = select({
         "@bazel_tools//src/conditions:linux": "@swiftformat",
@@ -132,6 +141,7 @@ shellcheck_binary(name = "shellcheck")
 multi_formatter_binary(
     name = "format",
     cc = "@llvm_toolchain_llvm//:bin/clang-format",
+    # Or ":gofumpt" if you want to use gofumpt instead of gofmt
     go = "@go_sdk//:bin/gofmt",
     java = ":java-format",
     javascript = ":prettier",

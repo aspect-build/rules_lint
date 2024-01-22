@@ -29,7 +29,7 @@ It is also inspired by <https://github.com/github/super-linter>.
 | ---------------------- | --------------------- | ---------------- |
 | C / C++                | [clang-format]        | ([#112])         |
 | CSS                    | [Prettier]            |                  |
-| Go                     | [gofmt]               | [golangci-lint]  |
+| Go                     | [gofmt],[gofumpt]     | [golangci-lint]  |
 | HCL (Hashicorp Config) | [terraform] fmt       |                  |
 | HTML                   | [Prettier]            |                  |
 | JSON                   | [Prettier]            |                  |
@@ -61,6 +61,7 @@ It is also inspired by <https://github.com/github/super-linter>.
 [buildifier]: https://github.com/keith/buildifier-prebuilt
 [prettier-plugin-sql]: https://github.com/un-ts/prettier
 [gofmt]: https://pkg.go.dev/cmd/gofmt
+[gofumpt]: https://github.com/mvdan/gofumpt
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
 [ruff]: https://docs.astral.sh/ruff/

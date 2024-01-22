@@ -5,6 +5,7 @@
 # Needed until Bazel 7 allows MODULE.bazel to directly call repository rules
 load(
     "@aspect_rules_lint//format:repositories.bzl",
+    "fetch_gofumpt",
     "fetch_java_format",
     "fetch_jsonnet",
     "fetch_ktfmt",
@@ -14,6 +15,8 @@ load(
     "fetch_terraform",
 )
 load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
+
+fetch_gofumpt()
 
 fetch_pmd()
 
