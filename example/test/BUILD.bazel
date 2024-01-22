@@ -22,6 +22,15 @@ write_file(
     content = ["public class generated { protected void finalize(int a) {} }"],
 )
 
+write_file(
+    name = "shell_code_generator",
+    out = "generated.sh",
+    content = [
+        "#!/usr/bin/env bash",
+        "[ -z $THING ] && echo 'hello world'",
+    ],
+)
+
 ts_project(
     name = "no_violations",
     srcs = [
@@ -44,6 +53,12 @@ py_library(
 java_library(
     name = "generated_java",
     srcs = ["generated.java"],
+)
+
+sh_library(
+    name = "generated_sh",
+    srcs = ["generated.sh"],
+    tags = ["lint-genfiles"],
 )
 
 flake8_test(
@@ -90,5 +105,12 @@ shellcheck_test(
     srcs = ["//src:hello_shell"],
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
+    tags = ["manual"],
+)
+
+shellcheck_test(
+    name = "shellcheck-generated",
+    srcs = [":generated_sh"],
+    # Expected to fail because the sh_library opted-in to having generated code checked as well
     tags = ["manual"],
 )

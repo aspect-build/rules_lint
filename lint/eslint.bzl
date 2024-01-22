@@ -39,7 +39,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "patch_and_report_files")
+load("//lint/private:lint_aspect.bzl", "filter_srcs", "patch_and_report_files")
 
 _MNEMONIC = "ESLint"
 
@@ -146,7 +146,7 @@ def _eslint_aspect_impl(target, ctx):
         return []
 
     patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
-    files_to_lint = [s for s in ctx.rule.files.srcs if s.is_source]
+    files_to_lint = filter_srcs(ctx.rule)
     eslint_action(ctx, ctx.executable, files_to_lint, report, ctx.attr.fail_on_violation)
     eslint_fix(ctx, ctx.executable, files_to_lint, patch)
     return [info]

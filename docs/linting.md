@@ -70,6 +70,12 @@ Add a [make_lint_test](./lint_test.md) call to the `lint.bzl` file, then use the
 
 See the `example/test/BUILD.bazel` file in this repo for some examples.
 
+## Linting generated files
+
+By default, we filter out generated files from linting.
+
+To bypass this filter, add `tags=["lint-genfiles"]` to a target to force all the `srcs` to be linted.
+
 ## Debugging
 
 Some linters honor the debug flag in this repo. To enable it, add a Bazel flag:
