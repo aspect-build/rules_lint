@@ -32,9 +32,6 @@ Add a file under `src/` that violates one of the linter checks, and add a commen
 can see the linter running. This should basically be a "demo" of how the linter works, without
 rules_lint getting involved yet.
 
-Take a look at this commit as an example of step 1:
-https://github.com/aspect-build/rules_lint/commit/7365b82957dd60898ef1051f5ae94539714a38f4
-
 Please check in a commit at this point to make your PR easier for us to review.
 
 ## Step 2: create linter
@@ -63,18 +60,12 @@ Add these three things:
 Then wire this up into the example and confirm that you can get the same linter result as you did in
 step 1.
 
-Take a look at this commit as an example of step 2:
-https://github.com/aspect-build/rules_lint/commit/29d275bcf7ecf5b99c6bff6913322fe1909302eb
-
 ## Step 3: docs
 
 Add a rule in the `docs/` folder matching the existing ones, so that the API docs are auto-generated.
 Run `bazel run docs:update` to create the Markdown file.
 
 Also add your new linter to the README.
-
-Here's a commit showing what it should look like:
-https://github.com/aspect-build/rules_lint/commit/c3bf01a39c2e68b0b37918620aeafbf8ef0b2d85
 
 ## Step 4: Send the PR!
 
