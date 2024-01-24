@@ -46,7 +46,7 @@ def golangci_lint_action(ctx, executable, srcs, config, report, use_exit_code = 
     if use_exit_code:
         command += " && touch {report}"
     else:
-        command += " 2>{report} || true"
+        command += " >{report} || true"
 
     ctx.actions.run_shell(
         inputs = inputs,
