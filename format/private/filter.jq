@@ -24,12 +24,12 @@ with_entries(select(.key | IN(
 
 # Convert values to filenames and extensions with star prefix
 | with_entries(.value = (
-    .value.filenames + (.value.extensions | map("*" + .))
+    .value.filenames + ( .value.filenames | [.[]? | "*/" + .] ) + (.value.extensions | map("*" + .))
 ))
 
 # Render each language as a line in a Bash case statement, e.g.
 # 'Jsonnet') patterns=('*.jsonnet' '*.libsonnet') ;;
-| to_entries | map(    
+| to_entries | map(
   "'" + .key + "') patterns=(" + (.value | map("'" + . + "'") | join(" ")) + ") ;;"
 )
 
