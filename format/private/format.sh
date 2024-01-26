@@ -14,10 +14,16 @@ cd $BUILD_WORKSPACE_DIRECTORY
 
 function on_exit {
   code=$?
-  if [[ $code != 0 ]]; then
-    echo >&2 "FAILED: A formatter tool exited with code $code"
-    echo >&2 "Try running 'bazel run {{fix_target}}' to fix this."
-  fi
+  case "$code" in
+    # return code 143 is the result of SIGTERM, which isn't failure, so suppress failure suggestion
+    0|143)
+      exit $code;
+      ;;
+    *)
+      echo >&2 "FAILED: A formatter tool exited with code $code"
+      echo >&2 "Try running 'bazel run {{fix_target}}' to fix this."
+      ;;
+  esac
 }
 
 trap on_exit EXIT
@@ -61,7 +67,7 @@ function ls-files {
         exit 1
         ;;
     esac
-    
+
     if [ "$#" -eq 0 ]; then
         # When the formatter is run with no arguments, we run over "all files in the repo".
         # However, we want to ignore anything that is in .gitignore, is marked for delete, etc.
@@ -130,160 +136,86 @@ case "$mode" in
  *) echo >&2 "unknown mode $mode";;
 esac
 
-# Run each supplied formatter over the files it owns
-# TODO: run them concurrently, not serial
+function time-run {
+  local files="$1" && shift
+  local bin="$1" && shift
+  local lang="$1" && shift
+  local silent="$1" && shift
+  local tuser
+  local tsys
 
-files=$(ls-files Starlark $@)
-bin=$(rlocation {{buildifier}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Starlark with Buildifier..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin -mode="$mode"
-fi
+  ( if [ $silent != 0 ] ; then 2>/dev/null ; fi ; echo "$files" | tr \\n \\0 | xargs -0 "$bin" "$@" >&2 ; times ) | ( read _ _ ; read tuser tsys; echo "Formatted ${lang} in ${tuser}" )
 
-files=$(ls-files Markdown $@)
-bin=$(rlocation {{prettier-md}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Markdown with Prettier..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
-fi
+}
 
-files=$(ls-files JSON $@)
-bin=$(rlocation {{prettier}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting JSON with Prettier..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
-fi
+function run-format {
+  local lang="$1" && shift
+  local fmtname="$1" && shift
+  local bin="$1" && shift
+  local args="$1" && shift
+  local tuser
+  local tsys
 
-files=$(ls-files JavaScript $@)
-bin=$(rlocation {{prettier}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting JavaScript with Prettier..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
-fi
-
-files=$(ls-files CSS $@)
-bin=$(rlocation {{prettier}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting CSS with Prettier..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
-fi
-
-files=$(ls-files HTML $@)
-bin=$(rlocation {{prettier}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting HTML with Prettier..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
-fi
-
-files=$(ls-files TypeScript $@)
-bin=$(rlocation {{prettier}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting TypeScript with Prettier..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
-fi
-
-files=$(ls-files TSX $@)
-bin=$(rlocation {{prettier}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting TSX with Prettier..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
-fi
-
-files=$(ls-files SQL $@)
-bin=$(rlocation {{prettier-sql}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting SQL with Prettier..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
-fi
-
-files=$(ls-files Python $@)
-bin=$(rlocation {{ruff}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Python with Ruff..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $ruffmode
-fi
-
-files=$(ls-files Terraform $@)
-bin=$(rlocation {{terraform-fmt}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Terraform files with terraform fmt..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin fmt $tfmode
-fi
-
-files=$(ls-files Jsonnet $@)
-bin=$(rlocation {{jsonnetfmt}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Jsonnet with jsonnetfmt..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $jsonnetmode
-fi
-
-files=$(ls-files Java $@)
-bin=$(rlocation {{java-format}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Java with java-format..."
-  # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
-  echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $javamode
-fi
-
-files=$(ls-files Kotlin $@)
-bin=$(rlocation {{ktfmt}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Kotlin with ktfmt..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $ktmode
-fi
-
-files=$(ls-files Scala $@)
-bin=$(rlocation {{scalafmt}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Scala with scalafmt..."
-  # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
-  echo "$files" | tr \\n \\0 | JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" xargs -0 $bin $scalamode
-fi
-
-files=$(ls-files Go $@)
-bin=$(rlocation {{gofmt}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Go with gofmt..."
-  # gofmt doesn't produce non-zero exit code so we must check for non-empty output
-  # https://github.com/golang/go/issues/24230
-  if [ "$mode" == "check" ]; then
-    NEED_FMT=$(echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode)
-    if [ -n "$NEED_FMT" ]; then
-       echo "Go files not formatted:"
-       echo "$NEED_FMT"
-       exit 1
-    fi
-  else
-    echo "$files" | tr \\n \\0 | xargs -0 $bin $gofmtmode
+  local files=$(ls-files "$lang" $@)
+  if [ -n "$files" ] && [ -n "$bin" ]; then
+    echo "Formatting ${lang} with ${fmtname}..."
+    case "$lang" in
+    'Protocol Buffer')
+        ( for file in $files; do
+          "$bin" $args $file >&2
+        done ; times ) | ( read _ _; read tuser tsys; echo "Formatted ${lang} in ${tuser}" )
+        ;;
+      Go)
+        # gofmt doesn't produce non-zero exit code so we must check for non-empty output
+        # https://github.com/golang/go/issues/24230
+        if [ "$mode" == "check" ]; then
+          GOFMT_OUT=$(mktemp)
+          (echo "$files" | tr \\n \\0 | xargs -0 "$bin" $args > "$GOFMT_OUT" ; times ) | ( read _ _; read tuser tsys; echo "Formatted ${lang} in ${tuser}" )
+          NEED_FMT="$(cat $GOFMT_OUT)"
+          rm $GOFMT_OUT
+          if [ -n "$NEED_FMT" ]; then
+            echo "Go files not formatted:"
+            echo "$NEED_FMT"
+            exit 1
+          fi
+        else
+          time-run "$files" "$bin" "$lang" 0 $args
+        fi
+        ;;
+      Java|Scala)
+          # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
+          ( export JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" ; time-run "$files" "$bin" "$lang" 0 $args )
+        ;;
+      Swift)
+        # for any formatter that must be silenced
+        time-run "$files" "$bin" "$lang" 1 $args
+        ;;
+      *)
+        time-run "$files" "$bin" "$lang" 0 $args
+        ;;
+    esac
   fi
-fi
+}
 
-files=$(ls-files C++ $@)
-bin=$(rlocation {{clang-format}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting C/C++ with clang-format..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $clangformatmode
-fi
+# Run each supplied formatter over the files it owns
 
-files=$(ls-files Shell $@)
-bin=$(rlocation {{shfmt}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Shell with shfmt..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $shfmtmode
-fi
-
-files=$(ls-files Swift $@)
-bin=$(rlocation {{swiftformat}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  # swiftformat itself prints Running SwiftFormat...
-  echo "$files" | tr \\n \\0 | xargs -0 $bin $swiftmode
-fi
-
-files=$(ls-files 'Protocol Buffer' $@)
-bin=$(rlocation {{buf}})
-if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Protobuf with buf..."
-  for file in $files; do
-    $bin $bufmode $file
-  done
-fi
+run-format Starlark Buildifier "$(rlocation {{buildifier}})" "-mode=$mode" $@
+run-format Markdown Prettier "$(rlocation {{prettier-md}})" "$prettiermode" $@
+run-format JSON Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
+run-format JavaScript Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
+run-format CSS Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
+run-format HTML Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
+run-format TypeScript Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
+run-format TSX Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
+run-format SQL Prettier "$(rlocation {{prettier-sql}})" "$prettiermode" $@
+run-format Python Ruff "$(rlocation {{ruff}})" "$ruffmode" $@
+run-format Terraform "terraform fmt" "$(rlocation {{terraform-fmt}})" "fmt $tfmode" $@
+run-format Jsonnet jsonnetfmt "$(rlocation {{jsonnetfmt}})" "$jsonnetmode" $@
+run-format Java java-format "$(rlocation {{java-format}})" "$javamode" $@
+run-format Kotlin ktfmt "$(rlocation {{ktfmt}})" "$ktmode" $@
+run-format Scala scalafmt "$(rlocation {{scalafmt}})" "$scalamode" $@
+run-format Go gofmt "$(rlocation {{gofmt}})" "$gofmtmode" $@
+run-format C++ clang-format "$(rlocation {{clang-format}})" "$clangformatmode" $@
+run-format Shell shfmt "$(rlocation {{shfmt}})" "$shfmtmode" $@
+run-format Swift swiftfmt "$(rlocation {{swiftformat}})" "$swiftmode" $@
+run-format 'Protocol Buffer' buf "$(rlocation {{buf}})" "$bufmode" $@
