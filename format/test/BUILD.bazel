@@ -1,0 +1,36 @@
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//format:defs.bzl", "multi_formatter_binary")
+load("//format/private:formatter_binary.bzl", "TOOLS")
+
+# Avoid depending on a bunch of actual tools in the root module.
+# That's the job of the example/ submodule.
+# Instead, just provide "recording mock" for each formatter we support.
+[
+    write_file(
+        name = "mock_{}_sh".format(t),
+        out = "mock_{}.sh".format(t),
+        content = [
+            "#!/usr/bin/env bash",
+            "echo + {} $*".format(t),
+        ],
+    )
+    for t in TOOLS.values()
+]
+
+[
+    sh_binary(
+        name = "mock_" + t,
+        srcs = ["mock_{}.sh".format(t)],
+    )
+    for t in TOOLS.values()
+]
+
+multi_formatter_binary(
+    name = "format_javascript",
+    javascript = ":mock_prettier.sh",
+)
+
+multi_formatter_binary(
+    name = "format_starlark",
+    starlark = ":mock_buildifier.sh",
+)
