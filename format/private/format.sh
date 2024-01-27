@@ -22,6 +22,10 @@ function on_exit {
 
 trap on_exit EXIT
 
+# Disable globbing, disabling globbing will allow formatting even if there is a match at the top level
+# See https://github.com/aspect-build/rules_lint/issues/122
+set -o noglob
+
 # ls-files <language> [<file>...]
 function ls-files {
     language="$1" && shift;
