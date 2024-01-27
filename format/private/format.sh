@@ -161,6 +161,13 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
 
+files=$(ls-files JSON $@)
+bin=$(rlocation {{prettier-json}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Formatting JSON with Prettier..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
+fi
+
 files=$(ls-files TypeScript $@)
 bin=$(rlocation {{prettier}})
 if [ -n "$files" ] && [ -n "$bin" ]; then

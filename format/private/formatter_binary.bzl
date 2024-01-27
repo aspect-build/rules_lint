@@ -6,6 +6,7 @@ load("@aspect_bazel_lib//lib:paths.bzl", "BASH_RLOCATION_FUNCTION", "to_rlocatio
 _TOOLS = {
     "javascript": "prettier",
     "markdown": "prettier-md",
+    "json": "prettier-json",
     "python": "ruff",
     "starlark": "buildifier",
     "jsonnet": "jsonnetfmt",
