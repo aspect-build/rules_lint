@@ -62,7 +62,7 @@ function ls-files {
 
         # TODO: determine which staged changes we should format; avoid formatting unstaged changes
         # TODO: try to format only modified regions of the file (where supported)
-        git ls-files --cached --modified --other --exclude-standard ${patterns[@]} | {
+        git ls-files --cached --modified --other --exclude-standard "${patterns[@]}" "${patterns[@]/#/*/}" | {
           grep -vE "^$(git ls-files --deleted)$" || true;
         }
     else
