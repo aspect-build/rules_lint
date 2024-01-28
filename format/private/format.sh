@@ -140,6 +140,13 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
 
+files=$(ls-files JSON $@)
+bin=$(rlocation {{prettier}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Formatting JSON with Prettier..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
+fi
+
 files=$(ls-files JavaScript $@)
 bin=$(rlocation {{prettier}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
@@ -178,14 +185,14 @@ fi
 files=$(ls-files SQL $@)
 bin=$(rlocation {{prettier-sql}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Running SQL with Prettier..."
+  echo "Formatting SQL with Prettier..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $prettiermode
 fi
 
 files=$(ls-files Python $@)
 bin=$(rlocation {{ruff}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Python with ruff..."
+  echo "Formatting Python with Ruff..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $ruffmode
 fi
 
