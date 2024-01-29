@@ -16,7 +16,7 @@ bats_load_library "bats-assert"
     assert_output --partial "Formatting TSX with Prettier..."
     assert_output --partial "+ prettier --write example/src/hello.tsx"
     assert_output --partial "Formatting JSON with Prettier..."
-    assert_output --partial "+ prettier --write renovate.json"
+    assert_output --partial "+ prettier --write .bcr/metadata.template.json"
     assert_output --partial "Formatting CSS with Prettier..."
     assert_output --partial "+ prettier --write example/src/hello.css"
     assert_output --partial "Formatting HTML with Prettier..."
@@ -38,8 +38,7 @@ bats_load_library "bats-assert"
 
     assert_output --partial "Formatting Starlark with Buildifier..."
     assert_output --partial "+ buildifier -mode=fix BUILD.bazel"
-    # FIXME(#122): this was broken by #105
-    # assert_output --partial "format/private/BUILD.bazel"
+    assert_output --partial "format/private/BUILD.bazel"
 }
 
 @test "should run prettier on Markdown" {
@@ -47,7 +46,7 @@ bats_load_library "bats-assert"
     assert_success
 
     assert_output --partial "Formatting Markdown with Prettier..."
-    assert_output --partial "+ prettier --write CONTRIBUTING.md README.md"
+    assert_output --partial "+ prettier --write .bcr/README.md CONTRIBUTING.md README.md"
 }
 
 @test "should run prettier on SQL" {
