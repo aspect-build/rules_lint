@@ -29,7 +29,7 @@ It is also inspired by <https://github.com/github/super-linter>.
 | ---------------------- | --------------------- | ---------------- |
 | C / C++                | [clang-format]        | ([#112])         |
 | CSS                    | [Prettier]            |                  |
-| Go                     | [gofmt],[gofumpt]     | [golangci-lint]  |
+| Go                     | [gofmt] or [gofumpt]  | [golangci-lint]  |
 | HCL (Hashicorp Config) | [terraform] fmt       |                  |
 | HTML                   | [Prettier]            |                  |
 | JSON                   | [Prettier]            |                  |
