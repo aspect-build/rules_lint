@@ -1,5 +1,5 @@
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
-load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -37,6 +37,18 @@ sh_library(
 go_binary(
     name = "hello_go",
     srcs = ["hello.go"],
+)
+
+go_binary(
+    name = "hello2_go",
+    srcs = ["hello2.go"],
+    deps = [":hello_go_helper"],
+)
+
+go_library(
+    name = "hello_go_helper",
+    srcs = ["hello_helper.go"],
+    importpath = "github.com/aspect-build/rules_lint/example/src/hello_helper",
 )
 
 cc_binary(
