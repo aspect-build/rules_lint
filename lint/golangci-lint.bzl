@@ -69,7 +69,12 @@ def _golangci_lint_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    golangci_lint_action(ctx, ctx.executable._golangci_lint, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr.fail_on_violation)
+
+    srcs = filter_srcs(ctx.rule)
+    if not srcs:
+        return []
+
+    golangci_lint_action(ctx, ctx.executable._golangci_lint, srcs, ctx.file._config_file, report, ctx.attr.fail_on_violation)
     return [info]
 
 def golangci_lint_aspect(binary, config):
