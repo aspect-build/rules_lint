@@ -38,6 +38,9 @@ jobs:
           support-version: "0.3.0"
           assert-path: /usr/lib/bats/bats-assert
           assert-version: "2.1.0"
-      - name: Integration test
+      - name: "Integration test: example"
         working-directory: example
+        run: bats ./test
+      - name: "Integration test: format"
+        working-directory: format
         run: bats ./test

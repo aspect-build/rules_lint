@@ -3,7 +3,7 @@
 load("@aspect_bazel_lib//lib:paths.bzl", "BASH_RLOCATION_FUNCTION", "to_rlocation_path")
 
 # Per the formatter design, each language can only have a single formatter binary
-_TOOLS = {
+TOOLS = {
     "javascript": "prettier",
     "markdown": "prettier-md",
     "python": "ruff",
@@ -22,17 +22,23 @@ _TOOLS = {
 }
 
 def _formatter_binary_impl(ctx):
-    # We need to fill in the rlocation paths in the shell script
-    substitutions = {
-        "{{BASH_RLOCATION_FUNCTION}}": BASH_RLOCATION_FUNCTION,
-        "{{fix_target}}": str(ctx.label),
-    }
-    tools = {v: getattr(ctx.attr, k) for k, v in _TOOLS.items()}
+    substitutions = {}
+    tools = {v: getattr(ctx.attr, k) for k, v in TOOLS.items()}
     for tool, attr in tools.items():
         if attr:
             substitutions["{{%s}}" % tool] = to_rlocation_path(ctx, attr.files_to_run.executable)
+    if len(substitutions) == 0:
+        fail("multi_formatter_binary should have at least one language attribute set to a formatter tool")
 
-    bin = ctx.actions.declare_file("format.sh")
+    substitutions.update({
+        # We need to fill in the rlocation paths in the shell script
+        "{{BASH_RLOCATION_FUNCTION}}": BASH_RLOCATION_FUNCTION,
+        # Support helpful error reporting
+        "{{fix_target}}": str(ctx.label),
+    })
+
+    # Uniquely named output file allowing more than one formatter in a package
+    bin = ctx.actions.declare_file("_{}.fmt.sh".format(ctx.label.name))
     ctx.actions.expand_template(
         template = ctx.file._bin,
         output = bin,
@@ -66,7 +72,7 @@ formatter_binary_lib = struct(
     implementation = _formatter_binary_impl,
     attrs = dict({
         k: attr.label(doc = "a binary target that runs {} (or another tool with compatible CLI arguments)".format(v), executable = True, cfg = "exec", allow_files = True)
-        for k, v in _TOOLS.items()
+        for k, v in TOOLS.items()
     }, **{
         "_bin": attr.label(default = "//format/private:format.sh", allow_single_file = True),
         "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
