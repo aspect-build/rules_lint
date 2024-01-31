@@ -11,6 +11,8 @@ load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 load("@rules_java//java:defs.bzl", "java_binary")
 load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
+load("@rules_rust//rust:toolchain.bzl", "current_rustfmt_toolchain")
+load(":rustfmt.bzl", "rustfmt_binary")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -92,6 +94,7 @@ alias(
         "@io_bazel_rules_go//go/platform:linux_arm64": "@com_github_mvdan_gofumpt_linux_arm64//file",
     }),
 )
+
 alias(
     name = "swiftformat",
     actual = select({
@@ -135,6 +138,17 @@ native_binary(
     out = "golangci-lint",
 )
 
+current_rustfmt_toolchain(
+    name = "rustfmt_current_toolchain",
+)
+
+rustfmt_binary(
+    name = "rustfmt",
+    toolchains = [
+        ":rustfmt_current_toolchain",
+    ],
+)
+
 # bazel run :shellcheck -- --help
 shellcheck_binary(name = "shellcheck")
 
@@ -150,6 +164,7 @@ multi_formatter_binary(
     markdown = ":prettier",
     protobuf = ":buf",
     python = ":ruff",
+    rust = ":rustfmt",
     scala = ":scalafmt",
     sh = ":shfmt",
     sql = ":prettier",

@@ -12,6 +12,7 @@ bazel_dep(name = "rules_jvm_external", version = "4.5")
 bazel_dep(name = "rules_go", version = "0.42.0", repo_name = "io_bazel_rules_go")
 bazel_dep(name = "rules_proto", version = "5.3.0-21.7")
 bazel_dep(name = "rules_python", version = "0.26.0")
+bazel_dep(name = "rules_rust", version = "0.38.0")
 bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 bazel_dep(name = "platforms", version = "0.0.7")
 
@@ -85,6 +86,42 @@ use_repo(
     "maven",
     "unpinned_maven",
 )
+
+#### Rust ####
+
+RUST_VERSION = "1.75.0"
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = [RUST_VERSION],
+)
+
+# # We need to express that building Rust on darwin/aarch64 should use the toolchain
+# # for darwin/amd64. The bzlmod integration for rules_rust does not currently expose
+# # that functionality, so we have a small module extension to do this.
+# # This should be removed once the bzlmod integration in rules_rust matures sufficiently.
+# rust_repository_sets = use_extension("//build/bzlmod:rust.bzl", "rust_repository_sets")
+# rust_repository_sets.repo_set(
+#     name = "macos_x86_64",
+#     exec_triple = "aarch64-apple-darwin",
+#     extra_target_triples = ["x86_64-apple-darwin"],
+#     versions = [RUST_VERSION],
+# )
+# rust_repository_sets.repo_set(
+#     name = "linux_aarch64",
+#     exec_triple = "x86_64-unknown-linux-gnu",
+#     extra_target_triples = ["aarch64-unknown-linux-gnu"],
+#     versions = [RUST_VERSION],
+# )
+# use_repo(
+#     rust_repository_sets,
+#     "extra_rust_toolchains",
+# )
+
+# register_toolchains(
+#     "@extra_rust_toolchains//:all",
+# )
 
 buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
 use_repo(buf, "rules_buf_toolchains")

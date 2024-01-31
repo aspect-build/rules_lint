@@ -42,6 +42,7 @@ function ls-files {
       'Markdown') patterns=('contents.lr' '*.md' '*.livemd' '*.markdown' '*.mdown' '*.mdwn' '*.mkd' '*.mkdn' '*.mkdown' '*.ronn' '*.scd' '*.workbook') ;;
       'Protocol Buffer') patterns=('*.proto') ;;
       'Python') patterns=('.gclient' 'DEPS' 'SConscript' 'SConstruct' 'wscript' '*.py' '*.cgi' '*.fcgi' '*.gyp' '*.gypi' '*.lmi' '*.py3' '*.pyde' '*.pyi' '*.pyp' '*.pyt' '*.pyw' '*.rpy' '*.spec' '*.tac' '*.wsgi' '*.xpy') ;;
+      'Rust') patterns=('*.rs') ;;
       'SQL') patterns=('*.sql' '*.cql' '*.ddl' '*.inc' '*.mysql' '*.prc' '*.tab' '*.udf' '*.viw') ;;
       'Scala') patterns=('*.scala' '*.kojo' '*.sbt' '*.sc') ;;
       'Shell') patterns=('.bash_aliases' '.bash_functions' '.bash_history' '.bash_logout' '.bash_profile' '.bashrc' '.cshrc' '.flaskenv' '.kshrc' '.login' '.profile' '.zlogin' '.zlogout' '.zprofile' '.zshenv' '.zshrc' '9fs' 'PKGBUILD' 'bash_aliases' 'bash_logout' 'bash_profile' 'bashrc' 'cshrc' 'gradlew' 'kshrc' 'login' 'man' 'profile' 'zlogin' 'zlogout' 'zprofile' 'zshenv' 'zshrc' '*.sh' '*.bash' '*.bats' '*.cgi' '*.command' '*.fcgi' '*.ksh' '*.sh.in' '*.tmux' '*.tool' '*.trigger' '*.zsh' '*.zsh-theme') ;;
@@ -54,7 +55,7 @@ function ls-files {
         exit 1
         ;;
     esac
-    
+
     if [ "$#" -eq 0 ]; then
         # When the formatter is run with no arguments, we run over "all files in the repo".
         # However, we want to ignore anything that is in .gitignore, is marked for delete, etc.
@@ -100,6 +101,7 @@ case "$mode" in
    bufmode="format -d --exit-code"
    tfmode="-check -diff"
    jsonnetmode="--test"
+   rustfmtmode="--write-mode=diff"
    scalamode="--test"
    clangformatmode="--style=file --fallback-style=none --dry-run"
    ;;
@@ -117,6 +119,7 @@ case "$mode" in
    bufmode="format -w"
    tfmode=""
    jsonnetmode="--in-place"
+   rustfmtmode="--write-mode=overwrite"
    scalamode=""
    clangformatmode="-style=file --fallback-style=none -i"
    ;;
@@ -256,6 +259,13 @@ bin=$(rlocation {{clang-format}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting C/C++ with clang-format..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin $clangformatmode
+fi
+
+files=$(ls-files Rust $@)
+bin=$(rlocation {{rustfmt}})
+if [ -n "$files" ] && [ -n "$bin" ]; then
+  echo "Formatting Rust with rustfmt..."
+  echo "$files" | tr \\n \\0 | xargs -0 $bin
 fi
 
 files=$(ls-files Shell $@)

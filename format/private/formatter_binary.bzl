@@ -15,6 +15,7 @@ TOOLS = {
     "scala": "scalafmt",
     "swift": "swiftformat",
     "go": "gofmt",
+    "rust": "rustfmt",
     "sql": "prettier-sql",
     "sh": "shfmt",
     "protobuf": "buf",

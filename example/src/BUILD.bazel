@@ -1,5 +1,6 @@
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -42,4 +43,9 @@ go_binary(
 cc_binary(
     name = "hello_cc",
     srcs = ["hello.cpp"],
+)
+
+rust_binary(
+    name = "hello_rust",
+    srcs = ["hello.rs"],
 )
