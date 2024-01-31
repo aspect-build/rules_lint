@@ -265,7 +265,7 @@ files=$(ls-files Rust $@)
 bin=$(rlocation {{rustfmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "Formatting Rust with rustfmt..."
-  echo "$files" | tr \\n \\0 | xargs -0 $bin
+  echo "$files" | tr \\n \\0 | xargs -0 $bin $rustfmtmode
 fi
 
 files=$(ls-files Shell $@)
