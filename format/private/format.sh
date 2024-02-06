@@ -101,7 +101,7 @@ case "$mode" in
    tfmode="-check -diff"
    jsonnetmode="--test"
    scalamode="--test"
-   clangformatmode="--style=file --fallback-style=none --dry-run"
+   clangformatmode="--style=file --fallback-style=none --dry-run -Werror"
    ;;
  fix)
    swiftmode=""
