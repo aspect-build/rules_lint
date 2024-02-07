@@ -5,3 +5,4 @@ lint:
     - //tools:lint.bzl%flake8
     - //tools:lint.bzl%pmd
     - //tools:lint.bzl%ruff
+    - //tools:lint.bzl%vale

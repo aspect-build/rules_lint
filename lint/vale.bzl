@@ -18,7 +18,8 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
     # Wire command-line options, see output of vale --help
     args = ctx.actions.args()
     args.add_all(srcs)
-    args.add_all(["--stylesPath", styles.path])
+    args.add_all(["--config", config[0]])
+    # args.add_all(["--stylesPath", styles.path])
 
     if use_exit_code:
         fail()
