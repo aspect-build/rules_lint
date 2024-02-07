@@ -13,13 +13,12 @@ _MNEMONIC = "Vale"
 # buildifier: disable=function-docstring
 def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = False):
     # First action, create an ini file with the StylesPath
-    inputs = srcs + config + [styles]
+    inputs = srcs + [config, styles]
 
     # Wire command-line options, see output of vale --help
     args = ctx.actions.args()
     args.add_all(srcs)
-    args.add_all(["--config", config[0]])
-    # args.add_all(["--stylesPath", styles.path])
+    args.add_all(["--config", config])
 
     if use_exit_code:
         fail()
@@ -39,12 +38,12 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
 def _vale_aspect_impl(target, ctx):
     if ctx.rule.kind in ["filegroup"]:  # TODO: look for tag too
         report, info = report_file(_MNEMONIC, target, ctx)
-        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, ctx.file._styles, ctx.files._config, report, ctx.attr.fail_on_violation)
+        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, ctx.file._styles, ctx.file._config, report, ctx.attr.fail_on_violation)
         return [info]
 
     return []
 
-def vale_aspect(binary, configs, styles):
+def vale_aspect(binary, config, styles):
     """A factory function to create a linter aspect.
     """
     return aspect(
@@ -56,12 +55,11 @@ def vale_aspect(binary, configs, styles):
                 executable = True,
                 cfg = "exec",
             ),
-            "_config": attr.label_list(
-                allow_files = True,
+            "_config": attr.label(
+                allow_single_file = True,
                 mandatory = True,
-                allow_empty = False,
-                doc = "Config files",
-                default = configs,
+                doc = "Config file",
+                default = config,
             ),
             "_styles": attr.label(
                 default = styles,
