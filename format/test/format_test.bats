@@ -69,7 +69,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_hcl
     assert_success
 
-    assert_output --partial "Formatting Hashicorp Config Language with terraform fmt..."
+    assert_output --partial "Formatting Terraform files with terraform fmt..."
     assert_output --partial "+ terraform-fmt fmt example/src/hello.tf"
 }
 
