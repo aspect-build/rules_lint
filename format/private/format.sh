@@ -32,7 +32,6 @@ function ls-files {
       'C++') patterns=('*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
       'CSS') patterns=('*.css') ;;
       'Go') patterns=('*.go') ;;
-      'HCL') patterns=('*.hcl' '*.nomad' '*.tf' '*.tfvars' '*.workflow') ;;
       'HTML') patterns=('*.html' '*.hta' '*.htm' '*.html.hl' '*.inc' '*.xht' '*.xhtml') ;;
       'JSON') patterns=('.all-contributorsrc' '.arcconfig' '.auto-changelog' '.c8rc' '.htmlhintrc' '.imgbotconfig' '.nycrc' '.tern-config' '.tern-project' '.watchmanconfig' 'Pipfile.lock' 'composer.lock' 'deno.lock' 'flake.lock' 'mcmod.info' '*.json' '*.4DForm' '*.4DProject' '*.avsc' '*.geojson' '*.gltf' '*.har' '*.ice' '*.JSON-tmLanguage' '*.jsonl' '*.mcmeta' '*.tfstate' '*.tfstate.backup' '*.topojson' '*.webapp' '*.webmanifest' '*.yy' '*.yyp') ;;
       'Java') patterns=('*.java' '*.jav' '*.jsh') ;;
@@ -49,6 +48,14 @@ function ls-files {
       'Swift') patterns=('*.swift') ;;
       'TSX') patterns=('*.tsx') ;;
       'TypeScript') patterns=('*.ts' '*.cts' '*.mts') ;;
+
+      # Note: terraform fmt cannot handle all HCL files such as .terraform.lock
+      # "Only .tf and .tfvars files can be processed with terraform fmt"
+      # so we define a custom language here instead of 'HCL' from github-linguist definition for the language.
+      # TODO: we should probably use https://terragrunt.gruntwork.io/docs/reference/cli-options/#hclfmt instead
+      # which does support the entire HCL language FWICT
+      'Terraform') patterns=('*.tf' '*.tfvars') ;;
+
       *)
         echo >&2 "Internal error: unknown language $language"
         exit 1
@@ -196,10 +203,10 @@ if [ -n "$files" ] && [ -n "$bin" ]; then
   echo "$files" | tr \\n \\0 | xargs -0 $bin $ruffmode
 fi
 
-files=$(ls-files HCL $@)
+files=$(ls-files Terraform $@)
 bin=$(rlocation {{terraform-fmt}})
 if [ -n "$files" ] && [ -n "$bin" ]; then
-  echo "Formatting Hashicorp Config Language with terraform fmt..."
+  echo "Formatting Terraform files with terraform fmt..."
   echo "$files" | tr \\n \\0 | xargs -0 $bin fmt $tfmode
 fi
 
