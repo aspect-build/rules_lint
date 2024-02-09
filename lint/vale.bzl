@@ -20,9 +20,17 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
     args = ctx.actions.args()
     args.add_all(srcs)
     args.add_all(["--config", config])
+    args.add_all(["--output", "line"])
 
     if use_exit_code:
-        fail()
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = [report],
+            command = executable.path + " $@ && touch " + report.path,
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+            tools = [executable],
+        )
     else:
         ctx.actions.run_shell(
             inputs = inputs,
