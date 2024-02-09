@@ -29,6 +29,7 @@ expand_template(
     name = "vale_ini",
     data = ["//tools:vale_styles"],
     substitutions = {
+        # Up three directory segments for bazel-out/arch/bin
         "{StylesPath}": "../../../$(execpath //tools:vale_styles)",
     },
     template = ".vale.ini",

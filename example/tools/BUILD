@@ -7,6 +7,7 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
+load("@aspect_rules_lint//lint:vale_library.bzl", "VALE_STYLES")
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
@@ -93,6 +94,7 @@ alias(
         "@io_bazel_rules_go//go/platform:linux_arm64": "@com_github_mvdan_gofumpt_linux_arm64//file",
     }),
 )
+
 alias(
     name = "swiftformat",
     actual = select({
@@ -151,9 +153,11 @@ native_binary(
 
 copy_to_directory(
     name = "vale_styles",
+    # Collect every style here, as a test that our code to fetch them is working.
+    # Most users should just copy in the styles that are referenced in their .vale.ini file.
     srcs = [
-        "@vale_Google//:Google",
-        "@vale_write-good//:write-good",
+        "@vale_{0}//:{0}".format(s)
+        for s in VALE_STYLES
     ],
     include_external_repositories = ["vale_*"],
 )
