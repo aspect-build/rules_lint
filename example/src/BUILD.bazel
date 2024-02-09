@@ -3,6 +3,12 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
 package(default_visibility = ["//visibility:public"])
 
+filegroup(
+    name = "md",
+    srcs = ["README.md"],
+    tags = ["markdown"],
+)
+
 ts_project(
     name = "ts",
     srcs = ["file.ts"],

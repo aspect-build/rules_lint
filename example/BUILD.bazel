@@ -1,3 +1,4 @@
+load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
@@ -46,4 +47,10 @@ js_library(
 alias(
     name = "format",
     actual = "//tools:format",
+)
+
+copy_to_bin(
+    name = ".vale_ini",
+    srcs = [".vale.ini"],
+    visibility = ["//src:__subpackages__"],
 )

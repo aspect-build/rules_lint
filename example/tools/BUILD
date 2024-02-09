@@ -4,8 +4,10 @@ This is in its own package because it has so many loading-time symbols,
 we don't want to trigger eager fetches of these for builds that don't want to run format.
 """
 
+load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
 load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
+load("@aspect_rules_lint//lint:vale_library.bzl", "VALE_STYLES")
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
@@ -92,6 +94,7 @@ alias(
         "@io_bazel_rules_go//go/platform:linux_arm64": "@com_github_mvdan_gofumpt_linux_arm64//file",
     }),
 )
+
 alias(
     name = "swiftformat",
     actual = select({
@@ -133,6 +136,32 @@ native_binary(
         },
     ),
     out = "golangci-lint",
+)
+
+native_binary(
+    name = "vale",
+    src = select(
+        {
+            "@bazel_tools//src/conditions:linux_x86_64": "@vale_Linux_64-bit//:vale",
+            "@bazel_tools//src/conditions:linux_aarch64": "@vale_Linux_arm64//:vale",
+            "@bazel_tools//src/conditions:darwin_x86_64": "@vale_macOS_64-bit//:vale",
+            "@bazel_tools//src/conditions:darwin_arm64": "@vale_macOS_arm64//:vale",
+        },
+    ),
+    out = "vale",
+)
+
+copy_to_directory(
+    name = "vale_styles",
+    srcs = [
+        "@vale_{0}//:{0}".format(s)
+        for s in VALE_STYLES
+        # Restrict to subset like Google and write-good to avoid GHA cache getting huge and exhasting disk.
+        # Comment this out to test that our code to fetch them is working.
+        # Most users should just copy in the styles that are referenced in their .vale.ini file.
+        if "oo" in s
+    ],
+    include_external_repositories = ["vale_*"],
 )
 
 # bazel run :shellcheck -- --help
