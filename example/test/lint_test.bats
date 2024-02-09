@@ -32,7 +32,7 @@ EOF
 	assert_output --partial 'src/hello.go:13:2: SA1006: printf-style function with dynamic format string and no further arguments should use print-style function instead (staticcheck)'
 
 	# Vale
-	assert_output --partial 'src/README.md:3:47:Google.We:Try to avoid using first-person plural like 'We'.'
+	assert_output --partial "src/README.md:3:47:Google.We:Try to avoid using first-person plural like 'We'."
 }
 
 @test "should produce reports" {
