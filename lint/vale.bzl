@@ -45,7 +45,11 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
 
 # buildifier: disable=function-docstring
 def _vale_aspect_impl(target, ctx):
-    if ctx.rule.kind in ["filegroup"]:  # TODO: look for tag too
+    # There's no "official" markdown_library rule.
+    # Users might want to try https://github.com/dwtj/dwtj_rules_markdown but we expect many won't
+    # want to take that dependency.
+    # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
+    if ctx.rule.kind == "markdown_library" or (ctx.rule.kind == "filegroup" and "markdown" in ctx.rule.attr.tags):
         report, info = report_file(_MNEMONIC, target, ctx)
         vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, ctx.file._styles, ctx.file._config, report, ctx.attr.fail_on_violation)
         return [info]
