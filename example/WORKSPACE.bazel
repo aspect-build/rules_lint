@@ -43,6 +43,10 @@ http_archive(
     url = "https://github.com/aspect-build/bazel-lib/releases/download/v1.38.0/bazel-lib-v1.38.0.tar.gz",
 )
 
+load("@aspect_bazel_lib//lib:repositories.bzl", "register_expand_template_toolchains")
+
+register_expand_template_toolchains()
+
 http_archive(
     name = "aspect_rules_js",
     sha256 = "a949d56fed8fa0a8dd82a0a660acc949253a05b2b0c52a07e4034e27f11218f6",

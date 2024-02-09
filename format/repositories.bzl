@@ -126,6 +126,7 @@ def fetch_java_format():
 def fetch_ktfmt():
     http_jar(
         name = "ktfmt",
+        integrity = "sha256-l/x/vRlNAan6RdgUfAVSQDAD1VusSridhNe7TV4/SN4=",
         url = "https://repo1.maven.org/maven2/com/facebook/ktfmt/0.46/ktfmt-0.46-jar-with-dependencies.jar",
     )
 
