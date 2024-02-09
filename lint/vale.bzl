@@ -90,7 +90,9 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
     # We don't try to use copy_file_to_bin_action because the config file is likely not in the same
     # package as the aspect is visiting, so we won't be allowed to write to it and will just fail
     # in bazel-lib with _file_in_different_package_error_msg
-    inputs = srcs + [config, styles]
+    inputs = srcs + [config]
+    if styles:
+        inputs.append(styles)
 
     # Wire command-line options, see output of vale --help
     args = ctx.actions.args()
@@ -99,23 +101,21 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
     args.add_all(["--output", "line"])
 
     if use_exit_code:
-        ctx.actions.run_shell(
-            inputs = inputs,
-            outputs = [report],
-            command = executable.path + " $@ && touch " + report.path,
-            arguments = [args],
-            mnemonic = _MNEMONIC,
-            tools = [executable],
-        )
+        command = "{vale} $@ && touch {report}"
     else:
-        ctx.actions.run_shell(
-            inputs = inputs,
-            outputs = [report],
-            tools = [executable],
-            arguments = [args],
-            command = executable.path + " $@ >" + report.path,
-            mnemonic = _MNEMONIC,
-        )
+        command = "{vale} $@ 2>{report} || true"
+
+    ctx.actions.run_shell(
+        inputs = inputs,
+        outputs = [report],
+        command = command.format(
+            vale = executable.path,
+            report = report.path,
+        ),
+        arguments = [args],
+        mnemonic = _MNEMONIC,
+        tools = [executable],
+    )
 
     return []
 
@@ -127,12 +127,19 @@ def _vale_aspect_impl(target, ctx):
     # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
     if ctx.rule.kind == "markdown_library" or (ctx.rule.kind == "filegroup" and "markdown" in ctx.rule.attr.tags):
         report, info = report_file(_MNEMONIC, target, ctx)
-        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, ctx.file._styles, ctx.file._config, report, ctx.attr.fail_on_violation)
+        styles = None
+        if ctx.files._styles:
+            if len(ctx.files._styles) != 1:
+                fail("Only a single directory should be in styles")
+            styles = ctx.files._styles[0]
+            if not styles.is_directory:
+                fail("Styles should be a directory containing installed styles")
+        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, ctx.attr.fail_on_violation)
         return [info]
 
     return []
 
-def vale_aspect(binary, config, styles):
+def vale_aspect(binary, config, styles = Label("//lint:empty")):
     """A factory function to create a linter aspect."""
     return aspect(
         implementation = _vale_aspect_impl,
@@ -151,7 +158,7 @@ def vale_aspect(binary, config, styles):
             ),
             "_styles": attr.label(
                 default = styles,
-                allow_single_file = True,
+                #allow_single_file = True,
             ),
         },
     )

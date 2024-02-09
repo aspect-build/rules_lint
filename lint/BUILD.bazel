@@ -4,6 +4,12 @@ load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
 exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
 
+filegroup(
+    name = "empty",
+    srcs = [],
+    visibility = ["//visibility:public"],
+)
+
 config_setting(
     name = "linux_x86",
     constraint_values = [
