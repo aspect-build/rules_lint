@@ -1,4 +1,4 @@
-load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
+load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
@@ -24,17 +24,6 @@ exports_files(
     visibility = ["//visibility:public"],
 )
 
-# Workaround for https://github.com/errata-ai/vale/issues/755
-expand_template(
-    name = "vale_ini",
-    data = ["//tools:vale_styles"],
-    substitutions = {
-        # Up three directory segments for bazel-out/arch/bin
-        "{StylesPath}": "../../../$(execpath //tools:vale_styles)",
-    },
-    template = ".vale.ini",
-)
-
 js_library(
     name = "eslintrc",
     srcs = [".eslintrc.cjs"],
@@ -58,4 +47,10 @@ js_library(
 alias(
     name = "format",
     actual = "//tools:format",
+)
+
+copy_to_bin(
+    name = ".vale_ini",
+    srcs = [".vale.ini"],
+    visibility = ["//src:__subpackages__"],
 )

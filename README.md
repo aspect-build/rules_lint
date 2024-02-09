@@ -20,7 +20,7 @@ https://github.com/google/shipshape is an old, abandoned attempt to open-source 
 It is also inspired by <https://github.com/github/super-linter>.
 
 [aspect cli]: https://docs.aspect.build/v/cli
-[tricorder]: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/43322.pdf
+[tricorder]: https://static.googleusercontent.com/media/research.google.com/en/pubs/archive/43322.pdf
 [reviewdog]: https://github.com/reviewdog/reviewdog
 
 ## Supported tools
@@ -37,7 +37,7 @@ It is also inspired by <https://github.com/github/super-linter>.
 | JavaScript             | [Prettier]            | [ESLint]         |
 | Jsonnet                | [jsonnetfmt]          |                  |
 | Kotlin                 | [ktfmt]               |                  |
-| Markdown               | [Prettier]            |                  |
+| Markdown               | [Prettier]            | [Vale]           |
 | Protocol Buffer        | [buf]                 | [buf lint]       |
 | Python                 | [ruff]                | [flake8], [ruff] |
 | SQL                    | [prettier-plugin-sql] |                  |
@@ -70,6 +70,7 @@ It is also inspired by <https://github.com/github/super-linter>.
 [golangci-lint]: https://github.com/golangci/golangci-lint
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 [#112]: https://github.com/aspect-build/rules_lint/issues/112
+[vale]: https://vale.sh/
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift

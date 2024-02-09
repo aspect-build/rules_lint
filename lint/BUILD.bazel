@@ -130,3 +130,28 @@ bzl_library(
     srcs = ["ruff_versions.bzl"],
     visibility = ["//visibility:public"],
 )
+
+bzl_library(
+    name = "vale",
+    srcs = ["vale.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":vale_library",
+        ":vale_versions",
+        "//lint/private:lint_aspect",
+        "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "@bazel_tools//tools/build_defs/repo:utils.bzl",
+    ],
+)
+
+bzl_library(
+    name = "vale_versions",
+    srcs = ["vale_versions.bzl"],
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "vale_library",
+    srcs = ["vale_library.bzl"],
+    visibility = ["//visibility:public"],
+)
