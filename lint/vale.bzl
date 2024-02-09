@@ -68,7 +68,8 @@ vale = vale_aspect(
     binary = "@@//tools:vale",
     # A copy_to_bin rule that places the .vale.ini file into bazel-bin
     config = "@@//:.vale_ini",
-    # A copy_to_directory rule that "installs" the styles together into a single folder
+    # Optional.
+    # A copy_to_directory rule that "installs" custom styles together into a single folder
     styles = "@@//tools:vale_styles",
 )
 ```
@@ -103,7 +104,7 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
     if use_exit_code:
         command = "{vale} $@ && touch {report}"
     else:
-        command = "{vale} $@ 2>{report} || true"
+        command = "{vale} $@ >{report} || true"
 
     ctx.actions.run_shell(
         inputs = inputs,
@@ -116,8 +117,6 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
         mnemonic = _MNEMONIC,
         tools = [executable],
     )
-
-    return []
 
 # buildifier: disable=function-docstring
 def _vale_aspect_impl(target, ctx):
@@ -139,7 +138,7 @@ def _vale_aspect_impl(target, ctx):
 
     return []
 
-def vale_aspect(binary, config, styles = Label("//lint:empty")):
+def vale_aspect(binary, config, styles = Label("//lint:empty_styles")):
     """A factory function to create a linter aspect."""
     return aspect(
         implementation = _vale_aspect_impl,
@@ -158,7 +157,6 @@ def vale_aspect(binary, config, styles = Label("//lint:empty")):
             ),
             "_styles": attr.label(
                 default = styles,
-                #allow_single_file = True,
             ),
         },
     )

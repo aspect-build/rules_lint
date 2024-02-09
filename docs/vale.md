@@ -70,7 +70,8 @@ vale = vale_aspect(
     binary = "@@//tools:vale",
     # A copy_to_bin rule that places the .vale.ini file into bazel-bin
     config = "@@//:.vale_ini",
-    # A copy_to_directory rule that "installs" the styles together into a single folder
+    # Optional.
+    # A copy_to_directory rule that "installs" custom styles together into a single folder
     styles = "@@//tools:vale_styles",
 )
 ```
@@ -135,6 +136,6 @@ A factory function to create a linter aspect.
 | :------------- | :------------- | :------------- |
 | <a id="vale_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="vale_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
-| <a id="vale_aspect-styles"></a>styles |  <p align="center"> - </p>   |  none |
+| <a id="vale_aspect-styles"></a>styles |  <p align="center"> - </p>   |  <code>Label("//lint:empty_styles")</code> |
 
 

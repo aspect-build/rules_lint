@@ -4,8 +4,9 @@ load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
 exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
 
+# Used as a default for vale_aspect#styles
 filegroup(
-    name = "empty",
+    name = "empty_styles",
     srcs = [],
     visibility = ["//visibility:public"],
 )
