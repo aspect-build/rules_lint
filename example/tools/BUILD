@@ -153,11 +153,13 @@ native_binary(
 
 copy_to_directory(
     name = "vale_styles",
-    # Collect every style here, as a test that our code to fetch them is working.
-    # Most users should just copy in the styles that are referenced in their .vale.ini file.
     srcs = [
         "@vale_{0}//:{0}".format(s)
         for s in VALE_STYLES
+        # Restrict to subset like Google and write-good to avoid GHA cache getting huge and exhasting disk.
+        # Comment this out to test that our code to fetch them is working.
+        # Most users should just copy in the styles that are referenced in their .vale.ini file.
+        if "oo" in s
     ],
     include_external_repositories = ["vale_*"],
 )
