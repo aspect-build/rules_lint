@@ -6,7 +6,7 @@ API for declaring a golangci-lint lint aspect that visits go_library, go_test, a
 load("@aspect_rules_lint//lint:golangci-lint.bzl", "golangci_lint_aspect")
 
 golangci_lint = golangci_lint_aspect(
-    binary = "@@//tools:golangci-lint",
+    binary = "@@//tools:golangci_lint",
     config = "@@//:.golangci.yaml",
 )
 ```
