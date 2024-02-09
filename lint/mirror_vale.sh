@@ -37,9 +37,6 @@ curl > $RELEASES \
 
 jq "$JQ_FILTER" <$RELEASES >$RAW
 
-echo "RAW"
-cat $RAW
-
 # Combine the new versions with the existing ones.
 # New versions should appear first, but existing content should overwrite new
 CURRENT=$(mktemp)
@@ -47,11 +44,12 @@ python3 -c "import json; exec(open('$SCRIPT_DIR/vale_versions.bzl').read()); pri
 OUT=$(mktemp)
 jq --slurp '.[0] * .[1]' $RAW $CURRENT > $OUT
 
-# FIXME: Replace placeholder sha256 with their content from checksums.txt
-
 # Overwrite the file with updated content
 (
   echo '"This file is automatically updated by mirror_vale.sh"'
   echo -n "VALE_VERSIONS = "
   cat $OUT
 )>$SCRIPT_DIR/vale_versions.bzl
+
+echo "For now, you must manually replace placeholder sha256 with their content from checksums.txt:"
+echo "https://github.com/errata-ai/vale/releases/download/v3.0.7/vale_3.0.7_checksums.txt"
