@@ -46,6 +46,7 @@ sh_library(
 go_binary(
     name = "hello_go",
     srcs = ["hello.go"],
+    deps = ["//src/gopher"],
 )
 
 cc_binary(
