@@ -3,5 +3,6 @@ lint:
     - //tools:lint.bzl%eslint
     - //tools:lint.bzl%buf
     - //tools:lint.bzl%flake8
+    - //tools:lint.bzl%golangci_lint
     - //tools:lint.bzl%pmd
     - //tools:lint.bzl%ruff
