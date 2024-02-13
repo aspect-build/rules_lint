@@ -8,7 +8,7 @@ bats_load_library "bats-assert"
 @test "should run prettier on javascript using git ls-files" {
     run bazel run //format/test:format_javascript
     assert_success
-    
+
     assert_output --partial "Formatting JavaScript with Prettier..."
     assert_output --partial "+ prettier --write example/.eslintrc.cjs"
     assert_output --partial "Formatting TypeScript with Prettier..."
@@ -69,7 +69,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_hcl
     assert_success
 
-    assert_output --partial "Formatting Terraform files with terraform fmt..."
+    assert_output --partial "Formatting Terraform with terraform fmt..."
     assert_output --partial "+ terraform-fmt fmt example/src/hello.tf"
 }
 
@@ -117,7 +117,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_cc
     assert_success
 
-    assert_output --partial "Formatting C/C++ with clang-format..."
+    assert_output --partial "Formatting C++ with clang-format..."
     assert_output --partial "+ clang-format -style=file --fallback-style=none -i example/src/hello.cpp"
 }
 
@@ -141,7 +141,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_protobuf
     assert_success
 
-    assert_output --partial "Formatting Protobuf with buf..."
+    assert_output --partial "Formatting Protocol Buffer with buf..."
     # Buf only formats one file at a time
     assert_output --partial "+ buf format -w example/src/file.proto"
     assert_output --partial "+ buf format -w example/src/unused.proto"
