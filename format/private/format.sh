@@ -117,7 +117,8 @@ case "$mode" in
    # as command-line arguments; see
    # https://github.com/astral-sh/ruff/discussions/5857#discussioncomment-6583943
    ruffmode="format --force-exclude"
-   shfmtmode="-w"
+   # NB: apply-ignore added in https://github.com/mvdan/sh/issues/1037
+   shfmtmode="-w --apply-ignore"
    javamode="--replace"
    ktmode=""
    gofmtmode="-w"
