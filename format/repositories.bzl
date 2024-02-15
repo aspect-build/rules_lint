@@ -58,13 +58,13 @@ def fetch_jsonnet():
 
 # buildifier: disable=function-docstring
 def fetch_shfmt():
-    shfmt_version = "3.7.0"
+    shfmt_version = "3.8.0"
 
     http_file(
         name = "shfmt_darwin_x86_64",
         downloaded_file_path = "shfmt",
         executable = True,
-        sha256 = "ae1d1ab961c113fb3dc2ff1150f33c3548983550d91da889b3171a5bcfaab14f",
+        sha256 = "c0218b47a0301bb006f49fad85d2c08de23df303472834faf5639d04121320f8",
         urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_darwin_amd64".format(shfmt_version)],
     )
 
@@ -72,7 +72,7 @@ def fetch_shfmt():
         name = "shfmt_darwin_aarch64",
         downloaded_file_path = "shfmt",
         executable = True,
-        sha256 = "ad7ff6f666adba3d801eb17365a15539f07296718d39fb62cc2fde6b527178aa",
+        sha256 = "1481240d2a90d4f0b530688d76d4f9117d17a756b6027cfa42b96f0707317f83",
         urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_darwin_arm64".format(shfmt_version)],
     )
 
@@ -80,7 +80,7 @@ def fetch_shfmt():
         name = "shfmt_linux_x86_64",
         downloaded_file_path = "shfmt",
         executable = True,
-        sha256 = "0264c424278b18e22453fe523ec01a19805ce3b8ebf18eaf3aadc1edc23f42e3",
+        sha256 = "27b3c6f9d9592fc5b4856c341d1ff2c88856709b9e76469313642a1d7b558fe0",
         urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_linux_amd64".format(shfmt_version)],
     )
 
@@ -88,7 +88,7 @@ def fetch_shfmt():
         name = "shfmt_linux_aarch64",
         downloaded_file_path = "shfmt",
         executable = True,
-        sha256 = "111612560d15bd53d8e8f8f85731176ce12f3b418ec473d39a40ed6bbec772de",
+        sha256 = "27e1f69b0d57c584bcbf5c882b4c4f78ffcf945d0efef45c1fbfc6692213c7c3",
         urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_linux_arm64".format(shfmt_version)],
     )
 
