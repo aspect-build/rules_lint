@@ -66,6 +66,6 @@ golangci_lint_test = make_lint_test(aspect = golangci_lint)
 
 vale = vale_aspect(
     binary = "@@//tools:vale",
-    config = "@@//:.vale_ini",
+    config = "@@//:.vale.ini",
     styles = "@@//tools:vale_styles",
 )
