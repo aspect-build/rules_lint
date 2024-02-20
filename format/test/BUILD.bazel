@@ -102,3 +102,8 @@ multi_formatter_binary(
     name = "format_protobuf",
     protobuf = ":mock_buf.sh",
 )
+
+multi_formatter_binary(
+    name = "format_yaml",
+    yaml = ":mock_yamlfmt.sh",
+)
