@@ -38,7 +38,7 @@ multi_formatter_binary(
 
 <pre>
 multi_formatter_binary(<a href="#multi_formatter_binary-name">name</a>, <a href="#multi_formatter_binary-cc">cc</a>, <a href="#multi_formatter_binary-go">go</a>, <a href="#multi_formatter_binary-java">java</a>, <a href="#multi_formatter_binary-javascript">javascript</a>, <a href="#multi_formatter_binary-jsonnet">jsonnet</a>, <a href="#multi_formatter_binary-kotlin">kotlin</a>, <a href="#multi_formatter_binary-markdown">markdown</a>, <a href="#multi_formatter_binary-protobuf">protobuf</a>, <a href="#multi_formatter_binary-python">python</a>,
-                       <a href="#multi_formatter_binary-scala">scala</a>, <a href="#multi_formatter_binary-sh">sh</a>, <a href="#multi_formatter_binary-sql">sql</a>, <a href="#multi_formatter_binary-starlark">starlark</a>, <a href="#multi_formatter_binary-swift">swift</a>, <a href="#multi_formatter_binary-terraform">terraform</a>)
+                       <a href="#multi_formatter_binary-scala">scala</a>, <a href="#multi_formatter_binary-sh">sh</a>, <a href="#multi_formatter_binary-sql">sql</a>, <a href="#multi_formatter_binary-starlark">starlark</a>, <a href="#multi_formatter_binary-swift">swift</a>, <a href="#multi_formatter_binary-terraform">terraform</a>, <a href="#multi_formatter_binary-yaml">yaml</a>)
 </pre>
 
 Produces an executable that aggregates the supplied formatter binaries
@@ -64,5 +64,6 @@ Produces an executable that aggregates the supplied formatter binaries
 | <a id="multi_formatter_binary-starlark"></a>starlark |  a binary target that runs buildifier (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-swift"></a>swift |  a binary target that runs swiftformat (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="multi_formatter_binary-terraform"></a>terraform |  a binary target that runs terraform-fmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="multi_formatter_binary-yaml"></a>yaml |  a binary target that runs yamlfmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 
 

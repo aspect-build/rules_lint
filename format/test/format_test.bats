@@ -152,5 +152,5 @@ bats_load_library "bats-assert"
     assert_success
 
     assert_output --partial "Formatting YAML with yamlfmt..."
-    assert_output --partial "+ yamlfmt example/src/config.yaml"
+    assert_output --partial "+ yamlfmt .bcr/config.yml"
 }
