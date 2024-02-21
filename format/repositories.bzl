@@ -6,14 +6,14 @@ Needed until Bazel 7 allows MODULE.bazel to directly call repository rules.
 load("@bazel_tools//tools/build_defs/repo:http.bzl", _http_archive = "http_archive", _http_file = "http_file", _http_jar = "http_jar")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
-def http_archive(name, **kwargs):
-    maybe(_http_archive, name = name, **kwargs)
+def http_archive(**kwargs):
+    maybe(_http_archive, **kwargs)
 
-def http_file(name, **kwargs):
-    maybe(_http_file, name = name, **kwargs)
+def http_file(**kwargs):
+    maybe(_http_file, **kwargs)
 
-def http_jar(name, **kwargs):
-    maybe(_http_jar, name = name, **kwargs)
+def http_jar(**kwargs):
+    maybe(_http_jar, **kwargs)
 
 def fetch_pmd():
     http_archive(

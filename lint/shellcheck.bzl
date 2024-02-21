@@ -17,9 +17,8 @@ shellcheck = shellcheck_aspect(
 """
 
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "filter_srcs", "report_file")
+load("//lint/private:maybe.bzl", http_archive = "maybe_http_archive")
 
 _MNEMONIC = "shellcheck"
 
@@ -125,8 +124,7 @@ def fetch_shellcheck(version = SHELLCHECK_VERSIONS.keys()[0]):
         version: a version of shellcheck that we have mirrored, e.g. `v0.9.0`
     """
     for plat, sha256 in SHELLCHECK_VERSIONS[version].items():
-        maybe(
-            http_archive,
+        http_archive(
             name = "shellcheck_{}".format(plat),
             url = "https://github.com/koalaman/shellcheck/releases/download/{version}/shellcheck-{version}.{plat}.tar.xz".format(
                 version = version,

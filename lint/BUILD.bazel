@@ -126,6 +126,7 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         "//lint/private:lint_aspect",
+        "//lint/private:maybe",
         "@bazel_skylib//rules:native_binary",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
