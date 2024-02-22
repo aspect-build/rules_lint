@@ -1,0 +1,87 @@
+"""BUILD definition for the formatter binary
+
+This is in its own package because it has so many loading-time symbols,
+we don't want to trigger eager fetches of these for builds that don't want to run format.
+"""
+
+load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_binary")
+load("@aspect_rules_lint//lint:vale_library.bzl", "VALE_STYLES")
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
+load("@rules_java//java:defs.bzl", "java_binary")
+load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
+
+package(default_visibility = ["//:__subpackages__"])
+
+alias(
+    name = "ruff",
+    actual = select({
+        "@bazel_tools//src/conditions:linux_x86_64": "@ruff_x86_64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:linux_aarch64": "@ruff_aarch64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:darwin_arm64": "@ruff_aarch64-apple-darwin//:ruff",
+        "@bazel_tools//src/conditions:darwin_x86_64": "@ruff_x86_64-apple-darwin//:ruff",
+    }),
+)
+
+alias(
+    name = "buf",
+    actual = "@rules_buf_toolchains//:buf",
+)
+
+# We can test that it works with:
+# bazel run :flake8 -- --help
+py_console_script_binary(
+    name = "flake8",
+    pkg = "@pip//flake8:pkg",
+)
+
+eslint_bin.eslint_binary(name = "eslint")
+
+java_binary(
+    name = "pmd",
+    main_class = "net.sourceforge.pmd.PMD",
+    runtime_deps = ["@net_sourceforge_pmd"],
+)
+
+native_binary(
+    name = "golangci_lint",
+    src = select(
+        {
+            "@bazel_tools//src/conditions:linux_x86_64": "@golangci_lint_linux_x86_64//:golangci-lint",
+            "@bazel_tools//src/conditions:linux_aarch64": "@golangci_lint_linux_aarch64//:golangci-lint",
+            "@bazel_tools//src/conditions:darwin_x86_64": "@golangci_lint_macos_x86_64//:golangci-lint",
+            "@bazel_tools//src/conditions:darwin_arm64": "@golangci_lint_macos_aarch64//:golangci-lint",
+        },
+    ),
+    out = "golangci-lint",
+)
+
+native_binary(
+    name = "vale",
+    src = select(
+        {
+            "@bazel_tools//src/conditions:linux_x86_64": "@vale_Linux_64-bit//:vale",
+            "@bazel_tools//src/conditions:linux_aarch64": "@vale_Linux_arm64//:vale",
+            "@bazel_tools//src/conditions:darwin_x86_64": "@vale_macOS_64-bit//:vale",
+            "@bazel_tools//src/conditions:darwin_arm64": "@vale_macOS_arm64//:vale",
+        },
+    ),
+    out = "vale",
+)
+
+copy_to_directory(
+    name = "vale_styles",
+    srcs = [
+        "@vale_{0}//:{0}".format(s)
+        for s in VALE_STYLES
+        # Restrict to subset like Google and write-good to avoid GHA cache getting huge and exhasting disk.
+        # Comment this out to test that our code to fetch them is working.
+        # Most users should just copy in the styles that are referenced in their .vale.ini file.
+        if "oo" in s
+    ],
+    include_external_repositories = ["vale_*"],
+)
+
+# bazel run :shellcheck -- --help
+shellcheck_binary(name = "shellcheck")

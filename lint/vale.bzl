@@ -52,12 +52,12 @@ See the example in rules_lint for a fully-working vale setup.
 load("@aspect_rules_lint//lint:vale.bzl", "vale_aspect")
 
 vale = vale_aspect(
-    binary = "@@//tools:vale",
+    binary = "@@//tools/lint:vale",
     # A copy_to_bin rule that places the .vale.ini file into bazel-bin
     config = "@@//:.vale_ini",
     # Optional.
     # A copy_to_directory rule that "installs" custom styles together into a single folder
-    styles = "@@//tools:vale_styles",
+    styles = "@@//tools/lint:vale_styles",
 )
 ```
 """

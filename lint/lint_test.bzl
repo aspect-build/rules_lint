@@ -2,7 +2,7 @@
 
 The test will fail when the linter reports any non-empty lint results.
 
-To use this, in your `lint.bzl` where you define the aspect, just create a test that references it.
+To use this, in your `linters.bzl` where you define the aspect, just create a test that references it.
 
 For example, with `flake8`:
 
@@ -21,7 +21,7 @@ flake8_test = make_lint_test(aspect = flake8)
 Now in your BUILD files you can add a test:
 
 ```starlark
-load("//tools:lint.bzl", "flake8_test")
+load("//tools/lint:linters.bzl", "flake8_test")
 
 py_library(
     name = "unused_import",
