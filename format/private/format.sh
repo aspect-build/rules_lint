@@ -54,6 +54,7 @@ function ls-files {
       'Swift') patterns=('*.swift') ;;
       'TSX') patterns=('*.tsx') ;;
       'TypeScript') patterns=('*.ts' '*.cts' '*.mts') ;;
+      'YAML') patterns=('*.yml' '*.yaml' '.clang-format' '.clang-tidy' '.gemrc') ;;
 
       # Note: terraform fmt cannot handle all HCL files such as .terraform.lock
       # "Only .tf and .tfvars files can be processed with terraform fmt"
@@ -115,6 +116,7 @@ case "$mode" in
    jsonnetmode="--test"
    scalamode="--test"
    clangformatmode="--style=file --fallback-style=none --dry-run -Werror"
+   yamlfmtmode="-lint"
    ;;
  fix)
    swiftmode=""
@@ -133,6 +135,7 @@ case "$mode" in
    jsonnetmode="--in-place"
    scalamode=""
    clangformatmode="-style=file --fallback-style=none -i"
+   yamlfmtmode=""
    ;;
  *) echo >&2 "unknown mode $mode";;
 esac
@@ -220,3 +223,4 @@ run-format C++ clang-format "$(rlocation {{clang-format}})" "$clangformatmode" $
 run-format Shell shfmt "$(rlocation {{shfmt}})" "$shfmtmode" $@
 run-format Swift swiftfmt "$(rlocation {{swiftformat}})" "$swiftmode" $@
 run-format 'Protocol Buffer' buf "$(rlocation {{buf}})" "$bufmode" $@
+run-format YAML yamlfmt "$(rlocation {{yamlfmt}})" "$yamlfmtmode" $@

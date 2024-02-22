@@ -209,6 +209,7 @@ load(
     "fetch_shfmt",
     "fetch_swiftformat",
     "fetch_terraform",
+    "fetch_yamlfmt",
 )
 
 fetch_gofumpt()
@@ -226,6 +227,8 @@ fetch_ktfmt()
 fetch_shfmt()
 
 fetch_swiftformat()
+
+fetch_yamlfmt()
 
 load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
 

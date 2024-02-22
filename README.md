@@ -47,6 +47,7 @@ It is also inspired by <https://github.com/github/super-linter>.
 | Swift                  | [SwiftFormat] (1)     |                  |
 | TSX                    | [Prettier]            | [ESLint]         |
 | TypeScript             | [Prettier]            | [ESLint]         |
+| YAML                   | [yamlfmt]             |                  |
 
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
@@ -71,6 +72,7 @@ It is also inspired by <https://github.com/github/super-linter>.
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 [#112]: https://github.com/aspect-build/rules_lint/issues/112
 [vale]: https://vale.sh/
+[yamlfmt]: https://github.com/google/yamlfmt
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift

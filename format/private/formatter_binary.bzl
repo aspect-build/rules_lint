@@ -19,6 +19,7 @@ TOOLS = {
     "sh": "shfmt",
     "protobuf": "buf",
     "cc": "clang-format",
+    "yaml": "yamlfmt",
 }
 
 def _formatter_binary_impl(ctx):

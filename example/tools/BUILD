@@ -110,6 +110,19 @@ java_binary(
     runtime_deps = ["@maven//:org_scalameta_scalafmt_cli_2_13"],
 )
 
+native_binary(
+    name = "yamlfmt",
+    src = select(
+        {
+            "@bazel_tools//src/conditions:linux_x86_64": "@yamlfmt_Linux_x86_64//:yamlfmt",
+            "@bazel_tools//src/conditions:linux_aarch64": "@yamlfmt_Linux_arm64//:yamlfmt",
+            "@bazel_tools//src/conditions:darwin_x86_64": "@yamlfmt_Darwin_x86_64//:yamlfmt",
+            "@bazel_tools//src/conditions:darwin_arm64": "@yamlfmt_Darwin_arm64//:yamlfmt",
+        },
+    ),
+    out = "yamlfmt",
+)
+
 # We can test that it works with:
 # bazel run :flake8 -- --help
 py_console_script_binary(
@@ -185,4 +198,5 @@ multi_formatter_binary(
     starlark = "@buildifier_prebuilt//:buildifier",
     swift = ":swiftformat",
     terraform = ":terraform",
+    yaml = ":yamlfmt",
 )

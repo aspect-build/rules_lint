@@ -13,6 +13,7 @@ load(
     "fetch_shfmt",
     "fetch_swiftformat",
     "fetch_terraform",
+    "fetch_yamlfmt",
 )
 load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
 
@@ -33,6 +34,8 @@ fetch_shfmt()
 fetch_swiftformat()
 
 fetch_ruff()
+
+fetch_yamlfmt()
 
 load("@aspect_rules_lint//lint:golangci-lint.bzl", "fetch_golangci_lint")
 

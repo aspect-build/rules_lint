@@ -146,3 +146,11 @@ bats_load_library "bats-assert"
     assert_output --partial "+ buf format -w example/src/file.proto"
     assert_output --partial "+ buf format -w example/src/unused.proto"
 }
+
+@test "should run yamlfmt on YAML" {
+    run bazel run //format/test:format_yaml
+    assert_success
+
+    assert_output --partial "Formatting YAML with yamlfmt..."
+    assert_output --partial "+ yamlfmt .bcr/config.yml"
+}

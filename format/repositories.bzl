@@ -196,3 +196,25 @@ def fetch_gofumpt():
             "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_darwin_arm64",
         ],
     )
+
+# From https://github.com/google/yamlfmt/releases/download/v0.11.0/checksums.txt
+_yamlfmt_shas = {
+    "8211a9e15f6abfc0bfad621414d3aeeac0d4b6bf4e6b8781fb19fb016c2740b7": "yamlfmt_0.11.0_Darwin_arm64.tar.gz",
+    "76aaa47bb4778fbd83113453c569c46272c608d9a416f73a237822c78d686af2": "yamlfmt_0.11.0_Darwin_x86_64.tar.gz",
+    "76da015f98e34f29216eab8b6155e419c0a2b623c466e997299ad5c225207992": "yamlfmt_0.11.0_Linux_arm64.tar.gz",
+    "8d58cc5baffda8fd3ad0da110c85e93f597403210686d9d3af0bb26ee21519c5": "yamlfmt_0.11.0_Linux_i386.tar.gz",
+    "8579868c3fbb0deca2573586e07d9912b5f07a302fb2bf26dac10791328c9998": "yamlfmt_0.11.0_Linux_x86_64.tar.gz",
+    "9ab6e2ad02118daf5f2d570268eba98837a5350e141539f0f844c4f8eed5d2ea": "yamlfmt_0.11.0_Windows_arm64.tar.gz",
+    "9d2598d90cfcdadb61b9843fb446af72a6ce7e7778ef4682c9a40411b746c3ef": "yamlfmt_0.11.0_Windows_i386.tar.gz",
+    "ca2327f2fb842b42b0607b4e7da7a85d87380dc8625aad955819c40bed1882e8": "yamlfmt_0.11.0_Windows_x86_64.tar.gz",
+}
+
+def fetch_yamlfmt():
+    for sha256, filename in _yamlfmt_shas.items():
+        reponame = filename.removesuffix(".tar.gz").replace("0.11.0_", "")
+        http_archive(
+            name = reponame,
+            build_file_content = "exports_files([\"yamlfmt\"])",
+            sha256 = sha256,
+            urls = ["https://github.com/google/yamlfmt/releases/download/v0.11.0/{}".format(filename)],
+        )
