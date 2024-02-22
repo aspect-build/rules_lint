@@ -1,5 +1,15 @@
 "This file is automatically updated by mirror_vale.sh"
 VALE_VERSIONS = {
+    "v3.1.0": {
+        "Linux_386": "81564dde82bf90b3552f0f181fe56803a8ab727c65c350c82290120a9ca47fa3",
+        "Linux_64-bit": "7c62da29c53dc58f836327bda3a763b7862633d7f957c1abf12e661c2d65a3e0",
+        "Linux_arm64": "8f83cf1345685f3da9c2a69a7952beab3d38f961b13d7a339156e1187d11f8f5",
+        "macOS_64-bit": "d00806911d713ee5325cf6aa377a0d48dd44d418c35f66e7527abf113b89cd48",
+        "macOS_arm64": "78baa52b88fff4bbebd88e0dcc8504932bb750b787a8fb3d2d4966e8e38dac60",
+        "Windows_386": "bf87bf2718cb425bce7fd201a635b4be3ec6efa4e361aaf64c62b3a90587c33d",
+        "Windows_64-bit": "8e0bff5ab631bcb2d05dfb01599ff9256a9d46b7163f0dcb75b99321d54fd992",
+        "Windows_arm64": "ac3111fa52c322cb5aaf3c321dbe170fb1f16977847a2a2329272606f45a806c",
+    },
     "v3.0.7": {
         "Linux_386": "86128821d5220cca019b05b2fd2470202ed9f6ed7c26baa45efb9f905c94281d",
         "Linux_64-bit": "103a070f45b36d6c206d1ec0668bd1e1ce63e721022693ed37933b673fdaa45d",

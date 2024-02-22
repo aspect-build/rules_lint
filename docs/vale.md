@@ -42,22 +42,9 @@ copy_to_directory(
 )
 ```
 
-Now the `.vale.ini` file will have a `StylesPath` entry that points to this folder, for example,
-
-```ini
-StylesPath = tools/vale_styles
-```
-
-Finally, it's necessary for the `.vale.ini` file to be copied to the bazel-bin folder so that it
-is relative to the generated `vale_styles` folder.
-Use [`copy_to_bin`](https://docs.aspect.build/rulesets/aspect_bazel_lib/docs/copy_to_bin/) for this:
-
-```starlark
-copy_to_bin(
-    name = ".vale_ini",
-    srcs = [".vale.ini"],
-)
-```
+Note that the `.vale.ini` file may have a `StylesPath` entry.
+Under Bazel, we set `VALE_STYLES_PATH` in the environment, so the `StylesPath` is used
+only when running Vale outside Bazel, such as in an editor extension.
 
 See the example in rules_lint for a fully-working vale setup.
 
@@ -92,7 +79,7 @@ A repository macro used from WORKSPACE to fetch vale binaries
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="fetch_vale-tag"></a>tag |  a tag of vale that we have mirrored, e.g. <code>v3.0.5</code>   |  <code>"v3.0.7"</code> |
+| <a id="fetch_vale-tag"></a>tag |  a tag of vale that we have mirrored, e.g. <code>v3.0.5</code>   |  <code>"v3.1.0"</code> |
 
 
 <a id="vale_action"></a>

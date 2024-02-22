@@ -40,22 +40,9 @@ copy_to_directory(
 )
 ```
 
-Now the `.vale.ini` file will have a `StylesPath` entry that points to this folder, for example,
-
-```ini
-StylesPath = tools/vale_styles
-```
-
-Finally, it's necessary for the `.vale.ini` file to be copied to the bazel-bin folder so that it
-is relative to the generated `vale_styles` folder.
-Use [`copy_to_bin`](https://docs.aspect.build/rulesets/aspect_bazel_lib/docs/copy_to_bin/) for this:
-
-```starlark
-copy_to_bin(
-    name = ".vale_ini",
-    srcs = [".vale.ini"],
-)
-```
+Note that the `.vale.ini` file may have a `StylesPath` entry.
+Under Bazel, we set `VALE_STYLES_PATH` in the environment, so the `StylesPath` is used
+only when running Vale outside Bazel, such as in an editor extension.
 
 See the example in rules_lint for a fully-working vale setup.
 
@@ -85,15 +72,14 @@ _MNEMONIC = "Vale"
 
 # buildifier: disable=function-docstring
 def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = False):
-    # NB: Users must make sure the config file we reference is already in
-    # bazel-out/arch/bin/my/pkg so that relative reference "tools/styles" correctly resolves
-    # to the generated styles folder in bazel-out/arch/bin/my/pkg/tools/styles
-    # We don't try to use copy_file_to_bin_action because the config file is likely not in the same
-    # package as the aspect is visiting, so we won't be allowed to write to it and will just fail
-    # in bazel-lib with _file_in_different_package_error_msg
     inputs = srcs + [config]
+    env = {}
     if styles:
         inputs.append(styles)
+
+        # Introduced in https://github.com/errata-ai/vale/commit/2139c4176a4d2e62d7dfb95dca24b96b9e8b7251
+        # and released in v3.1.0
+        env["VALE_STYLES_PATH"] = styles.path
 
     # Wire command-line options, see output of vale --help
     args = ctx.actions.args()
@@ -113,6 +99,7 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
             vale = executable.path,
             report = report.path,
         ),
+        env = env,
         arguments = [args],
         mnemonic = _MNEMONIC,
         tools = [executable],
