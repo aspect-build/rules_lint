@@ -4,7 +4,7 @@ This is in its own package because it has so many loading-time symbols,
 we don't want to trigger eager fetches of these for builds that don't want to run format.
 """
 
-load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 load("@rules_java//java:defs.bzl", "java_binary")
 
@@ -59,7 +59,7 @@ java_binary(
     runtime_deps = ["@maven//:org_scalameta_scalafmt_cli_2_13"],
 )
 
-multi_formatter_binary(
+format_multirun(
     name = "format",
     cc = "@llvm_toolchain_llvm//:bin/clang-format",
     # You can use standard gofmt instead of stricter gofumpt:
@@ -68,7 +68,7 @@ multi_formatter_binary(
     javascript = ":prettier",
     kotlin = ":ktfmt",
     markdown = ":prettier",
-    protobuf = "//tools/lint:buf",
+    protocol_buffer = "//tools/lint:buf",
     python = "//tools/lint:ruff",
     scala = ":scalafmt",
     sql = ":prettier",

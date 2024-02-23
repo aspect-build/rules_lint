@@ -17,6 +17,13 @@ def http_jar(**kwargs):
 
 def rules_lint_dependencies():
     http_archive(
+        name = "rules_multirun",
+        sha256 = "7b699b3922919d727e7f5aa868286e59cc69fa6aa14f6c3e54a4674010bd1582",
+        strip_prefix = "rules_multirun-0.7.0",
+        url = "https://github.com/keith/rules_multirun/releases/download/0.7.0/rules_multirun-0.7.0.tar.gz",
+    )
+
+    http_archive(
         name = "rules_multitool",
         sha256 = "793105ea4bb89cf9d82411cbee40b6874085f530314600887539e214e4970a3a",
         strip_prefix = "rules_multitool-0.4.0",

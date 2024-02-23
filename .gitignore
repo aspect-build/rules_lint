@@ -3,5 +3,6 @@ bazel-*
 .idea/
 .ijwb/
 node_modules
-# Until it gets more stable
+
+# TODO: enable when it is more stable, maybe Bazel 7.1
 MODULE.bazel.lock
