@@ -15,7 +15,7 @@ buf = buf_lint_aspect(
 )
 
 eslint = eslint_aspect(
-    binary = "@@//tools:eslint",
+    binary = "@@//tools/lint:eslint",
     # We trust that eslint will locate the correct configuration file for a given source file.
     # See https://eslint.org/docs/latest/use/configure/configuration-files#cascading-and-hierarchy
     configs = [
@@ -27,21 +27,21 @@ eslint = eslint_aspect(
 eslint_test = make_lint_test(aspect = eslint)
 
 flake8 = flake8_aspect(
-    binary = "@@//tools:flake8",
+    binary = "@@//tools/lint:flake8",
     config = "@@//:.flake8",
 )
 
 flake8_test = make_lint_test(aspect = flake8)
 
 pmd = pmd_aspect(
-    binary = "@@//tools:pmd",
+    binary = "@@//tools/lint:pmd",
     rulesets = ["@@//:pmd.xml"],
 )
 
 pmd_test = make_lint_test(aspect = pmd)
 
 ruff = ruff_aspect(
-    binary = "@@//tools:ruff",
+    binary = "@@//tools/lint:ruff",
     configs = [
         "@@//:.ruff.toml",
         "@@//src/subdir:ruff.toml",
@@ -51,21 +51,21 @@ ruff = ruff_aspect(
 ruff_test = make_lint_test(aspect = ruff)
 
 shellcheck = shellcheck_aspect(
-    binary = "@@//tools:shellcheck",
+    binary = "@@//tools/lint:shellcheck",
     config = "@@//:.shellcheckrc",
 )
 
 shellcheck_test = make_lint_test(aspect = shellcheck)
 
 golangci_lint = golangci_lint_aspect(
-    binary = "@@//tools:golangci_lint",
+    binary = "@@//tools/lint:golangci_lint",
     config = "@@//:.golangci.yaml",
 )
 
 golangci_lint_test = make_lint_test(aspect = golangci_lint)
 
 vale = vale_aspect(
-    binary = "@@//tools:vale",
+    binary = "@@//tools/lint:vale",
     config = "@@//:.vale.ini",
-    styles = "@@//tools:vale_styles",
+    styles = "@@//tools/lint:vale_styles",
 )

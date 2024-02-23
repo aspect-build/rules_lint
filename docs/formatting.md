@@ -2,9 +2,9 @@
 
 ## Installation
 
-Create a BUILD file that declares the formatter binary, typically at `tools/BUILD.bazel`
+Create a BUILD file that declares the formatter binary, typically at `tools/format/BUILD.bazel`
 
-Each formatter should be installed in your repository, see our `example/tools/BUILD` file.
+Each formatter should be installed in your repository, see our `example/tools/format/BUILD.bazel` file.
 A formatter is just an executable target.
 
 Then register them on the `formatters` attribute, for example:
@@ -24,7 +24,7 @@ Finally, we recommend an alias in the root BUILD file, so that developers can ju
 ```starlark
 alias(
     name = "format",
-    actual = "//tools:format",
+    actual = "//tools/format",
 )
 ```
 

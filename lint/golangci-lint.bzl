@@ -4,7 +4,7 @@
 load("@aspect_rules_lint//lint:golangci-lint.bzl", "golangci_lint_aspect")
 
 golangci_lint = golangci_lint_aspect(
-    binary = "@@//tools:golangci_lint",
+    binary = "@@//tools/lint:golangci_lint",
     config = "@@//:.golangci.yaml",
 )
 ```
