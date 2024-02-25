@@ -198,25 +198,20 @@ pinned_maven_install()
 
 #---SNIP--- Below here is re-used in the workspace snippet published on releases
 
-# Use whichever formatter binaries you need:
 load(
     "@aspect_rules_lint//format:repositories.bzl",
-    "fetch_gofumpt",
+    # Fetch additional formatter binaries you need:
     "fetch_java_format",
-    "fetch_jsonnet",
     "fetch_ktfmt",
     "fetch_pmd",
-    "fetch_shfmt",
     "fetch_swiftformat",
     "fetch_terraform",
-    "fetch_yamlfmt",
+    "rules_lint_dependencies",
 )
 
-fetch_gofumpt()
+rules_lint_dependencies()
 
 fetch_pmd()
-
-fetch_jsonnet()
 
 fetch_terraform()
 
@@ -224,11 +219,7 @@ fetch_java_format()
 
 fetch_ktfmt()
 
-fetch_shfmt()
-
 fetch_swiftformat()
-
-fetch_yamlfmt()
 
 load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
 

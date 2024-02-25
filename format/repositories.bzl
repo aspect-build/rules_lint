@@ -15,6 +15,14 @@ def http_file(**kwargs):
 def http_jar(**kwargs):
     maybe(_http_jar, **kwargs)
 
+def rules_lint_dependencies():
+    http_archive(
+        name = "rules_multitool",
+        sha256 = "21acf96d43cb40d591cacccc1c20a66fc796eaddf69ea61812594447bac7a113",
+        strip_prefix = "rules_multitool-0.2.0",
+        url = "https://github.com/theoremlp/rules_multitool/releases/download/v0.2.0/rules_multitool-0.2.0.tar.gz",
+    )
+
 def fetch_pmd():
     http_archive(
         name = "net_sourceforge_pmd",
@@ -22,74 +30,6 @@ def fetch_pmd():
         sha256 = "21acf96d43cb40d591cacccc1c20a66fc796eaddf69ea61812594447bac7a11d",
         strip_prefix = "pmd-bin-6.55.0/lib",
         url = "https://github.com/pmd/pmd/releases/download/pmd_releases/6.55.0/pmd-bin-6.55.0.zip",
-    )
-
-# buildifier: disable=function-docstring
-def fetch_jsonnet():
-    jsonnet_version = "0.20.0"
-
-    http_archive(
-        name = "jsonnet_macos_aarch64",
-        build_file_content = "exports_files([\"jsonnetfmt\"])",
-        sha256 = "a15a699a58eb172c6d91f4cbddf3681095a649008628e0cfd84f564db4244ee3",
-        urls = ["https://github.com/google/go-jsonnet/releases/download/v{0}/go-jsonnet_{0}_Darwin_arm64.tar.gz".format(jsonnet_version)],
-    )
-
-    http_archive(
-        name = "jsonnet_macos_x86_64",
-        build_file_content = "exports_files([\"jsonnetfmt\"])",
-        sha256 = "76901637f60589bb9bf91b3481d4aecbc31efcd35ca99ae72bcb510b00270ad9",
-        urls = ["https://github.com/google/go-jsonnet/releases/download/v{0}/go-jsonnet_{0}_Darwin_x86_64.tar.gz".format(jsonnet_version)],
-    )
-
-    http_archive(
-        name = "jsonnet_linux_x86_64",
-        build_file_content = "exports_files([\"jsonnetfmt\"])",
-        sha256 = "a137c5e969609c3995c4d05817a247cfef8a92760c5306c3ad7df0355dd62970",
-        urls = ["https://github.com/google/go-jsonnet/releases/download/v{0}/go-jsonnet_{0}_Linux_x86_64.tar.gz".format(jsonnet_version)],
-    )
-
-    http_archive(
-        name = "jsonnet_linux_aarch64",
-        build_file_content = "exports_files([\"jsonnetfmt\"])",
-        sha256 = "49fbc99c91dcd2be53fa856307de3b8708c91dc5c74740714fdf9317957322e0",
-        urls = ["https://github.com/google/go-jsonnet/releases/download/v{0}/go-jsonnet_{0}_Linux_arm64.tar.gz".format(jsonnet_version)],
-    )
-
-# buildifier: disable=function-docstring
-def fetch_shfmt():
-    shfmt_version = "3.8.0"
-
-    http_file(
-        name = "shfmt_darwin_x86_64",
-        downloaded_file_path = "shfmt",
-        executable = True,
-        sha256 = "c0218b47a0301bb006f49fad85d2c08de23df303472834faf5639d04121320f8",
-        urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_darwin_amd64".format(shfmt_version)],
-    )
-
-    http_file(
-        name = "shfmt_darwin_aarch64",
-        downloaded_file_path = "shfmt",
-        executable = True,
-        sha256 = "1481240d2a90d4f0b530688d76d4f9117d17a756b6027cfa42b96f0707317f83",
-        urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_darwin_arm64".format(shfmt_version)],
-    )
-
-    http_file(
-        name = "shfmt_linux_x86_64",
-        downloaded_file_path = "shfmt",
-        executable = True,
-        sha256 = "27b3c6f9d9592fc5b4856c341d1ff2c88856709b9e76469313642a1d7b558fe0",
-        urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_linux_amd64".format(shfmt_version)],
-    )
-
-    http_file(
-        name = "shfmt_linux_aarch64",
-        downloaded_file_path = "shfmt",
-        executable = True,
-        sha256 = "27e1f69b0d57c584bcbf5c882b4c4f78ffcf945d0efef45c1fbfc6692213c7c3",
-        urls = ["https://github.com/mvdan/sh/releases/download/v{0}/shfmt_v{0}_linux_arm64".format(shfmt_version)],
     )
 
 def fetch_terraform():
@@ -151,70 +91,3 @@ def fetch_swiftformat():
         sha256 = "978eaffdc3716bbc0859aecee0d83875cf3ab8d8725779448f0035309d9ad9f3",
         url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.49.17/swiftformat.zip",
     )
-
-def fetch_gofumpt():
-    http_file(
-        name = "com_github_mvdan_gofumpt_linux_amd64",
-        downloaded_file_path = "gofumpt",
-        executable = True,
-        sha256 = "759c6ab56bfbf62cafb35944aef1e0104a117e0aebfe44816fd79ef4b28521e4",
-        urls = [
-            "https://cdn.confidential.cloud/constellation/cas/sha256/759c6ab56bfbf62cafb35944aef1e0104a117e0aebfe44816fd79ef4b28521e4",
-            "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_linux_amd64",
-        ],
-    )
-
-    http_file(
-        name = "com_github_mvdan_gofumpt_linux_arm64",
-        downloaded_file_path = "gofumpt",
-        executable = True,
-        sha256 = "fba20ffd06606c89a500e3cc836408a09e4767e2f117c97724237ae4ecadf82e",
-        urls = [
-            "https://cdn.confidential.cloud/constellation/cas/sha256/fba20ffd06606c89a500e3cc836408a09e4767e2f117c97724237ae4ecadf82e",
-            "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_linux_arm64",
-        ],
-    )
-
-    http_file(
-        name = "com_github_mvdan_gofumpt_darwin_amd64",
-        downloaded_file_path = "gofumpt",
-        executable = True,
-        sha256 = "870f05a23541aad3d20d208a3ea17606169a240f608ac1cf987426198c14b2ed",
-        urls = [
-            "https://cdn.confidential.cloud/constellation/cas/sha256/870f05a23541aad3d20d208a3ea17606169a240f608ac1cf987426198c14b2ed",
-            "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_darwin_amd64",
-        ],
-    )
-
-    http_file(
-        name = "com_github_mvdan_gofumpt_darwin_arm64",
-        downloaded_file_path = "gofumpt",
-        executable = True,
-        sha256 = "f2df95d5fad8498ad8eeb0be8abdb8bb8d05e8130b332cb69751dfd090fabac4",
-        urls = [
-            "https://cdn.confidential.cloud/constellation/cas/sha256/f2df95d5fad8498ad8eeb0be8abdb8bb8d05e8130b332cb69751dfd090fabac4",
-            "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_darwin_arm64",
-        ],
-    )
-
-# From https://github.com/google/yamlfmt/releases/download/v0.11.0/checksums.txt
-_yamlfmt_shas = {
-    "8211a9e15f6abfc0bfad621414d3aeeac0d4b6bf4e6b8781fb19fb016c2740b7": "yamlfmt_0.11.0_Darwin_arm64.tar.gz",
-    "76aaa47bb4778fbd83113453c569c46272c608d9a416f73a237822c78d686af2": "yamlfmt_0.11.0_Darwin_x86_64.tar.gz",
-    "76da015f98e34f29216eab8b6155e419c0a2b623c466e997299ad5c225207992": "yamlfmt_0.11.0_Linux_arm64.tar.gz",
-    "8d58cc5baffda8fd3ad0da110c85e93f597403210686d9d3af0bb26ee21519c5": "yamlfmt_0.11.0_Linux_i386.tar.gz",
-    "8579868c3fbb0deca2573586e07d9912b5f07a302fb2bf26dac10791328c9998": "yamlfmt_0.11.0_Linux_x86_64.tar.gz",
-    "9ab6e2ad02118daf5f2d570268eba98837a5350e141539f0f844c4f8eed5d2ea": "yamlfmt_0.11.0_Windows_arm64.tar.gz",
-    "9d2598d90cfcdadb61b9843fb446af72a6ce7e7778ef4682c9a40411b746c3ef": "yamlfmt_0.11.0_Windows_i386.tar.gz",
-    "ca2327f2fb842b42b0607b4e7da7a85d87380dc8625aad955819c40bed1882e8": "yamlfmt_0.11.0_Windows_x86_64.tar.gz",
-}
-
-def fetch_yamlfmt():
-    for sha256, filename in _yamlfmt_shas.items():
-        reponame = filename.removesuffix(".tar.gz").replace("0.11.0_", "")
-        http_archive(
-            name = reponame,
-            build_file_content = "exports_files([\"yamlfmt\"])",
-            sha256 = sha256,
-            urls = ["https://github.com/google/yamlfmt/releases/download/v0.11.0/{}".format(filename)],
-        )

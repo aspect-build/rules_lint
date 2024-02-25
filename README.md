@@ -162,3 +162,4 @@ But we're not trying to stop anyone, either!
 
 You could probably configure the editor to always run the same Bazel command, any time a file is changed.
 Instructions to do this are out-of-scope for this repo, particularly since they have to be formulated and updated for so many editors.
+thing

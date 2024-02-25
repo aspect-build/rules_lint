@@ -1,0 +1,138 @@
+{
+  "yamlfmt": {
+    "binaries": [
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.11.0/yamlfmt_0.11.0_Darwin_arm64.tar.gz",
+        "sha256": "8211a9e15f6abfc0bfad621414d3aeeac0d4b6bf4e6b8781fb19fb016c2740b7",
+        "file": "yamlfmt",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.11.0/yamlfmt_0.11.0_Darwin_x86_64.tar.gz",
+        "sha256": "76aaa47bb4778fbd83113453c569c46272c608d9a416f73a237822c78d686af2",
+        "file": "yamlfmt",
+        "os": "macos",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.11.0/yamlfmt_0.11.0_Linux_arm64.tar.gz",
+        "sha256": "76da015f98e34f29216eab8b6155e419c0a2b623c466e997299ad5c225207992",
+        "file": "yamlfmt",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.11.0/yamlfmt_0.11.0_Linux_x86_64.tar.gz",
+        "sha256": "8579868c3fbb0deca2573586e07d9912b5f07a302fb2bf26dac10791328c9998",
+        "file": "yamlfmt",
+        "os": "linux",
+        "cpu": "x86_64"
+      }
+    ]
+  },
+  "gofumpt": {
+    "binaries": [
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_darwin_arm64",
+        "sha256": "f2df95d5fad8498ad8eeb0be8abdb8bb8d05e8130b332cb69751dfd090fabac4",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_darwin_amd64",
+        "sha256": "870f05a23541aad3d20d208a3ea17606169a240f608ac1cf987426198c14b2ed",
+        "os": "macos",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_linux_arm64",
+        "sha256": "fba20ffd06606c89a500e3cc836408a09e4767e2f117c97724237ae4ecadf82e",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.5.0/gofumpt_v0.5.0_linux_amd64",
+        "sha256": "759c6ab56bfbf62cafb35944aef1e0104a117e0aebfe44816fd79ef4b28521e4",
+        "os": "linux",
+        "cpu": "x86_64"
+      }
+    ]
+  },
+  "shfmt": {
+    "binaries": [
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_darwin_arm64",
+        "sha256": "1481240d2a90d4f0b530688d76d4f9117d17a756b6027cfa42b96f0707317f83",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_darwin_amd64",
+        "sha256": "c0218b47a0301bb006f49fad85d2c08de23df303472834faf5639d04121320f8",
+        "os": "macos",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64",
+        "sha256": "27b3c6f9d9592fc5b4856c341d1ff2c88856709b9e76469313642a1d7b558fe0",
+        "os": "linux",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_arm64",
+        "sha256": "27e1f69b0d57c584bcbf5c882b4c4f78ffcf945d0efef45c1fbfc6692213c7c3",
+        "os": "linux",
+        "cpu": "arm64"
+      }
+    ]
+  },
+  "jsonnetfmt": {
+    "binaries": [
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Darwin_arm64.tar.gz",
+        "sha256": "a15a699a58eb172c6d91f4cbddf3681095a649008628e0cfd84f564db4244ee3",
+        "os": "macos",
+        "cpu": "arm64",
+        "file": "jsonnetfmt"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Darwin_x86_64.tar.gz",
+        "sha256": "76901637f60589bb9bf91b3481d4aecbc31efcd35ca99ae72bcb510b00270ad9",
+        "os": "macos",
+        "cpu": "x86_64",
+        "file": "jsonnetfmt"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Linux_x86_64.tar.gz",
+        "sha256": "a137c5e969609c3995c4d05817a247cfef8a92760c5306c3ad7df0355dd62970",
+        "os": "linux",
+        "cpu": "x86_64",
+        "file": "jsonnetfmt"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Linux_arm64.tar.gz",
+        "sha256": "49fbc99c91dcd2be53fa856307de3b8708c91dc5c74740714fdf9317957322e0",
+        "os": "linux",
+        "cpu": "arm64",
+        "file": "jsonnetfmt"
+      }
+    ]
+  }
+}

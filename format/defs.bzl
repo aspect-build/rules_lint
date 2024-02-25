@@ -32,4 +32,18 @@ multi_formatter_binary(
 
 load("//format/private:formatter_binary.bzl", _fmt = "multi_formatter_binary")
 
-multi_formatter_binary = _fmt
+def multi_formatter_binary(
+        name,
+        jsonnet = Label("@multitool//tools/jsonnetfmt"),
+        go = Label("@multitool//tools/gofumpt"),
+        sh = Label("@multitool//tools/shfmt"),
+        yaml = Label("@multitool//tools/yamlfmt"),
+        **kwargs):
+    _fmt(
+        name = name,
+        jsonnet = jsonnet,
+        go = go,
+        sh = sh,
+        yaml = yaml,
+        **kwargs
+    )
