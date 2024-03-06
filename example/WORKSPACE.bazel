@@ -236,3 +236,11 @@ fetch_shellcheck()
 load("@aspect_rules_lint//lint:vale.bzl", "fetch_vale")
 
 fetch_vale()
+
+# Optional: multitool provides defaults for some tools such as yamlfmt
+load("@rules_multitool//multitool:multitool.bzl", "multitool")
+
+multitool(
+    name = "multitool",
+    lockfile = "@aspect_rules_lint//format:multitool.lock.json",
+)
