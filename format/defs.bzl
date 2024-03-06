@@ -1,6 +1,9 @@
-"""Produce a multi-formatter that aggregates the supplier formatters.
+"""Produce a multi-formatter that aggregates formatters.
 
-Each formatter binary should already be declared in your repository, and you can test them by running
+Some formatter tools are automatically provided by default in rules_lint.
+These are listed as defaults in the API docs below.
+
+Other formatter binaries may be declared in your repository, and you can test them by running
 them with Bazel.
 
 For example, to add prettier, your `BUILD.bazel` file should contain:
@@ -32,6 +35,8 @@ multi_formatter_binary(
 
 load("//format/private:formatter_binary.bzl", _fmt = "multi_formatter_binary")
 
+multi_formatter_binary_rule = _fmt
+
 def multi_formatter_binary(
         name,
         jsonnet = Label("@multitool//tools/jsonnetfmt"),
@@ -39,6 +44,7 @@ def multi_formatter_binary(
         sh = Label("@multitool//tools/shfmt"),
         yaml = Label("@multitool//tools/yamlfmt"),
         **kwargs):
+    "Wrapper macro around multi_formatter_binary_rule that sets defaults for some languages."
     _fmt(
         name = name,
         jsonnet = jsonnet,
