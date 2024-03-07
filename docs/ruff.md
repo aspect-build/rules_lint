@@ -51,7 +51,7 @@ A repository macro used from WORKSPACE to fetch ruff binaries
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="fetch_ruff-tag"></a>tag |  a tag of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  <code>"v0.3.0"</code> |
+| <a id="fetch_ruff-tag"></a>tag |  a tag of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  <code>"v0.3.1"</code> |
 
 
 <a id="ruff_action"></a>
