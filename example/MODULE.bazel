@@ -20,9 +20,6 @@ local_path_override(
     path = "..",
 )
 
-linters = use_extension("@aspect_rules_lint//lint:extensions.bzl", "linters")
-use_repo(linters, "aspect_rules_lint.yamlfmt")
-
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
 rules_ts_ext.deps()
 use_repo(rules_ts_ext, "npm_typescript")
