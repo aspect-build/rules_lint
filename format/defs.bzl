@@ -67,7 +67,7 @@ def format_multirun(name, **kwargs):
         #   (and make sure we don't eagerly reference @multitool in case it isn't defined)
         # - otherwise use the user-supplied value
         if lang_attribute in kwargs.keys():
-            tool_label = kwargs.pop("lang_attribute")
+            tool_label = kwargs.pop(lang_attribute)
         else:
             tool_label = Label(DEFAULT_TOOL_LABELS[lang])
         if not tool_label:
