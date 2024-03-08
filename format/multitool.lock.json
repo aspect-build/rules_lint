@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/theoremlp/rules_multitool/main/lockfile.schema.json",
   "yamlfmt": {
     "binaries": [
       {
