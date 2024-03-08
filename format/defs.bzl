@@ -37,19 +37,26 @@ load("//format/private:formatter_binary.bzl", _fmt = "multi_formatter_binary")
 
 multi_formatter_binary_rule = _fmt
 
-def multi_formatter_binary(
-        name,
-        jsonnet = Label("@multitool//tools/jsonnetfmt"),
-        go = Label("@multitool//tools/gofumpt"),
-        sh = Label("@multitool//tools/shfmt"),
-        yaml = Label("@multitool//tools/yamlfmt"),
-        **kwargs):
-    "Wrapper macro around multi_formatter_binary_rule that sets defaults for some languages."
+def multi_formatter_binary(name, **kwargs):
+    """Wrapper macro around multi_formatter_binary_rule that sets defaults for some languages.
+
+    These come from the `@multitool` repo.
+    Under --enable_bzlmod, rules_lint creates this automatically.
+    WORKSPACE users will have to set this up manually. See the release install snippet for an example.
+
+    Set any attribute to `False` to turn off that language altogether, rather than use a default tool.
+    """
+
     _fmt(
         name = name,
-        jsonnet = jsonnet,
-        go = go,
-        sh = sh,
-        yaml = yaml,
+        # Logic:
+        # - if there's no value for this key, the user omitted it, so use our default
+        # - if there is a value, and it's False, then pass None to the underlying rule
+        #   (and make sure we don't eagerly reference @multitool in case it isn't defined)
+        # - otherwise use the user-supplied value
+        jsonnet = kwargs.pop("jsonnet", Label("@multitool//tools/jsonnetfmt")) or None,
+        go = kwargs.pop("go", Label("@multitool//tools/gofumpt")) or None,
+        sh = kwargs.pop("sh", Label("@multitool//tools/shfmt")) or None,
+        yaml = kwargs.pop("yaml", Label("@multitool//tools/yamlfmt")) or None,
         **kwargs
     )

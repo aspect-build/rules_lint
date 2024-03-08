@@ -75,10 +75,16 @@ Produces an executable that aggregates the supplied formatter binaries
 ## multi_formatter_binary
 
 <pre>
-multi_formatter_binary(<a href="#multi_formatter_binary-name">name</a>, <a href="#multi_formatter_binary-jsonnet">jsonnet</a>, <a href="#multi_formatter_binary-go">go</a>, <a href="#multi_formatter_binary-sh">sh</a>, <a href="#multi_formatter_binary-yaml">yaml</a>, <a href="#multi_formatter_binary-kwargs">kwargs</a>)
+multi_formatter_binary(<a href="#multi_formatter_binary-name">name</a>, <a href="#multi_formatter_binary-kwargs">kwargs</a>)
 </pre>
 
 Wrapper macro around multi_formatter_binary_rule that sets defaults for some languages.
+
+These come from the `@multitool` repo.
+Under --enable_bzlmod, rules_lint creates this automatically.
+WORKSPACE users will have to set this up manually. See the release install snippet for an example.
+
+Set any attribute to `False` to turn off that language altogether, rather than use a default tool.
 
 **PARAMETERS**
 
@@ -86,10 +92,6 @@ Wrapper macro around multi_formatter_binary_rule that sets defaults for some lan
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="multi_formatter_binary-name"></a>name |  <p align="center"> - </p>   |  none |
-| <a id="multi_formatter_binary-jsonnet"></a>jsonnet |  <p align="center"> - </p>   |  <code>Label("@multitool//tools/jsonnetfmt:jsonnetfmt")</code> |
-| <a id="multi_formatter_binary-go"></a>go |  <p align="center"> - </p>   |  <code>Label("@multitool//tools/gofumpt:gofumpt")</code> |
-| <a id="multi_formatter_binary-sh"></a>sh |  <p align="center"> - </p>   |  <code>Label("@multitool//tools/shfmt:shfmt")</code> |
-| <a id="multi_formatter_binary-yaml"></a>yaml |  <p align="center"> - </p>   |  <code>Label("@multitool//tools/yamlfmt:yamlfmt")</code> |
 | <a id="multi_formatter_binary-kwargs"></a>kwargs |  <p align="center"> - </p>   |  none |
 
 
