@@ -36,6 +36,29 @@ A repository macro used from WORKSPACE to fetch binaries
 | <a id="fetch_shellcheck-version"></a>version |  a version of shellcheck that we have mirrored, e.g. <code>v0.9.0</code>   |  <code>"v0.9.0"</code> |
 
 
+<a id="lint_shellcheck_aspect"></a>
+
+## lint_shellcheck_aspect
+
+<pre>
+lint_shellcheck_aspect(<a href="#lint_shellcheck_aspect-binary">binary</a>, <a href="#lint_shellcheck_aspect-config">config</a>)
+</pre>
+
+A factory function to create a linter aspect.
+
+Attrs:
+    binary: a shellcheck executable.
+    config: the .shellcheckrc file
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="lint_shellcheck_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
+| <a id="lint_shellcheck_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
+
+
 <a id="shellcheck_action"></a>
 
 ## shellcheck_action
@@ -60,29 +83,6 @@ Based on https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md
 | <a id="shellcheck_action-config"></a>config |  label of the .shellcheckrc file   |  none |
 | <a id="shellcheck_action-report"></a>report |  output file to generate   |  none |
 | <a id="shellcheck_action-use_exit_code"></a>use_exit_code |  whether to fail the build when a lint violation is reported   |  <code>False</code> |
-
-
-<a id="shellcheck_aspect"></a>
-
-## shellcheck_aspect
-
-<pre>
-shellcheck_aspect(<a href="#shellcheck_aspect-binary">binary</a>, <a href="#shellcheck_aspect-config">config</a>)
-</pre>
-
-A factory function to create a linter aspect.
-
-Attrs:
-    binary: a shellcheck executable.
-    config: the .shellcheckrc file
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="shellcheck_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
-| <a id="shellcheck_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
 
 
 <a id="shellcheck_binary"></a>

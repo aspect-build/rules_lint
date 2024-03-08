@@ -3,6 +3,7 @@
 load("@aspect_rules_lint//lint:buf.bzl", "lint_buf_aspect")
 load("@aspect_rules_lint//lint:eslint.bzl", "lint_eslint_aspect")
 load("@aspect_rules_lint//lint:flake8.bzl", "lint_flake8_aspect")
+load("@aspect_rules_lint//lint:golangci-lint.bzl", "lint_golangci_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
@@ -56,7 +57,7 @@ shellcheck = lint_shellcheck_aspect(
 
 shellcheck_test = lint_test(aspect = shellcheck)
 
-golangci_lint = lint_golangci_lint_aspect(
+golangci_lint = lint_golangci_aspect(
     binary = "@@//tools/lint:golangci_lint",
     config = "@@//:.golangci.yaml",
 )

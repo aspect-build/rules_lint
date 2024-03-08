@@ -54,6 +54,41 @@ A repository macro used from WORKSPACE to fetch ruff binaries
 | <a id="fetch_ruff-tag"></a>tag |  a tag of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  <code>"v0.3.1"</code> |
 
 
+<a id="lint_ruff_aspect"></a>
+
+## lint_ruff_aspect
+
+<pre>
+lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_ruff_aspect-configs">configs</a>)
+</pre>
+
+A factory function to create a linter aspect.
+
+Attrs:
+    binary: a ruff executable. Can be obtained like so:
+
+        load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+        http_archive(
+            name = "ruff_bin_linux_amd64",
+            sha256 = "&lt;-sha-&gt;",
+            urls = [
+                "https://github.com/charliermarsh/ruff/releases/download/v&lt;-version-&gt;/ruff-x86_64-unknown-linux-gnu.tar.gz",
+            ],
+            build_file_content = """exports_files(["ruff"])""",
+        )
+
+    configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="lint_ruff_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
+| <a id="lint_ruff_aspect-configs"></a>configs |  <p align="center"> - </p>   |  none |
+
+
 <a id="ruff_action"></a>
 
 ## ruff_action
@@ -89,41 +124,6 @@ However this is needed because:
 | <a id="ruff_action-config"></a>config |  labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)   |  none |
 | <a id="ruff_action-report"></a>report |  output file to generate   |  none |
 | <a id="ruff_action-use_exit_code"></a>use_exit_code |  whether to fail the build when a lint violation is reported   |  <code>False</code> |
-
-
-<a id="ruff_aspect"></a>
-
-## ruff_aspect
-
-<pre>
-ruff_aspect(<a href="#ruff_aspect-binary">binary</a>, <a href="#ruff_aspect-configs">configs</a>)
-</pre>
-
-A factory function to create a linter aspect.
-
-Attrs:
-    binary: a ruff executable. Can be obtained like so:
-
-        load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-        http_archive(
-            name = "ruff_bin_linux_amd64",
-            sha256 = "&lt;-sha-&gt;",
-            urls = [
-                "https://github.com/charliermarsh/ruff/releases/download/v&lt;-version-&gt;/ruff-x86_64-unknown-linux-gnu.tar.gz",
-            ],
-            build_file_content = """exports_files(["ruff"])""",
-        )
-
-    configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="ruff_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
-| <a id="ruff_aspect-configs"></a>configs |  <p align="center"> - </p>   |  none |
 
 
 <a id="ruff_fix"></a>
