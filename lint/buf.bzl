@@ -12,7 +12,7 @@ buf = buf_lint_aspect(
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
-load("//lint/private:lint_aspect.bzl", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_file")
 
 _MNEMONIC = "buf"
 
@@ -82,7 +82,7 @@ def _buf_lint_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    buf_lint_action(ctx, ctx.toolchains[ctx.attr._buf_toolchain], target, report, ctx.attr.fail_on_violation)
+    buf_lint_action(ctx, ctx.toolchains[ctx.attr._buf_toolchain], target, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
 def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"):
@@ -96,7 +96,10 @@ def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
         implementation = _buf_lint_aspect_impl,
         attr_aspects = ["deps"],
         attrs = {
-            "fail_on_violation": attr.bool(),
+            "_options": attr.label(
+                default = "//lint:fail_on_violation",
+                providers = [LintOptionsInfo],
+            ),
             "_buf_toolchain": attr.string(
                 default = toolchain,
             ),

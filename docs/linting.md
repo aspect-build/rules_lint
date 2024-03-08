@@ -59,8 +59,8 @@ This is the same flag many linters support.
 
 ### 4. Errors during `bazel build`
 
-By adding `--aspects_parameters=fail_on_violation=true` to the command-line, we pass a parameter
-to our linter aspects that cause them to honor the exit code of the lint tool.
+Add `--@aspect_rules_lint//lint:fail_on_violation` to the command-line,
+to cause all linter aspects to honor the exit code of the lint tool.
 
 This makes the build fail when any lint violations are present.
 

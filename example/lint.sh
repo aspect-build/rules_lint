@@ -32,7 +32,7 @@ report_args=(
 # This is a rudimentary flag parser.
 if [ $1 == "--fail-on-violation" ]; then
 	args+=(
-		"--aspects_parameters=fail_on_violation=true"
+		"--@aspect_rules_lint//lint:fail_on_violation"
 		"--keep_going"
 	)
 	shift

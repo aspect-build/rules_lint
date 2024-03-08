@@ -64,7 +64,7 @@ vale = vale_aspect(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_file")
 load(":vale_library.bzl", "fetch_styles")
 load(":vale_versions.bzl", "VALE_VERSIONS")
 
@@ -120,7 +120,7 @@ def _vale_aspect_impl(target, ctx):
             styles = ctx.files._styles[0]
             if not styles.is_directory:
                 fail("Styles should be a directory containing installed styles")
-        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, ctx.attr.fail_on_violation)
+        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
         return [info]
 
     return []
@@ -130,7 +130,10 @@ def vale_aspect(binary, config, styles = Label("//lint:empty_styles")):
     return aspect(
         implementation = _vale_aspect_impl,
         attrs = {
-            "fail_on_violation": attr.bool(),
+            "_options": attr.label(
+                default = "//lint:fail_on_violation",
+                providers = [LintOptionsInfo],
+            ),
             "_vale": attr.label(
                 default = binary,
                 executable = True,

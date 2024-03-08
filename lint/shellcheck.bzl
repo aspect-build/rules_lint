@@ -17,7 +17,7 @@ shellcheck = shellcheck_aspect(
 """
 
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
-load("//lint/private:lint_aspect.bzl", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
 load("//lint/private:maybe.bzl", http_archive = "maybe_http_archive")
 
 _MNEMONIC = "shellcheck"
@@ -81,7 +81,7 @@ def _shellcheck_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr.fail_on_violation)
+    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
 def shellcheck_aspect(binary, config):
@@ -94,7 +94,10 @@ def shellcheck_aspect(binary, config):
     return aspect(
         implementation = _shellcheck_aspect_impl,
         attrs = {
-            "fail_on_violation": attr.bool(),
+            "_options": attr.label(
+                default = "//lint:fail_on_violation",
+                providers = [LintOptionsInfo],
+            ),
             "_shellcheck": attr.label(
                 default = binary,
                 executable = True,

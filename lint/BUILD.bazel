@@ -1,6 +1,7 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("//lint/private:lint_aspect.bzl", "fail_on_violation_flag")
 
 exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
 
@@ -29,6 +30,12 @@ config_setting(
 
 bool_flag(
     name = "debug",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+fail_on_violation_flag(
+    name = "fail_on_violation",
     build_setting_default = False,
     visibility = ["//visibility:public"],
 )
