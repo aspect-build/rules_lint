@@ -72,7 +72,7 @@ def _pmd_aspect_impl(target, ctx):
     pmd_action(ctx, ctx.executable._pmd, filter_srcs(ctx.rule), ctx.files._rulesets, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
-def pmd_aspect(binary, rulesets):
+def lint_pmd_aspect(binary, rulesets):
     """A factory function to create a linter aspect.
 
     Attrs:

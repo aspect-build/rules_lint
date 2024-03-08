@@ -67,7 +67,7 @@ def _flake8_aspect_impl(target, ctx):
     flake8_action(ctx, ctx.executable._flake8, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
-def flake8_aspect(binary, config):
+def lint_flake8_aspect(binary, config):
     """A factory function to create a linter aspect.
 
     Attrs:

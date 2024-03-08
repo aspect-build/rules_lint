@@ -151,7 +151,7 @@ def _eslint_aspect_impl(target, ctx):
     eslint_fix(ctx, ctx.executable, files_to_lint, patch)
     return [info]
 
-def eslint_aspect(binary, configs):
+def lint_eslint_aspect(binary, configs):
     """A factory function to create a linter aspect.
 
     Args:

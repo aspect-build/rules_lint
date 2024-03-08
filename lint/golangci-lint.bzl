@@ -77,7 +77,7 @@ def _golangci_lint_aspect_impl(target, ctx):
     golangci_lint_action(ctx, ctx.executable._golangci_lint, srcs, ctx.file._config_file, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
-def golangci_lint_aspect(binary, config):
+def lint_golangci_aspect(binary, config):
     """A factory function to create a linter aspect.
 
     Attrs:
