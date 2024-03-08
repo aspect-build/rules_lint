@@ -60,9 +60,6 @@ def make_lint_test(aspect):
         implementation = _test_impl,
         attrs = {
             "srcs": attr.label_list(doc = "*_library targets", aspects = [aspect]),
-            # Note, we don't use this in the test, but the user passes an aspect that has this aspect_attribute,
-            # and that requires that we list it here as well.
-            "fail_on_violation": attr.bool(),
             "_bin": attr.label(default = ":lint_test.sh", allow_single_file = True, executable = True, cfg = "exec"),
             "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
         },

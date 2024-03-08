@@ -15,7 +15,7 @@ ruff = ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "filter_srcs", "patch_and_report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "ruff"
@@ -113,7 +113,7 @@ def _ruff_aspect_impl(target, ctx):
 
     patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
     files_to_lint = filter_srcs(ctx.rule)
-    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, ctx.attr.fail_on_violation)
+    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch)
     return [info]
 
@@ -147,7 +147,10 @@ def ruff_aspect(binary, configs):
         # Needed for linters that need semantic information like transitive type declarations.
         # attr_aspects = ["deps"],
         attrs = {
-            "fail_on_violation": attr.bool(),
+            "_options": attr.label(
+                default = "//lint:fail_on_violation",
+                providers = [LintOptionsInfo],
+            ),
             "_ruff": attr.label(
                 default = binary,
                 allow_single_file = True,

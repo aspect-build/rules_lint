@@ -12,7 +12,7 @@ flake8 = flake8_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
 
 _MNEMONIC = "flake8"
 
@@ -64,7 +64,7 @@ def _flake8_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    flake8_action(ctx, ctx.executable._flake8, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr.fail_on_violation)
+    flake8_action(ctx, ctx.executable._flake8, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
 def flake8_aspect(binary, config):
@@ -88,7 +88,10 @@ def flake8_aspect(binary, config):
         # Needed for linters that need semantic information like transitive type declarations.
         # attr_aspects = ["deps"],
         attrs = {
-            "fail_on_violation": attr.bool(),
+            "_options": attr.label(
+                default = "//lint:fail_on_violation",
+                providers = [LintOptionsInfo],
+            ),
             "_flake8": attr.label(
                 default = binary,
                 executable = True,
