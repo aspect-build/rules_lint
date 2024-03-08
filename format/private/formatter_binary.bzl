@@ -1,88 +1,72 @@
 "Implementation of formatter_binary"
 
-load("@aspect_bazel_lib//lib:paths.bzl", "BASH_RLOCATION_FUNCTION", "to_rlocation_path")
-
 # Per the formatter design, each language can only have a single formatter binary
+# Keys in this map must match the `case "$language" in` block in format.sh
 TOOLS = {
-    "javascript": "prettier",
-    "markdown": "prettier-md",
-    "python": "ruff",
-    "starlark": "buildifier",
-    "jsonnet": "jsonnetfmt",
-    "terraform": "terraform-fmt",
-    "kotlin": "ktfmt",
-    "java": "java-format",
-    "scala": "scalafmt",
-    "swift": "swiftformat",
-    "go": "gofmt",
-    "sql": "prettier-sql",
-    "sh": "shfmt",
-    "protobuf": "buf",
-    "cc": "clang-format",
-    "yaml": "yamlfmt",
+    "JavaScript": "prettier",
+    "Markdown": "prettier",
+    "Python": "ruff",
+    "Starlark": "buildifier",
+    "Jsonnet": "jsonnetfmt",
+    "Terraform": "terraform-fmt",
+    "Kotlin": "ktfmt",
+    "Java": "java-format",
+    "Scala": "scalafmt",
+    "Swift": "swiftformat",
+    "Go": "gofmt",
+    "SQL": "prettier",
+    "Shell": "shfmt",
+    "Protocol Buffer": "buf",
+    "C++": "clang-format",
+    "YAML": "yamlfmt",
 }
 
-def _formatter_binary_impl(ctx):
-    substitutions = {}
-    tools = {v: getattr(ctx.attr, k) for k, v in TOOLS.items()}
-    for tool, attr in tools.items():
-        if attr:
-            substitutions["{{%s}}" % tool] = to_rlocation_path(ctx, attr.files_to_run.executable)
-    if len(substitutions) == 0:
-        fail("multi_formatter_binary should have at least one language attribute set to a formatter tool")
+DEFAULT_TOOL_LABELS = {
+    "Jsonnet": "@multitool//tools/jsonnetfmt",
+    "Go": "@multitool//tools/gofumpt",
+    "Shell": "@multitool//tools/shfmt",
+    "YAML": "@multitool//tools/yamlfmt",
+}
 
-    substitutions.update({
-        # We need to fill in the rlocation paths in the shell script
-        "{{BASH_RLOCATION_FUNCTION}}": BASH_RLOCATION_FUNCTION,
-        # Support helpful error reporting
-        "{{fix_target}}": str(ctx.label),
-    })
+CHECK_FLAGS = {
+    "buildifier": "-mode=check",
+    "swiftformat": "--lint",
+    "prettier": "--check",
+    "ruff": "format --check",
+    "shfmt": "--diff",
+    "java-format": "--set-exit-if-changed --dry-run",
+    "ktfmt": "--set-exit-if-changed --dry-run",
+    "gofmt": "-l",
+    "buf": "format -d --exit-code",
+    "terraform-fmt": "fmt -check -diff",
+    "jsonnetfmt": "--test",
+    "scalafmt": "--test",
+    "clang-format": "--style=file --fallback-style=none --dry-run -Werror",
+    "yamlfmt": "-lint",
+}
 
-    # Uniquely named output file allowing more than one formatter in a package
-    bin = ctx.actions.declare_file("_{}.fmt.sh".format(ctx.label.name))
-    ctx.actions.expand_template(
-        template = ctx.file._bin,
-        output = bin,
-        substitutions = substitutions,
-        is_executable = True,
-    )
+FIX_FLAGS = {
+    "buildifier": "-mode=fix",
+    "swiftformat": "",
+    "prettier": "--write",
+    # Force exclusions in the configuration file to be honored even when file paths are supplied
+    # as command-line arguments; see
+    # https://github.com/astral-sh/ruff/discussions/5857#discussioncomment-6583943
+    "ruff": "format --force-exclude",
+    # NB: apply-ignore added in https://github.com/mvdan/sh/issues/1037
+    "shfmt": "-w --apply-ignore",
+    "java-format": "--replace",
+    "ktfmt": "",
+    "gofmt": "-w",
+    "buf": "format -w",
+    "terraform-fmt": "fmt",
+    "jsonnetfmt": "--in-place",
+    "scalafmt": "",
+    "clang-format": "-style=file --fallback-style=none -i",
+    "yamlfmt": "",
+}
 
-    runfiles = ctx.runfiles(files = [ctx.file._runfiles_lib] + [
-        f.files_to_run.executable
-        for f in tools.values()
-        if f
-    ] + [
-        f.files_to_run.runfiles_manifest
-        for f in tools.values()
-        if f and f.files_to_run.runfiles_manifest
-    ])
-    runfiles = runfiles.merge_all([
-        f.default_runfiles
-        for f in tools.values()
-        if f
-    ])
-
-    return [
-        DefaultInfo(
-            executable = bin,
-            runfiles = runfiles,
-        ),
-    ]
-
-formatter_binary_lib = struct(
-    implementation = _formatter_binary_impl,
-    attrs = dict({
-        k: attr.label(doc = "a binary target that runs {} (or another tool with compatible CLI arguments)".format(v), executable = True, cfg = "exec", allow_files = True)
-        for k, v in TOOLS.items()
-    }, **{
-        "_bin": attr.label(default = "//format/private:format.sh", allow_single_file = True),
-        "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
-    }),
-)
-
-multi_formatter_binary = rule(
-    doc = "Produces an executable that aggregates the supplied formatter binaries",
-    implementation = formatter_binary_lib.implementation,
-    attrs = formatter_binary_lib.attrs,
-    executable = True,
-)
+def to_attribute_name(lang):
+    if lang == "C++":
+        return "cc"
+    return lang.lower().replace(" ", "_")

@@ -6,7 +6,10 @@ bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["//format/private:formatter_binary"],
+    deps = [
+        "//format/private:formatter_binary",
+        "@rules_multirun//:defs",
+    ],
 )
 
 bzl_library(
