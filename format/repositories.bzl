@@ -18,9 +18,9 @@ def http_jar(**kwargs):
 def rules_lint_dependencies():
     http_archive(
         name = "rules_multitool",
-        sha256 = "04310baa21f31aa12b53aa0cac6d2b8b3c80ab44060d0a4fc48c015f58fa531f",
-        strip_prefix = "rules_multitool-0.2.0",
-        url = "https://github.com/theoremlp/rules_multitool/releases/download/v0.2.0/rules_multitool-0.2.0.tar.gz",
+        sha256 = "79c91ae352174c576d48a052868e4e53b7ed0f0795db6dba5e6bbb3a6d90cf0c",
+        strip_prefix = "rules_multitool-0.3.0",
+        url = "https://github.com/theoremlp/rules_multitool/releases/download/v0.3.0/rules_multitool-0.3.0.tar.gz",
     )
 
 def fetch_pmd():
