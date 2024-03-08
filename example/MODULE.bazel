@@ -15,6 +15,14 @@ bazel_dep(name = "rules_python", version = "0.26.0")
 bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 bazel_dep(name = "platforms", version = "0.0.7")
 
+# Update to include
+# https://github.com/bazelbuild/rules_proto/pull/206
+git_override(
+    module_name = "rules_proto",
+    commit = "d373829e59d94c95e470f4250d9da4617c4951eb",
+    remote = "https://github.com/bazelbuild/rules_proto.git",
+)
+
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "..",
