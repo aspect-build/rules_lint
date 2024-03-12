@@ -56,12 +56,12 @@ Based on https://github.com/golangci/golangci-lint
 | <a id="golangci_lint_action-use_exit_code"></a>use_exit_code |  whether to fail the build when a lint violation is reported   |  <code>False</code> |
 
 
-<a id="golangci_lint_aspect"></a>
+<a id="lint_golangci_aspect"></a>
 
-## golangci_lint_aspect
+## lint_golangci_aspect
 
 <pre>
-golangci_lint_aspect(<a href="#golangci_lint_aspect-binary">binary</a>, <a href="#golangci_lint_aspect-config">config</a>)
+lint_golangci_aspect(<a href="#lint_golangci_aspect-binary">binary</a>, <a href="#lint_golangci_aspect-config">config</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -75,7 +75,7 @@ Attrs:
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="golangci_lint_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
-| <a id="golangci_lint_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
+| <a id="lint_golangci_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
+| <a id="lint_golangci_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
 
 

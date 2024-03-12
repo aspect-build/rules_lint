@@ -85,7 +85,7 @@ def _buf_lint_aspect_impl(target, ctx):
     buf_lint_action(ctx, ctx.toolchains[ctx.attr._buf_toolchain], target, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
-def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"):
+def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"):
     """A factory function to create a linter aspect.
 
     Args:

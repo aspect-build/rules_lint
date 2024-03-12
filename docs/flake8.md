@@ -40,12 +40,12 @@ Based on https://flake8.pycqa.org/en/latest/user/invocation.html
 | <a id="flake8_action-use_exit_code"></a>use_exit_code |  whether to fail the build when a lint violation is reported   |  <code>False</code> |
 
 
-<a id="flake8_aspect"></a>
+<a id="lint_flake8_aspect"></a>
 
-## flake8_aspect
+## lint_flake8_aspect
 
 <pre>
-flake8_aspect(<a href="#flake8_aspect-binary">binary</a>, <a href="#flake8_aspect-config">config</a>)
+lint_flake8_aspect(<a href="#lint_flake8_aspect-binary">binary</a>, <a href="#lint_flake8_aspect-config">config</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -67,7 +67,7 @@ Attrs:
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="flake8_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
-| <a id="flake8_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
+| <a id="lint_flake8_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
+| <a id="lint_flake8_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
 
 

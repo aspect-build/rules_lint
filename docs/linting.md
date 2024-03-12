@@ -66,7 +66,7 @@ This makes the build fail when any lint violations are present.
 
 ### 5. Failures during `bazel test`
 
-Add a [make_lint_test](./lint_test.md) call to the `linters.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
+Add a [lint_test](./lint_test.md) call to the `linters.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
 
 See the `example/test/BUILD.bazel` file in this repo for some examples.
 

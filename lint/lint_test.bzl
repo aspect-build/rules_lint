@@ -7,7 +7,7 @@ To use this, in your `linters.bzl` where you define the aspect, just create a te
 For example, with `flake8`:
 
 ```starlark
-load("@aspect_rules_lint//lint:lint_test.bzl", "make_lint_test")
+load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
 
 flake8 = flake8_aspect(
@@ -15,7 +15,7 @@ flake8 = flake8_aspect(
     config = "@@//:.flake8",
 )
 
-flake8_test = make_lint_test(aspect = flake8)
+flake8_test = lint_test(aspect = flake8)
 ```
 
 Now in your BUILD files you can add a test:
@@ -55,7 +55,7 @@ def _test_impl(ctx):
         runfiles = ctx.runfiles(reports + [ctx.file._runfiles_lib]),
     )]
 
-def make_lint_test(aspect):
+def lint_test(aspect):
     return rule(
         implementation = _test_impl,
         attrs = {

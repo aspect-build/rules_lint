@@ -117,7 +117,7 @@ def _ruff_aspect_impl(target, ctx):
     ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch)
     return [info]
 
-def ruff_aspect(binary, configs):
+def lint_ruff_aspect(binary, configs):
     """A factory function to create a linter aspect.
 
     Attrs:

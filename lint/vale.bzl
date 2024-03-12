@@ -125,7 +125,7 @@ def _vale_aspect_impl(target, ctx):
 
     return []
 
-def vale_aspect(binary, config, styles = Label("//lint:empty_styles")):
+def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles")):
     """A factory function to create a linter aspect."""
     return aspect(
         implementation = _vale_aspect_impl,

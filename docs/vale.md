@@ -82,6 +82,26 @@ A repository macro used from WORKSPACE to fetch vale binaries
 | <a id="fetch_vale-tag"></a>tag |  a tag of vale that we have mirrored, e.g. <code>v3.0.5</code>   |  <code>"v3.1.0"</code> |
 
 
+<a id="lint_vale_aspect"></a>
+
+## lint_vale_aspect
+
+<pre>
+lint_vale_aspect(<a href="#lint_vale_aspect-binary">binary</a>, <a href="#lint_vale_aspect-config">config</a>, <a href="#lint_vale_aspect-styles">styles</a>)
+</pre>
+
+A factory function to create a linter aspect.
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="lint_vale_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
+| <a id="lint_vale_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
+| <a id="lint_vale_aspect-styles"></a>styles |  <p align="center"> - </p>   |  <code>Label("//lint:empty_styles")</code> |
+
+
 <a id="vale_action"></a>
 
 ## vale_action
@@ -104,25 +124,5 @@ vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable
 | <a id="vale_action-config"></a>config |  <p align="center"> - </p>   |  none |
 | <a id="vale_action-report"></a>report |  <p align="center"> - </p>   |  none |
 | <a id="vale_action-use_exit_code"></a>use_exit_code |  <p align="center"> - </p>   |  <code>False</code> |
-
-
-<a id="vale_aspect"></a>
-
-## vale_aspect
-
-<pre>
-vale_aspect(<a href="#vale_aspect-binary">binary</a>, <a href="#vale_aspect-config">config</a>, <a href="#vale_aspect-styles">styles</a>)
-</pre>
-
-A factory function to create a linter aspect.
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="vale_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
-| <a id="vale_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
-| <a id="vale_aspect-styles"></a>styles |  <p align="center"> - </p>   |  <code>Label("//lint:empty_styles")</code> |
 
 
