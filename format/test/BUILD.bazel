@@ -100,7 +100,7 @@ format_multirun(
 
 format_multirun(
     name = "format_protobuf",
-    protobuf = ":mock_buf.sh",
+    protocol_buffer = ":mock_buf.sh",
 )
 
 format_multirun(

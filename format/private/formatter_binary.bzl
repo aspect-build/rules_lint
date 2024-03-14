@@ -17,7 +17,7 @@ TOOLS = {
     "go": "gofmt",
     "sql": "prettier-sql",
     "sh": "shfmt",
-    "protobuf": "buf",
+    "protocol_buffer": "buf",
     "cc": "clang-format",
     "yaml": "yamlfmt",
 }

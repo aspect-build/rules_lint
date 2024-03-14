@@ -68,7 +68,7 @@ format_multirun(
     javascript = ":prettier",
     kotlin = ":ktfmt",
     markdown = ":prettier",
-    protobuf = "//tools/lint:buf",
+    protocol_buffer = "//tools/lint:buf",
     python = "//tools/lint:ruff",
     scala = ":scalafmt",
     sql = ":prettier",
