@@ -1,11 +1,6 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-sh_binary(
-    name = "format",
-    srcs = ["format.sh"],
-    visibility = ["//visibility:public"],
-    deps = ["@bazel_tools//tools/bash/runfiles"],
-)
+exports_files(["format.sh"])
 
 bzl_library(
     name = "formatter_binary",

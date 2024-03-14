@@ -241,7 +241,7 @@ fetch_vale()
 # Optional: multitool provides defaults for some tools such as yamlfmt
 # If you do not set up multitool, you will be forced to either set an explicit tool
 # for languages that have a default, or set explicit False value, e.g.
-#   multi_formatter_binary(jsonnet = False)
+#   format_multirun(jsonnet = False)
 load("@rules_multitool//multitool:multitool.bzl", "multitool")
 
 multitool(
