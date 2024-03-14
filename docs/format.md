@@ -40,8 +40,8 @@ format_multirun(
 ## format_multirun_rule
 
 <pre>
-format_multirun_rule(<a href="#format_multirun_rule-name">name</a>, <a href="#format_multirun_rule-cc">cc</a>, <a href="#format_multirun_rule-go">go</a>, <a href="#format_multirun_rule-java">java</a>, <a href="#format_multirun_rule-javascript">javascript</a>, <a href="#format_multirun_rule-jsonnet">jsonnet</a>, <a href="#format_multirun_rule-kotlin">kotlin</a>, <a href="#format_multirun_rule-markdown">markdown</a>, <a href="#format_multirun_rule-protobuf">protobuf</a>,
-                            <a href="#format_multirun_rule-python">python</a>, <a href="#format_multirun_rule-scala">scala</a>, <a href="#format_multirun_rule-sh">sh</a>, <a href="#format_multirun_rule-sql">sql</a>, <a href="#format_multirun_rule-starlark">starlark</a>, <a href="#format_multirun_rule-swift">swift</a>, <a href="#format_multirun_rule-terraform">terraform</a>, <a href="#format_multirun_rule-yaml">yaml</a>)
+format_multirun_rule(<a href="#format_multirun_rule-name">name</a>, <a href="#format_multirun_rule-cc">cc</a>, <a href="#format_multirun_rule-go">go</a>, <a href="#format_multirun_rule-java">java</a>, <a href="#format_multirun_rule-javascript">javascript</a>, <a href="#format_multirun_rule-jsonnet">jsonnet</a>, <a href="#format_multirun_rule-kotlin">kotlin</a>, <a href="#format_multirun_rule-markdown">markdown</a>, <a href="#format_multirun_rule-protocol_buffer">protocol_buffer</a>,
+                     <a href="#format_multirun_rule-python">python</a>, <a href="#format_multirun_rule-scala">scala</a>, <a href="#format_multirun_rule-sh">sh</a>, <a href="#format_multirun_rule-sql">sql</a>, <a href="#format_multirun_rule-starlark">starlark</a>, <a href="#format_multirun_rule-swift">swift</a>, <a href="#format_multirun_rule-terraform">terraform</a>, <a href="#format_multirun_rule-yaml">yaml</a>)
 </pre>
 
 Produces an executable that aggregates the supplied formatter binaries
@@ -59,7 +59,7 @@ Produces an executable that aggregates the supplied formatter binaries
 | <a id="format_multirun_rule-jsonnet"></a>jsonnet |  a binary target that runs jsonnetfmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="format_multirun_rule-kotlin"></a>kotlin |  a binary target that runs ktfmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="format_multirun_rule-markdown"></a>markdown |  a binary target that runs prettier-md (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="format_multirun_rule-protobuf"></a>protobuf |  a binary target that runs buf (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="format_multirun_rule-protocol_buffer"></a>protocol_buffer |  a binary target that runs buf (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="format_multirun_rule-python"></a>python |  a binary target that runs ruff (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="format_multirun_rule-scala"></a>scala |  a binary target that runs scalafmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="format_multirun_rule-sh"></a>sh |  a binary target that runs shfmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
