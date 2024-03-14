@@ -106,7 +106,10 @@ case "$mode" in
  check)
    swiftmode="--lint"
    prettiermode="--check"
-   ruffmode="format --check"
+   # Force exclusions in the configuration file to be honored even when file paths are supplied
+   # as command-line arguments; see
+   # https://github.com/astral-sh/ruff/discussions/5857#discussioncomment-6583943
+   ruffmode="format --check --force-exclude"
    shfmtmode="-l"
    javamode="--set-exit-if-changed --dry-run"
    ktmode="--set-exit-if-changed --dry-run"
@@ -121,9 +124,7 @@ case "$mode" in
  fix)
    swiftmode=""
    prettiermode="--write"
-   # Force exclusions in the configuration file to be honored even when file paths are supplied
-   # as command-line arguments; see
-   # https://github.com/astral-sh/ruff/discussions/5857#discussioncomment-6583943
+   # see comment above
    ruffmode="format --force-exclude"
    # NB: apply-ignore added in https://github.com/mvdan/sh/issues/1037
    shfmtmode="-w --apply-ignore"
