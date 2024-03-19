@@ -1,3 +1,4 @@
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 
 exports_files(["ruff.toml"])
@@ -9,12 +10,30 @@ py_library(
 
 js_library(
     name = "eslintrc",
-    srcs = [".eslintrc.cjs"],
+    srcs = [
+        ".eslintrc.cjs",
+        "tsconfig.json",
+    ],
     visibility = ["//:__subpackages__"],
-    deps = ["//:eslintrc"],
+    deps = [
+        "//:eslintrc",
+        # uncomment this will cause this command to succeed:
+        # `bazel lint //src/subdir:ts`
+        # "//:node_modules/moment",
+    ],
 )
 
 js_library(
     name = "eslint-override",
     srcs = ["index.js"],
+)
+
+ts_project(
+    name = "ts",
+    srcs = ["test.ts"],
+    tsconfig = "tsconfig.json",
+    declaration = True,
+    deps = [
+        "//:node_modules/moment",
+    ]
 )

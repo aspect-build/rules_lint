@@ -1,4 +1,7 @@
 {
+  "dependencies": {
+    "moment": "*"
+  },
   "devDependencies": {
     "eslint": "*",
     "@typescript-eslint/parser": "*",
