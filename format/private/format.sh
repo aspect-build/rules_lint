@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
-# Template file for a formatter binary. This is expanded by a Bazel action in formatter_binary.bzl
-# to produce an actual Bash script.
-# Expansions are written in "mustache" syntax like {{interpolate_this}}.
+# Wrapper around a formatter tool
 
-{{BASH_RLOCATION_FUNCTION}}
+# --- begin runfiles.bash initialization v3 ---
+# Copy-pasted from the Bazel Bash runfiles library v3.
+# https://github.com/bazelbuild/bazel/blob/master/tools/bash/runfiles/runfiles.bash
+set -uo pipefail; set +e; f=bazel_tools/tools/bash/runfiles/runfiles.bash
+source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
+  source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2>/dev/null || \
+  source "$0.runfiles/$f" 2>/dev/null || \
+  source "$(grep -sm1 "^$f " "$0.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
+  source "$(grep -sm1 "^$f " "$0.exe.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
+  { echo>&2 "ERROR: runfiles.bash initializer cannot find $f. An executable rule may have forgotten to expose it in the runfiles, or the binary may require RUNFILES_DIR to be set."; exit 1; }; f=; set -e
+# --- end runfiles.bash initialization v3 ---
 
 if [[ -z "$BUILD_WORKSPACE_DIRECTORY" ]]; then
   echo >&2 "$0: FATAL: \$BUILD_WORKSPACE_DIRECTORY not set. This program should be executed under 'bazel run'."
@@ -21,7 +29,7 @@ function on_exit {
       ;;
     *)
       echo >&2 "FAILED: A formatter tool exited with code $code"
-      echo >&2 "Try running 'bazel run {{fix_target}}' to fix this."
+      echo >&2 "Try running 'bazel run $FIX_TARGET' to fix this."
       ;;
   esac
 }
@@ -95,52 +103,6 @@ function ls-files {
     fi
 }
 
-# Define the flags for the tools based on the mode of operation
-mode=fix
-if [ "${1:-}" == "--mode" ]; then
-  readonly mode=$2
-  shift 2
-fi
-
-case "$mode" in
- check)
-   swiftmode="--lint"
-   prettiermode="--check"
-   # Force exclusions in the configuration file to be honored even when file paths are supplied
-   # as command-line arguments; see
-   # https://github.com/astral-sh/ruff/discussions/5857#discussioncomment-6583943
-   ruffmode="format --check --force-exclude"
-   shfmtmode="-l"
-   javamode="--set-exit-if-changed --dry-run"
-   ktmode="--set-exit-if-changed --dry-run"
-   gofmtmode="-l"
-   bufmode="format -d --exit-code"
-   tfmode="-check -diff"
-   jsonnetmode="--test"
-   scalamode="--test"
-   clangformatmode="--style=file --fallback-style=none --dry-run -Werror"
-   yamlfmtmode="-lint"
-   ;;
- fix)
-   swiftmode=""
-   prettiermode="--write"
-   # see comment above
-   ruffmode="format --force-exclude"
-   # NB: apply-ignore added in https://github.com/mvdan/sh/issues/1037
-   shfmtmode="-w --apply-ignore"
-   javamode="--replace"
-   ktmode=""
-   gofmtmode="-w"
-   bufmode="format -w"
-   tfmode=""
-   jsonnetmode="--in-place"
-   scalamode=""
-   clangformatmode="-style=file --fallback-style=none -i"
-   yamlfmtmode=""
-   ;;
- *) echo >&2 "unknown mode $mode";;
-esac
-
 function time-run {
   local files="$1" && shift
   local bin="$1" && shift
@@ -155,7 +117,6 @@ function time-run {
 
 function run-format {
   local lang="$1" && shift
-  local fmtname="$1" && shift
   local bin="$1" && shift
   local args="$1" && shift
   local tuser
@@ -163,7 +124,6 @@ function run-format {
 
   local files=$(ls-files "$lang" $@)
   if [ -n "$files" ] && [ -n "$bin" ]; then
-    echo "Formatting ${lang} with ${fmtname}..."
     case "$lang" in
     'Protocol Buffer')
         ( for file in $files; do
@@ -202,26 +162,20 @@ function run-format {
   fi
 }
 
-# Run each supplied formatter over the files it owns
+bin="$(rlocation $tool)"
+if [ ! -e "$bin" ]; then
+  echo >&2 "cannot locate binary $tool"
+  exit 1
+fi
 
-run-format Starlark Buildifier "$(rlocation {{buildifier}})" "-mode=$mode" $@
-run-format Markdown Prettier "$(rlocation {{prettier-md}})" "$prettiermode" $@
-run-format JSON Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
-run-format JavaScript Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
-run-format CSS Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
-run-format HTML Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
-run-format TypeScript Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
-run-format TSX Prettier "$(rlocation {{prettier}})" "$prettiermode" $@
-run-format SQL Prettier "$(rlocation {{prettier-sql}})" "$prettiermode" $@
-run-format Python Ruff "$(rlocation {{ruff}})" "$ruffmode" $@
-run-format Terraform "terraform fmt" "$(rlocation {{terraform-fmt}})" "fmt $tfmode" $@
-run-format Jsonnet jsonnetfmt "$(rlocation {{jsonnetfmt}})" "$jsonnetmode" $@
-run-format Java java-format "$(rlocation {{java-format}})" "$javamode" $@
-run-format Kotlin ktfmt "$(rlocation {{ktfmt}})" "$ktmode" $@
-run-format Scala scalafmt "$(rlocation {{scalafmt}})" "$scalamode" $@
-run-format Go gofmt "$(rlocation {{gofmt}})" "$gofmtmode" $@
-run-format C++ clang-format "$(rlocation {{clang-format}})" "$clangformatmode" $@
-run-format Shell shfmt "$(rlocation {{shfmt}})" "$shfmtmode" $@
-run-format Swift swiftfmt "$(rlocation {{swiftformat}})" "$swiftmode" $@
-run-format 'Protocol Buffer' buf "$(rlocation {{buf}})" "$bufmode" $@
-run-format YAML yamlfmt "$(rlocation {{yamlfmt}})" "$yamlfmtmode" $@
+run-format "$lang" "$bin" "${flags:-""}" $@
+
+# Currently these aren't exposed as separate languages to the attributes of format_multirun
+# So we format all these languages as part of "JavaScript".
+if [[ "$lang" == "JavaScript" ]]; then
+  run-format "CSS" "$bin" "${flags:-""}" $@
+  run-format "HTML" "$bin" "${flags:-""}" $@
+  run-format "JSON" "$bin" "${flags:-""}" $@
+  run-format "TSX" "$bin" "${flags:-""}" $@
+  run-format "TypeScript" "$bin" "${flags:-""}" $@
+fi
