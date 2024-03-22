@@ -10,10 +10,18 @@ bazel_dep(name = "toolchains_llvm", version = "0.10.3")
 bazel_dep(name = "rules_java", version = "5.5.0")
 bazel_dep(name = "rules_jvm_external", version = "4.5")
 bazel_dep(name = "rules_go", version = "0.42.0", repo_name = "io_bazel_rules_go")
-bazel_dep(name = "rules_proto", version = "5.3.0-21.7")
+bazel_dep(name = "rules_proto", version = "6.0.0-rc2")
 bazel_dep(name = "rules_python", version = "0.26.0")
 bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 bazel_dep(name = "platforms", version = "0.0.7")
+
+# Update to include
+# https://github.com/bazelbuild/rules_proto/pull/206
+git_override(
+    module_name = "rules_proto",
+    commit = "d373829e59d94c95e470f4250d9da4617c4951eb",
+    remote = "https://github.com/bazelbuild/rules_proto.git",
+)
 
 local_path_override(
     module_name = "aspect_rules_lint",

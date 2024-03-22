@@ -7,4 +7,6 @@ build --repo_env=JAVA_HOME=../bazel_tools/jdk
 # We also don't have a reproducibility problem that necessitates it.
 common --lockfile_mode=off
 
+common --experimental_downloader_config=download.cfg --incompatible_enable_proto_toolchain_resolution
+
 startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
