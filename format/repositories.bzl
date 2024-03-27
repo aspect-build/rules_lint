@@ -29,6 +29,14 @@ def rules_lint_dependencies():
         url = "https://github.com/theoremlp/rules_multitool/releases/download/v0.6.0/rules_multitool-0.6.0.tar.gz",
     )
 
+    # Transitive of rules_multitool, included here for convenience
+    http_archive(
+        name = "bazel_features",
+        sha256 = "06f02b97b6badb3227df2141a4b4622272cdcd2951526f40a888ab5f43897f14",
+        strip_prefix = "bazel_features-1.9.0",
+        url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.9.0/bazel_features-v1.9.0.tar.gz",
+    )
+
 def fetch_pmd():
     http_archive(
         name = "net_sourceforge_pmd",
