@@ -2,11 +2,14 @@
 #
 # Shows an end-to-end workflow for linting without failing the build.
 # This is meant to mimic the behavior of the `bazel lint` command that you'd have
-# by using the Aspect CLI.
+# by using the Aspect CLI [lint command](https://docs.aspect.build/cli/commands/aspect_lint).
 #
 # To make the build fail when a linter warning is present, run with `--fail-on-violation`.
 # To auto-fix violations, run with `--fix` (or `--fix --dry-run` to just print the patches)
 #
+# NB: this is an example of code you could paste into your repo, meaning it's userland
+# and not a supported public API of rules_lint. It may be broken and we don't make any
+# promises to fix issues with using it.
 # We recommend using Aspect CLI instead!
 set -o errexit -o pipefail -o nounset
 
