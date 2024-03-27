@@ -110,4 +110,5 @@ def format_multirun(name, **kwargs):
     multirun(
         name = name + ".check",
         commands = [c + ".check" for c in commands],
+        keep_going = True,
     )
