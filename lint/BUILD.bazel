@@ -36,7 +36,7 @@ bool_flag(
 
 fail_on_violation_flag(
     name = "fail_on_violation",
-    build_setting_default = False,
+    build_setting_default = True,
     visibility = ["//visibility:public"],
 )
 
