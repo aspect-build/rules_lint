@@ -30,6 +30,21 @@ alias(
 
 ## Usage
 
+### Configuring formatters
+
+Since the `format` target is a `bazel run` command, it already runs in the working directory alongside the sources.
+Therefore the configuration instructions for the formatting tool should work as-is.
+Whatever configuration files the formatter normally discovers will be used under Bazel as well.
+
+As an example, if you want to change the indent level for Shell formatting, you can follow the
+[instructions for shfmt](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd#examples) and create a `.editorconfig` file: 
+
+```
+[[shell]]
+indent_style = space
+indent_size = 4
+```
+
 ### One-time re-format all files
 
 Assuming you installed with the typical layout:
