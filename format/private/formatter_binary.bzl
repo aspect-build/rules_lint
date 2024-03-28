@@ -25,6 +25,7 @@ DEFAULT_TOOL_LABELS = {
     "Jsonnet": "@multitool//tools/jsonnetfmt",
     "Go": "@multitool//tools/gofumpt",
     "Shell": "@multitool//tools/shfmt",
+    "Terraform": "@multitool//tools/terraform",
     "YAML": "@multitool//tools/yamlfmt",
 }
 

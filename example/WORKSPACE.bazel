@@ -216,15 +216,12 @@ load(
     "fetch_ktfmt",
     "fetch_pmd",
     "fetch_swiftformat",
-    "fetch_terraform",
     "rules_lint_dependencies",
 )
 
 rules_lint_dependencies()
 
 fetch_pmd()
-
-fetch_terraform()
 
 fetch_java_format()
 

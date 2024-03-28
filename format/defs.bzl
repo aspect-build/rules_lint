@@ -54,7 +54,7 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
         "data": [tool_label],
     }
 
-def format_multirun(name, **kwargs):
+def format_multirun(name, jobs = 4, **kwargs):
     """Create a multirun binary for the given formatters.
 
     Intended to be used with `bazel run` to update source files in-place.
@@ -74,6 +74,7 @@ def format_multirun(name, **kwargs):
 
     Args:
         name: name of the resulting target, typically "format"
+        jobs: how many language formatters to spawn in parallel, ideally matching how many CPUs are available
         **kwargs: attributes named for each language, providing Label of a tool that formats it
     """
     commands = []
@@ -95,14 +96,14 @@ def format_multirun(name, **kwargs):
         name = name,
         buffer_output = True,
         commands = commands,
-        # Run up to 4 formatters at the same time. This is an arbitrary choice, based on some idea that 4-core machines are typical.
-        jobs = 4,
+        jobs = jobs,
         keep_going = True,
     )
 
     multirun(
         name = name + ".check",
         commands = [c + ".check" for c in commands],
+        jobs = jobs,
         keep_going = True,
     )
 

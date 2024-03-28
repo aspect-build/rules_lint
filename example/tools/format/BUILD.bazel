@@ -10,16 +10,6 @@ load("@rules_java//java:defs.bzl", "java_binary")
 
 package(default_visibility = ["//:__subpackages__"])
 
-alias(
-    name = "terraform",
-    actual = select({
-        "@bazel_tools//src/conditions:linux_aarch64": "@terraform_linux_aarch64//:terraform",
-        "@bazel_tools//src/conditions:linux_x86_64": "@terraform_linux_x86_64//:terraform",
-        "@bazel_tools//src/conditions:darwin_arm64": "@terraform_macos_aarch64//:terraform",
-        "@bazel_tools//src/conditions:darwin_x86_64": "@terraform_macos_x86_64//:terraform",
-    }),
-)
-
 prettier.prettier_binary(
     name = "prettier",
     # Allow the binary to be run outside bazel
@@ -75,7 +65,6 @@ format_multirun(
     sql = ":prettier",
     starlark = "@buildifier_prebuilt//:buildifier",
     swift = ":swiftformat",
-    terraform = ":terraform",
 )
 
 format_test(
