@@ -70,6 +70,13 @@ def fetch_terraform():
         urls = ["https://releases.hashicorp.com/terraform/{0}/terraform_{0}_linux_amd64.zip".format(tf_version)],
     )
 
+    http_archive(
+        name = "terraform_linux_aarch64",
+        build_file_content = "exports_files([\"terraform\"])",
+        sha256 = "33e0f4f0b75f507fc19012111de008308df343153cd6a3992507f4566c0bb723",
+        urls = ["https://releases.hashicorp.com/terraform/{0}/terraform_{0}_linux_arm64.zip".format(tf_version)],
+    )
+
 def fetch_java_format():
     http_jar(
         name = "google-java-format",
