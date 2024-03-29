@@ -17,11 +17,12 @@ concurrency:
 
 jobs:
   bazel-test:
-    uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v5
+    uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v6
     with:
       folders: '[".", "example"]'
       # Only test with Bazel 6. And we don't try for Windows support yet.
       exclude: '[{"bazelversion": "5.4.0"}, {"os": "windows-latest"}]'
+      bazel_test_command: 'sudo apt-get install libncurses5 && bazel test //...'
 
   integration-test:
     runs-on: ubuntu-latest
