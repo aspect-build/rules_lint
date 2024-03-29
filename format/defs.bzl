@@ -35,7 +35,7 @@ format_multirun(
 load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("//format/private:formatter_binary.bzl", "CHECK_FLAGS", "DEFAULT_TOOL_LABELS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
-def format_attr_factory(target_name, lang, toolname, tool_label, mode):
+def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
     attr = {
         "name": target_name + (".check" if mode in "check" else ""),
         ("env" if mode == "test" else "environment"): {
@@ -79,7 +79,7 @@ def format_multirun(name, **kwargs):
             command(
                 command = "@aspect_rules_lint//format/private:format",
                 description = "Formatting {} with {}...".format(lang, toolname),
-                **format_attr_factory(target_name, lang, toolname, tool_label, mode)
+                **_format_attr_factory(target_name, lang, toolname, tool_label, mode)
             )
         commands.append(target_name)
 
@@ -107,29 +107,33 @@ def format_test(name, srcs = None, workspace = None, **kwargs):
 
     Similar to `format_multirun`, but testable.
 
-    You can set 'srcs' to a list of files to verify them in sandbox.
-    Or set 'workspace' to a file(such as WORKSPACE/MODULE.bazel) to verify its directory in no sandbox.
-    Mention: workspace mode can not be cached.
-
-    Other args are the same as `format_multirun`.
+    Args:
+        name: name of the resulting target, typically "format"
+        srcs: list of files to verify them in sandbox
+        workspace: file(such as WORKSPACE/MODULE.bazel) to verify its directory in no sandbox (mention: workspace mode can not be cached)
+        **kwargs: attributes named for each language, providing Label of a tool that formats it
     """
     if srcs and workspace:
         fail("Cannot provide both 'srcs' and 'workspace' at the same time")
     if not srcs and not workspace:
         fail("One of 'srcs' or 'workspace' must be provided")
 
+    tags = kwargs.pop("tags", [])
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
-        attrs = format_attr_factory(target_name, lang, toolname, tool_label, "test")
+        attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test")
         if srcs:
             attrs["data"] = [tool_label] + srcs
             attrs["args"] = ["$(location {})".format(i) for i in srcs]
         else:
             attrs["data"] = [tool_label] + [workspace]
             attrs["env"]["WORKSPACE"] = "$(location {})".format(workspace)
-            attrs["tags"] = ["no-sandbox", "no-cache", "external"]
+            for i in ["no-sandbox", "no-cache", "external"]:
+                if i not in tags:
+                    tags.append(i)
         native.sh_test(
             srcs = ["@aspect_rules_lint//format/private:format.sh"],
             deps = ["@bazel_tools//tools/bash/runfiles"],
+            tags = tags,
             **attrs
         )
 
@@ -158,6 +162,6 @@ def _tools_loop(name, kwargs):
 
     # Error checking in case some user keys were unmatched and therefore not pop'ed
     for attr in kwargs.keys():
-        fail("""Unknown language "{}". Valid values: {}""".format(attr, [to_attribute_name(lang) for laung in TOOLS.keys()]))
+        fail("""Unknown language "{}". Valid values: {}""".format(attr, [to_attribute_name(lang) for lang in TOOLS.keys()]))
 
     return result

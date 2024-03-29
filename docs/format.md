@@ -68,3 +68,27 @@ Note that `javascript` is a special case which also formats TypeScript, TSX, JSO
 | <a id="format_multirun-kwargs"></a>kwargs |  attributes named for each language, providing Label of a tool that formats it   |  none |
 
 
+<a id="format_test"></a>
+
+## format_test
+
+<pre>
+format_test(<a href="#format_test-name">name</a>, <a href="#format_test-srcs">srcs</a>, <a href="#format_test-workspace">workspace</a>, <a href="#format_test-kwargs">kwargs</a>)
+</pre>
+
+Create test for the given formatters.
+
+Similar to `format_multirun`, but testable.
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="format_test-name"></a>name |  name of the resulting target, typically "format"   |  none |
+| <a id="format_test-srcs"></a>srcs |  list of files to verify them in sandbox   |  <code>None</code> |
+| <a id="format_test-workspace"></a>workspace |  file(such as WORKSPACE/MODULE.bazel) to verify its directory in no sandbox (mention: workspace mode can not be cached)   |  <code>None</code> |
+| <a id="format_test-kwargs"></a>kwargs |  attributes named for each language, providing Label of a tool that formats it   |  none |
+
+

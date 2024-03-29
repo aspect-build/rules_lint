@@ -88,6 +88,26 @@ $ chmod u+x .git/hooks/pre-commit
 
 ### Check that files are already formatted
 
+There are two ways.
+
+#### one: manual check
+
 This will exit non-zero if formatting is needed. You would typically run the check mode on CI.
 
 `bazel run //tools/format:format.check`
+
+#### two: test rule
+
+```starlark
+load("@aspect_rules_lint//format:defs.bzl", "format_test")
+
+format_test(
+    name = "format_test",
+    # register languages, e.g. same to format_multirun
+    # python = "//:ruff",
+    workspace = "//:WORKSPACE.bazel", # not cacheable
+    # srcs = ["files"], # cacheable, but need declare all files. recommend use with kazel
+)
+```
+
+Then run `bazel test //tools/format/...` to check that all files are formatted.
