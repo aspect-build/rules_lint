@@ -19,12 +19,13 @@ _MNEMONIC = "buf"
 def _short_path(file, _):
     return file.path
 
-def buf_lint_action(ctx, buf_toolchain, target, report, use_exit_code = False):
+def buf_lint_action(ctx, buf, protoc, target, report, use_exit_code = False):
     """Runs the buf lint tool as a Bazel action.
 
     Args:
         ctx: Rule OR Aspect context
-        buf_toolchain: provides the buf-lint tool
+        buf: the buf-lint executable
+        protoc: the protoc executable
         target: the proto_library target to run on
         report: output file to generate
         use_exit_code: whether the protoc process exiting non-zero will be a build failure
@@ -51,7 +52,7 @@ def buf_lint_action(ctx, buf_toolchain, target, report, use_exit_code = False):
         )
 
     args = ctx.actions.args()
-    args.add_joined(["--plugin", "protoc-gen-buf-plugin", buf_toolchain.cli], join_with = "=")
+    args.add_joined(["--plugin", "protoc-gen-buf-plugin", buf], join_with = "=")
     args.add_joined(["--buf-plugin_opt", config], join_with = "=")
     args.add_joined("--descriptor_set_in", deps, join_with = ":", map_each = _short_path)
     args.add_joined(["--buf-plugin_out", "."], join_with = "=")
@@ -65,12 +66,12 @@ def buf_lint_action(ctx, buf_toolchain, target, report, use_exit_code = False):
     ctx.actions.run_shell(
         inputs = depset([
             ctx.file._config,
-            ctx.executable._protoc,
-            buf_toolchain.cli,
+            protoc,
+            buf,
         ], transitive = [deps]),
         outputs = [report],
         command = command.format(
-            protoc = ctx.executable._protoc.path,
+            protoc = protoc.path,
             report = report.path,
         ),
         arguments = [args],
@@ -82,7 +83,14 @@ def _buf_lint_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    buf_lint_action(ctx, ctx.toolchains[ctx.attr._buf_toolchain], target, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    buf_lint_action(
+        ctx,
+        ctx.toolchains[ctx.attr._buf_toolchain].cli,
+        ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
+        target,
+        report,
+        ctx.attr._options[LintOptionsInfo].fail_on_violation,
+    )
     return [info]
 
 def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"):
@@ -107,11 +115,6 @@ def buf_lint_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
                 default = config,
                 allow_single_file = True,
             ),
-            "_protoc": attr.label(
-                default = "@com_google_protobuf//:protoc",
-                executable = True,
-                cfg = "exec",
-            ),
         },
-        toolchains = [toolchain],
+        toolchains = [toolchain, "@rules_proto//proto:toolchain_type"],
     )
