@@ -39,7 +39,7 @@ format_multirun(
 ## format_multirun
 
 <pre>
-format_multirun(<a href="#format_multirun-name">name</a>, <a href="#format_multirun-kwargs">kwargs</a>)
+format_multirun(<a href="#format_multirun-name">name</a>, <a href="#format_multirun-jobs">jobs</a>, <a href="#format_multirun-kwargs">kwargs</a>)
 </pre>
 
 Create a multirun binary for the given formatters.
@@ -66,6 +66,7 @@ Note that `javascript` is a special case which also formats TypeScript, TSX, JSO
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="format_multirun-name"></a>name |  name of the resulting target, typically "format"   |  none |
+| <a id="format_multirun-jobs"></a>jobs |  how many language formatters to spawn in parallel, ideally matching how many CPUs are available   |  <code>4</code> |
 | <a id="format_multirun-kwargs"></a>kwargs |  attributes named for each language, providing Label of a tool that formats it   |  none |
 
 

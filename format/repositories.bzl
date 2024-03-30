@@ -30,6 +30,7 @@ def rules_lint_dependencies():
     )
 
     # Transitive of rules_multitool, included here for convenience
+    # Note that many WORKSPACE users will get an earlier (and incompatible) version from some other *_dependencies() helper
     http_archive(
         name = "bazel_features",
         sha256 = "06f02b97b6badb3227df2141a4b4622272cdcd2951526f40a888ab5f43897f14",
@@ -44,37 +45,6 @@ def fetch_pmd():
         sha256 = "21acf96d43cb40d591cacccc1c20a66fc796eaddf69ea61812594447bac7a11d",
         strip_prefix = "pmd-bin-6.55.0/lib",
         url = "https://github.com/pmd/pmd/releases/download/pmd_releases/6.55.0/pmd-bin-6.55.0.zip",
-    )
-
-def fetch_terraform():
-    tf_version = "1.4.0"
-
-    http_archive(
-        name = "terraform_macos_aarch64",
-        build_file_content = "exports_files([\"terraform\"])",
-        sha256 = "d4a1e564714c6acf848e86dc020ff182477b49f932e3f550a5d9c8f5da7636fb",
-        urls = ["https://releases.hashicorp.com/terraform/{0}/terraform_{0}_darwin_arm64.zip".format(tf_version)],
-    )
-
-    http_archive(
-        name = "terraform_macos_x86_64",
-        build_file_content = "exports_files([\"terraform\"])",
-        sha256 = "e897a4217f1c3bfe37c694570dcc6371336fbda698790bb6b0547ec8daf1ffb3",
-        urls = ["https://releases.hashicorp.com/terraform/{0}/terraform_{0}_darwin_amd64.zip".format(tf_version)],
-    )
-
-    http_archive(
-        name = "terraform_linux_x86_64",
-        build_file_content = "exports_files([\"terraform\"])",
-        sha256 = "5da60da508d6d1941ffa8b9216147456a16bbff6db7622ae9ad01d314cbdd188",
-        urls = ["https://releases.hashicorp.com/terraform/{0}/terraform_{0}_linux_amd64.zip".format(tf_version)],
-    )
-
-    http_archive(
-        name = "terraform_linux_aarch64",
-        build_file_content = "exports_files([\"terraform\"])",
-        sha256 = "33e0f4f0b75f507fc19012111de008308df343153cd6a3992507f4566c0bb723",
-        urls = ["https://releases.hashicorp.com/terraform/{0}/terraform_{0}_linux_arm64.zip".format(tf_version)],
     )
 
 def fetch_java_format():
