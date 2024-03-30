@@ -80,7 +80,8 @@ format_multirun(
 
 format_test(
     name = "format_test",
-    cc = "@llvm_toolchain_llvm//:bin/clang-format",
+    # FIXME: not hermetic, requires libncurses installed on the machine even when non-interactive
+    # cc = "@llvm_toolchain_llvm//:bin/clang-format",
     # FIXME: something is not hermetic about this java_binary, on CI we see
     # error: com/sun/source/tree/Tree
     # java.lang.NoClassDefFoundError: com/sun/source/tree/Tree
