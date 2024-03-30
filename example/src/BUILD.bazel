@@ -1,3 +1,4 @@
+load("@aspect_rules_lint//format:defs.bzl", "format_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
@@ -48,4 +49,12 @@ go_binary(
 cc_binary(
     name = "hello_cc",
     srcs = ["hello.cpp"],
+)
+
+format_test(
+    name = "format_files_test",
+    srcs = [
+        "//src:hello.go",
+        "//src:hello.sh",
+    ],
 )

@@ -36,7 +36,10 @@ load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("//format/private:formatter_binary.bzl", "CHECK_FLAGS", "DEFAULT_TOOL_LABELS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
 def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
-    attr = {
+    if mode not in ["check", "fix", "test"]:
+        fail("Invalid mode", mode)
+
+    return {
         "name": target_name + (".check" if mode in "check" else ""),
         ("env" if mode == "test" else "environment"): {
             # NB: can't use str(Label(target_name)) here because bzlmod makes it
@@ -45,16 +48,16 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
             "tool": "$(rlocationpaths %s)" % tool_label,
             "lang": lang,
             "flags": FIX_FLAGS[toolname] if mode == "fix" else CHECK_FLAGS[toolname],
-            "mode": mode if mode == "fix" else "check",
+            "mode": "check" if mode == "test" else mode,
         },
         "data": [tool_label],
     }
-    return attr
 
 def format_multirun(name, **kwargs):
     """Create a multirun binary for the given formatters.
 
     Intended to be used with `bazel run` to update source files in-place.
+    To check formatting with `bazel test`, see [format_test](#format_test).
 
     Also produces a target `[name].check` which does not edit files, rather it exits non-zero
     if any sources require formatting.
@@ -105,7 +108,8 @@ def format_multirun(name, **kwargs):
 def format_test(name, srcs = None, workspace = None, **kwargs):
     """Create test for the given formatters.
 
-    Similar to `format_multirun`, but testable.
+    Intended to be used with `bazel test` to verify files are formatted.
+    To format with `bazel run`, see [format_multirun](#format_multirun).
 
     Args:
         name: name of the resulting target, typically "format"
@@ -119,6 +123,7 @@ def format_test(name, srcs = None, workspace = None, **kwargs):
         fail("One of 'srcs' or 'workspace' must be provided")
 
     tags = kwargs.pop("tags", [])
+    test_targets = []
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
         attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test")
         if srcs:
@@ -136,6 +141,11 @@ def format_test(name, srcs = None, workspace = None, **kwargs):
             tags = tags,
             **attrs
         )
+        test_targets.append(attrs["name"])
+    native.test_suite(
+        name = name,
+        tests = test_targets,
+    )
 
 def _tools_loop(name, kwargs):
     result = []

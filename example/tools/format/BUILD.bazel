@@ -96,15 +96,8 @@ format_test(
     scala = ":scalafmt",
     sql = ":prettier",
     starlark = "@buildifier_prebuilt//:buildifier",
-    swift = ":swiftformat",
+    # FIXME: not hermetic: error while loading shared libraries: libFoundation.so
+    # swift = ":swiftformat",
     terraform = ":terraform",
     workspace = "//:WORKSPACE.bazel",
-)
-
-format_test(
-    name = "format_files_test",
-    srcs = [
-        "//src:hello.go",
-        "//src:hello.sh",
-    ],
 )
