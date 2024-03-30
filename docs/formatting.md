@@ -90,24 +90,49 @@ $ chmod u+x .git/hooks/pre-commit
 
 There are two ways.
 
-#### one: manual check
+#### 1: `run` target
 
 This will exit non-zero if formatting is needed. You would typically run the check mode on CI.
 
 `bazel run //tools/format:format.check`
 
-#### two: test rule
+#### 2: `test` target
+
+Normally Bazel tests should be hermetic, declaring their inputs, and therefore have cacheable results.
+
+This is possible with `format_test` and a list of `srcs`.
+Note that developers may not remember to add `format_test` for their new source files, so this is quite brittle,
+unless you also use a tool like [Gazelle] to automatically update BUILD files.
 
 ```starlark
 load("@aspect_rules_lint//format:defs.bzl", "format_test")
 
 format_test(
     name = "format_test",
-    # register languages, e.g. same to format_multirun
+    # register languages, e.g.
     # python = "//:ruff",
-    workspace = "//:WORKSPACE.bazel", # not cacheable
-    # srcs = ["files"], # cacheable, but need declare all files. recommend use with kazel
+    srcs = ["my_code.go"],
+)
+```
+
+Alternatively, you can give up on Bazel's hermeticity, and
+follow a similar pattern as [buildifier_test](https://github.com/bazelbuild/buildtools/pull/1092)
+which creates an intentionally non-hermetic, and not cacheable target.
+
+This will *always* run the formatters over all files under `bazel test`, so this technique is only appropriate
+when the formatters are fast enough, and/or the number of files in the repository are few enough.
+
+```starlark
+load("@aspect_rules_lint//format:defs.bzl", "format_test")
+
+format_test(
+    name = "format_test",
+    # register languages, e.g.
+    # python = "//:ruff",
+    workspace = "//:WORKSPACE.bazel",
 )
 ```
 
 Then run `bazel test //tools/format/...` to check that all files are formatted.
+
+[Gazelle]: https://github.com/bazelbuild/bazel-gazelle
