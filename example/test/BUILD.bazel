@@ -38,6 +38,7 @@ ts_project(
         "generated.ts",
         "no_violations.ts",
     ],
+    transpiler = "tsc",
     tsconfig = {},
 )
 

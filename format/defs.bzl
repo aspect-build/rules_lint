@@ -32,6 +32,7 @@ format_multirun(
 ```
 """
 
+load("@aspect_bazel_lib//lib:lists.bzl", "unique")
 load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("//format/private:formatter_binary.bzl", "CHECK_FLAGS", "DEFAULT_TOOL_LABELS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
@@ -105,7 +106,7 @@ def format_multirun(name, **kwargs):
         keep_going = True,
     )
 
-def format_test(name, srcs = None, workspace = None, **kwargs):
+def format_test(name, srcs = None, workspace = None, tags = [], **kwargs):
     """Create test for the given formatters.
 
     Intended to be used with `bazel test` to verify files are formatted.
@@ -115,6 +116,7 @@ def format_test(name, srcs = None, workspace = None, **kwargs):
         name: name of the resulting target, typically "format"
         srcs: list of files to verify them in sandbox
         workspace: file(such as WORKSPACE/MODULE.bazel) to verify its directory in no sandbox (mention: workspace mode can not be cached)
+        tags: tags to apply to generated targets. In 'workspace' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.
         **kwargs: attributes named for each language, providing Label of a tool that formats it
     """
     if srcs and workspace:
@@ -122,7 +124,6 @@ def format_test(name, srcs = None, workspace = None, **kwargs):
     if not srcs and not workspace:
         fail("One of 'srcs' or 'workspace' must be provided")
 
-    tags = kwargs.pop("tags", [])
     test_targets = []
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
         attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test")
@@ -132,19 +133,18 @@ def format_test(name, srcs = None, workspace = None, **kwargs):
         else:
             attrs["data"] = [tool_label] + [workspace]
             attrs["env"]["WORKSPACE"] = "$(location {})".format(workspace)
-            for i in ["no-sandbox", "no-cache", "external"]:
-                if i not in tags:
-                    tags.append(i)
+
         native.sh_test(
             srcs = ["@aspect_rules_lint//format/private:format.sh"],
             deps = ["@bazel_tools//tools/bash/runfiles"],
-            tags = tags,
+            tags = unique(tags + (["no-sandbox", "no-cache", "external"] if workspace else [])),
             **attrs
         )
         test_targets.append(attrs["name"])
     native.test_suite(
         name = name,
         tests = test_targets,
+        tags = tags,
     )
 
 def _tools_loop(name, kwargs):

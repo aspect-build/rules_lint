@@ -13,6 +13,7 @@ filegroup(
 ts_project(
     name = "ts",
     srcs = ["file.ts"],
+    transpiler = "tsc",
 )
 
 proto_library(
@@ -51,10 +52,12 @@ cc_binary(
     srcs = ["hello.cpp"],
 )
 
+# Cause a test failure when files are not formatted.
+# This is useful when you have no other way to check formatting on CI; see documentation.
 format_test(
     name = "format_files_test",
     srcs = [
-        "//src:hello.go",
-        "//src:hello.sh",
+        "hello.go",
+        "hello.sh",
     ],
 )
