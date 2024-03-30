@@ -4,7 +4,7 @@
 # --- begin runfiles.bash initialization v3 ---
 # Copy-pasted from the Bazel Bash runfiles library v3.
 # https://github.com/bazelbuild/bazel/blob/master/tools/bash/runfiles/runfiles.bash
-set -uo pipefail; set +e; f=bazel_tools/tools/bash/runfiles/runfiles.bash
+set -o pipefail; set +e; f=bazel_tools/tools/bash/runfiles/runfiles.bash
 source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
   source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2>/dev/null || \
   source "$0.runfiles/$f" 2>/dev/null || \
@@ -13,12 +13,22 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
   { echo>&2 "ERROR: runfiles.bash initializer cannot find $f. An executable rule may have forgotten to expose it in the runfiles, or the binary may require RUNFILES_DIR to be set."; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v3 ---
 
-if [[ -z "$BUILD_WORKSPACE_DIRECTORY" ]]; then
-  echo >&2 "$0: FATAL: \$BUILD_WORKSPACE_DIRECTORY not set. This program should be executed under 'bazel run'."
+if [[ -n "$BUILD_WORKSPACE_DIRECTORY" ]]; then
+  cd $BUILD_WORKSPACE_DIRECTORY
+elif [[ -n "$TEST_WORKSPACE" ]]; then
+  if [[ -n "$WORKSPACE" ]]; then
+    WORKSPACE_PATH="$(dirname "$(realpath ${WORKSPACE})")"
+    if ! cd "$WORKSPACE_PATH" ; then
+      echo "Unable to change to workspace (WORKSPACE_PATH: ${WORKSPACE_PATH})"
+      exit 1
+    fi
+  fi
+else
+  echo >&2 "$0: FATAL: WORKSPACE not set. This program should be executed under 'bazel run'."
   exit 1
 fi
 
-cd $BUILD_WORKSPACE_DIRECTORY
+set -u
 
 function on_exit {
   code=$?
@@ -149,7 +159,7 @@ function run-format {
         ;;
       Java|Scala)
           # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
-          ( export JAVA_RUNFILES="${RUNFILES_MANIFEST_FILE%_manifest}" ; time-run "$files" "$bin" "$lang" 0 $args )
+          ( export JAVA_RUNFILES="${RUNFILES_DIR}" ; time-run "$files" "$bin" "$lang" 0 $args )
         ;;
       Swift)
         # for any formatter that must be silenced
