@@ -121,6 +121,7 @@ which creates an intentionally non-hermetic, and not cacheable target.
 
 This will *always* run the formatters over all files under `bazel test`, so this technique is only appropriate
 when the formatters are fast enough, and/or the number of files in the repository are few enough.
+To acknowledge this fact, this mode requires an additional opt-in attribute, `no_sandbox`.
 
 ```starlark
 load("@aspect_rules_lint//format:defs.bzl", "format_test")
@@ -129,6 +130,7 @@ format_test(
     name = "format_test",
     # register languages, e.g.
     # python = "//:ruff",
+    no_sandbox = True,
     workspace = "//:WORKSPACE.bazel",
 )
 ```
