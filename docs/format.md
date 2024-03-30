@@ -45,6 +45,7 @@ format_multirun(<a href="#format_multirun-name">name</a>, <a href="#format_multi
 Create a multirun binary for the given formatters.
 
 Intended to be used with `bazel run` to update source files in-place.
+To check formatting with `bazel test`, see [format_test](#format_test).
 
 Also produces a target `[name].check` which does not edit files, rather it exits non-zero
 if any sources require formatting.
@@ -78,7 +79,8 @@ format_test(<a href="#format_test-name">name</a>, <a href="#format_test-srcs">sr
 
 Create test for the given formatters.
 
-Similar to `format_multirun`, but testable.
+Intended to be used with `bazel test` to verify files are formatted.
+To format with `bazel run`, see [format_multirun](#format_multirun).
 
 
 **PARAMETERS**
