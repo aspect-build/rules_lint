@@ -99,5 +99,5 @@ format_test(
     # FIXME: not hermetic: error while loading shared libraries: libFoundation.so
     # swift = ":swiftformat",
     terraform = ":terraform",
-    workspace = "//:WORKSPACE.bazel",
+    workspace = "//:.shellcheckrc",
 )

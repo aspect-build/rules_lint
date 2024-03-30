@@ -118,11 +118,6 @@ shellcheck_test(
 )
 
 format_test(
-    name = "format_test",
-    workspace = "//:WORKSPACE.bazel",
-)
-
-format_test(
     name = "format_test_manual",
     srcs = [":generated_sh"],
     tags = ["manual"],

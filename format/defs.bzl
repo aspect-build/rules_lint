@@ -114,8 +114,9 @@ def format_test(name, srcs = None, workspace = None, tags = [], **kwargs):
 
     Args:
         name: name of the resulting target, typically "format"
-        srcs: list of files to verify them in sandbox
-        workspace: file(such as WORKSPACE/MODULE.bazel) to verify its directory in no sandbox (mention: workspace mode can not be cached)
+        srcs: list of files to verify formatting, as a hermetic, cacheable test
+        workspace: a file in the root directory to verify formatting. This mode causes the test to be non-hermetic and cannot be cached.
+            Typically `WORKSPACE` or `MODULE.bazel` may be used.
         tags: tags to apply to generated targets. In 'workspace' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.
         **kwargs: attributes named for each language, providing Label of a tool that formats it
     """
@@ -131,7 +132,7 @@ def format_test(name, srcs = None, workspace = None, tags = [], **kwargs):
             attrs["data"] = [tool_label] + srcs
             attrs["args"] = ["$(location {})".format(i) for i in srcs]
         else:
-            attrs["data"] = [tool_label] + [workspace]
+            attrs["data"] = [tool_label, workspace]
             attrs["env"]["WORKSPACE"] = "$(location {})".format(workspace)
 
         native.sh_test(
