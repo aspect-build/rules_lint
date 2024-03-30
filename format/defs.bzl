@@ -106,7 +106,7 @@ def format_multirun(name, **kwargs):
         keep_going = True,
     )
 
-def format_test(name, srcs = None, workspace = None, tags = [], **kwargs):
+def format_test(name, srcs = None, workspace = None, no_sandbox = False, tags = [], **kwargs):
     """Create test for the given formatters.
 
     Intended to be used with `bazel test` to verify files are formatted.
@@ -114,16 +114,22 @@ def format_test(name, srcs = None, workspace = None, tags = [], **kwargs):
 
     Args:
         name: name of the resulting target, typically "format"
-        srcs: list of files to verify formatting, as a hermetic, cacheable test
-        workspace: a file in the root directory to verify formatting. This mode causes the test to be non-hermetic and cannot be cached.
-            Typically `WORKSPACE` or `MODULE.bazel` may be used.
-        tags: tags to apply to generated targets. In 'workspace' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.
+        srcs: list of files to verify formatting. Required when no_sandbox is False.
+        workspace: a file in the root directory to verify formatting. Required when no_sandbox is True.
+            Typically `//:WORKSPACE` or `//:MODULE.bazel` may be used.
+        no_sandbox: Set to True to enable formatting all files in the workspace.
+            This mode causes the test to be non-hermetic and it cannot be cached. Read the documentation in /docs/formatting.md.
+        tags: tags to apply to generated targets. In 'no_sandbox' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.
         **kwargs: attributes named for each language, providing Label of a tool that formats it
     """
     if srcs and workspace:
         fail("Cannot provide both 'srcs' and 'workspace' at the same time")
     if not srcs and not workspace:
         fail("One of 'srcs' or 'workspace' must be provided")
+    if no_sandbox and not workspace:
+        fail("When no_sandbox is True, then the workspace attribute is required")
+    if not srcs and not no_sandbox:
+        fail("When no_sandbox is False, then the srcs attribute is required")
 
     test_targets = []
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):

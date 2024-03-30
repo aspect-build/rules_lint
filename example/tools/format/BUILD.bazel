@@ -91,6 +91,7 @@ format_test(
     # java.lang.ClassNotFoundException: javax.swing.text.html.HTMLEditorKit$ParserCallback
     # kotlin = ":ktfmt",
     markdown = ":prettier",
+    no_sandbox = True,  # Enables formatting the entire workspace, paired with 'workspace' attribute
     protocol_buffer = "//tools/lint:buf",
     python = "//tools/lint:ruff",
     scala = ":scalafmt",
@@ -99,5 +100,5 @@ format_test(
     # FIXME: not hermetic: error while loading shared libraries: libFoundation.so
     # swift = ":swiftformat",
     terraform = ":terraform",
-    workspace = "//:.shellcheckrc",
+    workspace = "//:.shellcheckrc",  # A file in the workspace root, where the no_sandbox mode will run the formatter
 )
