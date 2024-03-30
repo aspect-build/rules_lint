@@ -81,10 +81,14 @@ format_multirun(
 format_test(
     name = "format_test",
     cc = "@llvm_toolchain_llvm//:bin/clang-format",
-    # go = "@go_sdk//:bin/gofmt",
-    java = ":java-format",
+    # FIXME: something is not hermetic about this java_binary, on CI we see
+    # error: com/sun/source/tree/Tree
+    # java.lang.NoClassDefFoundError: com/sun/source/tree/Tree
+    # java = ":java-format",
     javascript = ":prettier",
-    kotlin = ":ktfmt",
+    # FIXME: something is not hermetic about this binary, on CI we see
+    # java.lang.ClassNotFoundException: javax.swing.text.html.HTMLEditorKit$ParserCallback
+    # kotlin = ":ktfmt",
     markdown = ":prettier",
     protocol_buffer = "//tools/lint:buf",
     python = "//tools/lint:ruff",
