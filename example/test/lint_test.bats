@@ -23,13 +23,16 @@ EOF
 	assert_output --partial 'src/Foo.java:9:	FinalizeOverloaded:	Finalize methods should not be overloaded'
 
 	# ESLint
-	assert_output --partial 'src/file.ts:2:7: Type string trivially inferred from a string literal, remove type annotation  [error from @typescript-eslint/no-inferrable-types]'
+	assert_output --partial 'src/file.ts: line 2, col 7, Error - Type string trivially inferred from a string literal, remove type annotation. (@typescript-eslint/no-inferrable-types)'
 
 	# Buf
 	assert_output --partial 'src/file.proto:1:1:Import "src/unused.proto" is unused.'
 
 	# Golangci-lint
 	assert_output --partial 'src/hello.go:13:2: SA1006: printf-style function with dynamic format string and no further arguments should use print-style function instead (staticcheck)'
+
+	# Vale
+	assert_output --partial "src/README.md:3:47:Google.We:Try to avoid using first-person plural like 'We'."
 }
 
 @test "should produce reports" {

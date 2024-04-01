@@ -1,9 +1,12 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-Produce a multi-formatter that aggregates the supplier formatters.
+Produce a multi-formatter that aggregates formatters.
 
-Each formatter binary should already be declared in your repository, and you can test them by running
-them with Bazel.
+Some formatter tools are automatically provided by default in rules_lint.
+These are listed as defaults in the API docs below.
+
+Other formatter binaries may be declared in your repository.
+You can test that they work by running them directly with `bazel run`.
 
 For example, to add prettier, your `BUILD.bazel` file should contain:
 
@@ -19,50 +22,78 @@ prettier.prettier_binary(
 
 and you can test it with `bazel run //path/to:prettier -- --help`.
 
-Then you can register it with `multi_formatter_binary`:
+Then you can register it with `format_multirun`:
 
 ```
-load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 
-multi_formatter_binary(
+format_multirun(
     name = "format",
     javascript = ":prettier",
-    ...
 )
 ```
 
 
-<a id="multi_formatter_binary"></a>
+<a id="format_multirun"></a>
 
-## multi_formatter_binary
+## format_multirun
 
 <pre>
-multi_formatter_binary(<a href="#multi_formatter_binary-name">name</a>, <a href="#multi_formatter_binary-cc">cc</a>, <a href="#multi_formatter_binary-go">go</a>, <a href="#multi_formatter_binary-java">java</a>, <a href="#multi_formatter_binary-javascript">javascript</a>, <a href="#multi_formatter_binary-jsonnet">jsonnet</a>, <a href="#multi_formatter_binary-kotlin">kotlin</a>, <a href="#multi_formatter_binary-markdown">markdown</a>, <a href="#multi_formatter_binary-protobuf">protobuf</a>, <a href="#multi_formatter_binary-python">python</a>,
-                       <a href="#multi_formatter_binary-scala">scala</a>, <a href="#multi_formatter_binary-sh">sh</a>, <a href="#multi_formatter_binary-sql">sql</a>, <a href="#multi_formatter_binary-starlark">starlark</a>, <a href="#multi_formatter_binary-swift">swift</a>, <a href="#multi_formatter_binary-terraform">terraform</a>)
+format_multirun(<a href="#format_multirun-name">name</a>, <a href="#format_multirun-jobs">jobs</a>, <a href="#format_multirun-kwargs">kwargs</a>)
 </pre>
 
-Produces an executable that aggregates the supplied formatter binaries
+Create a multirun binary for the given formatters.
 
-**ATTRIBUTES**
+Intended to be used with `bazel run` to update source files in-place.
+To check formatting with `bazel test`, see [format_test](#format_test).
+
+Also produces a target `[name].check` which does not edit files, rather it exits non-zero
+if any sources require formatting.
+
+Tools are provided by default for some languages.
+These come from the `@multitool` repo.
+Under --enable_bzlmod, rules_lint creates this automatically.
+WORKSPACE users will have to set this up manually. See the release install snippet for an example.
+
+Set any attribute to `False` to turn off that language altogether, rather than use a default tool.
+
+Note that `javascript` is a special case which also formats TypeScript, TSX, JSON, CSS, and HTML.
 
 
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="multi_formatter_binary-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="multi_formatter_binary-cc"></a>cc |  a binary target that runs clang-format (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-go"></a>go |  a binary target that runs gofmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-java"></a>java |  a binary target that runs java-format (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-javascript"></a>javascript |  a binary target that runs prettier (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-jsonnet"></a>jsonnet |  a binary target that runs jsonnetfmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-kotlin"></a>kotlin |  a binary target that runs ktfmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-markdown"></a>markdown |  a binary target that runs prettier-md (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-protobuf"></a>protobuf |  a binary target that runs buf (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-python"></a>python |  a binary target that runs ruff (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-scala"></a>scala |  a binary target that runs scalafmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-sh"></a>sh |  a binary target that runs shfmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-sql"></a>sql |  a binary target that runs prettier-sql (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-starlark"></a>starlark |  a binary target that runs buildifier (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-swift"></a>swift |  a binary target that runs swiftformat (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="multi_formatter_binary-terraform"></a>terraform |  a binary target that runs terraform-fmt (or another tool with compatible CLI arguments)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="format_multirun-name"></a>name |  name of the resulting target, typically "format"   |  none |
+| <a id="format_multirun-jobs"></a>jobs |  how many language formatters to spawn in parallel, ideally matching how many CPUs are available   |  <code>4</code> |
+| <a id="format_multirun-kwargs"></a>kwargs |  attributes named for each language, providing Label of a tool that formats it   |  none |
+
+
+<a id="format_test"></a>
+
+## format_test
+
+<pre>
+format_test(<a href="#format_test-name">name</a>, <a href="#format_test-srcs">srcs</a>, <a href="#format_test-workspace">workspace</a>, <a href="#format_test-no_sandbox">no_sandbox</a>, <a href="#format_test-tags">tags</a>, <a href="#format_test-kwargs">kwargs</a>)
+</pre>
+
+Create test for the given formatters.
+
+Intended to be used with `bazel test` to verify files are formatted.
+To format with `bazel run`, see [format_multirun](#format_multirun).
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="format_test-name"></a>name |  name of the resulting target, typically "format"   |  none |
+| <a id="format_test-srcs"></a>srcs |  list of files to verify formatting. Required when no_sandbox is False.   |  <code>None</code> |
+| <a id="format_test-workspace"></a>workspace |  a file in the root directory to verify formatting. Required when no_sandbox is True. Typically <code>//:WORKSPACE</code> or <code>//:MODULE.bazel</code> may be used.   |  <code>None</code> |
+| <a id="format_test-no_sandbox"></a>no_sandbox |  Set to True to enable formatting all files in the workspace. This mode causes the test to be non-hermetic and it cannot be cached. Read the documentation in /docs/formatting.md.   |  <code>False</code> |
+| <a id="format_test-tags"></a>tags |  tags to apply to generated targets. In 'no_sandbox' mode, <code>["no-sandbox", "no-cache", "external"]</code> are added to the tags.   |  <code>[]</code> |
+| <a id="format_test-kwargs"></a>kwargs |  attributes named for each language, providing Label of a tool that formats it   |  none |
 
 

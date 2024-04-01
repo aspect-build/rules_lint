@@ -7,6 +7,12 @@ bzl_library(
     visibility = ["//lint:__subpackages__"],
 )
 
+bzl_library(
+    name = "maybe",
+    srcs = ["maybe.bzl"],
+    visibility = ["//lint:__subpackages__"],
+)
+
 js_binary(
     name = "patcher",
     entry_point = "patcher.mjs",

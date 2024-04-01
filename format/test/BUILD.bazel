@@ -1,6 +1,9 @@
+load("@bazel_skylib//lib:sets.bzl", "sets")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("//format:defs.bzl", "multi_formatter_binary")
+load("//format:defs.bzl", "format_multirun")
 load("//format/private:formatter_binary.bzl", "TOOLS")
+
+UNIQUE_TOOLS = sets.to_list(sets.make(TOOLS.values()))
 
 # Avoid depending on a bunch of actual tools in the root module.
 # That's the job of the example/ submodule.
@@ -14,7 +17,7 @@ load("//format/private:formatter_binary.bzl", "TOOLS")
             "echo + {} $*".format(t),
         ],
     )
-    for t in TOOLS.values()
+    for t in UNIQUE_TOOLS
 ]
 
 [
@@ -22,83 +25,26 @@ load("//format/private:formatter_binary.bzl", "TOOLS")
         name = "mock_" + t,
         srcs = ["mock_{}.sh".format(t)],
     )
-    for t in TOOLS.values()
+    for t in UNIQUE_TOOLS
 ]
 
-# Make a separate formatter binary to test each language in isolation.
-# Users should NOT do it this way!
-multi_formatter_binary(
-    name = "format_javascript",
+format_multirun(
+    name = "format",
+    cc = ":mock_clang-format.sh",
+    go = ":mock_gofmt.sh",
+    java = ":mock_java-format.sh",
     javascript = ":mock_prettier.sh",
-)
-
-multi_formatter_binary(
-    name = "format_starlark",
-    starlark = ":mock_buildifier.sh",
-)
-
-multi_formatter_binary(
-    name = "format_markdown",
+    jsonnet = ":mock_jsonnetfmt.sh",
+    kotlin = ":mock_ktfmt.sh",
     markdown = ":mock_prettier.sh",
-)
-
-multi_formatter_binary(
-    name = "format_sql",
-    sql = ":mock_prettier.sh",
-)
-
-multi_formatter_binary(
-    name = "format_python",
+    protocol_buffer = ":mock_buf.sh",
     python = ":mock_ruff.sh",
-)
-
-multi_formatter_binary(
-    name = "format_hcl",
+    scala = ":mock_scalafmt.sh",
+    shell = ":mock_shfmt.sh",
+    sql = ":mock_prettier.sh",
+    starlark = ":mock_buildifier.sh",
+    swift = ":mock_swiftformat.sh",
     # TODO: this attribute should be renamed to hcl
     terraform = ":mock_terraform-fmt.sh",
-)
-
-multi_formatter_binary(
-    name = "format_jsonnet",
-    jsonnet = ":mock_jsonnetfmt.sh",
-)
-
-multi_formatter_binary(
-    name = "format_java",
-    java = ":mock_java-format.sh",
-)
-
-multi_formatter_binary(
-    name = "format_kotlin",
-    kotlin = ":mock_ktfmt.sh",
-)
-
-multi_formatter_binary(
-    name = "format_scala",
-    scala = ":mock_scalafmt.sh",
-)
-
-multi_formatter_binary(
-    name = "format_go",
-    go = ":mock_gofmt.sh",
-)
-
-multi_formatter_binary(
-    name = "format_cc",
-    cc = ":mock_clang-format.sh",
-)
-
-multi_formatter_binary(
-    name = "format_sh",
-    sh = ":mock_shfmt.sh",
-)
-
-multi_formatter_binary(
-    name = "format_swift",
-    swift = ":mock_swiftformat.sh",
-)
-
-multi_formatter_binary(
-    name = "format_protobuf",
-    protobuf = ":mock_buf.sh",
+    yaml = ":mock_yamlfmt.sh",
 )

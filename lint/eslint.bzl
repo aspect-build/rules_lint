@@ -39,7 +39,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "filter_srcs", "patch_and_report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files")
 
 _MNEMONIC = "ESLint"
 
@@ -147,11 +147,11 @@ def _eslint_aspect_impl(target, ctx):
 
     patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
     files_to_lint = filter_srcs(ctx.rule)
-    eslint_action(ctx, ctx.executable, files_to_lint, report, ctx.attr.fail_on_violation)
+    eslint_action(ctx, ctx.executable, files_to_lint, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     eslint_fix(ctx, ctx.executable, files_to_lint, patch)
     return [info]
 
-def eslint_aspect(binary, configs):
+def lint_eslint_aspect(binary, configs):
     """A factory function to create a linter aspect.
 
     Args:
@@ -170,7 +170,10 @@ def eslint_aspect(binary, configs):
     return aspect(
         implementation = _eslint_aspect_impl,
         attrs = {
-            "fail_on_violation": attr.bool(),
+            "_options": attr.label(
+                default = "//lint:fail_on_violation",
+                providers = [LintOptionsInfo],
+            ),
             "_eslint": attr.label(
                 default = binary,
                 executable = True,

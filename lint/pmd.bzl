@@ -12,7 +12,7 @@ pmd = pmd_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
 
 _MNEMONIC = "PMD"
 
@@ -69,10 +69,10 @@ def _pmd_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    pmd_action(ctx, ctx.executable._pmd, filter_srcs(ctx.rule), ctx.files._rulesets, report, ctx.attr.fail_on_violation)
+    pmd_action(ctx, ctx.executable._pmd, filter_srcs(ctx.rule), ctx.files._rulesets, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
-def pmd_aspect(binary, rulesets):
+def lint_pmd_aspect(binary, rulesets):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -95,7 +95,10 @@ def pmd_aspect(binary, rulesets):
         # Needed for linters that need semantic information like transitive type declarations.
         # attr_aspects = ["deps"],
         attrs = {
-            "fail_on_violation": attr.bool(),
+            "_options": attr.label(
+                default = "//lint:fail_on_violation",
+                providers = [LintOptionsInfo],
+            ),
             "_pmd": attr.label(
                 default = binary,
                 executable = True,

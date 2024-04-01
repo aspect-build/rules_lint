@@ -14,6 +14,39 @@ pmd = pmd_aspect(
 ```
 
 
+<a id="lint_pmd_aspect"></a>
+
+## lint_pmd_aspect
+
+<pre>
+lint_pmd_aspect(<a href="#lint_pmd_aspect-binary">binary</a>, <a href="#lint_pmd_aspect-rulesets">rulesets</a>)
+</pre>
+
+A factory function to create a linter aspect.
+
+Attrs:
+    binary: a PMD executable. Can be obtained from rules_java like so:
+
+        ```
+        java_binary(
+            name = "pmd",
+            main_class = "net.sourceforge.pmd.PMD",
+            # Point to wherever you have the java_import rule defined, see our example
+            runtime_deps = ["@net_sourceforge_pmd"],
+        )
+        ```
+
+    rulesets: the PMD ruleset XML files
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="lint_pmd_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
+| <a id="lint_pmd_aspect-rulesets"></a>rulesets |  <p align="center"> - </p>   |  none |
+
+
 <a id="pmd_action"></a>
 
 ## pmd_action
@@ -38,38 +71,5 @@ Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running
 | <a id="pmd_action-rulesets"></a>rulesets |  list of labels of the PMD ruleset files   |  none |
 | <a id="pmd_action-report"></a>report |  output file to generate   |  none |
 | <a id="pmd_action-use_exit_code"></a>use_exit_code |  whether to fail the build when a lint violation is reported   |  <code>False</code> |
-
-
-<a id="pmd_aspect"></a>
-
-## pmd_aspect
-
-<pre>
-pmd_aspect(<a href="#pmd_aspect-binary">binary</a>, <a href="#pmd_aspect-rulesets">rulesets</a>)
-</pre>
-
-A factory function to create a linter aspect.
-
-Attrs:
-    binary: a PMD executable. Can be obtained from rules_java like so:
-
-        ```
-        java_binary(
-            name = "pmd",
-            main_class = "net.sourceforge.pmd.PMD",
-            # Point to wherever you have the java_import rule defined, see our example
-            runtime_deps = ["@net_sourceforge_pmd"],
-        )
-        ```
-
-    rulesets: the PMD ruleset XML files
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="pmd_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
-| <a id="pmd_aspect-rulesets"></a>rulesets |  <p align="center"> - </p>   |  none |
 
 

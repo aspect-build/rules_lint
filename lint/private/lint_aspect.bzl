@@ -1,5 +1,18 @@
 "Helpers to reduce boilerplate for writing linter aspects"
 
+LintOptionsInfo = provider(
+    doc = "Global options for running linters",
+    fields = {"fail_on_violation": "whether to honor the exit code of linter tools run as actions"},
+)
+
+def _fail_on_violation_flag_impl(ctx):
+    return LintOptionsInfo(fail_on_violation = ctx.build_setting_value)
+
+fail_on_violation_flag = rule(
+    implementation = _fail_on_violation_flag_impl,
+    build_setting = config.bool(flag = True),
+)
+
 def report_file(mnemonic, target, ctx):
     report = ctx.actions.declare_file("{}.{}.aspect_rules_lint.report".format(mnemonic, target.label.name))
     return report, OutputGroupInfo(rules_lint_report = depset([report]))

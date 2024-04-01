@@ -3,23 +3,22 @@
 Typical usage:
 
 1. Use [fetch_shellcheck](#fetch_shellcheck) in WORKSPACE to call the `http_archive` calls to download binaries.
-2. Use [shellcheck_binary](#shellcheck_binary) in `tools/BUILD.bazel` to declare the shellcheck target
-3. Use [shellcheck_aspect](#shellcheck_aspect) in `tools/lint.bzl` to declare the shellcheck linter aspect:
+2. Use [shellcheck_binary](#shellcheck_binary) to declare the shellcheck target, typically in in `tools/lint/BUILD.bazel`
+3. Use [shellcheck_aspect](#shellcheck_aspect) to declare the shellcheck linter aspect, typically in in `tools/lint/linters.bzl`:
 
 ```
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_aspect")
 
 shellcheck = shellcheck_aspect(
-    binary = "@@//tools:shellcheck",
+    binary = "@@//tools/lint:shellcheck",
     config = "@@//:.shellcheckrc",
 )
 ```
 """
 
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
+load("//lint/private:maybe.bzl", http_archive = "maybe_http_archive")
 
 _MNEMONIC = "shellcheck"
 
@@ -82,10 +81,10 @@ def _shellcheck_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr.fail_on_violation)
+    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
-def shellcheck_aspect(binary, config):
+def lint_shellcheck_aspect(binary, config):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -95,7 +94,10 @@ def shellcheck_aspect(binary, config):
     return aspect(
         implementation = _shellcheck_aspect_impl,
         attrs = {
-            "fail_on_violation": attr.bool(),
+            "_options": attr.label(
+                default = "//lint:fail_on_violation",
+                providers = [LintOptionsInfo],
+            ),
             "_shellcheck": attr.label(
                 default = binary,
                 executable = True,
@@ -125,8 +127,7 @@ def fetch_shellcheck(version = SHELLCHECK_VERSIONS.keys()[0]):
         version: a version of shellcheck that we have mirrored, e.g. `v0.9.0`
     """
     for plat, sha256 in SHELLCHECK_VERSIONS[version].items():
-        maybe(
-            http_archive,
+        http_archive(
             name = "shellcheck_{}".format(plat),
             url = "https://github.com/koalaman/shellcheck/releases/download/{version}/shellcheck-{version}.{plat}.tar.xz".format(
                 version = version,

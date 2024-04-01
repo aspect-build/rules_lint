@@ -6,30 +6,22 @@
 load(
     "@aspect_rules_lint//format:repositories.bzl",
     "fetch_java_format",
-    "fetch_jsonnet",
     "fetch_ktfmt",
     "fetch_pmd",
-    "fetch_shfmt",
     "fetch_swiftformat",
-    "fetch_terraform",
 )
 load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
 
 fetch_pmd()
 
-fetch_jsonnet()
-
-fetch_terraform()
-
 fetch_java_format()
 
 fetch_ktfmt()
 
-fetch_shfmt()
-
 fetch_swiftformat()
 
-fetch_ruff()
+# https://github.com/astral-sh/ruff/pull/8631#issuecomment-2022746290
+fetch_ruff("v0.3.2")
 
 load("@aspect_rules_lint//lint:golangci-lint.bzl", "fetch_golangci_lint")
 
@@ -38,3 +30,7 @@ fetch_golangci_lint()
 load("@aspect_rules_lint//lint:shellcheck.bzl", "fetch_shellcheck")
 
 fetch_shellcheck()
+
+load("@aspect_rules_lint//lint:vale.bzl", "fetch_vale")
+
+fetch_vale()

@@ -3,5 +3,5 @@ bazel-*
 .idea/
 .ijwb/
 node_modules
-# alex experiment...
-protobuf/
+# Until it gets more stable
+MODULE.bazel.lock

@@ -1,8 +1,9 @@
 "Demonstrates how to enforce zero-lint-tolerance policy with tests"
 
+load("@aspect_rules_lint//format:defs.bzl", "format_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("//tools:lint.bzl", "eslint_test", "flake8_test", "pmd_test", "ruff_test", "shellcheck_test")
+load("//tools/lint:linters.bzl", "eslint_test", "flake8_test", "pmd_test", "ruff_test", "shellcheck_test")
 
 write_file(
     name = "ts_code_generator",
@@ -37,6 +38,7 @@ ts_project(
         "generated.ts",
         "no_violations.ts",
     ],
+    transpiler = "tsc",
     tsconfig = {},
 )
 
@@ -112,5 +114,11 @@ shellcheck_test(
     name = "shellcheck-generated",
     srcs = [":generated_sh"],
     # Expected to fail because the sh_library opted-in to having generated code checked as well
+    tags = ["manual"],
+)
+
+format_test(
+    name = "format_test_manual",
+    srcs = [":generated_sh"],
     tags = ["manual"],
 )

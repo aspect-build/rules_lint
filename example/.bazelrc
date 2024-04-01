@@ -6,5 +6,5 @@ build --repo_env=JAVA_HOME=../bazel_tools/jdk
 # It has some stability issues and causes a ton of merge conflicts.
 # We also don't have a reproducibility problem that necessitates it.
 common --lockfile_mode=off
-
+common --@aspect_rules_ts//ts:skipLibCheck=always
 startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1

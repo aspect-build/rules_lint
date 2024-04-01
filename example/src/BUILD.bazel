@@ -1,11 +1,20 @@
+load("@aspect_rules_lint//format:defs.bzl", "format_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "md",
+    srcs = ["README.md"],
+    tags = ["markdown"],
+)
 
 ts_project(
     name = "ts",
     srcs = ["file.ts"],
+    transpiler = "tsc",
 )
 
 proto_library(
@@ -54,4 +63,14 @@ go_library(
 cc_binary(
     name = "hello_cc",
     srcs = ["hello.cpp"],
+)
+
+# Cause a test failure when files are not formatted.
+# This is useful when you have no other way to check formatting on CI; see documentation.
+format_test(
+    name = "format_files_test",
+    srcs = [
+        "hello.go",
+        "hello.sh",
+    ],
 )

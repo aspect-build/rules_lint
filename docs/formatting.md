@@ -2,17 +2,17 @@
 
 ## Installation
 
-Create a BUILD file that declares the formatter binary, typically at `tools/BUILD.bazel`
+Create a BUILD file that declares the formatter binary, typically at `tools/format/BUILD.bazel`
 
-Each formatter should be installed in your repository, see our `example/tools/BUILD` file.
+Each formatter should be installed in your repository, see our `example/tools/format/BUILD.bazel` file.
 A formatter is just an executable target.
 
 Then register them on the `formatters` attribute, for example:
 
 ```starlark
-load("@aspect_rules_lint//format:defs.bzl", "multi_formatter_binary")
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 
-multi_formatter_binary(
+format_multirun(
     name = "format",
     # register languages, e.g.
     # python = "//:ruff",
@@ -24,11 +24,26 @@ Finally, we recommend an alias in the root BUILD file, so that developers can ju
 ```starlark
 alias(
     name = "format",
-    actual = "//tools:format",
+    actual = "//tools/format",
 )
 ```
 
 ## Usage
+
+### Configuring formatters
+
+Since the `format` target is a `bazel run` command, it already runs in the working directory alongside the sources.
+Therefore the configuration instructions for the formatting tool should work as-is.
+Whatever configuration files the formatter normally discovers will be used under Bazel as well.
+
+As an example, if you want to change the indent level for Shell formatting, you can follow the
+[instructions for shfmt](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd#examples) and create a `.editorconfig` file: 
+
+```
+[[shell]]
+indent_style = space
+indent_size = 4
+```
 
 ### One-time re-format all files
 
@@ -67,12 +82,59 @@ If you don't use pre-commit, you can just wire directly into the git hook, howev
 this option will always run the formatter over all files, not just changed files.
 
 ```bash
-$ echo "bazel run //:format -- --mode check" >> .git/hooks/pre-commit
+$ echo "bazel run //:format.check" >> .git/hooks/pre-commit
 $ chmod u+x .git/hooks/pre-commit
 ```
 
 ### Check that files are already formatted
 
+There are two ways.
+
+#### 1: `run` target
+
 This will exit non-zero if formatting is needed. You would typically run the check mode on CI.
 
-`bazel run //:format -- --mode check`
+`bazel run //tools/format:format.check`
+
+#### 2: `test` target
+
+Normally Bazel tests should be hermetic, declaring their inputs, and therefore have cacheable results.
+
+This is possible with `format_test` and a list of `srcs`.
+Note that developers may not remember to add `format_test` for their new source files, so this is quite brittle,
+unless you also use a tool like [Gazelle] to automatically update BUILD files.
+
+```starlark
+load("@aspect_rules_lint//format:defs.bzl", "format_test")
+
+format_test(
+    name = "format_test",
+    # register languages, e.g.
+    # python = "//:ruff",
+    srcs = ["my_code.go"],
+)
+```
+
+Alternatively, you can give up on Bazel's hermeticity, and
+follow a similar pattern as [buildifier_test](https://github.com/bazelbuild/buildtools/pull/1092)
+which creates an intentionally non-hermetic, and not cacheable target.
+
+This will *always* run the formatters over all files under `bazel test`, so this technique is only appropriate
+when the formatters are fast enough, and/or the number of files in the repository are few enough.
+To acknowledge this fact, this mode requires an additional opt-in attribute, `no_sandbox`.
+
+```starlark
+load("@aspect_rules_lint//format:defs.bzl", "format_test")
+
+format_test(
+    name = "format_test",
+    # register languages, e.g.
+    # python = "//:ruff",
+    no_sandbox = True,
+    workspace = "//:WORKSPACE.bazel",
+)
+```
+
+Then run `bazel test //tools/format/...` to check that all files are formatted.
+
+[Gazelle]: https://github.com/bazelbuild/bazel-gazelle

@@ -1,0 +1,93 @@
+"""BUILD definition for the formatter binary
+
+This is in its own package because it has so many loading-time symbols,
+we don't want to trigger eager fetches of these for builds that don't want to run format.
+"""
+
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun", "format_test")
+load("@npm//:prettier/package_json.bzl", prettier = "bin")
+load("@rules_java//java:defs.bzl", "java_binary")
+
+package(default_visibility = ["//:__subpackages__"])
+
+prettier.prettier_binary(
+    name = "prettier",
+    # Allow the binary to be run outside bazel
+    env = {"BAZEL_BINDIR": "."},
+)
+
+java_binary(
+    name = "java-format",
+    jvm_flags = [
+        "--add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+    ],
+    main_class = "com.google.googlejavaformat.java.Main",
+    runtime_deps = ["@google-java-format//jar"],
+)
+
+java_binary(
+    name = "ktfmt",
+    main_class = "com.facebook.ktfmt.cli.Main",
+    runtime_deps = ["@ktfmt//jar"],
+)
+
+alias(
+    name = "swiftformat",
+    actual = select({
+        "@bazel_tools//src/conditions:linux": "@swiftformat",
+        "@bazel_tools//src/conditions:darwin": "@swiftformat_mac",
+    }),
+)
+
+java_binary(
+    name = "scalafmt",
+    data = ["//:.scalafmt.conf"],
+    main_class = "org.scalafmt.cli.Cli",
+    runtime_deps = ["@maven//:org_scalameta_scalafmt_cli_2_13"],
+)
+
+format_multirun(
+    name = "format",
+    cc = "@llvm_toolchain_llvm//:bin/clang-format",
+    # You can use standard gofmt instead of stricter gofumpt:
+    # go = "@go_sdk//:bin/gofmt",
+    java = ":java-format",
+    javascript = ":prettier",
+    kotlin = ":ktfmt",
+    markdown = ":prettier",
+    protocol_buffer = "//tools/lint:buf",
+    python = "//tools/lint:ruff",
+    scala = ":scalafmt",
+    sql = ":prettier",
+    starlark = "@buildifier_prebuilt//:buildifier",
+    swift = ":swiftformat",
+)
+
+format_test(
+    name = "format_test",
+    # FIXME: not hermetic, requires libncurses installed on the machine even when non-interactive
+    # cc = "@llvm_toolchain_llvm//:bin/clang-format",
+    # FIXME: something is not hermetic about this java_binary, on CI we see
+    # error: com/sun/source/tree/Tree
+    # java.lang.NoClassDefFoundError: com/sun/source/tree/Tree
+    # java = ":java-format",
+    javascript = ":prettier",
+    # FIXME: something is not hermetic about this binary, on CI we see
+    # java.lang.ClassNotFoundException: javax.swing.text.html.HTMLEditorKit$ParserCallback
+    # kotlin = ":ktfmt",
+    markdown = ":prettier",
+    no_sandbox = True,  # Enables formatting the entire workspace, paired with 'workspace' attribute
+    protocol_buffer = "//tools/lint:buf",
+    python = "//tools/lint:ruff",
+    scala = ":scalafmt",
+    sql = ":prettier",
+    starlark = "@buildifier_prebuilt//:buildifier",
+    # FIXME: not hermetic: error while loading shared libraries: libFoundation.so
+    # swift = ":swiftformat",
+    terraform = ":terraform",
+    workspace = "//:.shellcheckrc",  # A file in the workspace root, where the no_sandbox mode will run the formatter
+)

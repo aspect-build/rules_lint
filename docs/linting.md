@@ -9,9 +9,9 @@ You must declare your linters as Bazel aspects.
 > We want to accept label-typed attributes, so we follow the documentation from
 > https://bazel.build/extending/aspects#aspect_definition_2
 
-We suggest creating a `lint.bzl` file in whatever package contains most of your
-custom Bazel configuration, commonly in `tools/`.
-This `lint.bzl` should contain linter aspect declarations.
+We suggest creating a `linters.bzl` file in whatever package contains most of your
+custom Bazel configuration, commonly in `tools/lint`.
+This `linters.bzl` should contain linter aspect declarations.
 See the `docs/` folder for "aspect factory functions" that declare your linters.
 
 Finally, register those linter aspects in the lint runner. See details below.
@@ -38,7 +38,7 @@ The syntax is the same as [aspects declared on the command-line](https://bazel.b
 lint:
   aspects:
     # Format: <extension file label>%<aspect top-level name>
-    - //tools:lint.bzl%eslint
+    - //tools/lint:linters.bzl%eslint
 ```
 
 [![asciicast](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq.svg)](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq)
@@ -59,14 +59,14 @@ This is the same flag many linters support.
 
 ### 4. Errors during `bazel build`
 
-By adding `--aspects_parameters=fail_on_violation=true` to the command-line, we pass a parameter
-to our linter aspects that cause them to honor the exit code of the lint tool.
+Add `--@aspect_rules_lint//lint:fail_on_violation` to the command-line,
+to cause all linter aspects to honor the exit code of the lint tool.
 
 This makes the build fail when any lint violations are present.
 
 ### 5. Failures during `bazel test`
 
-Add a [make_lint_test](./lint_test.md) call to the `lint.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
+Add a [lint_test](./lint_test.md) call to the `linters.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
 
 See the `example/test/BUILD.bazel` file in this repo for some examples.
 

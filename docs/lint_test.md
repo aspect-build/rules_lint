@@ -4,12 +4,12 @@ Factory function to make lint test rules.
 
 The test will fail when the linter reports any non-empty lint results.
 
-To use this, in your `lint.bzl` where you define the aspect, just create a test that references it.
+To use this, in your `linters.bzl` where you define the aspect, just create a test that references it.
 
 For example, with `flake8`:
 
 ```starlark
-load("@aspect_rules_lint//lint:lint_test.bzl", "make_lint_test")
+load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
 
 flake8 = flake8_aspect(
@@ -17,13 +17,13 @@ flake8 = flake8_aspect(
     config = "@@//:.flake8",
 )
 
-flake8_test = make_lint_test(aspect = flake8)
+flake8_test = lint_test(aspect = flake8)
 ```
 
 Now in your BUILD files you can add a test:
 
 ```starlark
-load("//tools:lint.bzl", "flake8_test")
+load("//tools/lint:linters.bzl", "flake8_test")
 
 py_library(
     name = "unused_import",
@@ -37,12 +37,12 @@ flake8_test(
 ```
 
 
-<a id="make_lint_test"></a>
+<a id="lint_test"></a>
 
-## make_lint_test
+## lint_test
 
 <pre>
-make_lint_test(<a href="#make_lint_test-aspect">aspect</a>)
+lint_test(<a href="#lint_test-aspect">aspect</a>)
 </pre>
 
 
@@ -52,6 +52,6 @@ make_lint_test(<a href="#make_lint_test-aspect">aspect</a>)
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="make_lint_test-aspect"></a>aspect |  <p align="center"> - </p>   |  none |
+| <a id="lint_test-aspect"></a>aspect |  <p align="center"> - </p>   |  none |
 
 
