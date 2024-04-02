@@ -88,6 +88,5 @@ format_test(
     starlark = "@buildifier_prebuilt//:buildifier",
     # FIXME: not hermetic: error while loading shared libraries: libFoundation.so
     # swift = ":swiftformat",
-    terraform = ":terraform",
     workspace = "//:.shellcheckrc",  # A file in the workspace root, where the no_sandbox mode will run the formatter
 )

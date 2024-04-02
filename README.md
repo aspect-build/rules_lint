@@ -9,19 +9,10 @@ Features:
   Instead, users simply lint their existing `*_library` targets.
 - Lint checks and fixes are run as normal Bazel actions, which means they support Remote Execution and the outputs are stored in the Remote Cache.
 - Lint results can be **presented in various ways**, such as Code Review comments or failing tests.
-  See [Usage](https://github.com/aspect-build/rules_lint/blob/main/docs/linting.md#usage) below.
+  See [Usage](https://github.com/aspect-build/rules_lint/blob/main/docs/linting.md#usage).
 - **Can format files not known to Bazel**. Formatting just runs directly on the file tree.
   No need to create `sh_library` targets for your shell scripts, for example.
 - Honors the same configuration files you use for these tools outside Bazel (e.g. in the editor)
-
-This project is inspired by the design for [Tricorder].
-This is how Googlers get their static analysis results in code review (Critique).
-https://github.com/google/shipshape is an old, abandoned attempt to open-source Tricorder.
-It is also inspired by <https://github.com/github/super-linter>.
-
-[aspect cli]: https://docs.aspect.build/v/cli
-[tricorder]: https://static.googleusercontent.com/media/research.google.com/en/pubs/archive/43322.pdf
-[reviewdog]: https://github.com/reviewdog/reviewdog
 
 ## Supported tools
 
@@ -82,9 +73,14 @@ Thanks!!
 
 > We'll add documentation on adding formatters as well.
 
-## Design
+## Installation
 
-Formatting and Linting work a bit differently.
+Follow instructions from the release you wish to use:
+<https://github.com/aspect-build/rules_lint/releases>
+
+## Usage
+
+Formatting and Linting are inherently different, which leads to differences in how they are used in rules_lint.
 
 | Formatter                                                         | Linter                                                 |
 | ----------------------------------------------------------------- | ------------------------------------------------------ |
@@ -96,49 +92,25 @@ Formatting and Linting work a bit differently.
 | Can always format just changed files / regions                    | New violations might be introduced in unchanged files. |
 | Fast enough to put in a pre-commit workflow.                      | Some are slow.                                         |
 
-This leads to some minor differences in how they are used in rules_lint.
-
-We treat type-checkers as a build tool, not as a linter. This is for a few reasons:
-
-- They are commonly distributed along with compilers.
-  In compiled languages like Java, types are required in order for the compiler to emit executable bytecode at all.
-  In interpreted languages they're still often linked, e.g. TypeScript does both "compiling" to JavaScript and also type-checking.
-  This suggests that rules for a language should include the type-checker,
-  e.g. we expect Sorbet to be integrated with rules_ruby.
-- We think most developers want "error" semantics for type-checks:
-  the whole repository should successfully type-check or you cannot commit the change.
-  rules_lint is optimized for "warning" semantics, where we produce report files and it's up to the
-  Dev Infra team how to present those, for example only on changed files.
-- You can only type-check a library if its dependencies were checkable, which means short-circuiting
-  execution. rules_lint currently runs linters on every node in the dependency graph, including any
-  whose dependencies have lint warnings.
-
-## Installation
-
-Follow instructions from the release you wish to use:
-<https://github.com/aspect-build/rules_lint/releases>
-
-## Usage
-
 ### Format
 
 To format files, run the target you create when you install rules_lint.
 
-We recommend using a Git pre-commit hook to format changed files, by running `bazel run //:format [changed file ...]`.
+We recommend using a Git pre-commit hook to format changed files, and [Aspect Workflows] to provide the check on CI.
 
 [![asciicast](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT.svg)](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT)
 
-See [Formatting](./docs/formatting.md) for more ways to use the formatter, such as a pre-commit hook or a CI check.
+See [Formatting](./docs/formatting.md) for more ways to use the formatter.
 
 ### Lint
 
-To lint code, we recommend using the Aspect CLI to get the missing `lint` command.
+To lint code, we recommend using the [Aspect CLI] to get the missing `lint` command, and [Aspect Workflows] to provide first-class support for "linters as code reviewers".
 
 For example, running `bazel lint //src:all` prints lint warnings to the terminal for all targets in the `//src` package:
 
 [![asciicast](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq.svg)](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq)
 
-See [Linting](./docs/linting.md) for more ways to use the linter, such as running as a test target, or presenting results as code review comments.
+See [Linting](./docs/linting.md) for more ways to use the linter.
 
 ### Ignoring files
 
@@ -162,3 +134,25 @@ But we're not trying to stop anyone, either!
 
 You could probably configure the editor to always run the same Bazel command, any time a file is changed.
 Instructions to do this are out-of-scope for this repo, particularly since they have to be formulated and updated for so many editors.
+
+## FAQ
+
+### What about type-checking?
+
+We consider type-checkers as a build tool, not as a linter. This is for a few reasons:
+
+- They are commonly distributed along with compilers.
+  In compiled languages like Java, types are required in order for the compiler to emit executable bytecode at all.
+  In interpreted languages they're still often linked, e.g. TypeScript does both "compiling" to JavaScript and also type-checking.
+  This suggests that rules for a language should include the type-checker,
+  e.g. we expect Sorbet to be integrated with rules_ruby and mypy/pyright to be integrated with rules_python or Aspect's rules_py.
+- We think most developers want "build error" semantics for type-checks:
+  the whole repository should successfully type-check or you cannot commit the change.
+  rules_lint is optimized for "warning" semantics, where we produce report files and it's up to the
+  Dev Infra team how to present those, for example only on changed files.
+- You can only type-check a library if its dependencies were checkable, which means short-circuiting
+  execution. rules_lint currently runs linters on every node in the dependency graph, including any
+  whose dependencies have lint warnings.
+
+[aspect workflows]: https://docs.aspect.build/workflows
+[aspect cli]: https://docs.aspect.build/cli

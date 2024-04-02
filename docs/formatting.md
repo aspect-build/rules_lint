@@ -88,7 +88,10 @@ $ chmod u+x .git/hooks/pre-commit
 
 ### Check that files are already formatted
 
-There are two ways.
+We recommend using [Aspect Workflows] to hook up the CI check to notify developers of formatting changes,
+and offer to apply them as a suggestion in the code review thread.
+
+To set this up manually, there are two supported methods:
 
 #### 1: `run` target
 
@@ -138,3 +141,5 @@ format_test(
 Then run `bazel test //tools/format/...` to check that all files are formatted.
 
 [Gazelle]: https://github.com/bazelbuild/bazel-gazelle
+[Aspect Workflows]: https://docs.aspect.build/workflows
+[Aspect CLI]: https://docs.aspect.build/cli
