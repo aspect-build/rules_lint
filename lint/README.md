@@ -4,10 +4,12 @@
 
 These will be part of reviewing PRs to this repo:
 
-1. Avoid adding dependencies to rules_lint, they belong in the example instead. For example in adding
-   eslint or flake8, it's up to the user to provide us the binary to run.
-   This ensures that the user can select the versions of their tools and the toolchains used to run them
-   rather than us baking these into rules_lint.
+1. Take care with dependencies. Avoid adding to `MODULE.bazel` if possible.
+   In cases where a tool is a statically-linked binary, it can be added to the `multitool.lock.json` file
+   to conveniently provide it to users.
+   In other cases where a language ecosystem's package manager is involved,
+   the tool should be setup "in userland", which means adding it to the `example` folder.
+   Note that this distinction also determines whether users control the version of the tool.
 
 2. Study the installation, CLI usage, and configuration documentation for the linter you want to add.
    We'll need to adapt these to Bazel's idioms. As much as possible, copy or link to this documentation
@@ -50,8 +52,8 @@ Add these three things:
    It should call the `my_linter_action` function.
    It must always return a `rules_lint_report` output group, which is easiest by using the
    `report_file` helper in `//lint/private:lint_aspect.bzl`.
-   The simple lint.sh also relies on the report output file being named following the convention `*.aspect_rules_lint.report`, though this is
-   a design smell.
+   The simple lint.sh also relies on the report output file being named following the convention
+   `*.aspect_rules_lint.report`, though this is a design smell.
 
 3. A `my_linter_aspect` factory function. This is a higher-order function that returns an aspect.
    This pattern allows us to capture arguments like labels and toolchains which aren't legal
