@@ -4,20 +4,17 @@
 
 Create a BUILD file that declares the formatter binary, typically at `tools/format/BUILD.bazel`
 
-Each formatter should be installed in your repository, see our `example/tools/format/BUILD.bazel` file.
-A formatter is just an executable target.
-
-Then register them on the `formatters` attribute, for example:
+This file contains a `format_multirun` rule. To use the tools supplied by default in rules_lint,
+just make a simple call to it like so:
 
 ```starlark
 load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 
-format_multirun(
-    name = "format",
-    # register languages, e.g.
-    # python = "//:ruff",
-)
+format_multirun(name = "format")
 ```
+
+For more details, see the `format_multirun` [API documentation](./format.md) and
+the `example/tools/format/BUILD.bazel` file.
 
 Finally, we recommend an alias in the root BUILD file, so that developers can just type `bazel run format`:
 
@@ -25,6 +22,27 @@ Finally, we recommend an alias in the root BUILD file, so that developers can ju
 alias(
     name = "format",
     actual = "//tools/format",
+)
+```
+
+### Choosing formatter tools
+
+Each formatter should be installed by Bazel. A formatter is just an executable target.
+
+`rules_lint` provides some default tools at specific versions using
+[rules_multitool](https://github.com/theoremlp/rules_multitool).
+You may fetch alternate tools or versions instead.
+
+To register the tools you fetch, supply them as values for that language attribute.
+
+For example:
+
+```starlark
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
+
+format_multirun(
+    name = "format",
+    python = ":ruff",
 )
 ```
 
@@ -75,7 +93,7 @@ If you use [pre-commit.com](https://pre-commit.com/), add this in your `.pre-com
       files: .*
 ```
 
-> Note that pre-commit is silent while Bazel is fetching the tooling, which can make it appear hung on the first run.
+> Note that pre-commit is silent while Bazel is fetching the tools, which can make it appear hung on the first run.
 > There is no way to avoid this; see https://github.com/pre-commit/pre-commit/issues/1003
 
 If you don't use pre-commit, you can just wire directly into the git hook, however

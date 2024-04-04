@@ -7,14 +7,18 @@ Features:
 - **No changes needed to rulesets**. Works with the Bazel rules you already use.
 - **No changes needed to BUILD files**. You don't need to add lint wrapper macros, and lint doesn't appear in `bazel query` output.
   Instead, users simply lint their existing `*_library` targets.
-- Lint checks and fixes are run as normal Bazel actions, which means they support Remote Execution and the outputs are stored in the Remote Cache.
+- **Incremental**. Lint checks (including producing fixes) are run as normal Bazel actions, which means they support Remote Execution and the outputs are stored in the Remote Cache.
 - Lint results can be **presented in various ways**, such as Code Review comments or failing tests.
   See [Usage](https://github.com/aspect-build/rules_lint/blob/main/docs/linting.md#usage).
+- **Can lint changes only**. It's fine if your repository has a lot of existing issues.
+  It's not necessary to fix or suppress all of them to start linting new changes.
 - **Can format files not known to Bazel**. Formatting just runs directly on the file tree.
   No need to create `sh_library` targets for your shell scripts, for example.
-- Honors the same configuration files you use for these tools outside Bazel (e.g. in the editor)
+- Honors the same **configuration files** you use for these tools outside Bazel (e.g. in the editor)
 
 ## Supported tools
+
+New tools are being added frequently, so check this page again!
 
 | Language               | Formatter             | Linter(s)        |
 | ---------------------- | --------------------- | ---------------- |
@@ -68,10 +72,9 @@ Features:
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift
 
-To add a linter, please follow the steps in [lint/README.md](./lint/README.md) and then send us a PR.
+To add a tool, please follow the steps in [lint/README.md](./lint/README.md) or [format/README.md](./format/README.md)
+and then send us a PR.
 Thanks!!
-
-> We'll add documentation on adding formatters as well.
 
 ## Installation
 
