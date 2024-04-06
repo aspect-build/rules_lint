@@ -65,10 +65,12 @@ format_multirun(
     sql = ":prettier",
     starlark = "@buildifier_prebuilt//:buildifier",
     swift = ":swiftformat",
+    visibility = ["//:__subpackages__"],
 )
 
 format_test(
     name = "format_test",
+    size = "small",
     # FIXME: not hermetic, requires libncurses installed on the machine even when non-interactive
     # cc = "@llvm_toolchain_llvm//:bin/clang-format",
     # FIXME: something is not hermetic about this java_binary, on CI we see

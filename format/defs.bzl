@@ -33,6 +33,7 @@ format_multirun(
 """
 
 load("@aspect_bazel_lib//lib:lists.bzl", "unique")
+load("@aspect_bazel_lib//lib:utils.bzl", "propagate_common_rule_attributes", "propagate_common_test_rule_attributes")
 load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("//format/private:formatter_binary.bzl", "CHECK_FLAGS", "DEFAULT_TOOL_LABELS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
@@ -79,6 +80,10 @@ def format_multirun(name, jobs = 4, **kwargs):
     """
     commands = []
 
+    common_attrs = propagate_common_rule_attributes(kwargs)
+    for k in common_attrs.keys():
+        kwargs.pop(k)
+
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
         for mode in ["check", "fix"]:
             command(
@@ -88,16 +93,13 @@ def format_multirun(name, jobs = 4, **kwargs):
             )
         commands.append(target_name)
 
-    # Error checking in case some user keys were unmatched and therefore not pop'ed
-    for attr in kwargs.keys():
-        fail("""Unknown language "{}". Valid values: {}""".format(attr, [to_attribute_name(lang) for lang in TOOLS.keys()]))
-
     multirun(
         name = name,
         buffer_output = True,
         commands = commands,
         jobs = jobs,
         keep_going = True,
+        **common_attrs
     )
 
     multirun(
@@ -105,6 +107,7 @@ def format_multirun(name, jobs = 4, **kwargs):
         commands = [c + ".check" for c in commands],
         jobs = jobs,
         keep_going = True,
+        **common_attrs
     )
 
 def format_test(name, srcs = None, workspace = None, no_sandbox = False, tags = [], **kwargs):
@@ -133,6 +136,10 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, tags = 
         fail("When no_sandbox is False, then the srcs attribute is required")
 
     test_targets = []
+    common_attrs = propagate_common_test_rule_attributes(kwargs)
+    for k in common_attrs.keys():
+        kwargs.pop(k)
+
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
         attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test")
         if srcs:
