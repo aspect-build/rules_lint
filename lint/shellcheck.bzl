@@ -2,15 +2,13 @@
 
 Typical usage:
 
-1. Use [fetch_shellcheck](#fetch_shellcheck) in WORKSPACE to call the `http_archive` calls to download binaries.
-2. Use [shellcheck_binary](#shellcheck_binary) to declare the shellcheck target, typically in in `tools/lint/BUILD.bazel`
-3. Use [shellcheck_aspect](#shellcheck_aspect) to declare the shellcheck linter aspect, typically in in `tools/lint/linters.bzl`:
+Use [shellcheck_aspect](#shellcheck_aspect) to declare the shellcheck linter aspect, typically in in `tools/lint/linters.bzl`:
 
 ```
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_aspect")
 
 shellcheck = shellcheck_aspect(
-    binary = "@@//tools/lint:shellcheck",
+    binary = "@multitool//tools/shellcheck",
     config = "@@//:.shellcheckrc",
 )
 ```

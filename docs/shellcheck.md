@@ -4,36 +4,16 @@ API for declaring a shellcheck lint aspect that visits sh_library rules.
 
 Typical usage:
 
-1. Use [fetch_shellcheck](#fetch_shellcheck) in WORKSPACE to call the `http_archive` calls to download binaries.
-2. Use [shellcheck_binary](#shellcheck_binary) to declare the shellcheck target, typically in in `tools/lint/BUILD.bazel`
-3. Use [shellcheck_aspect](#shellcheck_aspect) to declare the shellcheck linter aspect, typically in in `tools/lint/linters.bzl`:
+Use [shellcheck_aspect](#shellcheck_aspect) to declare the shellcheck linter aspect, typically in in `tools/lint/linters.bzl`:
 
 ```
 load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_aspect")
 
 shellcheck = shellcheck_aspect(
-    binary = "@@//tools/lint:shellcheck",
+    binary = "@multitool//tools/shellcheck",
     config = "@@//:.shellcheckrc",
 )
 ```
-
-
-<a id="fetch_shellcheck"></a>
-
-## fetch_shellcheck
-
-<pre>
-fetch_shellcheck(<a href="#fetch_shellcheck-version">version</a>)
-</pre>
-
-A repository macro used from WORKSPACE to fetch binaries
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="fetch_shellcheck-version"></a>version |  a version of shellcheck that we have mirrored, e.g. <code>v0.9.0</code>   |  <code>"v0.9.0"</code> |
 
 
 <a id="lint_shellcheck_aspect"></a>
@@ -84,23 +64,5 @@ Based on https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md
 | <a id="shellcheck_action-output"></a>output |  output file to generate   |  none |
 | <a id="shellcheck_action-use_exit_code"></a>use_exit_code |  whether to fail the build when a lint violation is reported   |  <code>False</code> |
 | <a id="shellcheck_action-options"></a>options |  additional command-line options, see https://github.com/koalaman/shellcheck/blob/master/shellcheck.hs#L95   |  <code>[]</code> |
-
-
-<a id="shellcheck_binary"></a>
-
-## shellcheck_binary
-
-<pre>
-shellcheck_binary(<a href="#shellcheck_binary-name">name</a>)
-</pre>
-
-Wrapper around native_binary to select the correct shellcheck executable for the execution platform.
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="shellcheck_binary-name"></a>name |  <p align="center"> - </p>   |  none |
 
 
