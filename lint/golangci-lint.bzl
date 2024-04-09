@@ -11,7 +11,7 @@ golangci_lint = golangci_lint_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@io_bazel_rules_go//go:def.bzl", "go_context")
+load("@io_bazel_rules_go//go:def.bzl", "GoLibrary", "GoSource", "go_context")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
 
 _MNEMONIC = "golangcilint"
@@ -31,14 +31,26 @@ def golangci_lint_action(ctx, executable, srcs, config, report, use_exit_code = 
     """
 
     # golangci-lint calls out to Go, so we need the go context
-    go = go_context(ctx)
-    inputs = srcs + [config] + go.sdk_files
+    go_ctx = go_context(ctx)
+    inputs = srcs + [config] + go_ctx.sdk_files
+    importmaps = []
+    for dep in ctx.rule.attr.deps:
+        inputs.extend(dep[GoSource].srcs)
+        importmaps.append(dep[GoLibrary].importmap)
+
+    # For the Go tool to locate sources from other packages, it expects their imports to be on the GOPATH.
+    # It seems like rules_go does something different from what the ecosystem expects, that libraries are installed
+    # into the GOROOT folder.
+    # https://github.com/bazelbuild/rules_go/blob/c0ef535977f9fd2d9a67243552cd04da285ab629/extras/gomock.bzl#L37-L55
+    # suggests that we have to copy files around?
+    gopath = go_ctx.sdk.root_file.dirname
+
     args = ctx.actions.args()
     args.add_all(srcs)
 
     command = """#!/usr/bin/env bash
-        export GOROOT=$(cd "$(dirname {go_tool})/.."; pwd)
-        export GOPATH=$GOROOT
+        export GOROOT=$(pwd)/{goroot}
+        export GOPATH=$(pwd)/{gopath}
         export GOCACHE="$(mktemp -d)"
         export PATH="$GOPATH/bin:$PATH"
         GOLANGCI_LINT_CACHE=$(pwd)/.cache {golangci_lint} run --config={config} $@"""
@@ -52,12 +64,14 @@ def golangci_lint_action(ctx, executable, srcs, config, report, use_exit_code = 
         inputs = inputs,
         outputs = [report],
         command = command.format(
+            goroot = go_ctx.sdk.root_file.dirname,
+            gopath = gopath,
             golangci_lint = executable.path,
             report = report.path,
             config = config.path,
             go_tool = ctx.toolchains["@io_bazel_rules_go//go:toolchain"].sdk.go.path,
         ),
-        env = go.env,
+        env = go_ctx.env,
         arguments = [args],
         mnemonic = _MNEMONIC,
         tools = [executable],
