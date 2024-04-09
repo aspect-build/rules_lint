@@ -1,7 +1,7 @@
 "Bazel dependencies"
 
 bazel_dep(name = "aspect_rules_lint", version = "0.0.0")
-bazel_dep(name = "aspect_bazel_lib", version = "2.5.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.6.1")
 bazel_dep(name = "aspect_rules_js", version = "1.40.0")
 bazel_dep(name = "aspect_rules_ts", version = "2.2.0")
 bazel_dep(name = "rules_buf", version = "0.2.0")

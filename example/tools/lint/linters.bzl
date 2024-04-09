@@ -51,14 +51,14 @@ ruff = lint_ruff_aspect(
 ruff_test = lint_test(aspect = ruff)
 
 shellcheck = lint_shellcheck_aspect(
-    binary = "@@//tools/lint:shellcheck",
+    binary = "@multitool//tools/shellcheck",
     config = "@@//:.shellcheckrc",
 )
 
 shellcheck_test = lint_test(aspect = shellcheck)
 
 golangci_lint = lint_golangci_aspect(
-    binary = "@@//tools/lint:golangci_lint",
+    binary = "@multitool//tools/golangci-lint",
     config = "@@//:.golangci.yaml",
 )
 
