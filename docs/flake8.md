@@ -4,11 +4,25 @@ API for declaring a flake8 lint aspect that visits py_library rules.
 
 Typical usage:
 
+First, fetch the flake8 package via your standard requirements file and pip calls.
+
+Then, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
+
+```starlark
+load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
+py_console_script_binary(
+    name = "flake8",
+    pkg = "@pip//flake8:pkg",
+)
 ```
+
+Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
+
+```starlark
 load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
 
 flake8 = flake8_aspect(
-    binary = "@@//:flake8",
+    binary = "@@//tools/lint:flake8",
     config = "@@//:.flake8",
 )
 ```

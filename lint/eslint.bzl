@@ -2,12 +2,28 @@
 
 Typical usage:
 
+First, install eslint using your typical npm package.json and rules_js rules.
+
+Next, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
+
+```starlark
+load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
+eslint_bin.eslint_binary(name = "eslint")
 ```
+
+Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
+
+```starlark
 load("@aspect_rules_lint//lint:eslint.bzl", "eslint_aspect")
 
 eslint = eslint_aspect(
-    binary = "@@//path/to:eslint",
-    configs = "@@//path/to:eslintrc",
+    binary = "@@//tools/lint:eslint",
+    # We trust that eslint will locate the correct configuration file for a given source file.
+    # See https://eslint.org/docs/latest/use/configure/configuration-files#cascading-and-hierarchy
+    configs = [
+        "@@//:eslintrc",
+        ...
+    ],
 )
 ```
 
