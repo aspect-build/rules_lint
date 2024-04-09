@@ -4,14 +4,41 @@ API for declaring a PMD lint aspect that visits java_library rules.
 
 Typical usage:
 
+First, call the `fetch_pmd` helper in `WORKSPACE` to download the zip file.
+Alternatively you could use whatever you prefer for managing Java dependencies, such as a Maven integration rule.
+
+Next, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
+
+```starlark
+java_binary(
+    name = "pmd",
+    main_class = "net.sourceforge.pmd.PMD",
+    runtime_deps = ["@net_sourceforge_pmd"],
+)
 ```
+
+Finally, declare an aspect for it, typically in `tools/lint/linters.bzl`:
+
+```starlark
 load("@aspect_rules_lint//lint:pmd.bzl", "pmd_aspect")
 
 pmd = pmd_aspect(
-    binary = "@@//:PMD",
-    # config = "@@//:.PMD",
+    binary = "@@//tools/lint:pmd",
+    rulesets = ["@@//:pmd.xml"],
 )
 ```
+
+
+<a id="fetch_pmd"></a>
+
+## fetch_pmd
+
+<pre>
+fetch_pmd()
+</pre>
+
+
+
 
 
 <a id="lint_pmd_aspect"></a>
