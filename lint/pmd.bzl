@@ -2,16 +2,32 @@
 
 Typical usage:
 
+First, call the `fetch_pmd` helper in `WORKSPACE` to download the zip file.
+Alternatively you could use whatever you prefer for managing Java dependencies, such as a Maven integration rule.
+
+Next, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
+
+```starlark
+java_binary(
+    name = "pmd",
+    main_class = "net.sourceforge.pmd.PMD",
+    runtime_deps = ["@net_sourceforge_pmd"],
+)
 ```
+
+Finally, declare an aspect for it, typically in `tools/lint/linters.bzl`:
+
+```starlark
 load("@aspect_rules_lint//lint:pmd.bzl", "pmd_aspect")
 
 pmd = pmd_aspect(
-    binary = "@@//:PMD",
-    # config = "@@//:.PMD",
+    binary = "@@//tools/lint:pmd",
+    rulesets = ["@@//:pmd.xml"],
 )
 ```
 """
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
 
 _MNEMONIC = "PMD"
@@ -112,4 +128,13 @@ def lint_pmd_aspect(binary, rulesets):
                 default = rulesets,
             ),
         },
+    )
+
+def fetch_pmd():
+    http_archive(
+        name = "net_sourceforge_pmd",
+        build_file_content = """java_import(name = "net_sourceforge_pmd", jars = glob(["*.jar"]), visibility = ["//visibility:public"])""",
+        sha256 = "21acf96d43cb40d591cacccc1c20a66fc796eaddf69ea61812594447bac7a11d",
+        strip_prefix = "pmd-bin-6.55.0/lib",
+        url = "https://github.com/pmd/pmd/releases/download/pmd_releases/6.55.0/pmd-bin-6.55.0.zip",
     )

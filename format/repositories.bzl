@@ -38,15 +38,6 @@ def rules_lint_dependencies():
         url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.9.0/bazel_features-v1.9.0.tar.gz",
     )
 
-def fetch_pmd():
-    http_archive(
-        name = "net_sourceforge_pmd",
-        build_file_content = """java_import(name = "net_sourceforge_pmd", jars = glob(["*.jar"]), visibility = ["//visibility:public"])""",
-        sha256 = "21acf96d43cb40d591cacccc1c20a66fc796eaddf69ea61812594447bac7a11d",
-        strip_prefix = "pmd-bin-6.55.0/lib",
-        url = "https://github.com/pmd/pmd/releases/download/pmd_releases/6.55.0/pmd-bin-6.55.0.zip",
-    )
-
 def fetch_java_format():
     http_jar(
         name = "google-java-format",

@@ -98,7 +98,11 @@ bzl_library(
     name = "pmd",
     srcs = ["pmd.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["//lint/private:lint_aspect"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "@bazel_tools//tools/build_defs/repo:utils.bzl",
+    ],
 )
 
 bzl_library(
