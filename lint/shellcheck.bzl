@@ -16,27 +16,9 @@ shellcheck = shellcheck_aspect(
 ```
 """
 
-load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files")
-load("//lint/private:maybe.bzl", http_archive = "maybe_http_archive")
 
 _MNEMONIC = "shellcheck"
-
-def shellcheck_binary(name):
-    """Wrapper around native_binary to select the correct shellcheck executable for the execution platform."""
-    native_binary(
-        name = name,
-        src = select(
-            {
-                "@platforms//os:osx": "@shellcheck_darwin.x86_64//:shellcheck",
-                "@aspect_rules_lint//lint:linux_x86": "@shellcheck_linux.x86_64//:shellcheck",
-                "@aspect_rules_lint//lint:linux_aarch64": "@shellcheck_linux.aarch64//:shellcheck",
-            },
-            no_match_error = "Shellcheck hasn't been fetched for your platform",
-        ),
-        out = "shellcheck",
-        visibility = ["//visibility:public"],
-    )
 
 def shellcheck_action(ctx, executable, srcs, config, output, use_exit_code = False, options = []):
     """Run shellcheck as an action under Bazel.
@@ -112,31 +94,3 @@ def lint_shellcheck_aspect(binary, config):
             ),
         },
     )
-
-# Data manually mirrored from https://github.com/koalaman/shellcheck/releases
-# TODO: add a mirror_shellcheck.sh script to automate this
-SHELLCHECK_VERSIONS = {
-    "v0.9.0": {
-        "darwin.x86_64": "7d3730694707605d6e60cec4efcb79a0632d61babc035aa16cda1b897536acf5",
-        "linux.x86_64": "700324c6dd0ebea0117591c6cc9d7350d9c7c5c287acbad7630fa17b1d4d9e2f",
-        "linux.aarch64": "179c579ef3481317d130adebede74a34dbbc2df961a70916dd4039ebf0735fae",
-    },
-}
-
-def fetch_shellcheck(version = SHELLCHECK_VERSIONS.keys()[0]):
-    """A repository macro used from WORKSPACE to fetch binaries
-
-    Args:
-        version: a version of shellcheck that we have mirrored, e.g. `v0.9.0`
-    """
-    for plat, sha256 in SHELLCHECK_VERSIONS[version].items():
-        http_archive(
-            name = "shellcheck_{}".format(plat),
-            url = "https://github.com/koalaman/shellcheck/releases/download/{version}/shellcheck-{version}.{plat}.tar.xz".format(
-                version = version,
-                plat = plat,
-            ),
-            strip_prefix = "shellcheck-{}".format(version),
-            sha256 = sha256,
-            build_file_content = """exports_files(["shellcheck"])""",
-        )

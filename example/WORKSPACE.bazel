@@ -238,10 +238,6 @@ load("@aspect_rules_lint//lint:golangci-lint.bzl", "fetch_golangci_lint")
 
 fetch_golangci_lint()
 
-load("@aspect_rules_lint//lint:shellcheck.bzl", "fetch_shellcheck")
-
-fetch_shellcheck()
-
 load("@aspect_rules_lint//lint:vale.bzl", "fetch_vale")
 
 fetch_vale()
@@ -255,5 +251,8 @@ load("@rules_multitool//multitool:multitool.bzl", "multitool")
 
 multitool(
     name = "multitool",
-    lockfile = "@aspect_rules_lint//format:multitool.lock.json",
+    lockfiles = [
+        "@aspect_rules_lint//format:multitool.lock.json",
+        "@aspect_rules_lint//lint:multitool.lock.json",
+    ],
 )
