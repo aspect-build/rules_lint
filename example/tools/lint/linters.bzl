@@ -58,7 +58,7 @@ shellcheck = lint_shellcheck_aspect(
 shellcheck_test = lint_test(aspect = shellcheck)
 
 golangci_lint = lint_golangci_aspect(
-    binary = "@@//tools/lint:golangci_lint",
+    binary = "@multitool//tools/golangci-lint",
     config = "@@//:.golangci.yaml",
 )
 

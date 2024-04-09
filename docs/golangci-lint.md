@@ -6,28 +6,10 @@ API for declaring a golangci-lint lint aspect that visits go_library, go_test, a
 load("@aspect_rules_lint//lint:golangci-lint.bzl", "golangci_lint_aspect")
 
 golangci_lint = golangci_lint_aspect(
-    binary = "@@//tools/lint:golangci_lint",
+    binary = "@multitool//tools/golangci-lint",
     config = "@@//:.golangci.yaml",
 )
 ```
-
-
-<a id="fetch_golangci_lint"></a>
-
-## fetch_golangci_lint
-
-<pre>
-fetch_golangci_lint(<a href="#fetch_golangci_lint-version">version</a>)
-</pre>
-
-Naive macro that fetches a specific version of the golangci-lint from GitHub releases, for commonly-used platforms
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="fetch_golangci_lint-version"></a>version |  must be the default value. In the future this could be honored when we support multiple versions.   |  <code>"1.55.2"</code> |
 
 
 <a id="golangci_lint_action"></a>

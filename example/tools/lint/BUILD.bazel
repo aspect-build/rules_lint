@@ -44,19 +44,6 @@ java_binary(
 )
 
 native_binary(
-    name = "golangci_lint",
-    src = select(
-        {
-            "@bazel_tools//src/conditions:linux_x86_64": "@golangci_lint_linux_x86_64//:golangci-lint",
-            "@bazel_tools//src/conditions:linux_aarch64": "@golangci_lint_linux_aarch64//:golangci-lint",
-            "@bazel_tools//src/conditions:darwin_x86_64": "@golangci_lint_macos_x86_64//:golangci-lint",
-            "@bazel_tools//src/conditions:darwin_arm64": "@golangci_lint_macos_aarch64//:golangci-lint",
-        },
-    ),
-    out = "golangci-lint",
-)
-
-native_binary(
     name = "vale",
     src = select(
         {
