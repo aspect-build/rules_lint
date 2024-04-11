@@ -140,32 +140,32 @@
     "binaries": [
       {
         "kind": "archive",
-        "url": "https://releases.hashicorp.com/terraform/1.4.0/terraform_1.4.0_darwin_arm64.zip",
-        "sha256": "d4a1e564714c6acf848e86dc020ff182477b49f932e3f550a5d9c8f5da7636fb",
+        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_arm64.zip",
+        "sha256": "99c4d4feafb0183af2f7fbe07beeea6f83e5f5a29ae29fee3168b6810e37ff98",
         "os": "macos",
         "cpu": "arm64",
         "file": "terraform"
       },
       {
         "kind": "archive",
-        "url": "https://releases.hashicorp.com/terraform/1.4.0/terraform_1.4.0_darwin_amd64.zip",
-        "sha256": "e897a4217f1c3bfe37c694570dcc6371336fbda698790bb6b0547ec8daf1ffb3",
+        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_amd64.zip",
+        "sha256": "0eaf64e28f82e2defd06f7a6f3187d8cea03d5d9fcd2af54f549a6c32d6833f7",
         "os": "macos",
         "cpu": "x86_64",
         "file": "terraform"
       },
       {
         "kind": "archive",
-        "url": "https://releases.hashicorp.com/terraform/1.4.0/terraform_1.4.0_linux_amd64.zip",
-        "sha256": "5da60da508d6d1941ffa8b9216147456a16bbff6db7622ae9ad01d314cbdd188",
+        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip",
+        "sha256": "3ff056b5e8259003f67fd0f0ed7229499cfb0b41f3ff55cc184088589994f7a5",
         "os": "linux",
         "cpu": "x86_64",
         "file": "terraform"
       },
       {
         "kind": "archive",
-        "url": "https://releases.hashicorp.com/terraform/1.4.0/terraform_1.4.0_linux_arm64.zip",
-        "sha256": "33e0f4f0b75f507fc19012111de008308df343153cd6a3992507f4566c0bb723",
+        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_arm64.zip",
+        "sha256": "08631c385667dd28f03b3a3f77cb980393af4a2fcfc2236c148a678ad9150c8c",
         "os": "linux",
         "cpu": "arm64",
         "file": "terraform"
