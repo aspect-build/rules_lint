@@ -94,9 +94,22 @@ function ls-files {
 
         # TODO: determine which staged changes we should format; avoid formatting unstaged changes
         # TODO: try to format only modified regions of the file (where supported)
-        git ls-files --cached --modified --other --exclude-standard "${patterns[@]}" "${patterns[@]/#/*/}" | {
-          grep -vE "^$(git ls-files --deleted)$" || true;
-        }
+        files=$(git ls-files --cached --modified --other --exclude-standard "${patterns[@]}" "${patterns[@]/#/*/}" | {
+          grep -vE \
+            "^$(git ls-files --deleted)$" \
+          || true;
+        })
+        git_attributes=$(git check-attr -a -- $files)
+        non_ignored_files=()
+        for file in $files; do
+            # Check if any of the attributes we ignore are set for this file.
+            if ! grep -qE "(^| )$file: (rules-lint-ignored|linguist-generated|gitlab-generated): set($| )" <<< $git_attributes; then
+                non_ignored_files+=("$file")
+            fi
+        done
+        if [ ${#non_ignored_files[@]} -gt 0 ]; then
+            echo "${non_ignored_files[@]}"
+        fi
     else
         # When given arguments, they are glob patterns of the superset of files to format.
         # We just need to filter those so we only select files for this language
