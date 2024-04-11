@@ -1,41 +1,5 @@
 {
   "$schema": "https://raw.githubusercontent.com/theoremlp/rules_multitool/main/lockfile.schema.json",
-  "golangci-lint": {
-    "binaries": [
-      {
-        "os": "linux",
-        "cpu": "x86_64",
-        "kind": "archive",
-        "url": "https://github.com/golangci/golangci-lint/releases/download/v1.55.2/golangci-lint-1.55.2-linux-amd64.tar.gz",
-        "sha256": "ca21c961a33be3bc15e4292dc40c98c8dcc5463a7b6768a3afc123761630c09c",
-        "file": "golangci-lint-1.55.2-linux-amd64/golangci-lint"
-      },
-      {
-        "os": "linux",
-        "cpu": "arm64",
-        "kind": "archive",
-        "url": "https://github.com/golangci/golangci-lint/releases/download/v1.55.2/golangci-lint-1.55.2-linux-arm64.tar.gz",
-        "sha256": "8eb0cee9b1dbf0eaa49871798c7f8a5b35f2960c52d776a5f31eb7d886b92746",
-        "file": "golangci-lint-1.55.2-linux-arm64/golangci-lint"
-      },
-      {
-        "os": "macos",
-        "cpu": "x86_64",
-        "kind": "archive",
-        "url": "https://github.com/golangci/golangci-lint/releases/download/v1.55.2/golangci-lint-1.55.2-darwin-amd64.tar.gz",
-        "sha256": "632e96e6d5294fbbe7b2c410a49c8fa01c60712a0af85a567de85bcc1623ea21",
-        "file": "golangci-lint-1.55.2-darwin-amd64/golangci-lint"
-      },
-      {
-        "os": "macos",
-        "cpu": "arm64",
-        "kind": "archive",
-        "url": "https://github.com/golangci/golangci-lint/releases/download/v1.55.2/golangci-lint-1.55.2-darwin-arm64.tar.gz",
-        "sha256": "234463f059249f82045824afdcdd5db5682d0593052f58f6a3039a0a1c3899f6",
-        "file": "golangci-lint-1.55.2-darwin-arm64/golangci-lint"
-      }
-    ]
-  },
   "shellcheck": {
     "binaries": [
       {

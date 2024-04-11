@@ -19,7 +19,6 @@ exports_files(
         ".ruff.toml",
         ".shellcheckrc",
         ".scalafmt.conf",
-        ".golangci.yaml",
         ".vale.ini",
     ],
     visibility = ["//visibility:public"],
