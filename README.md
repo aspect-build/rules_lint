@@ -24,7 +24,7 @@ New tools are being added frequently, so check this page again!
 | ---------------------- | --------------------- | ---------------- |
 | C / C++                | [clang-format]        | ([#112])         |
 | CSS                    | [Prettier]            |                  |
-| Go                     | [gofmt] or [gofumpt]  | [golangci-lint]  |
+| Go                     | [gofmt] or [gofumpt]  |                  |
 | HCL (Hashicorp Config) | [terraform] fmt       |                  |
 | HTML                   | [Prettier]            |                  |
 | JSON                   | [Prettier]            |                  |
@@ -63,7 +63,6 @@ New tools are being added frequently, so check this page again!
 [ruff]: https://docs.astral.sh/ruff/
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
-[golangci-lint]: https://github.com/golangci/golangci-lint
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 [#112]: https://github.com/aspect-build/rules_lint/issues/112
 [vale]: https://vale.sh/

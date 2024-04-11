@@ -24,9 +24,6 @@ bazel_dep(name = "rules_proto", version = "6.0.0-rc2")
 bazel_dep(name = "rules_buf", version = "0.1.1")
 bazel_dep(name = "toolchains_protoc", version = "0.2.1")
 
-# Needed to get the 'go_context' symbol, to invoke golangci-lint
-bazel_dep(name = "rules_go", version = "0.39.1", repo_name = "io_bazel_rules_go")
-
 multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitool")
 multitool.hub(lockfile = "//format:multitool.lock.json")
 multitool.hub(lockfile = "//lint:multitool.lock.json")
