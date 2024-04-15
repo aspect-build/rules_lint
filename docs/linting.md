@@ -92,17 +92,6 @@ By default, we filter out generated files from linting.
 
 To bypass this filter, add `tags=["lint-genfiles"]` to a target to force all the `srcs` to be linted.
 
-## Ignoring files explicitly
-
-Commonly, the underlying linters that rules_lint invokes provide their own methods of excluding files from linting (.prettierignore for example). At times when that is not the case, rules_lint provides its
-own escape hatch to exclude files from linting using attributes specified via [`.gitattributes` files](https://git-scm.com/docs/gitattributes).
-
-If any of following attributes are set on a file it will be excluded from linting:
-
-- `rules-lint-ignored`
-- `gitlab-generated`
-- `linguist-generated`
-
 ## Debugging
 
 Some linters honor the debug flag in this repo. To enable it, add a Bazel flag:

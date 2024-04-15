@@ -100,16 +100,12 @@ function ls-files {
           || true;
         })
         git_attributes=$(git check-attr -a -- $files)
-        non_ignored_files=()
         for file in $files; do
             # Check if any of the attributes we ignore are set for this file.
             if ! grep -qE "(^| )$file: (rules-lint-ignored|linguist-generated|gitlab-generated): set($| )" <<< $git_attributes; then
-                non_ignored_files+=("$file")
+                echo $file
             fi
         done
-        if [ ${#non_ignored_files[@]} -gt 0 ]; then
-            echo "${non_ignored_files[@]}"
-        fi
     else
         # When given arguments, they are glob patterns of the superset of files to format.
         # We just need to filter those so we only select files for this language
