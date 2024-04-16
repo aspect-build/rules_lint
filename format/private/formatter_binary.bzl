@@ -34,7 +34,7 @@ CHECK_FLAGS = {
     "swiftformat": "--lint",
     "prettier": "--check",
     "ruff": "format --check --force-exclude",
-    "shfmt": "--diff",
+    "shfmt": "--diff --apply-ignore",
     "java-format": "--set-exit-if-changed --dry-run",
     "ktfmt": "--set-exit-if-changed --dry-run",
     "gofmt": "-l",
