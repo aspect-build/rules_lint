@@ -3,6 +3,7 @@
 load("@aspect_rules_lint//lint:buf.bzl", "lint_buf_aspect")
 load("@aspect_rules_lint//lint:eslint.bzl", "lint_eslint_aspect")
 load("@aspect_rules_lint//lint:flake8.bzl", "lint_flake8_aspect")
+load("@aspect_rules_lint//lint:ktlint.bzl", "lint_ktlint_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
@@ -61,3 +62,11 @@ vale = lint_vale_aspect(
     config = "@@//:.vale.ini",
     styles = "@@//tools/lint:vale_styles",
 )
+
+ktlint = lint_ktlint_aspect(
+    binary = "@@//tools/lint:ktlint",
+    editorconfig = "@@//:.editorconfig",
+    baseline_file = "@@//:ktlint-baseline.xml",
+)
+
+ktlint_test = lint_test(aspect = ktlint)

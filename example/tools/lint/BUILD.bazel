@@ -68,3 +68,11 @@ copy_to_directory(
     ],
     include_external_repositories = ["vale_*"],
 )
+
+java_binary(
+    name = "ktlint",
+    main_class = "com.pinterest.ktlint.Main",
+    runtime_deps = [
+        "@maven//:com_pinterest_ktlint_ktlint_cli",
+    ],
+)

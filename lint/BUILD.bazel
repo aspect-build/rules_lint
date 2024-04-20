@@ -155,3 +155,12 @@ bzl_library(
     srcs = ["vale_library.bzl"],
     visibility = ["//visibility:public"],
 )
+
+bzl_library(
+    name = "ktlint",
+    srcs = ["ktlint.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//lint/private:lint_aspect",
+    ],
+)

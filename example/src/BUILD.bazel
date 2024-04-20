@@ -1,6 +1,7 @@
 load("@aspect_rules_lint//format:defs.bzl", "format_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@io_bazel_rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -51,6 +52,11 @@ go_binary(
 cc_binary(
     name = "hello_cc",
     srcs = ["hello.cpp"],
+)
+
+kt_jvm_library(
+    name = "hello_kt",
+    srcs = ["hello.kt"],
 )
 
 # Cause a test failure when files are not formatted.

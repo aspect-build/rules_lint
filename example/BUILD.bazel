@@ -20,6 +20,8 @@ exports_files(
         ".shellcheckrc",
         ".scalafmt.conf",
         ".vale.ini",
+        ".editorconfig",
+        "ktlint-baseline.xml",
     ],
     visibility = ["//visibility:public"],
 )
