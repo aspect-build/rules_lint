@@ -79,6 +79,17 @@ Assuming you installed with the typical layout:
 
 `bazel run //:format some/file.md other/file.json`
 
+### Ignoring files explicitly
+
+Commonly, the underlying formatters that rules_lint invokes provide their own methods of excluding files (.prettierignore for example). At times when that is not the case, rules_lint provides its
+own escape hatch to exclude files from linting using attributes specified via [`.gitattributes` files](https://git-scm.com/docs/gitattributes).
+
+If any of following attributes are set on a file it will be excluded:
+
+- `rules-lint-ignored`
+- `gitlab-generated`
+- `linguist-generated`
+
 ### Install as a pre-commit hook
 
 If you use [pre-commit.com](https://pre-commit.com/), add this in your `.pre-commit-config.yaml`:
