@@ -81,7 +81,7 @@ Assuming you installed with the typical layout:
 
 ### Ignoring files explicitly
 
-Commonly, the underlying tools that rules_lint invokes provide their own methods of excluding files (.prettierignore for example). At times when that is not the case, rules_lint provides its
+Commonly, the underlying formatters that rules_lint invokes provide their own methods of excluding files (.prettierignore for example). At times when that is not the case, rules_lint provides its
 own escape hatch to exclude files from linting using attributes specified via [`.gitattributes` files](https://git-scm.com/docs/gitattributes).
 
 If any of following attributes are set on a file it will be excluded:

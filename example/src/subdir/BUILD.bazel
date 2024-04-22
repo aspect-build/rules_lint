@@ -16,5 +16,5 @@ js_library(
 
 js_library(
     name = "eslint-override",
-    srcs = glob(["*.js"]),
+    srcs = ["index.js"],
 )
