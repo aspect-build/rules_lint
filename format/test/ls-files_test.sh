@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -o nounset -o errexit -o pipefail
+
+source $TEST_SRCDIR/_main/format/private/ls-files.sh
+
+cd $TEST_TMPDIR
+
+git init --initial-branch=test
+
+touch src.{js,css} gen{1,2,3}.js {src,more}.go
+
+cat >.gitignore <<EOF
+ignore*
+EOF
+
+git config user.email "author@example.com"
+git config user.name "A U Thor"
+git add .
+git commit --all --message 'initial commit'
+
+# .gitignore files should be excluded
+touch ignore.scala
+scala=$(ls-files Scala)
+[[ "$scala" == "" ]] || {
+    echo >&2 -e "expected ls-files to be empty, was\n$scala"
+    exit 1
+}
+
+# Untracked files should be formatted
+touch untracked.kt
+kt=$(ls-files Kotlin)
+[[ "$kt" == "untracked.kt" ]] || {
+    echo >&2 -e "expected ls-files to return untracked.kt, was\n$kt"
+    exit 1
+}
+
+# .gitattributes should allow more excludes
+cat >.gitattributes <<EOF
+gen1.js rules-lint-ignored
+gen2.js gitlab-generated
+gen3.js linguist-generated
+EOF
+js=$(ls-files JavaScript)
+[[ "$js" == "src.js" ]] || {
+    echo >&2 -e "expected ls-files to return src.js, was\n$js"
+    exit 1
+}
+
+# deleted files should be ignored
+git rm src.css
+css=$(ls-files CSS)
+[[ "$css" == "" ]] || {
+    echo >&2 -e "expected ls-files to be empty, was\n$css"
+    exit 1
+}
+
+# patterns should match filenames
+go=$(ls-files Go src.go)
+[[ "$go" == "src.go" ]] || {
+    echo >&2 -e "expected ls-files to return src.go, was\n$go"
+    exit 1
+}
