@@ -112,20 +112,7 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file):
     """A factory function to create a linter aspect.
 
     Attrs:
-        binary: a ktlint executable.
-
-        Now declare a `java_binary` target that produces a ktlint executable using your Java toolchain, typically in `tools/linters/BUILD.bazel` as:
-
-        ```
-        java_binary(
-            name = "ktlint",
-            runtime_deps = [
-                "@maven//:com_pinterest_ktlint_ktlint_cli"
-            ],
-            main_class = "com.pinterest.ktlint.Main"
-        )
-        ```
-
+        binary: a ktlint executable, provided as file typically through http_file declaration or using fetch_ktlint in your WORKSPACE.
         editorconfig: The label of the file pointing to the .editorconfig file used by ktlint.
         baseline_file: An optional attribute pointing to the label of the baseline file used by ktlint.
     """

@@ -3,20 +3,16 @@
 API for calling declaring an ktlint lint aspect.
 
 Typical usage:
-
-Firstly, make sure you're using `rules_jvm_external` to install your Maven dependencies and then add `com.pinterest.ktlint:ktlint-cli` with the linter version to `artifacts` in `maven_install`,
-in your WORKSPACE or MODULE.bazel. Then create a `ktlint` binary target to be used in your linter as follows, typically in `tools/linters/BUILD.bazel`:
+Make sure you have `ktlint` pulled as a dependency into your WORKSPACE/module by pulling a version of it from here
+https://github.com/pinterest/ktlint/releases and using a `http_file` declaration for it like.
 
 ```
-java_binary(
-    name = "ktlint",
-    main_class = "com.pinterest.ktlint.Main",
-    runtime_deps = [
-        "@maven//:com_pinterest_ktlint_ktlint_cli",
-    ],
+http_file(
+    name = "com_github_pinterest_ktlint",
+    sha256 = "2e28cf46c27d38076bf63beeba0bdef6a845688d6c5dccd26505ce876094eb92",
+    url = "https://github.com/pinterest/ktlint/releases/download/1.2.1/ktlint",
+    executable = True,
 )
-```
-
 ```
 
 Then, create the linter aspect, typically in `tools/lint/linters.bzl`:
@@ -25,7 +21,7 @@ Then, create the linter aspect, typically in `tools/lint/linters.bzl`:
 load("@aspect_rules_lint//lint:ktlint.bzl", "ktlint_aspect")
 
 ktlint = ktlint_aspect(
-    binary = "@@//tools/linters:ktlint",
+    binary = "@@com_github_pinterest_ktlint//file",
     # rules can be enabled/disabled from with this file
     editorconfig = "@@//:.editorconfig",
     # a baseline file with exceptions for violations
@@ -34,12 +30,25 @@ ktlint = ktlint_aspect(
 ```
 
 
+<a id="fetch_ktlint"></a>
+
+## fetch_ktlint
+
+<pre>
+fetch_ktlint()
+</pre>
+
+
+
+
+
 <a id="ktlint_action"></a>
 
 ## ktlint_action
 
 <pre>
-ktlint_action(<a href="#ktlint_action-ctx">ctx</a>, <a href="#ktlint_action-executable">executable</a>, <a href="#ktlint_action-srcs">srcs</a>, <a href="#ktlint_action-editorconfig">editorconfig</a>, <a href="#ktlint_action-report">report</a>, <a href="#ktlint_action-baseline_file">baseline_file</a>, <a href="#ktlint_action-use_exit_code">use_exit_code</a>)
+ktlint_action(<a href="#ktlint_action-ctx">ctx</a>, <a href="#ktlint_action-executable">executable</a>, <a href="#ktlint_action-srcs">srcs</a>, <a href="#ktlint_action-editorconfig">editorconfig</a>, <a href="#ktlint_action-report">report</a>, <a href="#ktlint_action-baseline_file">baseline_file</a>, <a href="#ktlint_action-java_runtime">java_runtime</a>,
+              <a href="#ktlint_action-use_exit_code">use_exit_code</a>)
 </pre>
 
  Runs ktlint as build action in Bazel.
@@ -59,6 +68,7 @@ https://pinterest.github.io/ktlint/latest/install/cli/
 | <a id="ktlint_action-editorconfig"></a>editorconfig |  The file object pointing to the editorconfig file used by ktlint   |  none |
 | <a id="ktlint_action-report"></a>report |  :output:  the stdout of ktlint containing any violations found   |  none |
 | <a id="ktlint_action-baseline_file"></a>baseline_file |  The file object pointing to the baseline file used by ktlint.   |  none |
+| <a id="ktlint_action-java_runtime"></a>java_runtime |  The Java Runtime configured for this build, pulled from the registered toolchain.   |  none |
 | <a id="ktlint_action-use_exit_code"></a>use_exit_code |  whether a non-zero exit code from ktlint process will result in a build failure.   |  <code>False</code> |
 
 
@@ -73,47 +83,7 @@ lint_ktlint_aspect(<a href="#lint_ktlint_aspect-binary">binary</a>, <a href="#li
 A factory function to create a linter aspect.
 
 Attrs:
-    binary: a ktlint executable. This needs to be produced in your module/WORKSPACE as follows:
-
-    Add a maven dependency on `com.pinterest.ktlint:ktlint-cli:&lt;version` using `maven_install` repository
-    rule from rules_jvm_external
-    WORKSPACE
-        ```
-        load("@rules_jvm_external//:defs.bzl", "maven_install")
-
-        maven_install(
-            artifacts = [
-            ...
-            "com.pinterest.ktlint:ktlint-cli:1.2.1",
-            ],
-            ...
-        )
-        ```
-
-    MODULE.bazel
-        ```
-        maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
-        maven.install(
-            artifacts = [
-                ...
-                "com.pinterest.ktlint:ktlint-cli:1.2.1"
-            ],
-            ...
-        )
-        ```
-
-    Now declare a `java_binary` target that produces a ktlint executable using your Java toolchain, typically in `tools/linters/BUILD.bazel` as:
-
-    ```
-    java_binary(
-        name = "ktlint",
-        runtime_deps = [
-            "@maven//:com_pinterest_ktlint_ktlint_cli"
-        ],
-        main_class = "com.pinterest.ktlint.Main"
-    )
-    ```
-
+    binary: a ktlint executable, provided as file typically through http_file declaration or using fetch_ktlint in your WORKSPACE.
     editorconfig: The label of the file pointing to the .editorconfig file used by ktlint.
     baseline_file: An optional attribute pointing to the label of the baseline file used by ktlint.
 
