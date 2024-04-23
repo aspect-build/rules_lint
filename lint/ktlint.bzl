@@ -1,20 +1,16 @@
 """API for calling declaring an ktlint lint aspect.
 
 Typical usage:
-
-Firstly, make sure you're using `rules_jvm_external` to install your Maven dependencies and then add `com.pinterest.ktlint:ktlint-cli` with the linter version to `artifacts` in `maven_install`,
-in your WORKSPACE or MODULE.bazel. Then create a `ktlint` binary target to be used in your linter as follows, typically in `tools/linters/BUILD.bazel`:
+Make sure you have `ktlint` pulled as a dependency into your WORKSPACE/module by pulling a version of it from here
+https://github.com/pinterest/ktlint/releases and using a `http_file` declaration for it like.
 
 ```
-java_binary(
-    name = "ktlint",
-    main_class = "com.pinterest.ktlint.Main",
-    runtime_deps = [
-        "@maven//:com_pinterest_ktlint_ktlint_cli",
-    ],
+http_file(
+    name = "com_github_pinterest_ktlint",
+    sha256 = "2e28cf46c27d38076bf63beeba0bdef6a845688d6c5dccd26505ce876094eb92",
+    url = "https://github.com/pinterest/ktlint/releases/download/1.2.1/ktlint",
+    executable = True,
 )
-```
-
 ```
 
 Then, create the linter aspect, typically in `tools/lint/linters.bzl`:
@@ -23,7 +19,7 @@ Then, create the linter aspect, typically in `tools/lint/linters.bzl`:
 load("@aspect_rules_lint//lint:ktlint.bzl", "ktlint_aspect")
 
 ktlint = ktlint_aspect(
-    binary = "@@//tools/linters:ktlint",
+    binary = "@@com_github_pinterest_ktlint//file",
     # rules can be enabled/disabled from with this file
     editorconfig = "@@//:.editorconfig",
     # a baseline file with exceptions for violations
@@ -32,11 +28,12 @@ ktlint = ktlint_aspect(
 ```
 """
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
 
 _MNEMONIC = "ktlint"
 
-def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, use_exit_code = False):
+def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, java_runtime, use_exit_code = False):
     """ Runs ktlint as build action in Bazel.
 
     Adapter for wrapping Bazel around
@@ -49,12 +46,21 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, us
         editorconfig: The file object pointing to the editorconfig file used by ktlint
         report: :output:  the stdout of ktlint containing any violations found
         baseline_file: The file object pointing to the baseline file used by ktlint.
+        java_runtime: The Java Runtime configured for this build, pulled from the registered toolchain.
         use_exit_code: whether a non-zero exit code from ktlint process will result in a build failure.
     """
 
     args = ctx.actions.args()
     inputs = srcs
     outputs = [report]
+
+    # ktlint artifact is published as an "executable" script which calls the fat jar
+    # so we need to pass a hermetic Java runtime from our build to avoid relying on
+    # system Java
+    java_home = java_runtime[java_common.JavaRuntimeInfo].java_home
+    env = {
+        "JAVA_HOME": java_home,
+    }
 
     if not use_exit_code:
         args.add(executable.path)
@@ -67,18 +73,18 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, us
         args.add("--baseline={}".format(baseline_file.path))
 
     args.add("--relative")
+    args.add("--reporter=plain,output={}".format(report.path))
 
     if use_exit_code:
-        args.add("--reporter=plain,output={}".format(report.path))
         ctx.actions.run(
             inputs = inputs,
             outputs = outputs,
             executable = executable,
             arguments = [args],
             mnemonic = _MNEMONIC,
+            env = env,
         )
     else:
-        args.add("--reporter=plain,output={}".format(report.path))
         ctx.actions.run_shell(
             inputs = inputs,
             outputs = outputs,
@@ -91,48 +97,22 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, us
             mnemonic = _MNEMONIC,
             arguments = [args],
             tools = [executable],
+            env = env,
         )
 
 def _ktlint_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["kt_jvm_library", "kt_jvm_binary"]:
+    if ctx.rule.kind not in ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]:
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    ktlint_action(ctx, ctx.executable._ktlint, filter_srcs(ctx.rule), ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    ktlint_action(ctx, ctx.executable._ktlint, filter_srcs(ctx.rule), ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file):
     """A factory function to create a linter aspect.
 
     Attrs:
-        binary: a ktlint executable. This needs to be produced in your module/WORKSPACE as follows:
-
-        Add a maven dependency on `com.pinterest.ktlint:ktlint-cli:<version` using `maven_install` repository
-        rule from rules_jvm_external
-        WORKSPACE
-            ```
-            load("@rules_jvm_external//:defs.bzl", "maven_install")
-
-            maven_install(
-                artifacts = [
-                ...
-                "com.pinterest.ktlint:ktlint-cli:1.2.1",
-                ],
-                ...
-            )
-            ```
-
-        MODULE.bazel
-            ```
-            maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
-            maven.install(
-                artifacts = [
-                    ...
-                    "com.pinterest.ktlint:ktlint-cli:1.2.1"
-                ],
-                ...
-            )
-            ```
+        binary: a ktlint executable.
 
         Now declare a `java_binary` target that produces a ktlint executable using your Java toolchain, typically in `tools/linters/BUILD.bazel` as:
 
@@ -172,5 +152,19 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file):
                 default = baseline_file,
                 allow_single_file = True,
             ),
+            "_java_runtime": attr.label(
+                default = "@bazel_tools//tools/jdk:current_java_runtime",
+            ),
         },
+        toolchains = [
+            "@bazel_tools//tools/jdk:toolchain_type",
+        ],
+    )
+
+def fetch_ktlint():
+    http_file(
+        name = "com_github_pinterest_ktlint",
+        sha256 = "2e28cf46c27d38076bf63beeba0bdef6a845688d6c5dccd26505ce876094eb92",
+        url = "https://github.com/pinterest/ktlint/releases/download/1.2.1/ktlint",
+        executable = True,
     )

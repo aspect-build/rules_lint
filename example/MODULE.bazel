@@ -14,7 +14,7 @@ bazel_dep(name = "rules_proto", version = "6.0.0-rc2")
 bazel_dep(name = "rules_python", version = "0.26.0")
 bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 bazel_dep(name = "platforms", version = "0.0.8")
-bazel_dep(name = "rules_kotlin", version = "1.9.0", repo_name = "io_bazel_rules_kotlin")
+bazel_dep(name = "rules_kotlin", version = "1.9.0")
 
 local_path_override(
     module_name = "aspect_rules_lint",
@@ -76,7 +76,6 @@ maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
     artifacts = [
         "org.scalameta:scalafmt-cli_2.13:3.7.14",
-        "com.pinterest.ktlint:ktlint-cli:1.2.1",
     ],
     lock_file = "//:maven_install.json",
     repositories = [

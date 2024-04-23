@@ -64,7 +64,7 @@ vale = lint_vale_aspect(
 )
 
 ktlint = lint_ktlint_aspect(
-    binary = "@@//tools/lint:ktlint",
+    binary = "@@com_github_pinterest_ktlint//file",
     editorconfig = "@@//:.editorconfig",
     baseline_file = "@@//:ktlint-baseline.xml",
 )
