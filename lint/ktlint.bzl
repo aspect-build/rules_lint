@@ -60,6 +60,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
     java_home = java_runtime[java_common.JavaRuntimeInfo].java_home
     env = {
         "JAVA_HOME": java_home,
+        "PATH": java_home,
     }
 
     if not use_exit_code:
