@@ -58,13 +58,13 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
     # so we need to pass a hermetic Java runtime from our build to avoid relying on
     # system Java
     java_home = java_runtime[java_common.JavaRuntimeInfo].java_home
+    java_runtime_files = java_runtime[java_common.JavaRuntimeInfo].files
     env = {
         "JAVA_HOME": java_home,
-        "PATH": java_home,
     }
 
-    if not use_exit_code:
-        args.add(executable.path)
+    args.add(executable.path)
+    inputs.append(executable)
 
     if editorconfig:
         inputs.append(editorconfig)
@@ -76,30 +76,38 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
     args.add("--relative")
     args.add("--reporter=plain,output={}".format(report.path))
 
+    # Include source files and Java runtime files required for ktlint
+    inputs = depset(direct = inputs, transitive = [java_runtime_files])
+
     if use_exit_code:
-        ctx.actions.run(
-            inputs = inputs,
-            outputs = outputs,
-            executable = executable,
-            arguments = [args],
-            mnemonic = _MNEMONIC,
-            env = env,
-        )
-    else:
-        ctx.actions.run_shell(
-            inputs = inputs,
-            outputs = outputs,
-            command = """
+        command = """
+            # This makes hermetic java available to ktlint executable
+            export PATH=$PATH:$JAVA_HOME/bin
             ktlint=$1
             ktlint_args="${@:2}"
+
+            # Run ktlint with arguments passed
+            $ktlint ${ktlint_args}
+            """
+    else:
+        command = """
+            # This makes hermetic java available to ktlint executable
+            export PATH=$PATH:$JAVA_HOME/bin
+            ktlint=$1
+            ktlint_args="${@:2}"
+
             # Don't fail ktlint and just report the violations
             $ktlint ${ktlint_args} || true
-            """,
-            mnemonic = _MNEMONIC,
-            arguments = [args],
-            tools = [executable],
-            env = env,
-        )
+            """
+
+    ctx.actions.run_shell(
+        inputs = inputs,
+        outputs = outputs,
+        command = command,
+        arguments = [args],
+        mnemonic = _MNEMONIC,
+        env = env,
+    )
 
 def _ktlint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]:
