@@ -63,7 +63,6 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
         "JAVA_HOME": java_home,
     }
 
-    args.add(executable.path)
     inputs.append(executable)
 
     if editorconfig:
@@ -74,7 +73,6 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
         args.add("--baseline={}".format(baseline_file.path))
 
     args.add("--relative")
-    args.add("--reporter=plain,output={}".format(report.path))
 
     # Include source files and Java runtime files required for ktlint
     inputs = depset(direct = inputs, transitive = [java_runtime_files])
@@ -83,22 +81,18 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
         command = """
             # This makes hermetic java available to ktlint executable
             export PATH=$PATH:$JAVA_HOME/bin
-            ktlint=$1
-            ktlint_args="${@:2}"
 
             # Run ktlint with arguments passed
-            $ktlint ${ktlint_args}
-            """
+            {ktlint} $@ && touch {report}
+            """.format(ktlint = executable.path, report = report.path)
     else:
         command = """
             # This makes hermetic java available to ktlint executable
             export PATH=$PATH:$JAVA_HOME/bin
-            ktlint=$1
-            ktlint_args="${@:2}"
 
             # Don't fail ktlint and just report the violations
-            $ktlint ${ktlint_args} || true
-            """
+            {ktlint} $@ >{report} || true
+            """.format(ktlint = executable.path, report = report.path)
 
     ctx.actions.run_shell(
         inputs = inputs,
