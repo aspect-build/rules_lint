@@ -47,4 +47,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//lint:vale",
 )
 
+stardoc_with_diff_test(
+    name = "ktlint",
+    bzl_library_target = "//lint:ktlint",
+)
+
 update_docs(name = "update")

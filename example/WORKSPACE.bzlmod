@@ -27,3 +27,7 @@ fetch_pmd()
 load("@aspect_rules_lint//lint:vale.bzl", "fetch_vale")
 
 fetch_vale()
+
+load("@aspect_rules_lint//lint:ktlint.bzl", "fetch_ktlint")
+
+fetch_ktlint()

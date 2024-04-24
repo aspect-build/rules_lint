@@ -31,7 +31,7 @@ New tools are being added frequently, so check this page again!
 | Java                   | [google-java-format]  | [pmd]            |
 | JavaScript             | [Prettier]            | [ESLint]         |
 | Jsonnet                | [jsonnetfmt]          |                  |
-| Kotlin                 | [ktfmt]               |                  |
+| Kotlin                 | [ktfmt]               | [ktlint]         |
 | Markdown               | [Prettier]            | [Vale]           |
 | Protocol Buffer        | [buf]                 | [buf lint]       |
 | Python                 | [ruff]                | [flake8], [ruff] |
@@ -54,6 +54,7 @@ New tools are being added frequently, so check this page again!
 [terraform]: https://github.com/hashicorp/terraform
 [buf]: https://docs.buf.build/format/usage
 [ktfmt]: https://github.com/facebook/ktfmt
+[ktlint]: https://github.com/pinterest/ktlint
 [buildifier]: https://github.com/keith/buildifier-prebuilt
 [prettier-plugin-sql]: https://github.com/un-ts/prettier
 [gofmt]: https://pkg.go.dev/cmd/gofmt
