@@ -2,20 +2,11 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 exports_files(["format.sh"])
 
-sh_library(
-    name = "ls-files",
-    srcs = ["ls-files.sh"],
-    visibility = ["//format:__subpackages__"],
-)
-
 sh_binary(
     name = "format",
     srcs = ["format.sh"],
     visibility = ["//visibility:public"],
-    deps = [
-        "ls-files",
-        "@bazel_tools//tools/bash/runfiles",
-    ],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
 )
 
 bzl_library(

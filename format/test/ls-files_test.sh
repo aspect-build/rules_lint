@@ -2,9 +2,8 @@
 
 set -o nounset -o errexit -o pipefail
 
-source $TEST_SRCDIR/_main/format/private/ls-files.sh
-
-cd $TEST_TMPDIR
+BUILD_WORKSPACE_DIRECTORY=$TEST_TMPDIR
+source $TEST_SRCDIR/_main/format/private/format.sh
 
 git init --initial-branch=test
 
