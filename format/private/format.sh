@@ -46,6 +46,7 @@ function on_exit {
 
 trap on_exit EXIT
 
+# Exports a function that is similar to 'git ls-files'
 # ls-files <language> [<file>...]
 function ls-files {
     language="$1" && shift;
@@ -99,13 +100,15 @@ function ls-files {
             "^$(git ls-files --deleted)$" \
           || true;
         })
-        git_attributes=$(git check-attr -a -- $files)
-        for file in $files; do
-            # Check if any of the attributes we ignore are set for this file.
-            if ! grep -qE "(^| )$file: (rules-lint-ignored|linguist-generated|gitlab-generated): set($| )" <<< $git_attributes; then
-                echo $file
-            fi
-        done
+        if [[ $files != "" ]]; then
+            git_attributes=$(git check-attr -a -- $files)
+            for file in $files; do
+                # Check if any of the attributes we ignore are set for this file.
+                if ! grep -qE "(^| )$file: (rules-lint-ignored|linguist-generated|gitlab-generated): set($| )" <<< $git_attributes; then
+                    echo $file
+                fi
+            done
+        fi
     else
         # When given arguments, they are glob patterns of the superset of files to format.
         # We just need to filter those so we only select files for this language
@@ -181,20 +184,23 @@ function run-format {
   fi
 }
 
-bin="$(rlocation $tool)"
-if [ ! -e "$bin" ]; then
-  echo >&2 "cannot locate binary $tool"
-  exit 1
-fi
+# Check if our script is the main entry point, not being sourced by a test
+if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
+  bin="$(rlocation $tool)"
+  if [ ! -e "$bin" ]; then
+    echo >&2 "cannot locate binary $tool"
+    exit 1
+  fi
 
-run-format "$lang" "$bin" "${flags:-""}" $@
+  run-format "$lang" "$bin" "${flags:-""}" $@
 
-# Currently these aren't exposed as separate languages to the attributes of format_multirun
-# So we format all these languages as part of "JavaScript".
-if [[ "$lang" == "JavaScript" ]]; then
-  run-format "CSS" "$bin" "${flags:-""}" $@
-  run-format "HTML" "$bin" "${flags:-""}" $@
-  run-format "JSON" "$bin" "${flags:-""}" $@
-  run-format "TSX" "$bin" "${flags:-""}" $@
-  run-format "TypeScript" "$bin" "${flags:-""}" $@
+  # Currently these aren't exposed as separate languages to the attributes of format_multirun
+  # So we format all these languages as part of "JavaScript".
+  if [[ "$lang" == "JavaScript" ]]; then
+    run-format "CSS" "$bin" "${flags:-""}" $@
+    run-format "HTML" "$bin" "${flags:-""}" $@
+    run-format "JSON" "$bin" "${flags:-""}" $@
+    run-format "TSX" "$bin" "${flags:-""}" $@
+    run-format "TypeScript" "$bin" "${flags:-""}" $@
+  fi
 fi

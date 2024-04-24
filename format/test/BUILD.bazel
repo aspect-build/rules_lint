@@ -3,6 +3,12 @@ load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//format:defs.bzl", "format_multirun")
 load("//format/private:formatter_binary.bzl", "TOOLS")
 
+sh_test(
+    name = "ls-files_test",
+    srcs = ["ls-files_test.sh"],
+    deps = ["//format/private:format"],
+)
+
 UNIQUE_TOOLS = sets.to_list(sets.make(TOOLS.values()))
 
 # Avoid depending on a bunch of actual tools in the root module.
