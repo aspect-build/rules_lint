@@ -1,0 +1,12 @@
+plugins:
+  # Place any plugins listed here in a corresponding block in package.json
+
+  # "pnpm": {
+  #   "packageExtensions": {
+  #     "prettier": {
+  #       "peerDependencies": {
+  #         "@ianvs/prettier-plugin-sort-imports": "*"
+  #       }
+  #     }
+  #   }
+  - "@ianvs/prettier-plugin-sort-imports"
