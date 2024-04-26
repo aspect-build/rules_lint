@@ -1,5 +1,23 @@
 "This file is automatically updated by mirror_ruff.sh"
 RUFF_VERSIONS = {
+    "v0.4.2": {
+        "aarch64-apple-darwin": "b39e01c746c5453f529fe6fb4720276cf8c9c09278b0426b4240bf7d9eece34a",
+        "aarch64-pc-windows-msvc": "19febbd1eb6bf4c7091b323548aee452d342e35f0daddcb2445e4416bf37bfaf",
+        "aarch64-unknown-linux-gnu": "ab79c2354b8f9d0be97a029f2625db1db03dec1f28f8234b19cb56ac94ac1000",
+        "aarch64-unknown-linux-musl": "b0b1341b8056adb82e42310c92856469191a190d0b4f22727317a77d3e750e6f",
+        "armv7-unknown-linux-gnueabihf": "2de0df2d8eb3a3bc49f7ded118d09cb0d4a6fa115808b668a6ca0e7643a0dd51",
+        "armv7-unknown-linux-musleabihf": "b3dd361e4e24d89651a14ec6f3f50c1bf30ea3ead69fdd394eb9389b15449808",
+        "i686-pc-windows-msvc": "521e4088ae693eb5e2ad16f6a8d70ccf97c2ca3b733117a50af27464036d3af5",
+        "i686-unknown-linux-gnu": "9209a27e22238d905772034612de530eaaa400f870950bfcc4737887a25eee86",
+        "i686-unknown-linux-musl": "e47674586e0c228691c66ad5c228865b4394c20953717b3c1840eb67fb318a22",
+        "powerpc64-unknown-linux-gnu": "59dc57b4b3172d96678154757368c8a97369173783ebb075641de40d203c507e",
+        "powerpc64le-unknown-linux-gnu": "fdd8fe4d6035dfdae15980c2e52abbd030d68f41e6f9cb7bfac8c6e928b088d4",
+        "s390x-unknown-linux-gnu": "4036c95405941535e6cefbc6d8089b029042bdba6a9aa5c5bd4421139dbd4fdb",
+        "x86_64-apple-darwin": "49c80d714b0c578a244820462c4aa1fa66556c2271ab32b81126980f7bf98dec",
+        "x86_64-pc-windows-msvc": "ede9b71bae135e2042a5bdc61446da4c059776640ca803dd24a07a3d9a335ec1",
+        "x86_64-unknown-linux-gnu": "9951c9d13cca258d326fabc7b167a22539423ecf663f0e9ffa4f10f2f0cf705c",
+        "x86_64-unknown-linux-musl": "b49fc92f04f06ee5851c2193632f6afe00ac2004fa8e06b1118bd282fc748512",
+    },
     "v0.4.1": {
         "aarch64-apple-darwin": "a990d1ff93f9eb039ed2ff68e283994f070f7c5fbc45e2f79ba0d6a0a16c38a8",
         "aarch64-pc-windows-msvc": "2753f817675f6e3f31c324159e08ab0e1103056d4abd9e24c3042bc59bebec88",
