@@ -28,12 +28,13 @@ ktlint = ktlint_aspect(
 ```
 """
 
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
 
 _MNEMONIC = "ktlint"
 
-def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, java_runtime, use_exit_code = False):
+def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, java_runtime, ruleset_jar = None, use_exit_code = False):
     """ Runs ktlint as build action in Bazel.
 
     Adapter for wrapping Bazel around
@@ -47,6 +48,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
         report: :output:  the stdout of ktlint containing any violations found
         baseline_file: The file object pointing to the baseline file used by ktlint.
         java_runtime: The Java Runtime configured for this build, pulled from the registered toolchain.
+        ruleset_jar: An optional, custom ktlint ruleset jar.
         use_exit_code: whether a non-zero exit code from ktlint process will result in a build failure.
     """
 
@@ -71,6 +73,9 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
     if baseline_file:
         inputs.append(baseline_file)
         args.add("--baseline={}".format(baseline_file.path))
+    if ruleset_jar:
+        inputs.append(ruleset_jar)
+        args.add("--ruleset={}".format(ruleset_jar.path))
 
     args.add("--relative")
 
@@ -108,23 +113,43 @@ def _ktlint_aspect_impl(target, ctx):
         return []
 
     report, info = report_file(_MNEMONIC, target, ctx)
-    ktlint_action(ctx, ctx.executable._ktlint, filter_srcs(ctx.rule), ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    ruleset_jar = None
+    if hasattr(ctx.attr, "_ruleset_jar"):
+        ruleset_jar = ctx.file._ruleset_jar
+
+    ktlint_action(ctx, ctx.executable._ktlint, filter_srcs(ctx.rule), ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, ctx.attr._options[LintOptionsInfo].fail_on_violation)
     return [info]
 
-def lint_ktlint_aspect(binary, editorconfig, baseline_file):
+def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):
     """A factory function to create a linter aspect.
 
-    Attrs:
+    Args:
         binary: a ktlint executable, provided as file typically through http_file declaration or using fetch_ktlint in your WORKSPACE.
         editorconfig: The label of the file pointing to the .editorconfig file used by ktlint.
         baseline_file: An optional attribute pointing to the label of the baseline file used by ktlint.
+        ruleset_jar: An optional, custom ktlint ruleset provided as a fat jar, and works on top of the standard rules.
+
+    Returns:
+        An aspect definition for ktlint
     """
+
+    # Attr defaults cannot be None, so this is added only if a
+    # ruleset jar is specified
+    extra_attrs = {}
+    if ruleset_jar:
+        extra_attrs = {
+            "_ruleset_jar": attr.label(
+                default = ruleset_jar,
+                allow_single_file = True,
+            ),
+        }
+
     return aspect(
         implementation = _ktlint_aspect_impl,
         # Edges we need to walk up the graph from the selected targets.
         # Needed for linters that need semantic information like transitive type declarations.
         # attr_aspects = ["deps"],
-        attrs = {
+        attrs = dicts.add({
             "_options": attr.label(
                 default = "//lint:fail_on_violation",
                 providers = [LintOptionsInfo],
@@ -145,7 +170,7 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file):
             "_java_runtime": attr.label(
                 default = "@bazel_tools//tools/jdk:current_java_runtime",
             ),
-        },
+        }, extra_attrs),
         toolchains = [
             "@bazel_tools//tools/jdk:toolchain_type",
         ],
@@ -154,7 +179,7 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file):
 def fetch_ktlint():
     http_file(
         name = "com_github_pinterest_ktlint",
-        sha256 = "2e28cf46c27d38076bf63beeba0bdef6a845688d6c5dccd26505ce876094eb92",
-        url = "https://github.com/pinterest/ktlint/releases/download/1.2.1/ktlint",
+        sha256 = "89491ea865d369b39cfaca2dcf60b38adbdcd74985f5e0170c0bb73034000135",
+        url = "https://github.com/pinterest/ktlint/releases/download/0.45.2/ktlint",
         executable = True,
     )
