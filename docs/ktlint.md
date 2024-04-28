@@ -83,20 +83,18 @@ lint_ktlint_aspect(<a href="#lint_ktlint_aspect-binary">binary</a>, <a href="#li
 
 A factory function to create a linter aspect.
 
-Attrs:
-    binary: a ktlint executable, provided as file typically through http_file declaration or using fetch_ktlint in your WORKSPACE.
-    editorconfig: The label of the file pointing to the .editorconfig file used by ktlint.
-    baseline_file: An optional attribute pointing to the label of the baseline file used by ktlint.
-    ruleset_jar: An optional, custom ktlint ruleset provided as a fat jar, and works on top of the standard rules.
-
 **PARAMETERS**
 
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="lint_ktlint_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
-| <a id="lint_ktlint_aspect-editorconfig"></a>editorconfig |  <p align="center"> - </p>   |  none |
-| <a id="lint_ktlint_aspect-baseline_file"></a>baseline_file |  <p align="center"> - </p>   |  none |
-| <a id="lint_ktlint_aspect-ruleset_jar"></a>ruleset_jar |  <p align="center"> - </p>   |  <code>None</code> |
+| <a id="lint_ktlint_aspect-binary"></a>binary |  a ktlint executable, provided as file typically through http_file declaration or using fetch_ktlint in your WORKSPACE.   |  none |
+| <a id="lint_ktlint_aspect-editorconfig"></a>editorconfig |  The label of the file pointing to the .editorconfig file used by ktlint.   |  none |
+| <a id="lint_ktlint_aspect-baseline_file"></a>baseline_file |  An optional attribute pointing to the label of the baseline file used by ktlint.   |  none |
+| <a id="lint_ktlint_aspect-ruleset_jar"></a>ruleset_jar |  An optional, custom ktlint ruleset provided as a fat jar, and works on top of the standard rules.   |  <code>None</code> |
+
+**RETURNS**
+
+An aspect definition for ktlint
 
 
