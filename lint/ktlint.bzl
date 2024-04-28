@@ -179,7 +179,7 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):
 def fetch_ktlint():
     http_file(
         name = "com_github_pinterest_ktlint",
-        sha256 = "89491ea865d369b39cfaca2dcf60b38adbdcd74985f5e0170c0bb73034000135",
-        url = "https://github.com/pinterest/ktlint/releases/download/0.45.2/ktlint",
+        sha256 = "2e28cf46c27d38076bf63beeba0bdef6a845688d6c5dccd26505ce876094eb92",
+        url = "https://github.com/pinterest/ktlint/releases/download/1.2.1/ktlint",
         executable = True,
     )
