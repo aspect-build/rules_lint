@@ -29,6 +29,28 @@ ktlint = ktlint_aspect(
 )
 ```
 
+If you plan on using Ktlint [custom rulesets](https://pinterest.github.io/ktlint/1.2.1/install/cli/#rule-sets), you can also declare 
+an additional `ruleset_jar` attribute pointing to your custom ruleset jar like this
+
+```
+java_binary(
+    name = "my_ktlint_custom_ruleset",
+    ...
+)
+
+ktlint = ktlint_aspect(
+    binary = "@@com_github_pinterest_ktlint//file",
+    # rules can be enabled/disabled from with this file
+    editorconfig = "@@//:.editorconfig",
+    # a baseline file with exceptions for violations
+    baseline_file = "@@//:.ktlint-baseline.xml",
+    # Run your custom ktlint ruleset on top of standard rules
+    ruleset_jar = "@@//:my_ktlint_custom_ruleset_deploy.jar",
+)
+```
+
+If your custom ruleset is a third-party dependency and not a first-party dependency, you can also fetch it using `http_file` and use it instead.
+
 
 <a id="fetch_ktlint"></a>
 
