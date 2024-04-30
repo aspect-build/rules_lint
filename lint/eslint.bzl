@@ -63,13 +63,25 @@ def _gather_inputs(ctx, srcs):
     inputs = copy_files_to_bin_actions(ctx, srcs)
 
     # Add the config file along with any deps it has on npm packages
-    inputs.extend(js_lib_helpers.gather_files_from_js_providers(
-        ctx.attr._config_files + [ctx.attr._workaround_17660, ctx.attr._formatter],
-        include_transitive_sources = True,
-        include_declarations = False,
-        include_npm_linked_packages = True,
-    ).to_list())
-
+    if "gather_files_from_js_providers" in dir(js_lib_helpers):
+        # rules_js 1.x
+        js_inputs = js_lib_helpers.gather_files_from_js_providers(
+            ctx.attr._config_files + [ctx.attr._workaround_17660, ctx.attr._formatter],
+            include_transitive_sources = True,
+            include_declarations = False,
+            include_npm_linked_packages = True,
+        )
+    else:
+        # rules_js 2.x
+        js_inputs = js_lib_helpers.gather_files_from_js_infos(
+            ctx.attr._config_files + [ctx.attr._workaround_17660, ctx.attr._formatter],
+            include_sources = True,
+            include_transitive_sources = True,
+            include_types = False,
+            include_transitive_types = False,
+            include_npm_sources = True,
+        )
+    inputs.extend(js_inputs.to_list())
     return inputs
 
 def eslint_action(ctx, executable, srcs, report, exit_code = None):
