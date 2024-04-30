@@ -5,7 +5,7 @@
 # Error: bazel exited with exit code: 1
 
 # Demo with just running ruff:
-# $ bazel run --run_under="cd $PWD &&" -- //tools/lint:ruff check --config=.ruff.toml src/*.py
+# $ bazel run --run_under="cd $PWD &&" -- //tools/lint:ruff check src/*.py --config=.ruff.toml
 # INFO: Build completed successfully, 1 total action
 # src/unused_import.py:12:8: F401 [*] `os` imported but unused
 # Found 1 error.
