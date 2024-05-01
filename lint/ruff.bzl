@@ -153,7 +153,7 @@ def lint_ruff_aspect(binary, configs):
             ),
             "_ruff": attr.label(
                 default = binary,
-                allow_single_file = True,
+                allow_files = True,
                 executable = True,
                 cfg = "exec",
             ),
