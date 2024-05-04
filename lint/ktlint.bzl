@@ -52,9 +52,27 @@ If your custom ruleset is a third-party dependency and not a first-party depende
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files")
 
 _MNEMONIC = "ktlint"
+
+def _gather_inputs(srcs, ktlint, editorconfig, baseline_file, java_runtime, ruleset_jar, patcher=None):
+    inputs = srcs
+    java_runtime_files = java_runtime[java_common.JavaRuntimeInfo].files
+
+    inputs.append(ktlint)
+
+    if editorconfig:
+        inputs.append(editorconfig)
+    if baseline_file:
+        inputs.append(baseline_file)
+    if ruleset_jar:
+        inputs.append(ruleset_jar)
+    if patcher:
+        inputs.append(patcher)
+
+    # Include source files and Java runtime files required for ktlint
+    return depset(direct = inputs, transitive = [java_runtime_files]) 
 
 def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, java_runtime, ruleset_jar = None, use_exit_code = False):
     """ Runs ktlint as build action in Bazel.
@@ -75,34 +93,26 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
     """
 
     args = ctx.actions.args()
-    inputs = srcs
+    inputs = _gather_inputs(srcs, executable, editorconfig, baseline_file, java_runtime, ruleset_jar)
     outputs = [report]
 
     # ktlint artifact is published as an "executable" script which calls the fat jar
     # so we need to pass a hermetic Java runtime from our build to avoid relying on
     # system Java
     java_home = java_runtime[java_common.JavaRuntimeInfo].java_home
-    java_runtime_files = java_runtime[java_common.JavaRuntimeInfo].files
     env = {
         "JAVA_HOME": java_home,
     }
 
-    inputs.append(executable)
 
     if editorconfig:
-        inputs.append(editorconfig)
         args.add("--editorconfig={}".format(editorconfig.path))
     if baseline_file:
-        inputs.append(baseline_file)
         args.add("--baseline={}".format(baseline_file.path))
     if ruleset_jar:
-        inputs.append(ruleset_jar)
         args.add("--ruleset={}".format(ruleset_jar.path))
 
     args.add("--relative")
-
-    # Include source files and Java runtime files required for ktlint
-    inputs = depset(direct = inputs, transitive = [java_runtime_files])
 
     if use_exit_code:
         command = """
@@ -130,16 +140,82 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
         env = env,
     )
 
+
+def ktlint_fix(ctx, executable, srcs, editorconfig, baseline_file, java_runtime, ruleset_jar, patch):
+    """Creates a Bazel action that spawns ktlint with --format.
+
+    Args:
+        ctx: an action context OR aspect context
+        executable: struct with _ktlint  and _patcher field
+        srcs: list of file objects to lint
+        editorconfig: The label of the editorconfig file passed to ktlint
+        baseline_file: The baseline file with known violations passed to ktlint.
+        java_runtime: The java runtime to be used for running ktlint.
+        ruleset_jar: An optional, custom ruleset jar file object to be passed to ktlint.
+        patch:  output file containing the applied fixes that can be applied with the patch(1) command.
+
+    """
+    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
+    args = []
+    if editorconfig:
+        args.append("--editorconfig={}".format(editorconfig.path))
+    
+    if baseline_file:
+        args.append("--baseline={}".format(baseline_file.path))
+
+    if ruleset_jar:
+        args.append("--ruleset={}".format(ruleset_jar.path))
+    
+    args.append("--relative")
+    
+    ctx.actions.write(
+        output = patch_cfg,
+        content = json.encode({
+            "linter": executable._ktlint.path,
+            "args": args + ["-F"],
+            "files_to_diff": [s.path for s in srcs],
+            "output": patch.path,
+        }),
+    )
+
+    inputs = _gather_inputs(srcs + [patch_cfg], executable._ktlint, editorconfig, baseline_file, java_runtime, ruleset_jar, executable._patcher, include_ktlint = False)
+    
+    env = {
+        "BAZEL_BINDIR": ".",
+        "JAVA_HOME": java_runtime[java_common.JavaRuntimeInfo].java_home,
+        "JS_BINARY__LOG_DEBUG": "1"
+    }
+
+    command = """
+            # This makes hermetic java available to ktlint executable
+            export PATH=$PATH:$JAVA_HOME/bin
+
+            # Run patcher with ktlint specific configuration
+            {patcher} {patch_cfg}
+            """.format(patcher = executable._patcher.path, patch_cfg = patch_cfg.path)
+
+    ctx.actions.run_shell(
+        inputs = inputs,
+        outputs = [patch],
+        command = command,
+        arguments = args,
+        mnemonic = _MNEMONIC,
+        env = env,
+        tools = [executable._ktlint]
+    )
+
 def _ktlint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]:
         return []
 
-    report, info = report_file(_MNEMONIC, target, ctx)
+    patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
     ruleset_jar = None
     if hasattr(ctx.attr, "_ruleset_jar"):
         ruleset_jar = ctx.file._ruleset_jar
 
-    ktlint_action(ctx, ctx.executable._ktlint, filter_srcs(ctx.rule), ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    files_to_lint = filter_srcs(ctx.rule)
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    ktlint_fix(ctx, ctx.executable, files_to_lint, ctx.file._editorconfig, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, patch)
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):
@@ -191,6 +267,11 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):
             ),
             "_java_runtime": attr.label(
                 default = "@bazel_tools//tools/jdk:current_java_runtime",
+            ),
+            "_patcher": attr.label(
+                default = "@aspect_rules_lint//lint/private:patcher",
+                executable = True,
+                cfg = "exec",
             ),
         }, extra_attrs),
         toolchains = [
