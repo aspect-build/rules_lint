@@ -95,6 +95,31 @@ https://pinterest.github.io/ktlint/latest/install/cli/
 | <a id="ktlint_action-use_exit_code"></a>use_exit_code |  whether a non-zero exit code from ktlint process will result in a build failure.   |  <code>False</code> |
 
 
+<a id="ktlint_fix"></a>
+
+## ktlint_fix
+
+<pre>
+ktlint_fix(<a href="#ktlint_fix-ctx">ctx</a>, <a href="#ktlint_fix-executable">executable</a>, <a href="#ktlint_fix-srcs">srcs</a>, <a href="#ktlint_fix-editorconfig">editorconfig</a>, <a href="#ktlint_fix-baseline_file">baseline_file</a>, <a href="#ktlint_fix-java_runtime">java_runtime</a>, <a href="#ktlint_fix-ruleset_jar">ruleset_jar</a>, <a href="#ktlint_fix-patch">patch</a>)
+</pre>
+
+Creates a Bazel action that spawns ktlint with --format.
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="ktlint_fix-ctx"></a>ctx |  an action context OR aspect context   |  none |
+| <a id="ktlint_fix-executable"></a>executable |  struct with _ktlint  and _patcher field   |  none |
+| <a id="ktlint_fix-srcs"></a>srcs |  list of file objects to lint   |  none |
+| <a id="ktlint_fix-editorconfig"></a>editorconfig |  The label of the editorconfig file passed to ktlint   |  none |
+| <a id="ktlint_fix-baseline_file"></a>baseline_file |  The baseline file with known violations passed to ktlint.   |  none |
+| <a id="ktlint_fix-java_runtime"></a>java_runtime |  The java runtime to be used for running ktlint.   |  none |
+| <a id="ktlint_fix-ruleset_jar"></a>ruleset_jar |  An optional, custom ruleset jar file object to be passed to ktlint.   |  none |
+| <a id="ktlint_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
+
+
 <a id="lint_ktlint_aspect"></a>
 
 ## lint_ktlint_aspect
