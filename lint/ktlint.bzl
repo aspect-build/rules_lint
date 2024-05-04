@@ -56,11 +56,9 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_
 
 _MNEMONIC = "ktlint"
 
-def _gather_inputs(srcs, ktlint, editorconfig, baseline_file, java_runtime, ruleset_jar, patcher=None):
+def _gather_inputs(srcs, editorconfig, baseline_file, java_runtime, ruleset_jar):
     inputs = srcs
     java_runtime_files = java_runtime[java_common.JavaRuntimeInfo].files
-
-    inputs.append(ktlint)
 
     if editorconfig:
         inputs.append(editorconfig)
@@ -68,8 +66,6 @@ def _gather_inputs(srcs, ktlint, editorconfig, baseline_file, java_runtime, rule
         inputs.append(baseline_file)
     if ruleset_jar:
         inputs.append(ruleset_jar)
-    if patcher:
-        inputs.append(patcher)
 
     # Include source files and Java runtime files required for ktlint
     return depset(direct = inputs, transitive = [java_runtime_files]) 
@@ -93,7 +89,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
     """
 
     args = ctx.actions.args()
-    inputs = _gather_inputs(srcs, executable, editorconfig, baseline_file, java_runtime, ruleset_jar)
+    inputs = _gather_inputs(srcs + [executable], editorconfig, baseline_file, java_runtime, ruleset_jar)
     outputs = [report]
 
     # ktlint artifact is published as an "executable" script which calls the fat jar
@@ -178,12 +174,11 @@ def ktlint_fix(ctx, executable, srcs, editorconfig, baseline_file, java_runtime,
         }),
     )
 
-    inputs = _gather_inputs(srcs + [patch_cfg], executable._ktlint, editorconfig, baseline_file, java_runtime, ruleset_jar, executable._patcher, include_ktlint = False)
+    inputs = _gather_inputs(srcs + [patch_cfg], editorconfig, baseline_file, java_runtime, ruleset_jar)
     
     env = {
         "BAZEL_BINDIR": ".",
         "JAVA_HOME": java_runtime[java_common.JavaRuntimeInfo].java_home,
-        "JS_BINARY__LOG_DEBUG": "1"
     }
 
     command = """
@@ -201,7 +196,7 @@ def ktlint_fix(ctx, executable, srcs, editorconfig, baseline_file, java_runtime,
         arguments = args,
         mnemonic = _MNEMONIC,
         env = env,
-        tools = [executable._ktlint]
+        tools = [executable._ktlint, executable._patcher]
     )
 
 def _ktlint_aspect_impl(target, ctx):
