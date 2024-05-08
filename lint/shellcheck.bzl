@@ -31,6 +31,7 @@ def shellcheck_action(ctx, executable, srcs, config, report, exit_code = None, o
         report: output file to generate
         exit_code: output file to write the exit code.
             If None, then fail the build when vale exits non-zero.
+            See https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#return-values
         options: additional command-line options, see https://github.com/koalaman/shellcheck/blob/master/shellcheck.hs#L95
     """
     inputs = srcs + [config]
@@ -68,7 +69,8 @@ def _shellcheck_aspect_impl(target, ctx):
 
     patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
     shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, report, exit_code)
-    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, patch, False, ["--format", "diff"])
+    discard_exit_code = ctx.actions.declare_file("{}.{}.aspect_rules_lint.patch_exit_code".format(_MNEMONIC, target.label.name))
+    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, patch, discard_exit_code, ["--format", "diff"])
     return [info]
 
 def lint_shellcheck_aspect(binary, config):
