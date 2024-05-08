@@ -56,7 +56,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report
 
 _MNEMONIC = "ktlint"
 
-def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, java_runtime, ruleset_jar = None, use_exit_code = False):
+def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, java_runtime, ruleset_jar = None, exit_code = None):
     """ Runs ktlint as build action in Bazel.
 
     Adapter for wrapping Bazel around
@@ -71,7 +71,8 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
         baseline_file: The file object pointing to the baseline file used by ktlint.
         java_runtime: The Java Runtime configured for this build, pulled from the registered toolchain.
         ruleset_jar: An optional, custom ktlint ruleset jar.
-        use_exit_code: whether a non-zero exit code from ktlint process will result in a build failure.
+        exit_code: output file to write the exit code.
+            If None, then fail the build when ktlint exits non-zero.
     """
 
     args = ctx.actions.args()
@@ -104,27 +105,21 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
     # Include source files and Java runtime files required for ktlint
     inputs = depset(direct = inputs, transitive = [java_runtime_files])
 
-    if use_exit_code:
-        command = """
-            # This makes hermetic java available to ktlint executable
-            export PATH=$PATH:$JAVA_HOME/bin
+    # This makes hermetic java available to ktlint executable
+    command = "export PATH=$PATH:$JAVA_HOME/bin\n"
 
-            # Run ktlint with arguments passed
-            {ktlint} $@ && touch {report}
-            """.format(ktlint = executable.path, report = report.path)
+    if exit_code:
+        # Don't fail ktlint and just report the violations
+        command += "{ktlint} $@ >{report}; echo $? >" + exit_code.path
+        outputs.append(exit_code)
     else:
-        command = """
-            # This makes hermetic java available to ktlint executable
-            export PATH=$PATH:$JAVA_HOME/bin
-
-            # Don't fail ktlint and just report the violations
-            {ktlint} $@ >{report} || true
-            """.format(ktlint = executable.path, report = report.path)
+        # Run ktlint with arguments passed
+        command += "{ktlint} $@ && touch {report}"
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
-        command = command,
+        command = command.format(ktlint = executable.path, report = report.path),
         arguments = [args],
         mnemonic = _MNEMONIC,
         env = env,
@@ -134,12 +129,12 @@ def _ktlint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]:
         return []
 
-    report, info = report_file(_MNEMONIC, target, ctx)
+    report, exit_code, info = report_file(_MNEMONIC, target, ctx)
     ruleset_jar = None
     if hasattr(ctx.attr, "_ruleset_jar"):
         ruleset_jar = ctx.file._ruleset_jar
 
-    ktlint_action(ctx, ctx.executable._ktlint, filter_srcs(ctx.rule), ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    ktlint_action(ctx, ctx.executable._ktlint, filter_srcs(ctx.rule), ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):

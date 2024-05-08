@@ -71,7 +71,7 @@ load(":vale_versions.bzl", "VALE_VERSIONS")
 _MNEMONIC = "Vale"
 
 # buildifier: disable=function-docstring
-def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = False):
+def vale_action(ctx, executable, srcs, styles, config, report, exit_code = None):
     inputs = srcs + [config]
     env = {}
     if styles:
@@ -86,15 +86,18 @@ def vale_action(ctx, executable, srcs, styles, config, report, use_exit_code = F
     args.add_all(srcs)
     args.add_all(["--config", config])
     args.add_all(["--output", "line"])
+    outputs = [report]
 
-    if use_exit_code:
-        command = "{vale} $@ && touch {report}"
+    if exit_code:
+        command = "{vale} $@ >{report}; echo $? > " + exit_code.path
+        outputs.append(exit_code)
     else:
-        command = "{vale} $@ >{report} || true"
+        # Create empty report file on success, as Bazel expects one
+        command = "{vale} $@ && touch {report}"
 
     ctx.actions.run_shell(
         inputs = inputs,
-        outputs = [report],
+        outputs = outputs,
         command = command.format(
             vale = executable.path,
             report = report.path,
@@ -112,7 +115,7 @@ def _vale_aspect_impl(target, ctx):
     # want to take that dependency.
     # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
     if ctx.rule.kind == "markdown_library" or (ctx.rule.kind == "filegroup" and "markdown" in ctx.rule.attr.tags):
-        report, info = report_file(_MNEMONIC, target, ctx)
+        report, exit_code, info = report_file(_MNEMONIC, target, ctx)
         styles = None
         if ctx.files._styles:
             if len(ctx.files._styles) != 1:
@@ -120,7 +123,7 @@ def _vale_aspect_impl(target, ctx):
             styles = ctx.files._styles[0]
             if not styles.is_directory:
                 fail("Styles should be a directory containing installed styles")
-        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, exit_code)
         return [info]
 
     return []

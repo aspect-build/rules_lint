@@ -20,7 +20,7 @@ load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "ruff"
 
-def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
+def ruff_action(ctx, executable, srcs, config, report, exit_code = None):
     """Run ruff as an action under Bazel.
 
     Ruff will select the configuration file to use for each source file, as documented here:
@@ -41,8 +41,10 @@ def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
         executable: label of the the ruff program
         srcs: python files to be linted
         config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
-        report: output file to generate
-        use_exit_code: whether to fail the build when a lint violation is reported
+        report: output file of linter results to generate
+        exit_code: output file to write the exit code.
+            If None, then fail the build when ruff exits non-zero.
+            See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes
     """
     inputs = srcs + config
     outputs = [report]
@@ -53,26 +55,21 @@ def ruff_action(ctx, executable, srcs, config, report, use_exit_code = False):
     args.add("check")
     args.add_all(srcs)
 
-    if use_exit_code:
-        ctx.actions.run_shell(
-            inputs = inputs,
-            outputs = outputs,
-            command = executable.path + " $@ && touch " + report.path,
-            arguments = [args],
-            mnemonic = _MNEMONIC,
-            tools = [executable],
-        )
+    if exit_code:
+        command = "{ruff} $@ >{report}; echo $? >" + exit_code.path
+        outputs.append(exit_code)
     else:
-        args.add(report, format = "--output-file=%s")
-        args.add("--exit-zero")
+        # Create empty report file on success, as Bazel expects one
+        command = "{ruff} $@ && touch {report}"
 
-        ctx.actions.run(
-            inputs = inputs,
-            outputs = outputs,
-            executable = executable,
-            arguments = [args],
-            mnemonic = _MNEMONIC,
-        )
+    ctx.actions.run_shell(
+        inputs = inputs,
+        outputs = outputs,
+        command = command.format(ruff = executable.path, report = report.path),
+        arguments = [args],
+        mnemonic = _MNEMONIC,
+        tools = [executable],
+    )
 
 def ruff_fix(ctx, executable, srcs, config, patch):
     """Create a Bazel Action that spawns ruff with --fix.
@@ -111,9 +108,9 @@ def _ruff_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["py_binary", "py_library", "py_test"]:
         return []
 
-    patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
+    patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
     files_to_lint = filter_srcs(ctx.rule)
-    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
     ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch)
     return [info]
 

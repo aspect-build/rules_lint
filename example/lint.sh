@@ -26,10 +26,10 @@ filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" 
 args=(
 	"--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale} | tr ' ' ',')"
 	"--build_event_json_file=$buildevents"
+	"--remote_download_regex='.*aspect_rules_lint.*'"
 )
 report_args=(
 	"--output_groups=rules_lint_report"
-	"--remote_download_regex='.*aspect_rules_lint.report'"
 )
 
 # This is a rudimentary flag parser.
@@ -45,7 +45,6 @@ if [ $1 == "--fix" ]; then
 	# override this flag
 	patch_args=(
 		"--output_groups=rules_lint_patch"
-		"--remote_download_regex='.*aspect_rules_lint.patch'"
 	)
 	shift
 fi

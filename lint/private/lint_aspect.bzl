@@ -13,9 +13,21 @@ fail_on_violation_flag = rule(
     build_setting = config.bool(flag = True),
 )
 
+# buildifier: disable=function-docstring
 def report_file(mnemonic, target, ctx):
-    report = ctx.actions.declare_file("{}.{}.aspect_rules_lint.report".format(mnemonic, target.label.name))
-    return report, OutputGroupInfo(rules_lint_report = depset([report]))
+    outfile = "{}.{}.aspect_rules_lint.{}"
+    report = ctx.actions.declare_file(outfile.format(mnemonic, target.label.name, "report"))
+    outs = [report]
+    if ctx.attr._options[LintOptionsInfo].fail_on_violation:
+        # Fail on violation means the exit code is reported to Bazel as the action result
+        exit_code = None
+    else:
+        # The exit code should instead be provided as an action output so the build succeeds.
+        # Downstream tooling like `aspect lint` will be responsible for reading the exit codes
+        # and interpreting them.
+        exit_code = ctx.actions.declare_file(outfile.format(mnemonic, target.label.name, "exit_code"))
+        outs.append(exit_code)
+    return report, exit_code, OutputGroupInfo(rules_lint_report = depset(outs))
 
 def patch_file(mnemonic, target, ctx):
     patch = ctx.actions.declare_file("{}.{}.aspect_rules_lint.patch".format(mnemonic, target.label.name))
@@ -25,9 +37,9 @@ def patch_file(mnemonic, target, ctx):
 # So we need a separate function to return both.
 def patch_and_report_files(*args):
     patch, _ = patch_file(*args)
-    report, _ = report_file(*args)
-    return patch, report, OutputGroupInfo(
-        rules_lint_report = depset([report]),
+    report, exit_code, _ = report_file(*args)
+    return patch, report, exit_code, OutputGroupInfo(
+        rules_lint_report = depset([f for f in [report, exit_code] if f]),
         rules_lint_patch = depset([patch]),
     )
 
