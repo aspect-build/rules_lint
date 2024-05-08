@@ -107,22 +107,22 @@ A factory function to create a linter aspect.
 ## vale_action
 
 <pre>
-vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable">executable</a>, <a href="#vale_action-srcs">srcs</a>, <a href="#vale_action-styles">styles</a>, <a href="#vale_action-config">config</a>, <a href="#vale_action-report">report</a>, <a href="#vale_action-exit_code">exit_code</a>)
+vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable">executable</a>, <a href="#vale_action-srcs">srcs</a>, <a href="#vale_action-styles">styles</a>, <a href="#vale_action-config">config</a>, <a href="#vale_action-stdout">stdout</a>, <a href="#vale_action-exit_code">exit_code</a>)
 </pre>
 
-
+Run Vale as an action under Bazel.
 
 **PARAMETERS**
 
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="vale_action-ctx"></a>ctx |  <p align="center"> - </p>   |  none |
-| <a id="vale_action-executable"></a>executable |  <p align="center"> - </p>   |  none |
-| <a id="vale_action-srcs"></a>srcs |  <p align="center"> - </p>   |  none |
-| <a id="vale_action-styles"></a>styles |  <p align="center"> - </p>   |  none |
-| <a id="vale_action-config"></a>config |  <p align="center"> - </p>   |  none |
-| <a id="vale_action-report"></a>report |  <p align="center"> - </p>   |  none |
-| <a id="vale_action-exit_code"></a>exit_code |  <p align="center"> - </p>   |  <code>None</code> |
+| <a id="vale_action-ctx"></a>ctx |  Bazel Rule or Aspect evaluation context   |  none |
+| <a id="vale_action-executable"></a>executable |  label of the the Vale program   |  none |
+| <a id="vale_action-srcs"></a>srcs |  markdown files to be linted   |  none |
+| <a id="vale_action-styles"></a>styles |  a directory containing vale extensions, following https://vale.sh/docs/topics/styles/   |  none |
+| <a id="vale_action-config"></a>config |  label of the .vale.ini file, see https://vale.sh/docs/vale-cli/structure/#valeini   |  none |
+| <a id="vale_action-stdout"></a>stdout |  output file containing stdout of Vale   |  none |
+| <a id="vale_action-exit_code"></a>exit_code |  output file containing Vale exit code. If None, then fail the build when Vale exits non-zero.   |  <code>None</code> |
 
 

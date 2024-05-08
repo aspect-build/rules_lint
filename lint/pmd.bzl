@@ -32,7 +32,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report
 
 _MNEMONIC = "PMD"
 
-def pmd_action(ctx, executable, srcs, rulesets, report, exit_code = None):
+def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
     """Run PMD as an action under Bazel.
 
     Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running-pmd-via-command-line
@@ -42,12 +42,12 @@ def pmd_action(ctx, executable, srcs, rulesets, report, exit_code = None):
         executable: label of the the PMD program
         srcs: java files to be linted
         rulesets: list of labels of the PMD ruleset files
-        report: output file to generate
+        stdout: output file to generate
         exit_code: output file to write the exit code.
             If None, then fail the build when PMD exits non-zero.
     """
     inputs = srcs + rulesets
-    outputs = [report]
+    outputs = [stdout]
 
     # Wire command-line options, see
     # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
@@ -60,16 +60,16 @@ def pmd_action(ctx, executable, srcs, rulesets, report, exit_code = None):
     src_args.add_all(srcs)
 
     if exit_code:
-        command = "{PMD} $@ >{report}; echo $? > " + exit_code.path
+        command = "{PMD} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
-        # Create empty report file on success, as Bazel expects one
-        command = "{PMD} $@ && touch {report}"
+        # Create empty stdout file on success, as Bazel expects one
+        command = "{PMD} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
-        command = command.format(PMD = executable.path, report = report.path),
+        command = command.format(PMD = executable.path, stdout = stdout.path),
         arguments = [args, "--file-list", src_args],
         mnemonic = _MNEMONIC,
         tools = [executable],

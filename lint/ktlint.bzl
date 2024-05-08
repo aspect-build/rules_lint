@@ -56,7 +56,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report
 
 _MNEMONIC = "ktlint"
 
-def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, java_runtime, ruleset_jar = None, exit_code = None):
+def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None):
     """ Runs ktlint as build action in Bazel.
 
     Adapter for wrapping Bazel around
@@ -67,7 +67,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
         executable: struct with ktlint field
         srcs: A list of source files to lint
         editorconfig: The file object pointing to the editorconfig file used by ktlint
-        report: :output:  the stdout of ktlint containing any violations found
+        stdout: :output:  the stdout of ktlint containing any violations found
         baseline_file: The file object pointing to the baseline file used by ktlint.
         java_runtime: The Java Runtime configured for this build, pulled from the registered toolchain.
         ruleset_jar: An optional, custom ktlint ruleset jar.
@@ -77,7 +77,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
 
     args = ctx.actions.args()
     inputs = srcs
-    outputs = [report]
+    outputs = [stdout]
 
     # ktlint artifact is published as an "executable" script which calls the fat jar
     # so we need to pass a hermetic Java runtime from our build to avoid relying on
@@ -110,16 +110,16 @@ def ktlint_action(ctx, executable, srcs, editorconfig, report, baseline_file, ja
 
     if exit_code:
         # Don't fail ktlint and just report the violations
-        command += "{ktlint} $@ >{report}; echo $? >" + exit_code.path
+        command += "{ktlint} $@ >{stdout}; echo $? >" + exit_code.path
         outputs.append(exit_code)
     else:
         # Run ktlint with arguments passed
-        command += "{ktlint} $@ && touch {report}"
+        command += "{ktlint} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
-        command = command.format(ktlint = executable.path, report = report.path),
+        command = command.format(ktlint = executable.path, stdout = stdout.path),
         arguments = [args],
         mnemonic = _MNEMONIC,
         env = env,

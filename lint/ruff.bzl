@@ -20,7 +20,7 @@ load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "ruff"
 
-def ruff_action(ctx, executable, srcs, config, report, exit_code = None):
+def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
     """Run ruff as an action under Bazel.
 
     Ruff will select the configuration file to use for each source file, as documented here:
@@ -41,13 +41,13 @@ def ruff_action(ctx, executable, srcs, config, report, exit_code = None):
         executable: label of the the ruff program
         srcs: python files to be linted
         config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
-        report: output file of linter results to generate
+        stdout: output file of linter results to generate
         exit_code: output file to write the exit code.
             If None, then fail the build when ruff exits non-zero.
             See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes
     """
     inputs = srcs + config
-    outputs = [report]
+    outputs = [stdout]
 
     # Wire command-line options, see
     # `ruff help check` to see available options
@@ -56,16 +56,16 @@ def ruff_action(ctx, executable, srcs, config, report, exit_code = None):
     args.add_all(srcs)
 
     if exit_code:
-        command = "{ruff} $@ >{report}; echo $? >" + exit_code.path
+        command = "{ruff} $@ >{stdout}; echo $? >" + exit_code.path
         outputs.append(exit_code)
     else:
-        # Create empty report file on success, as Bazel expects one
-        command = "{ruff} $@ && touch {report}"
+        # Create empty file on success, as Bazel expects one
+        command = "{ruff} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
-        command = command.format(ruff = executable.path, report = report.path),
+        command = command.format(ruff = executable.path, stdout = stdout.path),
         arguments = [args],
         mnemonic = _MNEMONIC,
         tools = [executable],

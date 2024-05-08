@@ -70,8 +70,19 @@ load(":vale_versions.bzl", "VALE_VERSIONS")
 
 _MNEMONIC = "Vale"
 
-# buildifier: disable=function-docstring
-def vale_action(ctx, executable, srcs, styles, config, report, exit_code = None):
+def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None):
+    """Run Vale as an action under Bazel.
+
+    Args:
+        ctx: Bazel Rule or Aspect evaluation context
+        executable: label of the the Vale program
+        srcs: markdown files to be linted
+        styles: a directory containing vale extensions, following https://vale.sh/docs/topics/styles/
+        config: label of the .vale.ini file, see https://vale.sh/docs/vale-cli/structure/#valeini
+        stdout: output file containing stdout of Vale
+        exit_code: output file containing Vale exit code.
+            If None, then fail the build when Vale exits non-zero.
+    """
     inputs = srcs + [config]
     env = {}
     if styles:
@@ -86,21 +97,21 @@ def vale_action(ctx, executable, srcs, styles, config, report, exit_code = None)
     args.add_all(srcs)
     args.add_all(["--config", config])
     args.add_all(["--output", "line"])
-    outputs = [report]
+    outputs = [stdout]
 
     if exit_code:
-        command = "{vale} $@ >{report}; echo $? > " + exit_code.path
+        command = "{vale} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
-        # Create empty report file on success, as Bazel expects one
-        command = "{vale} $@ && touch {report}"
+        # Create empty file on success, as Bazel expects one
+        command = "{vale} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
         command = command.format(
             vale = executable.path,
-            report = report.path,
+            stdout = stdout.path,
         ),
         env = env,
         arguments = [args],

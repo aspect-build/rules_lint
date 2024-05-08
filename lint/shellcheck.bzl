@@ -18,7 +18,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_
 
 _MNEMONIC = "shellcheck"
 
-def shellcheck_action(ctx, executable, srcs, config, report, exit_code = None, options = []):
+def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
     """Run shellcheck as an action under Bazel.
 
     Based on https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md
@@ -28,8 +28,8 @@ def shellcheck_action(ctx, executable, srcs, config, report, exit_code = None, o
         executable: label of the the shellcheck program
         srcs: bash files to be linted
         config: label of the .shellcheckrc file
-        report: output file to generate
-        exit_code: output file to write the exit code.
+        stdout: output file containing stdout of shellcheck
+        exit_code: output file containing shellcheck exit code.
             If None, then fail the build when vale exits non-zero.
             See https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#return-values
         options: additional command-line options, see https://github.com/koalaman/shellcheck/blob/master/shellcheck.hs#L95
@@ -41,21 +41,21 @@ def shellcheck_action(ctx, executable, srcs, config, report, exit_code = None, o
     args = ctx.actions.args()
     args.add_all(options)
     args.add_all(srcs)
-    outputs = [report]
+    outputs = [stdout]
 
     if exit_code:
-        command = "{shellcheck} $@ >{report}; echo $? >" + exit_code.path
+        command = "{shellcheck} $@ >{stdout}; echo $? >" + exit_code.path
         outputs.append(exit_code)
     else:
-        # Create empty report file on success, as Bazel expects one
-        command = "{shellcheck} $@ && touch {report}"
+        # Create empty file on success, as Bazel expects one
+        command = "{shellcheck} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
         command = command.format(
             shellcheck = executable.path,
-            report = report.path,
+            stdout = stdout.path,
         ),
         arguments = [args],
         mnemonic = _MNEMONIC,

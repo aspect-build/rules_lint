@@ -19,7 +19,7 @@ _MNEMONIC = "buf"
 def _short_path(file, _):
     return file.path
 
-def buf_lint_action(ctx, buf, protoc, target, report, exit_code = None):
+def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
     """Runs the buf lint tool as a Bazel action.
 
     Args:
@@ -27,7 +27,7 @@ def buf_lint_action(ctx, buf, protoc, target, report, exit_code = None):
         buf: the buf-lint executable
         protoc: the protoc executable
         target: the proto_library target to run on
-        report: output file to generate
+        stderr: output file containing the stderr of protoc
         exit_code: output file to write the exit code.
             If None, then fail the build when protoc exits non-zero.
     """
@@ -58,14 +58,14 @@ def buf_lint_action(ctx, buf, protoc, target, report, exit_code = None):
     args.add_joined("--descriptor_set_in", deps, join_with = ":", map_each = _short_path)
     args.add_joined(["--buf-plugin_out", "."], join_with = "=")
     args.add_all(sources)
-    outputs = [report]
+    outputs = [stderr]
 
     if exit_code:
-        command = "{protoc} $@ 2>{report}; echo $? > " + exit_code.path
+        command = "{protoc} $@ 2>{stderr}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
-        # Create empty report file on success, as Bazel expects one
-        command = "{protoc} $@ && touch {report}"
+        # Create empty file on success, as Bazel expects one
+        command = "{protoc} $@ && touch {stderr}"
 
     ctx.actions.run_shell(
         inputs = depset([
@@ -76,7 +76,7 @@ def buf_lint_action(ctx, buf, protoc, target, report, exit_code = None):
         outputs = outputs,
         command = command.format(
             protoc = protoc.path,
-            report = report.path,
+            stderr = stderr.path,
         ),
         arguments = [args],
         mnemonic = _MNEMONIC,

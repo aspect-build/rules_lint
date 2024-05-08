@@ -30,7 +30,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report
 
 _MNEMONIC = "flake8"
 
-def flake8_action(ctx, executable, srcs, config, report, exit_code = None):
+def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None):
     """Run flake8 as an action under Bazel.
 
     Based on https://flake8.pycqa.org/en/latest/user/invocation.html
@@ -40,12 +40,12 @@ def flake8_action(ctx, executable, srcs, config, report, exit_code = None):
         executable: label of the the flake8 program
         srcs: python files to be linted
         config: label of the flake8 config file (setup.cfg, tox.ini, or .flake8)
-        report: output file to generate
-        exit_code: output file to write the exit code.
+        stdout: output file containing stdout of flake8
+        exit_code: output file containing exit code of flake8
             If None, then fail the build when flake8 exits non-zero.
     """
     inputs = srcs + [config]
-    outputs = [report]
+    outputs = [stdout]
 
     # Wire command-line options, see
     # https://flake8.pycqa.org/en/latest/user/options.html
@@ -54,17 +54,17 @@ def flake8_action(ctx, executable, srcs, config, report, exit_code = None):
     args.add(config, format = "--config=%s")
 
     if exit_code:
-        command = "{flake8} $@ >{report}; echo $? > " + exit_code.path
+        command = "{flake8} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
-        # Create empty report file on success, as Bazel expects one
-        command = "{flake8} $@ && touch {report}"
+        # Create empty stdout file on success, as Bazel expects one
+        command = "{flake8} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
         tools = [executable],
-        command = command.format(flake8 = executable.path, report = report.path),
+        command = command.format(flake8 = executable.path, stdout = stdout.path),
         arguments = [args],
         mnemonic = _MNEMONIC,
     )

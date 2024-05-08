@@ -77,8 +77,8 @@ https://eslint.org/docs/latest/use/command-line-interface
 | <a id="eslint_action-ctx"></a>ctx |  an action context OR aspect context   |  none |
 | <a id="eslint_action-executable"></a>executable |  struct with an eslint field   |  none |
 | <a id="eslint_action-srcs"></a>srcs |  list of file objects to lint   |  none |
-| <a id="eslint_action-report"></a>report |  output: the stdout of eslint containing any violations found   |  none |
-| <a id="eslint_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when eslint exits non-zero.   |  <code>None</code> |
+| <a id="eslint_action-report"></a>report |  output file containing the stdout or --output-file of eslint   |  none |
+| <a id="eslint_action-exit_code"></a>exit_code |  output file containing the exit code of eslint. If None, then fail the build when eslint exits non-zero.   |  <code>None</code> |
 
 
 <a id="eslint_fix"></a>

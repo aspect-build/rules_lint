@@ -82,8 +82,8 @@ def eslint_action(ctx, executable, srcs, report, exit_code = None):
         ctx: an action context OR aspect context
         executable: struct with an eslint field
         srcs: list of file objects to lint
-        report: output: the stdout of eslint containing any violations found
-        exit_code: output file to write the exit code.
+        report: output file containing the stdout or --output-file of eslint
+        exit_code: output file containing the exit code of eslint.
             If None, then fail the build when eslint exits non-zero.
     """
 

@@ -94,7 +94,7 @@ Attrs:
 ## ruff_action
 
 <pre>
-ruff_action(<a href="#ruff_action-ctx">ctx</a>, <a href="#ruff_action-executable">executable</a>, <a href="#ruff_action-srcs">srcs</a>, <a href="#ruff_action-config">config</a>, <a href="#ruff_action-report">report</a>, <a href="#ruff_action-exit_code">exit_code</a>)
+ruff_action(<a href="#ruff_action-ctx">ctx</a>, <a href="#ruff_action-executable">executable</a>, <a href="#ruff_action-srcs">srcs</a>, <a href="#ruff_action-config">config</a>, <a href="#ruff_action-stdout">stdout</a>, <a href="#ruff_action-exit_code">exit_code</a>)
 </pre>
 
 Run ruff as an action under Bazel.
@@ -122,7 +122,7 @@ However this is needed because:
 | <a id="ruff_action-executable"></a>executable |  label of the the ruff program   |  none |
 | <a id="ruff_action-srcs"></a>srcs |  python files to be linted   |  none |
 | <a id="ruff_action-config"></a>config |  labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)   |  none |
-| <a id="ruff_action-report"></a>report |  output file of linter results to generate   |  none |
+| <a id="ruff_action-stdout"></a>stdout |  output file of linter results to generate   |  none |
 | <a id="ruff_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when ruff exits non-zero. See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes   |  <code>None</code> |
 
 
