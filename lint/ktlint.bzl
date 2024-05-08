@@ -168,7 +168,7 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):
         # attr_aspects = ["deps"],
         attrs = dicts.add({
             "_options": attr.label(
-                default = "//lint:fail_on_violation",
+                default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_ktlint": attr.label(

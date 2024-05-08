@@ -84,7 +84,7 @@ def lint_shellcheck_aspect(binary, config):
         implementation = _shellcheck_aspect_impl,
         attrs = {
             "_options": attr.label(
-                default = "//lint:fail_on_violation",
+                default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_shellcheck": attr.label(

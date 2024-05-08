@@ -187,7 +187,7 @@ def lint_eslint_aspect(binary, configs):
         implementation = _eslint_aspect_impl,
         attrs = {
             "_options": attr.label(
-                default = "//lint:fail_on_violation",
+                default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_eslint": attr.label(

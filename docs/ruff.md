@@ -65,19 +65,7 @@ lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_r
 A factory function to create a linter aspect.
 
 Attrs:
-    binary: a ruff executable. Can be obtained like so:
-
-        load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-        http_archive(
-            name = "ruff_bin_linux_amd64",
-            sha256 = "&lt;-sha-&gt;",
-            urls = [
-                "https://github.com/charliermarsh/ruff/releases/download/v&lt;-version-&gt;/ruff-x86_64-unknown-linux-gnu.tar.gz",
-            ],
-            build_file_content = """exports_files(["ruff"])""",
-        )
-
+    binary: a ruff executable
     configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
 
 **PARAMETERS**

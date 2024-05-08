@@ -11,3 +11,5 @@
 # Found 1 error.
 # [*] 1 potentially fixable with the --fix option.
 import os
+
+print("{".format("something"))

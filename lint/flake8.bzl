@@ -100,7 +100,7 @@ def lint_flake8_aspect(binary, config):
         # attr_aspects = ["deps"],
         attrs = {
             "_options": attr.label(
-                default = "//lint:fail_on_violation",
+                default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_flake8": attr.label(

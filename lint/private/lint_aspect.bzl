@@ -2,15 +2,27 @@
 
 LintOptionsInfo = provider(
     doc = "Global options for running linters",
-    fields = {"fail_on_violation": "whether to honor the exit code of linter tools run as actions"},
+    fields = {
+        "debug": "print additional information for rules_lint developers",
+        "fail_on_violation": "whether to honor the exit code of linter tools run as actions",
+        "fix": "whether to run linters in their --fix mode. Fixes are collected into patch files.",
+    },
 )
 
-def _fail_on_violation_flag_impl(ctx):
-    return LintOptionsInfo(fail_on_violation = ctx.build_setting_value)
+def _lint_options_impl(ctx):
+    return LintOptionsInfo(
+        debug = ctx.attr.debug,
+        fail_on_violation = ctx.attr.fail_on_violation,
+        fix = ctx.attr.fix,
+    )
 
-fail_on_violation_flag = rule(
-    implementation = _fail_on_violation_flag_impl,
-    build_setting = config.bool(flag = True),
+lint_options = rule(
+    implementation = _lint_options_impl,
+    attrs = {
+        "debug": attr.bool(),
+        "fix": attr.bool(),
+        "fail_on_violation": attr.bool(),
+    },
 )
 
 # buildifier: disable=function-docstring

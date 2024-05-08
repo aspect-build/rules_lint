@@ -145,7 +145,7 @@ def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles")):
         implementation = _vale_aspect_impl,
         attrs = {
             "_options": attr.label(
-                default = "//lint:fail_on_violation",
+                default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_vale": attr.label(

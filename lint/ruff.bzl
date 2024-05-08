@@ -118,19 +118,7 @@ def lint_ruff_aspect(binary, configs):
     """A factory function to create a linter aspect.
 
     Attrs:
-        binary: a ruff executable. Can be obtained like so:
-
-            load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-            http_archive(
-                name = "ruff_bin_linux_amd64",
-                sha256 = "<-sha->",
-                urls = [
-                    "https://github.com/charliermarsh/ruff/releases/download/v<-version->/ruff-x86_64-unknown-linux-gnu.tar.gz",
-                ],
-                build_file_content = \"""exports_files(["ruff"])\""",
-            )
-
+        binary: a ruff executable
         configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
     """
 
@@ -140,12 +128,9 @@ def lint_ruff_aspect(binary, configs):
 
     return aspect(
         implementation = _ruff_aspect_impl,
-        # Edges we need to walk up the graph from the selected targets.
-        # Needed for linters that need semantic information like transitive type declarations.
-        # attr_aspects = ["deps"],
         attrs = {
             "_options": attr.label(
-                default = "//lint:fail_on_violation",
+                default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_ruff": attr.label(
@@ -168,8 +153,9 @@ def lint_ruff_aspect(binary, configs):
 
 def _ruff_workaround_20269_impl(rctx):
     # download_and_extract has a bug due to the use of Apache Commons library within Bazel,
-    # see https://issues.apache.org/jira/projects/COMPRESS/issues/COMPRESS-654
+    # See https://github.com/bazelbuild/bazel/issues/20269
     # To workaround, we fetch the file and then use the BSD tar on the system to extract it.
+    # TODO: remove for users on Bazel 8 (or maybe sooner if that fix is cherry-picked)
     rctx.download(sha256 = rctx.attr.sha256, url = rctx.attr.url, output = "ruff.tar.gz")
     result = rctx.execute([rctx.which("tar"), "xzf", "ruff.tar.gz"])
     if result.return_code:
