@@ -39,20 +39,20 @@ load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
 
 def _write_assert(ctx, files):
     "Create a parameter to substitute into the shell script"
-    diagnostics = None
+    output = None
     exit_code = None
     for f in files.to_list():
         if f.path.endswith(".report"):
-            diagnostics = f
+            output = f
         elif f.path.endswith(".exit_code"):
             exit_code = f
         else:
             fail("rules_lint_report output group contains unrecognized file extension: ", f.path)
-    if diagnostics and exit_code:
-        return "assert_exit_code_zero '{}' '{}'".format(to_rlocation_path(ctx, exit_code), to_rlocation_path(ctx, diagnostics))
-    if diagnostics:
-        return "assert_diagnostics_empty '{}'".format(to_rlocation_path(ctx, diagnostics))
-    fail("missing diagnostics file among", files)
+    if output and exit_code:
+        return "assert_exit_code_zero '{}' '{}'".format(to_rlocation_path(ctx, exit_code), to_rlocation_path(ctx, output))
+    if output:
+        return "assert_diagnostics_empty '{}'".format(to_rlocation_path(ctx, output))
+    fail("missing output file among", files)
 
 def _test_impl(ctx):
     bin = ctx.actions.declare_file("{}.lint_test.sh".format(ctx.label.name))
