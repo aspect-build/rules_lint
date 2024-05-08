@@ -52,7 +52,7 @@ If your custom ruleset is a third-party dependency and not a first-party depende
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
 
 _MNEMONIC = "ktlint"
 
@@ -129,7 +129,7 @@ def _ktlint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]:
         return []
 
-    report, exit_code, info = report_file(_MNEMONIC, target, ctx)
+    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     ruleset_jar = None
     if hasattr(ctx.attr, "_ruleset_jar"):
         ruleset_jar = ctx.file._ruleset_jar

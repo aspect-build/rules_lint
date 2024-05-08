@@ -51,7 +51,7 @@ Add these three things:
    This is responsible for selecting which rule types in the graph it "knows how to lint".
    It should call the `my_linter_action` function.
    It must always return a `rules_lint_report` output group, which is easiest by using the
-   `report_file` helper in `//lint/private:lint_aspect.bzl`.
+   `report_files` helper in `//lint/private:lint_aspect.bzl`.
    The simple lint.sh also relies on the report output file being named following the convention
    `*.aspect_rules_lint.report`, though this is a design smell.
 

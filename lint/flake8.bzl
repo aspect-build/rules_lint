@@ -26,7 +26,7 @@ flake8 = lint_flake8_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
 
 _MNEMONIC = "flake8"
 
@@ -74,7 +74,7 @@ def _flake8_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["py_binary", "py_library"]:
         return []
 
-    report, exit_code, info = report_file(_MNEMONIC, target, ctx)
+    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     flake8_action(ctx, ctx.executable._flake8, filter_srcs(ctx.rule), ctx.file._config_file, report, exit_code)
     return [info]
 

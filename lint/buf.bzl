@@ -12,7 +12,7 @@ buf = buf_lint_aspect(
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files")
 
 _MNEMONIC = "buf"
 
@@ -86,7 +86,7 @@ def _buf_lint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["proto_library"]:
         return []
 
-    report, exit_code, info = report_file(_MNEMONIC, target, ctx)
+    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     buf_lint_action(
         ctx,
         ctx.toolchains[ctx.attr._buf_toolchain].cli,

@@ -14,7 +14,7 @@ fail_on_violation_flag = rule(
 )
 
 # buildifier: disable=function-docstring
-def report_file(mnemonic, target, ctx):
+def report_files(mnemonic, target, ctx):
     outfile = "{}.{}.aspect_rules_lint.{}"
     report = ctx.actions.declare_file(outfile.format(mnemonic, target.label.name, "report"))
     outs = [report]
@@ -37,7 +37,7 @@ def patch_file(mnemonic, target, ctx):
 # So we need a separate function to return both.
 def patch_and_report_files(*args):
     patch, _ = patch_file(*args)
-    report, exit_code, _ = report_file(*args)
+    report, exit_code, _ = report_files(*args)
     return patch, report, exit_code, OutputGroupInfo(
         rules_lint_report = depset([f for f in [report, exit_code] if f]),
         rules_lint_patch = depset([patch]),

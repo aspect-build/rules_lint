@@ -28,7 +28,7 @@ pmd = pmd_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
 
 _MNEMONIC = "PMD"
 
@@ -80,7 +80,7 @@ def _pmd_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["java_binary", "java_library"]:
         return []
 
-    report, exit_code, info = report_file(_MNEMONIC, target, ctx)
+    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     pmd_action(ctx, ctx.executable._pmd, filter_srcs(ctx.rule), ctx.files._rulesets, report, exit_code)
     return [info]
 

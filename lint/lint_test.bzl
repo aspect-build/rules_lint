@@ -1,6 +1,6 @@
 """Factory function to make lint test rules.
 
-The test will fail when the linter reports any non-empty lint results.
+When the linter exits non-zero, the test will print the output of the linter and then fail.
 
 To use this, in your `linters.bzl` where you define the aspect, just create a test that references it.
 

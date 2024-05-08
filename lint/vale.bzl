@@ -64,7 +64,7 @@ vale = vale_aspect(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files")
 load(":vale_library.bzl", "fetch_styles")
 load(":vale_versions.bzl", "VALE_VERSIONS")
 
@@ -126,7 +126,7 @@ def _vale_aspect_impl(target, ctx):
     # want to take that dependency.
     # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
     if ctx.rule.kind == "markdown_library" or (ctx.rule.kind == "filegroup" and "markdown" in ctx.rule.attr.tags):
-        report, exit_code, info = report_file(_MNEMONIC, target, ctx)
+        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         styles = None
         if ctx.files._styles:
             if len(ctx.files._styles) != 1:
