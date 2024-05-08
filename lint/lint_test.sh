@@ -12,10 +12,21 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
   { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v3 ---
 
-for report in {{reports}}; do
-  report_file=$(rlocation "$report")
+function assert_diagnostics_empty() {
+  report_file=$(rlocation "$1")
   if [ -s "${report_file}" ]; then      
         cat ${report_file}
         exit 1
   fi
-done
+}
+
+function assert_exit_code_zero() {
+  exit_code=$(cat $(rlocation "$1"))
+  diagnostics_file=$(rlocation "$2")
+  if [[ "$exit_code" != "0" ]]; then
+    cat $diagnostics_file
+    exit 1
+  fi
+}
+
+{{asserts}}

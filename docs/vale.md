@@ -107,7 +107,7 @@ A factory function to create a linter aspect.
 ## vale_action
 
 <pre>
-vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable">executable</a>, <a href="#vale_action-srcs">srcs</a>, <a href="#vale_action-styles">styles</a>, <a href="#vale_action-config">config</a>, <a href="#vale_action-report">report</a>, <a href="#vale_action-use_exit_code">use_exit_code</a>)
+vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable">executable</a>, <a href="#vale_action-srcs">srcs</a>, <a href="#vale_action-styles">styles</a>, <a href="#vale_action-config">config</a>, <a href="#vale_action-report">report</a>, <a href="#vale_action-exit_code">exit_code</a>)
 </pre>
 
 
@@ -123,6 +123,6 @@ vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable
 | <a id="vale_action-styles"></a>styles |  <p align="center"> - </p>   |  none |
 | <a id="vale_action-config"></a>config |  <p align="center"> - </p>   |  none |
 | <a id="vale_action-report"></a>report |  <p align="center"> - </p>   |  none |
-| <a id="vale_action-use_exit_code"></a>use_exit_code |  <p align="center"> - </p>   |  <code>False</code> |
+| <a id="vale_action-exit_code"></a>exit_code |  <p align="center"> - </p>   |  <code>None</code> |
 
 
