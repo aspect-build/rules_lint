@@ -25,6 +25,7 @@ filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" 
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
 args=(
 	"--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale} | tr ' ' ',')"
+	"--norun_validations"
 	"--build_event_json_file=$buildevents"
 )
 report_args=(
