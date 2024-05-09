@@ -119,7 +119,7 @@ However this is needed because:
 ## ruff_fix
 
 <pre>
-ruff_fix(<a href="#ruff_fix-ctx">ctx</a>, <a href="#ruff_fix-executable">executable</a>, <a href="#ruff_fix-srcs">srcs</a>, <a href="#ruff_fix-config">config</a>, <a href="#ruff_fix-patch">patch</a>)
+ruff_fix(<a href="#ruff_fix-ctx">ctx</a>, <a href="#ruff_fix-executable">executable</a>, <a href="#ruff_fix-srcs">srcs</a>, <a href="#ruff_fix-config">config</a>, <a href="#ruff_fix-patch">patch</a>, <a href="#ruff_fix-stdout">stdout</a>, <a href="#ruff_fix-exit_code">exit_code</a>)
 </pre>
 
 Create a Bazel Action that spawns ruff with --fix.
@@ -134,5 +134,7 @@ Create a Bazel Action that spawns ruff with --fix.
 | <a id="ruff_fix-srcs"></a>srcs |  list of file objects to lint   |  none |
 | <a id="ruff_fix-config"></a>config |  labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)   |  none |
 | <a id="ruff_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
+| <a id="ruff_fix-stdout"></a>stdout |  output file of linter results to generate   |  none |
+| <a id="ruff_fix-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when ruff exits non-zero.   |  none |
 
 

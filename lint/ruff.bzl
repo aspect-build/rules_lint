@@ -15,7 +15,7 @@ ruff = ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "ruff"
@@ -115,11 +115,12 @@ def _ruff_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["py_binary", "py_library", "py_test"]:
         return []
 
-    patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
     files_to_lint = filter_srcs(ctx.rule)
     if ctx.attr._options[LintOptionsInfo].fix:
+        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, report, exit_code)
     else:
+        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
     return [info]
 
