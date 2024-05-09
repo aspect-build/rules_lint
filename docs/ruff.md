@@ -8,50 +8,10 @@ Typical usage:
 load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
 
 ruff = ruff_aspect(
-    binary = "@@//:ruff",
+    binary = "@multitool//tools/ruff",
     configs = "@@//:.ruff.toml",
 )
 ```
-
-
-<a id="ruff_workaround_20269"></a>
-
-## ruff_workaround_20269
-
-<pre>
-ruff_workaround_20269(<a href="#ruff_workaround_20269-name">name</a>, <a href="#ruff_workaround_20269-build_file_content">build_file_content</a>, <a href="#ruff_workaround_20269-repo_mapping">repo_mapping</a>, <a href="#ruff_workaround_20269-sha256">sha256</a>, <a href="#ruff_workaround_20269-url">url</a>)
-</pre>
-
-Workaround for https://github.com/bazelbuild/bazel/issues/20269
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="ruff_workaround_20269-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="ruff_workaround_20269-build_file_content"></a>build_file_content |  -   | String | optional | <code>""</code> |
-| <a id="ruff_workaround_20269-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.&lt;p&gt;For example, an entry <code>"@foo": "@bar"</code> declares that, for any time this repository depends on <code>@foo</code> (such as a dependency on <code>@foo//some:target</code>, it should actually resolve that dependency within globally-declared <code>@bar</code> (<code>@bar//some:target</code>).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | required |  |
-| <a id="ruff_workaround_20269-sha256"></a>sha256 |  -   | String | optional | <code>""</code> |
-| <a id="ruff_workaround_20269-url"></a>url |  -   | String | optional | <code>""</code> |
-
-
-<a id="fetch_ruff"></a>
-
-## fetch_ruff
-
-<pre>
-fetch_ruff(<a href="#fetch_ruff-tag">tag</a>)
-</pre>
-
-A repository macro used from WORKSPACE to fetch ruff binaries
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="fetch_ruff-tag"></a>tag |  a tag of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  <code>"v0.4.3"</code> |
 
 
 <a id="lint_ruff_aspect"></a>
@@ -65,19 +25,7 @@ lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_r
 A factory function to create a linter aspect.
 
 Attrs:
-    binary: a ruff executable. Can be obtained like so:
-
-        load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-        http_archive(
-            name = "ruff_bin_linux_amd64",
-            sha256 = "&lt;-sha-&gt;",
-            urls = [
-                "https://github.com/charliermarsh/ruff/releases/download/v&lt;-version-&gt;/ruff-x86_64-unknown-linux-gnu.tar.gz",
-            ],
-            build_file_content = """exports_files(["ruff"])""",
-        )
-
+    binary: a ruff executable.
     configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
 
 **PARAMETERS**

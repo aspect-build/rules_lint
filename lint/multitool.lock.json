@@ -35,5 +35,41 @@
         "file": "shellcheck-v0.10.0/shellcheck"
       }
     ]
+  },
+  "ruff": {
+    "binaries": [
+      {
+        "kind": "archive",
+        "os": "macos",
+        "cpu": "x86_64",
+        "url": "https://github.com/astral-sh/ruff/releases/download/v0.4.3/ruff-0.4.3-x86_64-apple-darwin.tar.gz",
+        "sha256": "8dcbc118da18a6c83fab6778a130708221c214f4edac9cebb64ad2f36af3f7ff",
+        "file": "ruff"
+      },
+      {
+        "kind": "archive",
+        "os": "macos",
+        "cpu": "arm64",
+        "url": "https://github.com/astral-sh/ruff/releases/download/v0.4.3/ruff-0.4.3-aarch64-apple-darwin.tar.gz",
+        "sha256": "7b29fd8fd234e091afc264bbad95c54a9df99da490eeac67309efd58e36c2f2d",
+        "file": "ruff"
+      },
+      {
+        "kind": "archive",
+        "os": "linux",
+        "cpu": "arm64",
+        "url": "https://github.com/astral-sh/ruff/releases/download/v0.4.3/ruff-0.4.3-aarch64-unknown-linux-gnu.tar.gz",
+        "sha256": "e660824c56e0e5ec73f9e38f054e5e8542992b95f7bc5a0d9185840637c913ee",
+        "file": "ruff"
+      },
+      {
+        "kind": "archive",
+        "os": "linux",
+        "cpu": "x86_64",
+        "url": "https://github.com/astral-sh/ruff/releases/download/v0.4.3/ruff-0.4.3-x86_64-unknown-linux-gnu.tar.gz",
+        "sha256": "40864cdabb4e7ca2f6bfd155140771c87b737c6c0fc821bdb810e5bdd2ef4478",
+        "file": "ruff"
+      }
+    ]
   }
 }

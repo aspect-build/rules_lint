@@ -42,7 +42,7 @@ load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 
 format_multirun(
     name = "format",
-    python = ":ruff",
+    python = "@multitool//tools/ruff",
 )
 ```
 
@@ -142,7 +142,7 @@ load("@aspect_rules_lint//format:defs.bzl", "format_test")
 format_test(
     name = "format_test",
     # register languages, e.g.
-    # python = "//:ruff",
+    # python = "@multitool//tools/ruff",
     srcs = ["my_code.go"],
 )
 ```
@@ -161,7 +161,7 @@ load("@aspect_rules_lint//format:defs.bzl", "format_test")
 format_test(
     name = "format_test",
     # register languages, e.g.
-    # python = "//:ruff",
+    # python = "@multitool//tools/ruff",
     no_sandbox = True,
     workspace = "//:WORKSPACE.bazel",
 )
