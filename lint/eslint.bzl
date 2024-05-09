@@ -55,7 +55,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
 
 _MNEMONIC = "ESLint"
 
@@ -124,7 +124,7 @@ def eslint_action(ctx, executable, srcs, report, exit_code = None):
             mnemonic = _MNEMONIC,
         )
 
-def eslint_fix(ctx, executable, srcs, patch):
+def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
     """Create a Bazel Action that spawns eslint with --fix.
 
     Args:
@@ -132,6 +132,8 @@ def eslint_fix(ctx, executable, srcs, patch):
         executable: struct with an eslint field
         srcs: list of file objects to lint
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
+        stdout: output file containing the stdout or --output-file of eslint
+        exit_code: output file containing the exit code of eslint
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
@@ -148,10 +150,14 @@ def eslint_fix(ctx, executable, srcs, patch):
 
     ctx.actions.run(
         inputs = _gather_inputs(ctx, srcs) + [patch_cfg],
-        outputs = [patch],
+        outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
-        env = {"BAZEL_BINDIR": "."},
+        env = {
+            "BAZEL_BINDIR": ".",
+            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
+            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
+        },
         tools = [executable._eslint],
         mnemonic = _MNEMONIC,
     )
@@ -161,10 +167,14 @@ def _eslint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["js_library", "ts_project", "ts_project_rule"]:
         return []
 
-    patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
     files_to_lint = filter_srcs(ctx.rule)
-    eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code)
-    eslint_fix(ctx, ctx.executable, files_to_lint, patch)
+    if ctx.attr._options[LintOptionsInfo].fix:
+        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        eslint_fix(ctx, ctx.executable, files_to_lint, patch, report, exit_code)
+    else:
+        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code)
+
     return [info]
 
 def lint_eslint_aspect(binary, configs):

@@ -81,8 +81,7 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
         config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
         stdout: output file of linter results to generate
-        exit_code: output file to write the exit code.
-            If None, then fail the build when ruff exits non-zero.
+        exit_code: output file to write the exit code
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
