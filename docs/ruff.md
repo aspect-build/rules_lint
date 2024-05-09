@@ -135,6 +135,6 @@ Create a Bazel Action that spawns ruff with --fix.
 | <a id="ruff_fix-config"></a>config |  labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)   |  none |
 | <a id="ruff_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
 | <a id="ruff_fix-stdout"></a>stdout |  output file of linter results to generate   |  none |
-| <a id="ruff_fix-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when ruff exits non-zero.   |  none |
+| <a id="ruff_fix-exit_code"></a>exit_code |  output file to write the exit code   |  none |
 
 

@@ -4,6 +4,8 @@ console.log(a);
 
 // linting violation; not auto-fixable
 // Should be reported under `--fix` and lint will exit 1.
-function* foo() {
-  return 10;
+try {
+  console.log();
+} catch (e) {
+  throw e;
 }
