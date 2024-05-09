@@ -51,7 +51,7 @@ def _write_assert(ctx, files):
     if output and exit_code:
         return "assert_exit_code_zero '{}' '{}'".format(to_rlocation_path(ctx, exit_code), to_rlocation_path(ctx, output))
     if output:
-        return "assert_diagnostics_empty '{}'".format(to_rlocation_path(ctx, output))
+        return "assert_output_empty '{}'".format(to_rlocation_path(ctx, output))
     fail("missing output file among", files)
 
 def _test_impl(ctx):
