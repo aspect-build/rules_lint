@@ -33,7 +33,7 @@ flake8 = lint_flake8_aspect(
 ## flake8_action
 
 <pre>
-flake8_action(<a href="#flake8_action-ctx">ctx</a>, <a href="#flake8_action-executable">executable</a>, <a href="#flake8_action-srcs">srcs</a>, <a href="#flake8_action-config">config</a>, <a href="#flake8_action-report">report</a>, <a href="#flake8_action-use_exit_code">use_exit_code</a>)
+flake8_action(<a href="#flake8_action-ctx">ctx</a>, <a href="#flake8_action-executable">executable</a>, <a href="#flake8_action-srcs">srcs</a>, <a href="#flake8_action-config">config</a>, <a href="#flake8_action-stdout">stdout</a>, <a href="#flake8_action-exit_code">exit_code</a>)
 </pre>
 
 Run flake8 as an action under Bazel.
@@ -50,8 +50,8 @@ Based on https://flake8.pycqa.org/en/latest/user/invocation.html
 | <a id="flake8_action-executable"></a>executable |  label of the the flake8 program   |  none |
 | <a id="flake8_action-srcs"></a>srcs |  python files to be linted   |  none |
 | <a id="flake8_action-config"></a>config |  label of the flake8 config file (setup.cfg, tox.ini, or .flake8)   |  none |
-| <a id="flake8_action-report"></a>report |  output file to generate   |  none |
-| <a id="flake8_action-use_exit_code"></a>use_exit_code |  whether to fail the build when a lint violation is reported   |  <code>False</code> |
+| <a id="flake8_action-stdout"></a>stdout |  output file containing stdout of flake8   |  none |
+| <a id="flake8_action-exit_code"></a>exit_code |  output file containing exit code of flake8 If None, then fail the build when flake8 exits non-zero.   |  <code>None</code> |
 
 
 <a id="lint_flake8_aspect"></a>

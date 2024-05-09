@@ -12,14 +12,14 @@ buf = buf_lint_aspect(
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files")
 
 _MNEMONIC = "buf"
 
 def _short_path(file, _):
     return file.path
 
-def buf_lint_action(ctx, buf, protoc, target, report, use_exit_code = False):
+def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
     """Runs the buf lint tool as a Bazel action.
 
     Args:
@@ -27,8 +27,9 @@ def buf_lint_action(ctx, buf, protoc, target, report, use_exit_code = False):
         buf: the buf-lint executable
         protoc: the protoc executable
         target: the proto_library target to run on
-        report: output file to generate
-        use_exit_code: whether the protoc process exiting non-zero will be a build failure
+        stderr: output file containing the stderr of protoc
+        exit_code: output file to write the exit code.
+            If None, then fail the build when protoc exits non-zero.
     """
     config = json.encode({
         "input_config": "" if ctx.file._config == None else ctx.file._config.short_path,
@@ -57,11 +58,14 @@ def buf_lint_action(ctx, buf, protoc, target, report, use_exit_code = False):
     args.add_joined("--descriptor_set_in", deps, join_with = ":", map_each = _short_path)
     args.add_joined(["--buf-plugin_out", "."], join_with = "=")
     args.add_all(sources)
+    outputs = [stderr]
 
-    if use_exit_code:
-        command = "{protoc} $@ && touch {report}"
+    if exit_code:
+        command = "{protoc} $@ 2>{stderr}; echo $? > " + exit_code.path
+        outputs.append(exit_code)
     else:
-        command = "{protoc} $@ 2>{report} || true"
+        # Create empty file on success, as Bazel expects one
+        command = "{protoc} $@ && touch {stderr}"
 
     ctx.actions.run_shell(
         inputs = depset([
@@ -69,10 +73,10 @@ def buf_lint_action(ctx, buf, protoc, target, report, use_exit_code = False):
             protoc,
             buf,
         ], transitive = [deps]),
-        outputs = [report],
+        outputs = outputs,
         command = command.format(
             protoc = protoc.path,
-            report = report.path,
+            stderr = stderr.path,
         ),
         arguments = [args],
         mnemonic = _MNEMONIC,
@@ -82,14 +86,14 @@ def _buf_lint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["proto_library"]:
         return []
 
-    report, info = report_file(_MNEMONIC, target, ctx)
+    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     buf_lint_action(
         ctx,
         ctx.toolchains[ctx.attr._buf_toolchain].cli,
         ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
         target,
         report,
-        ctx.attr._options[LintOptionsInfo].fail_on_violation,
+        exit_code,
     )
     return [info]
 

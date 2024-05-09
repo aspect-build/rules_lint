@@ -18,7 +18,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_
 
 _MNEMONIC = "shellcheck"
 
-def shellcheck_action(ctx, executable, srcs, config, output, use_exit_code = False, options = []):
+def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
     """Run shellcheck as an action under Bazel.
 
     Based on https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md
@@ -28,8 +28,10 @@ def shellcheck_action(ctx, executable, srcs, config, output, use_exit_code = Fal
         executable: label of the the shellcheck program
         srcs: bash files to be linted
         config: label of the .shellcheckrc file
-        output: output file to generate
-        use_exit_code: whether to fail the build when a lint violation is reported
+        stdout: output file containing stdout of shellcheck
+        exit_code: output file containing shellcheck exit code.
+            If None, then fail the build when vale exits non-zero.
+            See https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#return-values
         options: additional command-line options, see https://github.com/koalaman/shellcheck/blob/master/shellcheck.hs#L95
     """
     inputs = srcs + [config]
@@ -39,18 +41,21 @@ def shellcheck_action(ctx, executable, srcs, config, output, use_exit_code = Fal
     args = ctx.actions.args()
     args.add_all(options)
     args.add_all(srcs)
+    outputs = [stdout]
 
-    if use_exit_code:
-        command = "{shellcheck} $@ && touch {report}"
+    if exit_code:
+        command = "{shellcheck} $@ >{stdout}; echo $? >" + exit_code.path
+        outputs.append(exit_code)
     else:
-        command = "{shellcheck} $@ >{report} || true"
+        # Create empty file on success, as Bazel expects one
+        command = "{shellcheck} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
-        outputs = [output],
+        outputs = outputs,
         command = command.format(
             shellcheck = executable.path,
-            report = output.path,
+            stdout = stdout.path,
         ),
         arguments = [args],
         mnemonic = _MNEMONIC,
@@ -62,9 +67,10 @@ def _shellcheck_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["sh_binary", "sh_library"]:
         return []
 
-    patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
-    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
-    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, patch, False, ["--format", "diff"])
+    patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, report, exit_code)
+    discard_exit_code = ctx.actions.declare_file("{}.{}.aspect_rules_lint.patch_exit_code".format(_MNEMONIC, target.label.name))
+    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, patch, discard_exit_code, ["--format", "diff"])
     return [info]
 
 def lint_shellcheck_aspect(binary, config):

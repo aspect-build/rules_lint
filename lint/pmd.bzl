@@ -28,11 +28,11 @@ pmd = pmd_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
 
 _MNEMONIC = "PMD"
 
-def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
+def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
     """Run PMD as an action under Bazel.
 
     Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running-pmd-via-command-line
@@ -42,10 +42,12 @@ def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
         executable: label of the the PMD program
         srcs: java files to be linted
         rulesets: list of labels of the PMD ruleset files
-        report: output file to generate
-        use_exit_code: whether to fail the build when a lint violation is reported
+        stdout: output file to generate
+        exit_code: output file to write the exit code.
+            If None, then fail the build when PMD exits non-zero.
     """
     inputs = srcs + rulesets
+    outputs = [stdout]
 
     # Wire command-line options, see
     # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
@@ -57,35 +59,29 @@ def pmd_action(ctx, executable, srcs, rulesets, report, use_exit_code = False):
     src_args.use_param_file("%s", use_always = True)
     src_args.add_all(srcs)
 
-    if use_exit_code:
-        ctx.actions.run_shell(
-            inputs = inputs,
-            outputs = [report],
-            command = executable.path + " $@ && touch " + report.path,
-            arguments = [args, "--file-list", src_args],
-            mnemonic = _MNEMONIC,
-            tools = [executable],
-        )
+    if exit_code:
+        command = "{PMD} $@ >{stdout}; echo $? > " + exit_code.path
+        outputs.append(exit_code)
     else:
-        args.add_all(["--report-file", report])
+        # Create empty stdout file on success, as Bazel expects one
+        command = "{PMD} $@ && touch {stdout}"
 
-        # NB: this arg changes in PMD 7
-        args.add_all(["--fail-on-violation", "false"])
-        ctx.actions.run(
-            inputs = inputs,
-            outputs = [report],
-            executable = executable,
-            arguments = [args, "--file-list", src_args],
-            mnemonic = _MNEMONIC,
-        )
+    ctx.actions.run_shell(
+        inputs = inputs,
+        outputs = outputs,
+        command = command.format(PMD = executable.path, stdout = stdout.path),
+        arguments = [args, "--file-list", src_args],
+        mnemonic = _MNEMONIC,
+        tools = [executable],
+    )
 
 # buildifier: disable=function-docstring
 def _pmd_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["java_binary", "java_library"]:
         return []
 
-    report, info = report_file(_MNEMONIC, target, ctx)
-    pmd_action(ctx, ctx.executable._pmd, filter_srcs(ctx.rule), ctx.files._rulesets, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    pmd_action(ctx, ctx.executable._pmd, filter_srcs(ctx.rule), ctx.files._rulesets, report, exit_code)
     return [info]
 
 def lint_pmd_aspect(binary, rulesets):

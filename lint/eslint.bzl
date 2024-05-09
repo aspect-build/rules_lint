@@ -72,7 +72,7 @@ def _gather_inputs(ctx, srcs):
 
     return inputs
 
-def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
+def eslint_action(ctx, executable, srcs, report, exit_code = None):
     """Create a Bazel Action that spawns an eslint process.
 
     Adapter for wrapping Bazel around
@@ -82,8 +82,9 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
         ctx: an action context OR aspect context
         executable: struct with an eslint field
         srcs: list of file objects to lint
-        report: output: the stdout of eslint containing any violations found
-        use_exit_code: whether an eslint process exiting non-zero will be a build failure
+        report: output file containing the stdout or --output-file of eslint
+        exit_code: output file containing the exit code of eslint.
+            If None, then fail the build when eslint exits non-zero.
     """
 
     args = ctx.actions.args()
@@ -96,7 +97,7 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
 
     env = {"BAZEL_BINDIR": ctx.bin_dir.path}
 
-    if use_exit_code:
+    if not exit_code:
         ctx.actions.run_shell(
             inputs = _gather_inputs(ctx, srcs),
             outputs = [report],
@@ -112,12 +113,11 @@ def eslint_action(ctx, executable, srcs, report, use_exit_code = False):
         args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
 
         args.add_all(["--output-file", report.short_path])
-        exit_code_out = ctx.actions.declare_file("_{}.exit_code_out".format(ctx.label.name))
-        env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code_out.path
+        env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
 
         ctx.actions.run(
             inputs = _gather_inputs(ctx, srcs),
-            outputs = [report, exit_code_out],
+            outputs = [report, exit_code],
             executable = executable._eslint,
             arguments = [args],
             env = env,
@@ -161,9 +161,9 @@ def _eslint_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["js_library", "ts_project", "ts_project_rule"]:
         return []
 
-    patch, report, info = patch_and_report_files(_MNEMONIC, target, ctx)
+    patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
     files_to_lint = filter_srcs(ctx.rule)
-    eslint_action(ctx, ctx.executable, files_to_lint, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code)
     eslint_fix(ctx, ctx.executable, files_to_lint, patch)
     return [info]
 

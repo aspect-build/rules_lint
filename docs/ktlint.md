@@ -69,8 +69,8 @@ fetch_ktlint()
 ## ktlint_action
 
 <pre>
-ktlint_action(<a href="#ktlint_action-ctx">ctx</a>, <a href="#ktlint_action-executable">executable</a>, <a href="#ktlint_action-srcs">srcs</a>, <a href="#ktlint_action-editorconfig">editorconfig</a>, <a href="#ktlint_action-report">report</a>, <a href="#ktlint_action-baseline_file">baseline_file</a>, <a href="#ktlint_action-java_runtime">java_runtime</a>, <a href="#ktlint_action-ruleset_jar">ruleset_jar</a>,
-              <a href="#ktlint_action-use_exit_code">use_exit_code</a>)
+ktlint_action(<a href="#ktlint_action-ctx">ctx</a>, <a href="#ktlint_action-executable">executable</a>, <a href="#ktlint_action-srcs">srcs</a>, <a href="#ktlint_action-editorconfig">editorconfig</a>, <a href="#ktlint_action-stdout">stdout</a>, <a href="#ktlint_action-baseline_file">baseline_file</a>, <a href="#ktlint_action-java_runtime">java_runtime</a>, <a href="#ktlint_action-ruleset_jar">ruleset_jar</a>,
+              <a href="#ktlint_action-exit_code">exit_code</a>)
 </pre>
 
  Runs ktlint as build action in Bazel.
@@ -88,11 +88,11 @@ https://pinterest.github.io/ktlint/latest/install/cli/
 | <a id="ktlint_action-executable"></a>executable |  struct with ktlint field   |  none |
 | <a id="ktlint_action-srcs"></a>srcs |  A list of source files to lint   |  none |
 | <a id="ktlint_action-editorconfig"></a>editorconfig |  The file object pointing to the editorconfig file used by ktlint   |  none |
-| <a id="ktlint_action-report"></a>report |  :output:  the stdout of ktlint containing any violations found   |  none |
+| <a id="ktlint_action-stdout"></a>stdout |  :output:  the stdout of ktlint containing any violations found   |  none |
 | <a id="ktlint_action-baseline_file"></a>baseline_file |  The file object pointing to the baseline file used by ktlint.   |  none |
 | <a id="ktlint_action-java_runtime"></a>java_runtime |  The Java Runtime configured for this build, pulled from the registered toolchain.   |  none |
 | <a id="ktlint_action-ruleset_jar"></a>ruleset_jar |  An optional, custom ktlint ruleset jar.   |  <code>None</code> |
-| <a id="ktlint_action-use_exit_code"></a>use_exit_code |  whether a non-zero exit code from ktlint process will result in a build failure.   |  <code>False</code> |
+| <a id="ktlint_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when ktlint exits non-zero.   |  <code>None</code> |
 
 
 <a id="lint_ktlint_aspect"></a>

@@ -18,7 +18,7 @@ buf = buf_lint_aspect(
 ## buf_lint_action
 
 <pre>
-buf_lint_action(<a href="#buf_lint_action-ctx">ctx</a>, <a href="#buf_lint_action-buf">buf</a>, <a href="#buf_lint_action-protoc">protoc</a>, <a href="#buf_lint_action-target">target</a>, <a href="#buf_lint_action-report">report</a>, <a href="#buf_lint_action-use_exit_code">use_exit_code</a>)
+buf_lint_action(<a href="#buf_lint_action-ctx">ctx</a>, <a href="#buf_lint_action-buf">buf</a>, <a href="#buf_lint_action-protoc">protoc</a>, <a href="#buf_lint_action-target">target</a>, <a href="#buf_lint_action-stderr">stderr</a>, <a href="#buf_lint_action-exit_code">exit_code</a>)
 </pre>
 
 Runs the buf lint tool as a Bazel action.
@@ -32,8 +32,8 @@ Runs the buf lint tool as a Bazel action.
 | <a id="buf_lint_action-buf"></a>buf |  the buf-lint executable   |  none |
 | <a id="buf_lint_action-protoc"></a>protoc |  the protoc executable   |  none |
 | <a id="buf_lint_action-target"></a>target |  the proto_library target to run on   |  none |
-| <a id="buf_lint_action-report"></a>report |  output file to generate   |  none |
-| <a id="buf_lint_action-use_exit_code"></a>use_exit_code |  whether the protoc process exiting non-zero will be a build failure   |  <code>False</code> |
+| <a id="buf_lint_action-stderr"></a>stderr |  output file containing the stderr of protoc   |  none |
+| <a id="buf_lint_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when protoc exits non-zero.   |  <code>None</code> |
 
 
 <a id="lint_buf_aspect"></a>

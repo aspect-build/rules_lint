@@ -1,6 +1,6 @@
 """Factory function to make lint test rules.
 
-The test will fail when the linter reports any non-empty lint results.
+When the linter exits non-zero, the test will print the output of the linter and then fail.
 
 To use this, in your `linters.bzl` where you define the aspect, just create a test that references it.
 
@@ -37,22 +37,36 @@ flake8_test(
 
 load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
 
-def _test_impl(ctx):
-    reports = []
-    for src in ctx.attr.srcs:
-        for report in src[OutputGroupInfo].rules_lint_report.to_list():
-            reports.append(report)
+def _write_assert(ctx, files):
+    "Create a parameter to substitute into the shell script"
+    output = None
+    exit_code = None
+    for f in files.to_list():
+        if f.path.endswith(".report"):
+            output = f
+        elif f.path.endswith(".exit_code"):
+            exit_code = f
+        else:
+            fail("rules_lint_report output group contains unrecognized file extension: ", f.path)
+    if output and exit_code:
+        return "assert_exit_code_zero '{}' '{}'".format(to_rlocation_path(ctx, exit_code), to_rlocation_path(ctx, output))
+    if output:
+        return "assert_output_empty '{}'".format(to_rlocation_path(ctx, output))
+    fail("missing output file among", files)
 
+def _test_impl(ctx):
     bin = ctx.actions.declare_file("{}.lint_test.sh".format(ctx.label.name))
+    asserts = [_write_assert(ctx, src[OutputGroupInfo].rules_lint_report) for src in ctx.attr.srcs]
+
     ctx.actions.expand_template(
         template = ctx.file._bin,
         output = bin,
-        substitutions = {"{{reports}}": " ".join([to_rlocation_path(ctx, r) for r in reports])},
+        substitutions = {"{{asserts}}": "\n".join(asserts)},
         is_executable = True,
     )
     return [DefaultInfo(
         executable = bin,
-        runfiles = ctx.runfiles(reports + [ctx.file._runfiles_lib]),
+        runfiles = ctx.runfiles([ctx.file._runfiles_lib], transitive_files = depset(transitive = [src[OutputGroupInfo].rules_lint_report for src in ctx.attr.srcs])),
     )]
 
 def lint_test(aspect):

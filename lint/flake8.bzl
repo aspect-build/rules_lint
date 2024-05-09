@@ -26,11 +26,11 @@ flake8 = lint_flake8_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_file")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
 
 _MNEMONIC = "flake8"
 
-def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
+def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None):
     """Run flake8 as an action under Bazel.
 
     Based on https://flake8.pycqa.org/en/latest/user/invocation.html
@@ -40,45 +40,42 @@ def flake8_action(ctx, executable, srcs, config, report, use_exit_code = False):
         executable: label of the the flake8 program
         srcs: python files to be linted
         config: label of the flake8 config file (setup.cfg, tox.ini, or .flake8)
-        report: output file to generate
-        use_exit_code: whether to fail the build when a lint violation is reported
+        stdout: output file containing stdout of flake8
+        exit_code: output file containing exit code of flake8
+            If None, then fail the build when flake8 exits non-zero.
     """
     inputs = srcs + [config]
-    outputs = [report]
+    outputs = [stdout]
 
     # Wire command-line options, see
     # https://flake8.pycqa.org/en/latest/user/options.html
     args = ctx.actions.args()
     args.add_all(srcs)
     args.add(config, format = "--config=%s")
-    if use_exit_code:
-        ctx.actions.run_shell(
-            inputs = inputs,
-            outputs = outputs,
-            tools = [executable],
-            command = executable.path + " $@ && touch " + report.path,
-            arguments = [args],
-            mnemonic = _MNEMONIC,
-        )
-    else:
-        args.add(report, format = "--output-file=%s")
-        args.add("--exit-zero")
 
-        ctx.actions.run(
-            inputs = inputs,
-            outputs = outputs,
-            executable = executable,
-            arguments = [args],
-            mnemonic = _MNEMONIC,
-        )
+    if exit_code:
+        command = "{flake8} $@ >{stdout}; echo $? > " + exit_code.path
+        outputs.append(exit_code)
+    else:
+        # Create empty stdout file on success, as Bazel expects one
+        command = "{flake8} $@ && touch {stdout}"
+
+    ctx.actions.run_shell(
+        inputs = inputs,
+        outputs = outputs,
+        tools = [executable],
+        command = command.format(flake8 = executable.path, stdout = stdout.path),
+        arguments = [args],
+        mnemonic = _MNEMONIC,
+    )
 
 # buildifier: disable=function-docstring
 def _flake8_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["py_binary", "py_library"]:
         return []
 
-    report, info = report_file(_MNEMONIC, target, ctx)
-    flake8_action(ctx, ctx.executable._flake8, filter_srcs(ctx.rule), ctx.file._config_file, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
+    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    flake8_action(ctx, ctx.executable._flake8, filter_srcs(ctx.rule), ctx.file._config_file, report, exit_code)
     return [info]
 
 def lint_flake8_aspect(binary, config):

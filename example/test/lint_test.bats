@@ -41,6 +41,8 @@ EOF
 	assert_lints
 
 	run $BATS_TEST_DIRNAME/../lint.sh --fix --dry-run //src:all
+	assert_success
+
 	# Check that we created a 'patch -p1' format file that fixes the ESLint violation
 	run cat bazel-bin/src/ESLint.ts.aspect_rules_lint.patch
 	assert_success

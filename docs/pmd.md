@@ -79,7 +79,7 @@ Attrs:
 ## pmd_action
 
 <pre>
-pmd_action(<a href="#pmd_action-ctx">ctx</a>, <a href="#pmd_action-executable">executable</a>, <a href="#pmd_action-srcs">srcs</a>, <a href="#pmd_action-rulesets">rulesets</a>, <a href="#pmd_action-report">report</a>, <a href="#pmd_action-use_exit_code">use_exit_code</a>)
+pmd_action(<a href="#pmd_action-ctx">ctx</a>, <a href="#pmd_action-executable">executable</a>, <a href="#pmd_action-srcs">srcs</a>, <a href="#pmd_action-rulesets">rulesets</a>, <a href="#pmd_action-stdout">stdout</a>, <a href="#pmd_action-exit_code">exit_code</a>)
 </pre>
 
 Run PMD as an action under Bazel.
@@ -96,7 +96,7 @@ Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running
 | <a id="pmd_action-executable"></a>executable |  label of the the PMD program   |  none |
 | <a id="pmd_action-srcs"></a>srcs |  java files to be linted   |  none |
 | <a id="pmd_action-rulesets"></a>rulesets |  list of labels of the PMD ruleset files   |  none |
-| <a id="pmd_action-report"></a>report |  output file to generate   |  none |
-| <a id="pmd_action-use_exit_code"></a>use_exit_code |  whether to fail the build when a lint violation is reported   |  <code>False</code> |
+| <a id="pmd_action-stdout"></a>stdout |  output file to generate   |  none |
+| <a id="pmd_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when PMD exits non-zero.   |  <code>None</code> |
 
 
