@@ -75,6 +75,8 @@ async function main(args, sandbox) {
     env: config.env || {},
   });
 
+  // Check if we failed to spawn the process.
+  // If it ran normally and exited non-zero, ret.error will still be undefined
   if (ret.error) {
     console.error(ret.error);
     process.exit(1);
@@ -108,6 +110,8 @@ async function main(args, sandbox) {
   }
 
   diffOut.close();
+
+  return ret.status;
 }
 
 (async () => {
@@ -117,7 +121,8 @@ async function main(args, sandbox) {
       await fs.promises.mkdtemp(path.join(os.tmpdir(), "rules_lint_patcher-")),
       process.env.JS_BINARY__WORKSPACE
     );
-    await main(process.argv.slice(2), sandbox);
+    // Propagate the exit code of the subprocess so the caller can interpret it.
+    process.exitCode = await main(process.argv.slice(2), sandbox);
   } catch (e) {
     console.error(e);
     process.exit(1);

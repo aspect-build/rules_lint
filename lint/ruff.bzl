@@ -71,7 +71,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
         tools = [executable],
     )
 
-def ruff_fix(ctx, executable, srcs, config, patch):
+def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
     """Create a Bazel Action that spawns ruff with --fix.
 
     Args:
@@ -80,6 +80,9 @@ def ruff_fix(ctx, executable, srcs, config, patch):
         srcs: list of file objects to lint
         config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
+        stdout: output file of linter results to generate
+        exit_code: output file to write the exit code.
+            If None, then fail the build when ruff exits non-zero.
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
@@ -95,10 +98,14 @@ def ruff_fix(ctx, executable, srcs, config, patch):
 
     ctx.actions.run(
         inputs = srcs + config + [patch_cfg],
-        outputs = [patch],
+        outputs = [patch, exit_code, stdout],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
-        env = {"BAZEL_BINDIR": "."},
+        env = {
+            "BAZEL_BINDIR": ".",
+            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
+            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
+        },
         tools = [executable._ruff],
         mnemonic = _MNEMONIC,
     )
@@ -110,8 +117,10 @@ def _ruff_aspect_impl(target, ctx):
 
     patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
     files_to_lint = filter_srcs(ctx.rule)
-    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
-    ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch)
+    if ctx.attr._options[LintOptionsInfo].fix:
+        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, report, exit_code)
+    else:
+        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
     return [info]
 
 def lint_ruff_aspect(binary, configs):
