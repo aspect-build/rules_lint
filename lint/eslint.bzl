@@ -141,7 +141,7 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
         output = patch_cfg,
         content = json.encode({
             "linter": executable._eslint.path,
-            "args": ["--fix"] + [s.short_path for s in srcs],
+            "args": ["--fix", "--format", "../../../" + ctx.file._formatter.path] + [s.short_path for s in srcs],
             "env": {"BAZEL_BINDIR": ctx.bin_dir.path},
             "files_to_diff": [s.path for s in srcs],
             "output": patch.path,
@@ -157,6 +157,7 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
             "BAZEL_BINDIR": ".",
             "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
+            "JS_BINARY__SILENT_ON_SUCCESS": "1",
         },
         tools = [executable._eslint],
         mnemonic = _MNEMONIC,
