@@ -67,7 +67,7 @@ FIX_FLAGS = {
     "scalafmt": "",
     "clang-format": "-style=file --fallback-style=none -i",
     "yamlfmt": "",
-    "rustfmt": "--write-mode=overwrite",
+    "rustfmt": "",
 }
 
 def to_attribute_name(lang):

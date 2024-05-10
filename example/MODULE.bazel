@@ -17,6 +17,12 @@ bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 bazel_dep(name = "platforms", version = "0.0.8")
 bazel_dep(name = "rules_kotlin", version = "1.9.0")
 
+git_override(
+    module_name = "rules_rust",
+    commit = "4a3ffcb1e89b3f20b12a37b55595682f4bc866b7",
+    remote = "https://github.com/bazelbuild/rules_rust.git",
+)
+
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "..",
