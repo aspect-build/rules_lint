@@ -7,6 +7,7 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 load("@aspect_rules_lint//format:defs.bzl", "format_multirun", "format_test")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 load("@rules_java//java:defs.bzl", "java_binary")
+load("@rules_rust//rust:toolchain.bzl", "current_rustfmt_toolchain")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -61,6 +62,7 @@ format_multirun(
     markdown = ":prettier",
     protocol_buffer = "//tools/lint:buf",
     python = "//tools/lint:ruff",
+    rust = current_rustfmt_toolchain,
     scala = ":scalafmt",
     sql = ":prettier",
     starlark = "@buildifier_prebuilt//:buildifier",
