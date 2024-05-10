@@ -89,7 +89,7 @@ def format_multirun(name, jobs = 4, print_command = False, **kwargs):
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
         for mode in ["check", "fix"]:
             command(
-                command = "@aspect_rules_lint//format/private:format",
+                command = Label("@aspect_rules_lint//format/private:format"),
                 description = "Formatting {} with {}...".format(lang, toolname),
                 **_format_attr_factory(target_name, lang, toolname, tool_label, mode)
             )
@@ -154,8 +154,8 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, tags = 
             attrs["env"]["WORKSPACE"] = "$(location {})".format(workspace)
 
         native.sh_test(
-            srcs = ["@aspect_rules_lint//format/private:format.sh"],
-            deps = ["@bazel_tools//tools/bash/runfiles"],
+            srcs = [Label("@aspect_rules_lint//format/private:format.sh")],
+            deps = [Label("@bazel_tools//tools/bash/runfiles")],
             tags = unique(tags + (["no-sandbox", "no-cache", "external"] if workspace else [])),
             **attrs
         )
