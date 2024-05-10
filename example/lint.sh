@@ -25,9 +25,9 @@ filter='.namedSetOfFiles | values | .files[] | select(.name | endswith($ext)) | 
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
 args=(
 	"--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale} | tr ' ' ',')"
-	# Allow lints of code that fails some validation check
-        # See https://github.com/aspect-build/rules_ts/pull/574#issuecomment-2073632879
-        "--norun_validations"
+	# Allow lints of code that fails some validation action
+	# See https://github.com/aspect-build/rules_ts/pull/574#issuecomment-2073632879
+	"--norun_validations"
 	"--build_event_json_file=$buildevents"
 	"--output_groups=rules_lint_report"
 	"--remote_download_regex='.*aspect_rules_lint.*'"
