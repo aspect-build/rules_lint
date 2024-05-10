@@ -17,6 +17,7 @@ bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 bazel_dep(name = "platforms", version = "0.0.8")
 bazel_dep(name = "rules_kotlin", version = "1.9.0")
 
+# TODO(alex): remove and upgrade to rules_rust 0.44.0 or later
 git_override(
     module_name = "rules_rust",
     commit = "4a3ffcb1e89b3f20b12a37b55595682f4bc866b7",
