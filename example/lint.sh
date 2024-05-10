@@ -20,7 +20,7 @@ fi
 
 fix=""
 buildevents=$(mktemp)
-filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" + .name)'
+filter='.namedSetOfFiles | values | .files[] | select(.name | endswith($ext)) | ((.pathPrefix | join("/")) + "/" + .name)'
 
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
 args=(
@@ -29,10 +29,8 @@ args=(
         # See https://github.com/aspect-build/rules_ts/pull/574#issuecomment-2073632879
         "--norun_validations"
 	"--build_event_json_file=$buildevents"
-)
-report_args=(
 	"--output_groups=rules_lint_report"
-	"--remote_download_regex='.*aspect_rules_lint.report'"
+	"--remote_download_regex='.*aspect_rules_lint.*'"
 )
 
 # This is a rudimentary flag parser.
@@ -45,10 +43,9 @@ if [ $1 == "--fail-on-violation" ]; then
 fi
 if [ $1 == "--fix" ]; then
 	fix="patch"
-	# override this flag
-	patch_args=(
+	args+=(
+		"--@aspect_rules_lint//lint:fix"
 		"--output_groups=rules_lint_patch"
-		"--remote_download_regex='.*aspect_rules_lint.patch'"
 	)
 	shift
 fi
@@ -58,11 +55,11 @@ if [ $1 == "--dry-run" ]; then
 	shift
 fi
 
-# Produce report files
-bazel build ${args[@]} ${report_args[@]} $@
+# Run linters
+bazel build ${args[@]} $@
 
 # TODO: Maybe this could be hermetic with bazel run @aspect_bazel_lib//tools:jq or sth
-valid_reports=$(jq --raw-output "$filter" "$buildevents")
+valid_reports=$(jq --arg ext report --raw-output "$filter" "$buildevents")
 
 # Show the results.
 while IFS= read -r report; do
@@ -80,9 +77,7 @@ done <<<"$valid_reports"
 # [*] 1 fixable with the `--fix` option.
 # so that the naive thing of pasting that flag to lint.sh will do what the user expects.
 if [ -n "$fix" ]; then
-	# redo the build with this new requested output
-	bazel build ${args[@]} ${patch_args[@]} $@
-	valid_patches=$(jq --raw-output "$filter" "$buildevents")
+	valid_patches=$(jq --arg ext patch --raw-output "$filter" "$buildevents")
 	while IFS= read -r patch; do
 		# Exclude coverage reports, and check if the report is empty.
 		if [[ "$patch" == *coverage.dat ]] || [[ ! -s "$patch" ]]; then

@@ -86,7 +86,7 @@ https://eslint.org/docs/latest/use/command-line-interface
 ## eslint_fix
 
 <pre>
-eslint_fix(<a href="#eslint_fix-ctx">ctx</a>, <a href="#eslint_fix-executable">executable</a>, <a href="#eslint_fix-srcs">srcs</a>, <a href="#eslint_fix-patch">patch</a>)
+eslint_fix(<a href="#eslint_fix-ctx">ctx</a>, <a href="#eslint_fix-executable">executable</a>, <a href="#eslint_fix-srcs">srcs</a>, <a href="#eslint_fix-patch">patch</a>, <a href="#eslint_fix-stdout">stdout</a>, <a href="#eslint_fix-exit_code">exit_code</a>)
 </pre>
 
 Create a Bazel Action that spawns eslint with --fix.
@@ -100,6 +100,8 @@ Create a Bazel Action that spawns eslint with --fix.
 | <a id="eslint_fix-executable"></a>executable |  struct with an eslint field   |  none |
 | <a id="eslint_fix-srcs"></a>srcs |  list of file objects to lint   |  none |
 | <a id="eslint_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
+| <a id="eslint_fix-stdout"></a>stdout |  output file containing the stdout or --output-file of eslint   |  none |
+| <a id="eslint_fix-exit_code"></a>exit_code |  output file containing the exit code of eslint   |  none |
 
 
 <a id="lint_eslint_aspect"></a>

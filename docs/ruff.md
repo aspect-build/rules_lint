@@ -65,19 +65,7 @@ lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_r
 A factory function to create a linter aspect.
 
 Attrs:
-    binary: a ruff executable. Can be obtained like so:
-
-        load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-        http_archive(
-            name = "ruff_bin_linux_amd64",
-            sha256 = "&lt;-sha-&gt;",
-            urls = [
-                "https://github.com/charliermarsh/ruff/releases/download/v&lt;-version-&gt;/ruff-x86_64-unknown-linux-gnu.tar.gz",
-            ],
-            build_file_content = """exports_files(["ruff"])""",
-        )
-
+    binary: a ruff executable
     configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
 
 **PARAMETERS**
@@ -131,7 +119,7 @@ However this is needed because:
 ## ruff_fix
 
 <pre>
-ruff_fix(<a href="#ruff_fix-ctx">ctx</a>, <a href="#ruff_fix-executable">executable</a>, <a href="#ruff_fix-srcs">srcs</a>, <a href="#ruff_fix-config">config</a>, <a href="#ruff_fix-patch">patch</a>)
+ruff_fix(<a href="#ruff_fix-ctx">ctx</a>, <a href="#ruff_fix-executable">executable</a>, <a href="#ruff_fix-srcs">srcs</a>, <a href="#ruff_fix-config">config</a>, <a href="#ruff_fix-patch">patch</a>, <a href="#ruff_fix-stdout">stdout</a>, <a href="#ruff_fix-exit_code">exit_code</a>)
 </pre>
 
 Create a Bazel Action that spawns ruff with --fix.
@@ -146,5 +134,7 @@ Create a Bazel Action that spawns ruff with --fix.
 | <a id="ruff_fix-srcs"></a>srcs |  list of file objects to lint   |  none |
 | <a id="ruff_fix-config"></a>config |  labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)   |  none |
 | <a id="ruff_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
+| <a id="ruff_fix-stdout"></a>stdout |  output file of linter results to generate   |  none |
+| <a id="ruff_fix-exit_code"></a>exit_code |  output file to write the exit code   |  none |
 
 

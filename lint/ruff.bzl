@@ -15,7 +15,7 @@ ruff = ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "ruff"
@@ -71,7 +71,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
         tools = [executable],
     )
 
-def ruff_fix(ctx, executable, srcs, config, patch):
+def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
     """Create a Bazel Action that spawns ruff with --fix.
 
     Args:
@@ -80,6 +80,8 @@ def ruff_fix(ctx, executable, srcs, config, patch):
         srcs: list of file objects to lint
         config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
+        stdout: output file of linter results to generate
+        exit_code: output file to write the exit code
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
@@ -95,10 +97,15 @@ def ruff_fix(ctx, executable, srcs, config, patch):
 
     ctx.actions.run(
         inputs = srcs + config + [patch_cfg],
-        outputs = [patch],
+        outputs = [patch, exit_code, stdout],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
-        env = {"BAZEL_BINDIR": "."},
+        env = {
+            "BAZEL_BINDIR": ".",
+            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
+            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
+            "JS_BINARY__SILENT_ON_SUCCESS": "1",
+        },
         tools = [executable._ruff],
         mnemonic = _MNEMONIC,
     )
@@ -108,29 +115,20 @@ def _ruff_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["py_binary", "py_library", "py_test"]:
         return []
 
-    patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
     files_to_lint = filter_srcs(ctx.rule)
-    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
-    ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch)
+    if ctx.attr._options[LintOptionsInfo].fix:
+        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, report, exit_code)
+    else:
+        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
     return [info]
 
 def lint_ruff_aspect(binary, configs):
     """A factory function to create a linter aspect.
 
     Attrs:
-        binary: a ruff executable. Can be obtained like so:
-
-            load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-            http_archive(
-                name = "ruff_bin_linux_amd64",
-                sha256 = "<-sha->",
-                urls = [
-                    "https://github.com/charliermarsh/ruff/releases/download/v<-version->/ruff-x86_64-unknown-linux-gnu.tar.gz",
-                ],
-                build_file_content = \"""exports_files(["ruff"])\""",
-            )
-
+        binary: a ruff executable
         configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
     """
 
@@ -140,12 +138,9 @@ def lint_ruff_aspect(binary, configs):
 
     return aspect(
         implementation = _ruff_aspect_impl,
-        # Edges we need to walk up the graph from the selected targets.
-        # Needed for linters that need semantic information like transitive type declarations.
-        # attr_aspects = ["deps"],
         attrs = {
             "_options": attr.label(
-                default = "//lint:fail_on_violation",
+                default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_ruff": attr.label(
@@ -168,8 +163,9 @@ def lint_ruff_aspect(binary, configs):
 
 def _ruff_workaround_20269_impl(rctx):
     # download_and_extract has a bug due to the use of Apache Commons library within Bazel,
-    # see https://issues.apache.org/jira/projects/COMPRESS/issues/COMPRESS-654
+    # See https://github.com/bazelbuild/bazel/issues/20269
     # To workaround, we fetch the file and then use the BSD tar on the system to extract it.
+    # TODO: remove for users on Bazel 8 (or maybe sooner if that fix is cherry-picked)
     rctx.download(sha256 = rctx.attr.sha256, url = rctx.attr.url, output = "ruff.tar.gz")
     result = rctx.execute([rctx.which("tar"), "xzf", "ruff.tar.gz"])
     if result.return_code:

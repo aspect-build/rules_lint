@@ -14,7 +14,7 @@ shellcheck = shellcheck_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
 
 _MNEMONIC = "shellcheck"
 
@@ -67,10 +67,17 @@ def _shellcheck_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["sh_binary", "sh_library"]:
         return []
 
-    patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
-    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, report, exit_code)
-    discard_exit_code = ctx.actions.declare_file("{}.{}.aspect_rules_lint.patch_exit_code".format(_MNEMONIC, target.label.name))
-    shellcheck_action(ctx, ctx.executable._shellcheck, filter_srcs(ctx.rule), ctx.file._config_file, patch, discard_exit_code, ["--format", "diff"])
+    files_to_lint = filter_srcs(ctx.rule)
+    if ctx.attr._options[LintOptionsInfo].fix:
+        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        discard_exit_code = ctx.actions.declare_file("{}.{}.aspect_rules_lint.patch_exit_code".format(_MNEMONIC, target.label.name))
+        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, patch, discard_exit_code, ["--format", "diff"])
+    else:
+        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+
+    # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
+    # So we must run a second action to populate the human-readable report.
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, report, exit_code)
     return [info]
 
 def lint_shellcheck_aspect(binary, config):
@@ -84,7 +91,7 @@ def lint_shellcheck_aspect(binary, config):
         implementation = _shellcheck_aspect_impl,
         attrs = {
             "_options": attr.label(
-                default = "//lint:fail_on_violation",
+                default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_shellcheck": attr.label(

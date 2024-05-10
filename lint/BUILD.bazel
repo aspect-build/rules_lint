@@ -1,7 +1,7 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
-load("//lint/private:lint_aspect.bzl", "fail_on_violation_flag")
+load("//lint/private:lint_aspect.bzl", "lint_options")
 
 exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
 
@@ -34,17 +34,48 @@ bool_flag(
     visibility = ["//visibility:public"],
 )
 
-fail_on_violation_flag(
+config_setting(
+    name = "debug.enabled",
+    flag_values = {":debug": "true"},
+)
+
+bool_flag(
     name = "fail_on_violation",
     build_setting_default = False,
     visibility = ["//visibility:public"],
 )
 
 config_setting(
-    name = "debug_flag",
-    flag_values = {
-        ":debug": "true",
-    },
+    name = "fail_on_violation.enabled",
+    flag_values = {":fail_on_violation": "true"},
+)
+
+bool_flag(
+    name = "fix",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "fix.enabled",
+    flag_values = {":fix": "true"},
+)
+
+lint_options(
+    name = "options",
+    debug = select({
+        ":debug.enabled": True,
+        "//conditions:default": False,
+    }),
+    fail_on_violation = select({
+        ":fail_on_violation.enabled": True,
+        "//conditions:default": False,
+    }),
+    fix = select({
+        ":fix.enabled": True,
+        "//conditions:default": False,
+    }),
+    visibility = ["//visibility:public"],
 )
 
 js_library(
