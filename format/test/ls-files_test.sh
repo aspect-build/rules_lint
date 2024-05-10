@@ -60,3 +60,39 @@ go=$(ls-files Go src.go)
     echo >&2 -e "expected ls-files to return src.go, was\n$go"
     exit 1
 }
+
+# sparse-checkout should be supported
+mkdir tree1 tree2
+touch tree1/src.js tree2/src.js
+git add .
+git commit --all --message 'prepare sparse-checkout'
+git sparse-checkout init
+
+js=$(ls-files JavaScript)
+[[ "$js" == "src.js" ]] || {
+    echo >&2 -e "expected ls-files to return src.js, was\n$js"
+    exit 1
+}
+
+git sparse-checkout add tree1
+js=$(ls-files JavaScript)
+expected='src.js
+tree1/src.js'
+
+[[ "$js" == "$expected" ]] || {
+    echo >&2 -e "expected ls-files to return $expected, was\n$js"
+    exit 1
+}
+
+git sparse-checkout add tree2
+js=$(ls-files JavaScript)
+expected='src.js
+tree1/src.js
+tree2/src.js'
+
+[[ "$js" == "$expected" ]] || {
+    echo >&2 -e "expected ls-files to return $expected, was\n$js"
+    exit 1
+}
+
+git sparse-checkout disable
