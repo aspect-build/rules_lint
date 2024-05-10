@@ -12,7 +12,6 @@ ruff = ruff_aspect(
 ```
 """
 
-load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
@@ -190,11 +189,8 @@ def fetch_ruff(tag = RUFF_VERSIONS.keys()[0]):
     """
     version = tag.lstrip("v")
 
-    # ruff changed their release artifact naming starting with v0.1.8
-    if versions.is_at_least("0.1.8", version):
-        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{version}-{plat}.{ext}"
-    else:
-        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{plat}.{ext}"
+    # ruff changed their release artifact naming starting with v0.1.8, so that's the minimum version we support
+    url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{version}-{plat}.{ext}"
 
     for plat, sha256 in RUFF_VERSIONS[tag].items():
         fetch_rule = http_archive
