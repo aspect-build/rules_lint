@@ -95,7 +95,7 @@ function ls-files {
 
         # TODO: determine which staged changes we should format; avoid formatting unstaged changes
         # TODO: try to format only modified regions of the file (where supported)
-        files=$(git ls-files --cached --modified --other --exclude-standard "${patterns[@]}" "${patterns[@]/#/*/}" | {
+        files=$(git ls-files --cached --modified --other --exclude-standard "${patterns[@]}" "${patterns[@]/#/*/}" | grep -v ^S | cut -f2 -d' ' | {
           grep -vE \
             "^$(git ls-files --deleted)$" \
           || true;
