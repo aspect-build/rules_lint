@@ -19,6 +19,7 @@ TOOLS = {
     "Protocol Buffer": "buf",
     "C++": "clang-format",
     "YAML": "yamlfmt",
+    "Rust": "rustfmt",
 }
 
 DEFAULT_TOOL_LABELS = {
@@ -44,6 +45,7 @@ CHECK_FLAGS = {
     "scalafmt": "--test",
     "clang-format": "--style=file --fallback-style=none --dry-run -Werror",
     "yamlfmt": "-lint",
+    "rustfmt": "--check",
 }
 
 FIX_FLAGS = {
@@ -65,6 +67,7 @@ FIX_FLAGS = {
     "scalafmt": "",
     "clang-format": "-style=file --fallback-style=none -i",
     "yamlfmt": "",
+    "rustfmt": "",
 }
 
 def to_attribute_name(lang):

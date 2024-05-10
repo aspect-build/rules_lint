@@ -133,3 +133,10 @@ bats_load_library "bats-assert"
 
     assert_output --partial "+ yamlfmt .bcr/config.yml"
 }
+
+@test "should run rustfmt on Rust" {
+    run bazel run //format/test:format_Rust_with_rustfmt
+    assert_success
+
+    assert_output --partial "+ rustfmt example/src/hello.rs"
+}

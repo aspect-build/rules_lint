@@ -45,6 +45,7 @@ format_multirun(
     markdown = ":mock_prettier.sh",
     protocol_buffer = ":mock_buf.sh",
     python = ":mock_ruff.sh",
+    rust = ":mock_rustfmt.sh",
     scala = ":mock_scalafmt.sh",
     shell = ":mock_shfmt.sh",
     sql = ":mock_prettier.sh",

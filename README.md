@@ -35,6 +35,7 @@ New tools are being added frequently, so check this page again!
 | Markdown               | [Prettier]            | [Vale]           |
 | Protocol Buffer        | [buf]                 | [buf lint]       |
 | Python                 | [ruff]                | [flake8], [ruff] |
+| Rust                   | [rustfmt]             |                  |
 | SQL                    | [prettier-plugin-sql] |                  |
 | Scala                  | [scalafmt]            |                  |
 | Shell                  | [shfmt]               | [shellcheck]     |
@@ -68,6 +69,7 @@ New tools are being added frequently, so check this page again!
 [#112]: https://github.com/aspect-build/rules_lint/issues/112
 [vale]: https://vale.sh/
 [yamlfmt]: https://github.com/google/yamlfmt
+[rustfmt]: https://rust-lang.github.io/rustfmt
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift
