@@ -45,7 +45,7 @@ CHECK_FLAGS = {
     "scalafmt": "--test",
     "clang-format": "--style=file --fallback-style=none --dry-run -Werror",
     "yamlfmt": "-lint",
-    "rustfmt": "--write-mode=diff",
+    "rustfmt": "--check",
 }
 
 FIX_FLAGS = {
