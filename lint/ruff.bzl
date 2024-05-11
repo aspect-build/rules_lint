@@ -91,6 +91,7 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
             "args": ["check", "--fix"] + [s.path for s in srcs],
             "files_to_diff": [s.path for s in srcs],
             "output": patch.path,
+            "quiet": True,
         }),
     )
 
@@ -98,7 +99,7 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
         inputs = srcs + config + [patch_cfg],
         outputs = [patch, exit_code, stdout],
         executable = executable._patcher,
-        arguments = [patch_cfg.path],
+        arguments = ["--quiet", patch_cfg.path],
         env = {
             "BAZEL_BINDIR": ".",
             "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,

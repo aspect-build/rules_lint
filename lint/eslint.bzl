@@ -104,6 +104,7 @@ def eslint_action(ctx, executable, srcs, report, exit_code = None):
     # TODO: enable if debug config, similar to rules_ts
     # args.add("--debug")
 
+    args.add("--quiet")
     args.add_all(["--format", "../../../" + ctx.file._formatter.path])
     args.add_all([s.short_path for s in srcs])
 
