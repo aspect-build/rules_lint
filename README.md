@@ -12,6 +12,7 @@ Features:
   See [Usage](https://github.com/aspect-build/rules_lint/blob/main/docs/linting.md#usage).
 - **Can lint changes only**. It's fine if your repository has a lot of existing issues.
   It's not necessary to fix or suppress all of them to start linting new changes.
+  This is sometimes called the "Water Leak Principle": you should always fix a leak before mopping the spill.
 - **Can format files not known to Bazel**. Formatting just runs directly on the file tree.
   No need to create `sh_library` targets for your shell scripts, for example.
 - Honors the same **configuration files** you use for these tools outside Bazel (e.g. in the editor)
@@ -121,7 +122,7 @@ See [Linting](./docs/linting.md) for more ways to use the linter.
 
 The linters only visit files that are part of the Bazel dependency graph (listed as `srcs` to some library target).
 
-The formatter honors the `.gitignore` file.
+The formatter honors the `.gitignore` and `.gitattributes` files.
 Otherwise use the affordance provided by the tool, for example `.prettierignore` for files to be ignored by Prettier.
 
 Sometimes engineers want to ignore a file with a certain extension because the content isn't actually valid syntax for the corresponding language.
