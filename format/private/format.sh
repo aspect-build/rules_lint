@@ -131,34 +131,38 @@ function time-run {
   local bin="$1" && shift
   local lang="$1" && shift
   local silent="$1" && shift
-  local tuser
-  local tsys
+  local TIMEFORMAT="Formatted ${lang} in %lR"
 
-  ( if [ $silent != 0 ] ; then 2>/dev/null ; fi ; echo "$files" | tr \\n \\0 | xargs -0 "$bin" "$@" >&2 ; times ) | ( read _ _ ; read tuser tsys; echo "Formatted ${lang} in ${tuser}" )
-
+  if [ $silent != 0 ] ; then 2>/dev/null ; fi
+  time {
+    echo "$files" | tr \\n \\0 | xargs -0 "$bin" "$@" >&2
+  }
 }
 
 function run-format {
   local lang="$1" && shift
   local bin="$1" && shift
   local args="$1" && shift
-  local tuser
-  local tsys
+  local TIMEFORMAT="Formatted ${lang} in %lR"
 
   local files=$(ls-files "$lang" $@)
   if [ -n "$files" ] && [ -n "$bin" ]; then
     case "$lang" in
-    'Protocol Buffer')
-        ( for file in $files; do
-          "$bin" $args $file >&2
-        done ; times ) | ( read _ _; read tuser tsys; echo "Formatted ${lang} in ${tuser}" )
+      'Protocol Buffer')
+        time {
+          for file in $files; do
+            "$bin" $args $file >&2
+          done
+        }
         ;;
       Go)
         # gofmt doesn't produce non-zero exit code so we must check for non-empty output
         # https://github.com/golang/go/issues/24230
         if [ "$mode" == "check" ]; then
           GOFMT_OUT=$(mktemp)
-          (echo "$files" | tr \\n \\0 | xargs -0 "$bin" $args > "$GOFMT_OUT" ; times ) | ( read _ _; read tuser tsys; echo "Formatted ${lang} in ${tuser}" )
+          time {
+            echo "$files" | tr \\n \\0 | xargs -0 "$bin" $args > "$GOFMT_OUT"
+          }
           NEED_FMT="$(cat $GOFMT_OUT)"
           rm $GOFMT_OUT
           if [ -n "$NEED_FMT" ]; then
