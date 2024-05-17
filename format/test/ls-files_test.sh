@@ -45,6 +45,16 @@ js=$(ls-files JavaScript)
     echo >&2 -e "expected ls-files to return src.js, was\n$js"
     exit 1
 }
+js=$(ls-files JavaScript src.js gen1.js gen2.js gen3.js)
+[[ "$js" == "src.js" ]] || {
+    echo >&2 -e "expected ls-files to return src.js, was\n$js"
+    exit 1
+}
+js=$(ls-files JavaScript src.js gen1.js gen2.js gen3.js --disable_git_attribute_checks)
+[[ "$js" == "src.js gen1.js gen2.js gen3.js" ]] || {
+    echo >&2 -e "expected ls-files to return src.js gen1.js gen2.js gen3.js, was\n$js"
+    exit 1
+}
 
 # deleted files should be ignored
 git rm src.css

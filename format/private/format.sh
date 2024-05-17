@@ -49,6 +49,12 @@ trap on_exit EXIT
 # Exports a function that is similar to 'git ls-files'
 # ls-files <language> [<file>...]
 function ls-files {
+    disable_git_attribute_checks=false
+    if [[ "${!#}" == "--disable_git_attribute_checks" ]]; then
+      set -- "${@:1:$#-1}"
+      disable_git_attribute_checks=true
+    fi
+
     language="$1" && shift;
     # Copied file patterns from
     # https://github.com/github-linguist/linguist/blob/559a6426942abcae16b6d6b328147476432bf6cb/lib/linguist/languages.yml
@@ -101,15 +107,6 @@ function ls-files {
             "^$(git ls-files --deleted)$" \
           || true;
         })
-        if [[ $files != "" ]]; then
-            git_attributes=$(git check-attr -a -- $files)
-            for file in $files; do
-                # Check if any of the attributes we ignore are set for this file.
-                if ! grep -qE "(^| )$file: (rules-lint-ignored|linguist-generated|gitlab-generated): set($| )" <<< $git_attributes; then
-                    echo $file
-                fi
-            done
-        fi
     else
         # When given arguments, they are glob patterns of the superset of files to format.
         # We just need to filter those so we only select files for this language
@@ -122,7 +119,22 @@ function ls-files {
           fi
           find_args+=("-name" "${patterns[$i]}")
         done
-        find "$@" "${find_args[@]}"
+        files=$(find "$@" "${find_args[@]}")
+    fi
+
+    if [[ $disable_git_attribute_checks == true ]]; then
+      echo $files
+      return
+    fi
+
+    if [[ $files != "" ]]; then
+        git_attributes=$(git check-attr rules-lint-ignored linguist-generated gitlab-generated -- $files)
+        for file in $files; do
+            # Check if any of the attributes we ignore are set for this file.
+            if ! grep -qE "(^| )$file: (rules-lint-ignored|linguist-generated|gitlab-generated): set($| )" <<< $git_attributes; then
+                echo $file
+            fi
+        done
     fi
 }
 
