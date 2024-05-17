@@ -114,7 +114,7 @@ def format_multirun(name, jobs = 4, print_command = False, **kwargs):
         **common_attrs
     )
 
-def format_test(name, srcs = None, workspace = None, no_sandbox = False, tags = [], **kwargs):
+def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable_git_attribute_checks = False, tags = [], **kwargs):
     """Create test for the given formatters.
 
     Intended to be used with `bazel test` to verify files are formatted.
@@ -127,6 +127,7 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, tags = 
             Typically `//:WORKSPACE` or `//:MODULE.bazel` may be used.
         no_sandbox: Set to True to enable formatting all files in the workspace.
             This mode causes the test to be non-hermetic and it cannot be cached. Read the documentation in /docs/formatting.md.
+        disable_git_attribute_checks: Set to True to disable honoring .gitattributes filters
         tags: tags to apply to generated targets. In 'no_sandbox' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.
         **kwargs: attributes named for each language, providing Label of a tool that formats it
     """
@@ -152,6 +153,9 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, tags = 
         else:
             attrs["data"] = [tool_label, workspace]
             attrs["env"]["WORKSPACE"] = "$(location {})".format(workspace)
+
+        if disable_git_attribute_checks:
+            attrs["args"].push("--disable_git_attribute_checks")
 
         native.sh_test(
             srcs = [Label("@aspect_rules_lint//format/private:format.sh")],
