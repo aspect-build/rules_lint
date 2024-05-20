@@ -17,7 +17,7 @@ buf = lint_buf_aspect(
 eslint = lint_eslint_aspect(
     binary = "@@//tools/lint:eslint",
     # We trust that eslint will locate the correct configuration file for a given source file.
-    # See https://eslint.org/docs/latest/use/configure/configuration-files#cascading-and-hierarchy
+    # See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-file-resolution
     configs = [
         "@@//:eslintrc",
         "@@//src/subdir:eslintrc",

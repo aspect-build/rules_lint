@@ -9,7 +9,7 @@ py_library(
 
 js_library(
     name = "eslintrc",
-    srcs = [".eslintrc.cjs"],
+    srcs = ["eslint.config.mjs"],
     visibility = ["//:__subpackages__"],
     deps = ["//:eslintrc"],
 )

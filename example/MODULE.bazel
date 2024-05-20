@@ -49,11 +49,17 @@ npm.npm_translate_lock(
     npmrc = "//:.npmrc",
     pnpm_lock = "//:pnpm-lock.yaml",
     public_hoist_packages = {
-        "@typescript-eslint/eslint-plugin": [""],
+        "typescript-eslint": [""],
         "prettier-plugin-sql": [""],
     },
 )
 use_repo(npm, "npm")
+
+pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
+
+# Allows developers to use the matching pnpm version, for example:
+# bazel run -- @pnpm --dir /home/runner/work/rules_js/rules_js install
+use_repo(pnpm, "pnpm")
 
 python_version = "3.9"
 
