@@ -30,6 +30,7 @@ fi
 
 set -u
 
+FIX_CMD="bazel run ${FIX_TARGET:-} $@"
 function on_exit {
   code=$?
   case "$code" in
@@ -39,7 +40,7 @@ function on_exit {
       ;;
     *)
       echo >&2 "FAILED: A formatter tool exited with code $code"
-      echo >&2 "Try running 'bazel run $FIX_TARGET' to fix this."
+      echo >&2 "Try running '$FIX_CMD' to fix this."
       ;;
   esac
 }
