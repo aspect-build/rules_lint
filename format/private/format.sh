@@ -82,6 +82,7 @@ function ls-files {
       'Swift') patterns=('*.swift') ;;
       'TSX') patterns=('*.tsx') ;;
       'TypeScript') patterns=('*.ts' '*.cts' '*.mts') ;;
+      'Vue') patterns=('*.vue') ;;
       'YAML') patterns=('*.yml' '*.yaml' '.clang-format' '.clang-tidy' '.gemrc') ;;
 
       # Note: terraform fmt cannot handle all HCL files such as .terraform.lock
@@ -219,6 +220,7 @@ if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
     run-format "JSON" "$bin" "${flags:-""}" $@
     run-format "TSX" "$bin" "${flags:-""}" $@
     run-format "TypeScript" "$bin" "${flags:-""}" $@
+    run-format "Vue" "$bin" "${flags:-""}" $@
   fi
   if [[ "$lang" == "CSS" ]]; then
     run-format "Less" "$bin" "${flags:-""}" $@
