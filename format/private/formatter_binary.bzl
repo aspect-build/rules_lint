@@ -3,8 +3,11 @@
 # Per the formatter design, each language can only have a single formatter binary
 # Keys in this map must match the `case "$language" in` block in format.sh
 TOOLS = {
+    # NB: includes TypeScript and JSON
     "JavaScript": "prettier",
     "Markdown": "prettier",
+    "CSS": "prettier",
+    "HTML": "prettier",
     "Python": "ruff",
     "Starlark": "buildifier",
     "Jsonnet": "jsonnetfmt",

@@ -69,17 +69,20 @@ function ls-files {
       'JavaScript') patterns=('Jakefile' '*.js' '*._js' '*.bones' '*.cjs' '*.es' '*.es6' '*.frag' '*.gs' '*.jake' '*.javascript' '*.jsb' '*.jscad' '*.jsfl' '*.jslib' '*.jsm' '*.jspre' '*.jss' '*.jsx' '*.mjs' '*.njs' '*.pac' '*.sjs' '*.ssjs' '*.xsjs' '*.xsjslib') ;;
       'Jsonnet') patterns=('*.jsonnet' '*.libsonnet') ;;
       'Kotlin') patterns=('*.kt' '*.ktm' '*.kts') ;;
+      'Less') patterns=('*.less') ;;
       'Markdown') patterns=('contents.lr' '*.md' '*.livemd' '*.markdown' '*.mdown' '*.mdwn' '*.mkd' '*.mkdn' '*.mkdown' '*.ronn' '*.scd' '*.workbook') ;;
       'Protocol Buffer') patterns=('*.proto') ;;
       'Python') patterns=('.gclient' 'DEPS' 'SConscript' 'SConstruct' 'wscript' '*.py' '*.cgi' '*.fcgi' '*.gyp' '*.gypi' '*.lmi' '*.py3' '*.pyde' '*.pyi' '*.pyp' '*.pyt' '*.pyw' '*.rpy' '*.spec' '*.tac' '*.wsgi' '*.xpy') ;;
       'Rust') patterns=('*.rs' '*.rs.in') ;;
       'SQL') patterns=('*.sql' '*.cql' '*.ddl' '*.inc' '*.mysql' '*.prc' '*.tab' '*.udf' '*.viw') ;;
+      'SCSS') patterns=('*.scss') ;;
       'Scala') patterns=('*.scala' '*.kojo' '*.sbt' '*.sc') ;;
       'Shell') patterns=('.bash_aliases' '.bash_functions' '.bash_history' '.bash_logout' '.bash_profile' '.bashrc' '.cshrc' '.flaskenv' '.kshrc' '.login' '.profile' '.zlogin' '.zlogout' '.zprofile' '.zshenv' '.zshrc' '9fs' 'PKGBUILD' 'bash_aliases' 'bash_logout' 'bash_profile' 'bashrc' 'cshrc' 'gradlew' 'kshrc' 'login' 'man' 'profile' 'zlogin' 'zlogout' 'zprofile' 'zshenv' 'zshrc' '*.sh' '*.bash' '*.bats' '*.cgi' '*.command' '*.fcgi' '*.ksh' '*.sh.in' '*.tmux' '*.tool' '*.trigger' '*.zsh' '*.zsh-theme') ;;
       'Starlark') patterns=('BUCK' 'BUILD' 'BUILD.bazel' 'MODULE.bazel' 'Tiltfile' 'WORKSPACE' 'WORKSPACE.bazel' '*.bzl' '*.star') ;;
       'Swift') patterns=('*.swift') ;;
       'TSX') patterns=('*.tsx') ;;
       'TypeScript') patterns=('*.ts' '*.cts' '*.mts') ;;
+      'Vue') patterns=('*.vue') ;;
       'YAML') patterns=('*.yml' '*.yaml' '.clang-format' '.clang-tidy' '.gemrc') ;;
 
       # Note: terraform fmt cannot handle all HCL files such as .terraform.lock
@@ -214,10 +217,13 @@ if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
   # Currently these aren't exposed as separate languages to the attributes of format_multirun
   # So we format all these languages as part of "JavaScript".
   if [[ "$lang" == "JavaScript" ]]; then
-    run-format "CSS" "$bin" "${flags:-""}" $@
-    run-format "HTML" "$bin" "${flags:-""}" $@
     run-format "JSON" "$bin" "${flags:-""}" $@
     run-format "TSX" "$bin" "${flags:-""}" $@
     run-format "TypeScript" "$bin" "${flags:-""}" $@
+    run-format "Vue" "$bin" "${flags:-""}" $@
+  fi
+  if [[ "$lang" == "CSS" ]]; then
+    run-format "Less" "$bin" "${flags:-""}" $@
+    run-format "SCSS" "$bin" "${flags:-""}" $@
   fi
 fi

@@ -12,9 +12,8 @@ bats_load_library "bats-assert"
     assert_output --partial "+ prettier --write example/eslint.config.mjs"
     assert_output --partial "+ prettier --write example/src/file.ts example/test/no_violations.ts"
     assert_output --partial "+ prettier --write example/src/hello.tsx"
+    assert_output --partial "+ prettier --write example/src/hello.vue"
     assert_output --partial "+ prettier --write .bcr/metadata.template.json"
-    assert_output --partial "+ prettier --write example/src/hello.css"
-    assert_output --partial "+ prettier --write example/src/index.html"
 }
 
 # File arguments: will filter with find
@@ -39,6 +38,22 @@ bats_load_library "bats-assert"
     assert_success
 
     assert_output --partial "+ prettier --write .bcr/README.md CONTRIBUTING.md README.md"
+}
+
+@test "should run prettier on CSS" {
+    run bazel run //format/test:format_CSS_with_prettier
+    assert_success
+
+    assert_output --partial "+ prettier --write example/src/hello.css"
+    assert_output --partial "+ prettier --write example/src/hello.less"
+    assert_output --partial "+ prettier --write example/src/hello.scss"
+}
+
+@test "should run prettier on HTML" {
+    run bazel run //format/test:format_HTML_with_prettier
+    assert_success
+
+    assert_output --partial "+ prettier --write example/src/index.html"
 }
 
 @test "should run prettier on SQL" {
