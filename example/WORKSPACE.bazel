@@ -38,16 +38,16 @@ install_deps()
 
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "ac6392cbe5e1cc7701bbd81caf94016bae6f248780e12af4485d4a7127b4cb2b",
-    strip_prefix = "bazel-lib-2.6.1",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.6.1/bazel-lib-v2.6.1.tar.gz",
+    sha256 = "87ab4ec479ebeb00d286266aca2068caeef1bb0b1765e8f71c7b6cfee6af4226",
+    strip_prefix = "bazel-lib-2.7.3",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.3/bazel-lib-v2.7.3.tar.gz",
 )
 
 http_archive(
     name = "aspect_rules_js",
-    sha256 = "41129b17c0951b663a30c55710a0842767cd162137b7cd3a200f43e32161ce7a",
-    strip_prefix = "rules_js-1.40.0",
-    url = "https://github.com/aspect-build/rules_js/releases/download/v1.40.0/rules_js-v1.40.0.tar.gz",
+    sha256 = "5a28b79064a23b944413c6d0c2bdd3a154ac384c8dcf21a9bf54d91efef94163",
+    strip_prefix = "rules_js-2.0.0-alpha.7",
+    url = "https://github.com/aspect-build/rules_js/releases/download/v2.0.0-alpha.7/rules_js-v2.0.0-alpha.7.tar.gz",
 )
 
 http_archive(
@@ -56,6 +56,10 @@ http_archive(
     strip_prefix = "bazel_features-1.9.0",
     url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.9.0/bazel_features-v1.9.0.tar.gz",
 )
+
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+
+bazel_features_deps()
 
 load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_register_toolchains")
 
@@ -87,9 +91,9 @@ npm_repositories()
 
 http_archive(
     name = "aspect_rules_ts",
-    sha256 = "c77f0dfa78c407893806491223c1264c289074feefbf706721743a3556fa7cea",
-    strip_prefix = "rules_ts-2.2.0",
-    url = "https://github.com/aspect-build/rules_ts/releases/download/v2.2.0/rules_ts-v2.2.0.tar.gz",
+    sha256 = "abdbeb62e2a5c00eb29e1aea3269e7c4e9f065415e77720227b34f0cfb75012c",
+    strip_prefix = "rules_ts-3.0.0-alpha.1",
+    url = "https://github.com/aspect-build/rules_ts/releases/download/v3.0.0-alpha.1/rules_ts-v3.0.0-alpha.1.tar.gz",
 )
 
 load("@aspect_rules_ts//ts:repositories.bzl", "rules_ts_dependencies")

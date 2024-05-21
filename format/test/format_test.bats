@@ -9,7 +9,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_JavaScript_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write example/.eslintrc.cjs"
+    assert_output --partial "+ prettier --write example/eslint.config.mjs"
     assert_output --partial "+ prettier --write example/src/file.ts example/test/no_violations.ts"
     assert_output --partial "+ prettier --write example/src/hello.tsx"
     assert_output --partial "+ prettier --write .bcr/metadata.template.json"

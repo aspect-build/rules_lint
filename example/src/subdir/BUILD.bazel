@@ -8,13 +8,6 @@ py_library(
 )
 
 js_library(
-    name = "eslintrc",
-    srcs = [".eslintrc.cjs"],
-    visibility = ["//:__subpackages__"],
-    deps = ["//:eslintrc"],
-)
-
-js_library(
     name = "eslint-override",
     srcs = ["index.js"],
 )
