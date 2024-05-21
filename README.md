@@ -24,7 +24,7 @@ New tools are being added frequently, so check this page again!
 | Language               | Formatter             | Linter(s)        |
 | ---------------------- | --------------------- | ---------------- |
 | C / C++                | [clang-format]        | ([#112])         |
-| CSS                    | [Prettier]            |                  |
+| CSS, Less, Sass        | [Prettier]            |                  |
 | Go                     | [gofmt] or [gofumpt]  |                  |
 | HCL (Hashicorp Config) | [terraform] fmt       |                  |
 | HTML                   | [Prettier]            |                  |

@@ -41,6 +41,22 @@ bats_load_library "bats-assert"
     assert_output --partial "+ prettier --write .bcr/README.md CONTRIBUTING.md README.md"
 }
 
+@test "should run prettier on CSS" {
+    run bazel run //format/test:format_CSS_with_prettier
+    assert_success
+
+    assert_output --partial "+ prettier --write example/src/hello.css"
+    assert_output --partial "+ prettier --write example/src/hello.less"
+    assert_output --partial "+ prettier --write example/src/hello.scss"
+}
+
+@test "should run prettier on HTML" {
+    run bazel run //format/test:format_HTML_with_prettier
+    assert_success
+
+    assert_output --partial "+ prettier --write example/src/index.html"
+}
+
 @test "should run prettier on SQL" {
     run bazel run //format/test:format_SQL_with_prettier
     assert_success
