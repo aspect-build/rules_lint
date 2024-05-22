@@ -44,7 +44,7 @@ EOF
 	assert_success
 
 	# Check that we created a 'patch -p1' format file that fixes the ESLint violation
-	run cat bazel-bin/src/ESLint.ts.aspect_rules_lint.patch
+	run cat bazel-bin/src/ts.aspect_rules_lint.ESLint.patch
 	assert_success
 	echo <<"EOF" | assert_output --partial
 --- a/src/file.ts
@@ -57,7 +57,7 @@ EOF
 EOF
 
 	# Check that we created a 'patch -p1' format file that fixes the ruff violation
-	run cat bazel-bin/src/ruff.unused_import.aspect_rules_lint.patch
+	run cat bazel-bin/src/unused_import.aspect_rules_lint.ruff.patch
 	assert_success
 	echo <<"EOF" | assert_output --partial
 --- a/src/unused_import.py
