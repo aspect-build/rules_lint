@@ -25,7 +25,7 @@ export default tseslint.config(
     rules: {
       "no-debugger": "off",
       "@typescript-eslint/no-redundant-type-constituents": "error",
-      "sort-imports": "error",
+      "sort-imports": "warn",
     },
   }
 );
