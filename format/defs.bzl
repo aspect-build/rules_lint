@@ -1,7 +1,7 @@
 """Produce a multi-formatter that aggregates formatter tools.
 
-Some formatter tools are automatically provided by default in rules_lint.
-These are listed as defaults in the API docs below and come from [multitool].
+Some formatter tools may be installed by [multitool].
+These are noted in the API docs below.
 
 Note: Under `--enable_bzlmod`, rules_lint installs multitool automatically.
 `WORKSPACE` users must install it manually; see the snippet on the releases page.
@@ -43,7 +43,7 @@ format_multirun(
 load("@aspect_bazel_lib//lib:lists.bzl", "unique")
 load("@aspect_bazel_lib//lib:utils.bzl", "propagate_common_rule_attributes", "propagate_common_test_rule_attributes")
 load("@rules_multirun//:defs.bzl", "command", "multirun")
-load("//format/private:formatter_binary.bzl", "CHECK_FLAGS", "DEFAULT_TOOL_LABELS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
+load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
 def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
     if mode not in ["check", "fix", "test"]:
@@ -80,9 +80,10 @@ Some languages have dialects:
 """,
     attrs = {
         to_attribute_name(key): attr.label(
-            doc = """a `{0}` binary, or any other tool that has a matching command-line interface.
-            Use `False` to disable {1} formatting.""".format(value, key),
-            default = DEFAULT_TOOL_LABELS.get(key, None),
+            doc = "a `{0}` binary, or any other tool that has a matching command-line interface. {1}".format(
+                value,
+                "Use `@aspect_rules_lint//format:{}` to choose the built-in tool.".format(BUILTIN_TOOL_LABELS[key].split("/")[-1]) if key in BUILTIN_TOOL_LABELS.keys() else "",
+            ),
         )
         for key, value in TOOLS.items()
     },
@@ -204,20 +205,10 @@ def _tools_loop(name, kwargs):
 
     for lang, toolname in TOOLS.items():
         lang_attribute = to_attribute_name(lang)
-
-        # Logic:
-        # - if there's no value for this key, the user omitted it, so use our default if we have one
-        # - if there is a value, and it's False, then skip this language
-        #   (and make sure we don't eagerly reference @multitool in case it isn't defined)
-        # - otherwise use the user-supplied value
-        tool_label = False
-        if lang_attribute in kwargs.keys():
-            tool_label = kwargs.pop(lang_attribute)
-        elif lang in DEFAULT_TOOL_LABELS.keys():
-            tool_label = Label(DEFAULT_TOOL_LABELS[lang])
-        if not tool_label:
+        if lang_attribute not in kwargs.keys():
             continue
 
+        tool_label = kwargs.pop(lang_attribute)
         target_name = "_".join([name, lang.replace(" ", "_"), "with", toolname])
 
         result.append((lang, toolname, tool_label, target_name))

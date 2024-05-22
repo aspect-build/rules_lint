@@ -1,11 +1,22 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS")
+
+package(default_visibility = ["//visibility:public"])
 
 exports_files(glob(["*.bzl"]))
+
+# Alias the multitools for strict repo visibility under bzlmod
+[
+    alias(
+        name = v.split("/")[-1],
+        actual = v,
+    )
+    for v in BUILTIN_TOOL_LABELS.values()
+]
 
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
-    visibility = ["//visibility:public"],
     deps = [
         "//format/private:formatter_binary",
         "@aspect_bazel_lib//lib:lists",
@@ -17,7 +28,6 @@ bzl_library(
 bzl_library(
     name = "repositories",
     srcs = ["repositories.bzl"],
-    visibility = ["//visibility:public"],
     deps = [
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",

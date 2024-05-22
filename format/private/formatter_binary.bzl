@@ -25,8 +25,8 @@ TOOLS = {
     "Rust": "rustfmt",
 }
 
-# Provide defaults to make install more convenient
-DEFAULT_TOOL_LABELS = {
+# Provided to make install more convenient
+BUILTIN_TOOL_LABELS = {
     "Jsonnet": "@multitool//tools/jsonnetfmt",
     "Go": "@multitool//tools/gofumpt",
     "Shell": "@multitool//tools/shfmt",
