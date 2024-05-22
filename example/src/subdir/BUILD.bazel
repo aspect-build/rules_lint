@@ -20,6 +20,7 @@ ts_project(
     transpiler = "tsc",
     tsconfig = "//src:tsconfig",
     deps = [
+        "//:node_modules/@types/node",
         "//:node_modules/moment",
     ],
 )
