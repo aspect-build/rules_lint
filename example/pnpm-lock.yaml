@@ -6,10 +6,18 @@ settings:
 
 packageExtensionsChecksum: 19f0d7e792b840865d8c76630f5d93fb
 
+dependencies:
+  moment:
+    specifier: "*"
+    version: 1.0.0
+
 devDependencies:
   "@eslint/js":
-    specifier: ^9.3.0
+    specifier: ^9
     version: 9.3.0
+  "@types/node":
+    specifier: ^18
+    version: 18.0.0
   eslint:
     specifier: ^9
     version: 9.3.0
@@ -141,6 +149,13 @@ packages:
     dependencies:
       "@nodelib/fs.scandir": 2.1.5
       fastq: 1.15.0
+    dev: true
+
+  /@types/node@18.0.0:
+    resolution:
+      {
+        integrity: sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA==,
+      }
     dev: true
 
   /@typescript-eslint/eslint-plugin@7.10.0(@typescript-eslint/parser@7.10.0)(eslint@9.3.0)(typescript@4.9.5):
@@ -982,6 +997,13 @@ packages:
     dependencies:
       brace-expansion: 2.0.1
     dev: true
+
+  /moment@1.0.0:
+    resolution:
+      {
+        integrity: sha512-OJ+qbuimy8etd9x6HbyUdB0vaneRbm7EXuXs/EewK93a9GwoJfx/E15kbBAMQzZq3N7IdEFY3jwcOzNwILJWoA==,
+      }
+    dev: false
 
   /moo@0.5.2:
     resolution:

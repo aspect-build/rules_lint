@@ -1,6 +1,10 @@
 {
+  "dependencies": {
+    "moment": "*"
+  },
   "devDependencies": {
     "@eslint/js": "^9",
+    "@types/node": "^18",
     "eslint": "^9",
     "prettier": "^2.8.7",
     "prettier-plugin-sql": "^0.14.0",
