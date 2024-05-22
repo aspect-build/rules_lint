@@ -1,14 +1,19 @@
-"""Produce a multi-formatter that aggregates formatters.
+"""Produce a multi-formatter that aggregates formatter tools.
 
-Some formatter tools are automatically provided by default in rules_lint.
-These are listed as defaults in the API docs below.
+Some formatter tools may be installed by [multitool].
+These are noted in the API docs below.
+
+Note: Under `--enable_bzlmod`, rules_lint installs multitool automatically.
+`WORKSPACE` users must install it manually; see the snippet on the releases page.
 
 Other formatter binaries may be declared in your repository.
 You can test that they work by running them directly with `bazel run`.
 
-For example, to add prettier, your `BUILD.bazel` file should contain:
+For example, to add [Prettier]:
 
-```
+1. Add to your `BUILD.bazel` file:
+
+```starlark
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 
 prettier.prettier_binary(
@@ -18,24 +23,27 @@ prettier.prettier_binary(
 )
 ```
 
-and you can test it with `bazel run //path/to:prettier -- --help`.
+2. Try it with `bazel run //path/to:prettier -- --help`.
+3. Register it with `format_multirun`:
 
-Then you can register it with `format_multirun`:
-
-```
+```starlark
 load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 
 format_multirun(
     name = "format",
     javascript = ":prettier",
+    ... more languages
 )
 ```
+
+[Prettier]: https://prettier.io/
+[multitool]: https://registry.bazel.build/modules/rules_multitool
 """
 
 load("@aspect_bazel_lib//lib:lists.bzl", "unique")
 load("@aspect_bazel_lib//lib:utils.bzl", "propagate_common_rule_attributes", "propagate_common_test_rule_attributes")
 load("@rules_multirun//:defs.bzl", "command", "multirun")
-load("//format/private:formatter_binary.bzl", "CHECK_FLAGS", "DEFAULT_TOOL_LABELS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
+load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
 def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
     if mode not in ["check", "fix", "test"]:
@@ -55,30 +63,50 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
         "data": [tool_label],
     }
 
+languages = rule(
+    implementation = lambda ctx: fail("languages rule is documentation-only; do not call it"),
+    doc = """\
+Language attributes that may be passed to [format_multirun](#format_multirun) or [format_test](#format_test).
+    
+Files with matching extensions from [GitHub Linguist] will be formatted for the given language.
+
+Some languages have dialects:
+    - `javascript` includes TypeScript, TSX, and JSON.
+    - `css` includes Less and Sass.
+
+**Do not call the `languages` rule directly, it exists only to document the attributes.**
+
+[GitHub Linguist]: https://github.com/github-linguist/linguist/blob/559a6426942abcae16b6d6b328147476432bf6cb/lib/linguist/languages.yml
+""",
+    attrs = {
+        to_attribute_name(key): attr.label(
+            doc = "a `{0}` binary, or any other tool that has a matching command-line interface. {1}".format(
+                value,
+                "Use `@aspect_rules_lint//format:{}` to choose the built-in tool.".format(BUILTIN_TOOL_LABELS[key].split("/")[-1]) if key in BUILTIN_TOOL_LABELS.keys() else "",
+            ),
+        )
+        for key, value in TOOLS.items()
+    },
+)
+
 def format_multirun(name, jobs = 4, print_command = False, **kwargs):
-    """Create a multirun binary for the given formatters.
+    """Create a [multirun] binary for the given languages.
 
     Intended to be used with `bazel run` to update source files in-place.
-    To check formatting with `bazel test`, see [format_test](#format_test).
 
-    Also produces a target `[name].check` which does not edit files, rather it exits non-zero
-    if any sources require formatting.
+    This macro produces a target named `[name].check` which does not edit files,
+    rather it exits non-zero if any sources require formatting.
 
-    Tools are provided by default for some languages.
-    These come from the `@multitool` repo.
-    Under --enable_bzlmod, rules_lint creates this automatically.
-    WORKSPACE users will have to set this up manually. See the release install snippet for an example.
+    Not recommended: to check formatting with `bazel test`, use [format_test](#format_test) instead.
 
-    Set any attribute to `False` to turn off that language altogether, rather than use a default tool.
-
-    Note that `javascript` is a special case which also formats TypeScript, TSX, JSON, CSS, and HTML.
+    [multirun]: https://registry.bazel.build/modules/rules_multirun
 
     Args:
         name: name of the resulting target, typically "format"
         jobs: how many language formatters to spawn in parallel, ideally matching how many CPUs are available
         print_command: whether to print a progress message before calling the formatter of each language.
             Note that a line is printed for a formatter even if no files of that language are to be formatted.
-        **kwargs: attributes named for each language, providing Label of a tool that formats it
+        **kwargs: attributes named for each language; see [languages](#languages)
     """
     commands = []
 
@@ -118,6 +146,8 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
     """Create test for the given formatters.
 
     Intended to be used with `bazel test` to verify files are formatted.
+    This is not recommended, because it is either non-hermetic or requires listing all source files.
+
     To format with `bazel run`, see [format_multirun](#format_multirun).
 
     Args:
@@ -129,7 +159,7 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             This mode causes the test to be non-hermetic and it cannot be cached. Read the documentation in /docs/formatting.md.
         disable_git_attribute_checks: Set to True to disable honoring .gitattributes filters
         tags: tags to apply to generated targets. In 'no_sandbox' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.
-        **kwargs: attributes named for each language, providing Label of a tool that formats it
+        **kwargs: attributes named for each language; see [languages](#languages)
     """
     if srcs and workspace:
         fail("Cannot provide both 'srcs' and 'workspace' at the same time")
@@ -175,20 +205,10 @@ def _tools_loop(name, kwargs):
 
     for lang, toolname in TOOLS.items():
         lang_attribute = to_attribute_name(lang)
-
-        # Logic:
-        # - if there's no value for this key, the user omitted it, so use our default if we have one
-        # - if there is a value, and it's False, then skip this language
-        #   (and make sure we don't eagerly reference @multitool in case it isn't defined)
-        # - otherwise use the user-supplied value
-        tool_label = False
-        if lang_attribute in kwargs.keys():
-            tool_label = kwargs.pop(lang_attribute)
-        elif lang in DEFAULT_TOOL_LABELS.keys():
-            tool_label = Label(DEFAULT_TOOL_LABELS[lang])
-        if not tool_label:
+        if lang_attribute not in kwargs.keys():
             continue
 
+        tool_label = kwargs.pop(lang_attribute)
         target_name = "_".join([name, lang.replace(" ", "_"), "with", toolname])
 
         result.append((lang, toolname, tool_label, target_name))

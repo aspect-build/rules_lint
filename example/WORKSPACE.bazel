@@ -286,9 +286,7 @@ fetch_ktlint()
 
 ########################
 # Optional: multitool provides defaults for some tools such as yamlfmt
-# If you do not set up multitool, you will be forced to either set an explicit tool
-# for languages that have a default, or set explicit False value, e.g.
-#   format_multirun(jsonnet = False)
+# If you do not set up multitool, you must provide these tools yourself
 load("@rules_multitool//multitool:multitool.bzl", "multitool")
 
 multitool(

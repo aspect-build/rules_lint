@@ -54,21 +54,26 @@ format_multirun(
     name = "format",
     cc = "@llvm_toolchain_llvm//:bin/clang-format",
     css = ":prettier",
+    go = "@aspect_rules_lint//format:gofumpt",
     html = ":prettier",
     # You can use standard gofmt instead of stricter gofumpt:
     # go = "@go_sdk//:bin/gofmt",
     java = ":java-format",
     javascript = ":prettier",
+    jsonnet = "@aspect_rules_lint//format:jsonnetfmt",
     kotlin = ":ktfmt",
     markdown = ":prettier",
     protocol_buffer = "//tools/lint:buf",
     python = "//tools/lint:ruff",
     rust = "@rules_rust//tools/rustfmt:upstream_rustfmt",
     scala = ":scalafmt",
+    shell = "@aspect_rules_lint//format:shfmt",
     sql = ":prettier",
     starlark = "@buildifier_prebuilt//:buildifier",
     swift = ":swiftformat",
+    terraform = "@aspect_rules_lint//format:terraform",
     visibility = ["//:__subpackages__"],
+    yaml = "@aspect_rules_lint//format:yamlfmt",
 )
 
 format_test(
