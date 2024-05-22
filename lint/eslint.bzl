@@ -68,7 +68,7 @@ def _gather_inputs(ctx, srcs):
         js_inputs = js_lib_helpers.gather_files_from_js_providers(
             ctx.attr._config_files + [ctx.attr._workaround_17660, ctx.attr._formatter],
             include_transitive_sources = True,
-            include_declarations = False,
+            include_declarations = True,
             include_npm_linked_packages = True,
         )
     else:
@@ -77,8 +77,8 @@ def _gather_inputs(ctx, srcs):
             ctx.attr._config_files + [ctx.attr._workaround_17660, ctx.attr._formatter],
             include_sources = True,
             include_transitive_sources = True,
-            include_types = False,
-            include_transitive_types = False,
+            include_types = True,
+            include_transitive_types = True,
             include_npm_sources = True,
         )
     inputs.extend(js_inputs.to_list())

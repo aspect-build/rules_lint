@@ -1,4 +1,7 @@
 {
+  "dependencies": {
+    "moment": "*"
+  },
   "devDependencies": {
     "@eslint/js": "^9",
     "eslint": "^9",

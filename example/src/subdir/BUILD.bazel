@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 
 exports_files(["ruff.toml"])
 
@@ -10,4 +11,15 @@ py_library(
 js_library(
     name = "eslint-override",
     srcs = ["index.js"],
+)
+
+ts_project(
+    name = "ts",
+    srcs = ["test.ts"],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = "//src:tsconfig",
+    deps = [
+        "//:node_modules/moment",
+    ],
 )

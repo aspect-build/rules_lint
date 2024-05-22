@@ -1,10 +1,15 @@
 load("@aspect_rules_lint//format:defs.bzl", "format_test")
-load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
+
+ts_config(
+    name = "tsconfig",
+    src = "tsconfig.json",
+)
 
 filegroup(
     name = "md",
