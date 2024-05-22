@@ -1,4 +1,4 @@
-"Implementation of formatter_binary"
+"Utilities for format_multirun macro"
 
 # Per the formatter design, each language can only have a single formatter binary
 # Keys in this map must match the `case "$language" in` block in format.sh
@@ -25,6 +25,7 @@ TOOLS = {
     "Rust": "rustfmt",
 }
 
+# Provide defaults to make install more convenient
 DEFAULT_TOOL_LABELS = {
     "Jsonnet": "@multitool//tools/jsonnetfmt",
     "Go": "@multitool//tools/gofumpt",
@@ -33,6 +34,7 @@ DEFAULT_TOOL_LABELS = {
     "YAML": "@multitool//tools/yamlfmt",
 }
 
+# Flags to pass each tool's CLI when running in check mode
 CHECK_FLAGS = {
     "buildifier": "-mode=check",
     "swiftformat": "--lint",
@@ -51,6 +53,7 @@ CHECK_FLAGS = {
     "rustfmt": "--check",
 }
 
+# Flags to pass each tool when running in default mode
 FIX_FLAGS = {
     "buildifier": "-mode=fix",
     "swiftformat": "",
