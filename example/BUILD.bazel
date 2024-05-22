@@ -32,7 +32,6 @@ js_library(
     deps = [
         ":node_modules/@eslint/js",
         ":node_modules/typescript-eslint",
-        "//src:tsconfig",
     ],
 )
 

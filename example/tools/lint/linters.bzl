@@ -18,7 +18,11 @@ eslint = lint_eslint_aspect(
     binary = "@@//tools/lint:eslint",
     # ESLint will resolve the configuration file by looking in the working directory first.
     # See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-file-resolution
-    configs = ["@@//:eslintrc"],
+    # We must also include any other config files we expect eslint to be able to locate, e.g. tsconfigs
+    configs = [
+        "@@//:eslintrc",
+        "@@//src:tsconfig",
+    ],
 )
 
 eslint_test = lint_test(aspect = eslint)
