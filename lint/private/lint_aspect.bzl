@@ -25,10 +25,11 @@ lint_options = rule(
     },
 )
 
+_OUTFILE_FORMAT = "{label}.aspect_rules_lint.{mnemonic}.{suffix}"
+
 # buildifier: disable=function-docstring
 def report_files(mnemonic, target, ctx):
-    outfile = "{}.{}.aspect_rules_lint.{}"
-    report = ctx.actions.declare_file(outfile.format(mnemonic, target.label.name, "report"))
+    report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report"))
     outs = [report]
     if ctx.attr._options[LintOptionsInfo].fail_on_violation:
         # Fail on violation means the exit code is reported to Bazel as the action result
@@ -37,12 +38,12 @@ def report_files(mnemonic, target, ctx):
         # The exit code should instead be provided as an action output so the build succeeds.
         # Downstream tooling like `aspect lint` will be responsible for reading the exit codes
         # and interpreting them.
-        exit_code = ctx.actions.declare_file(outfile.format(mnemonic, target.label.name, "exit_code"))
+        exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "exit_code"))
         outs.append(exit_code)
     return report, exit_code, OutputGroupInfo(rules_lint_report = depset(outs))
 
 def patch_file(mnemonic, target, ctx):
-    patch = ctx.actions.declare_file("{}.{}.aspect_rules_lint.patch".format(mnemonic, target.label.name))
+    patch = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "patch"))
     return patch, OutputGroupInfo(rules_lint_patch = depset([patch]))
 
 # If we return multiple OutputGroupInfo from a rule implementation, only one will get used.
