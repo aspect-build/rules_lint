@@ -43,12 +43,19 @@ def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, o
     args.add_all(srcs)
     outputs = [stdout]
 
+    # Exit early when srcs is empty. This can happen when all srcs are generated files.
     if exit_code:
-        command = "{shellcheck} $@ >{stdout} 2>&1; echo $? >" + exit_code.path
+        if len(srcs) == 0:
+            command = "touch {stdout} && echo 0 >" + exit_code.path
+        else:
+            command = "{shellcheck} $@ >{stdout} 2>&1; echo $? >" + exit_code.path
         outputs.append(exit_code)
     else:
         # Create empty file on success, as Bazel expects one
-        command = "{shellcheck} $@ && touch {stdout}"
+        if len(srcs) == 0:
+            command = "touch {stdout}"
+        else:
+            command = "{shellcheck} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
