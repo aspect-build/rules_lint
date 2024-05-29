@@ -2,8 +2,7 @@
 
 set -o nounset -o errexit -o pipefail
 
-BUILD_WORKSPACE_DIRECTORY=$TEST_TMPDIR
-source $TEST_SRCDIR/_main/format/private/format.sh
+BUILD_WORKSPACE_DIRECTORY=$TEST_TMPDIR source "$TEST_SRCDIR/_main/format/private/format.sh"
 
 git init --initial-branch=test
 
@@ -51,7 +50,11 @@ js=$(ls-files JavaScript src.js gen1.js gen2.js gen3.js)
     exit 1
 }
 js=$(ls-files JavaScript src.js gen1.js gen2.js gen3.js --disable_git_attribute_checks)
-[[ "$js" == "src.js gen1.js gen2.js gen3.js" ]] || {
+expected='src.js
+gen1.js
+gen2.js
+gen3.js'
+[[ "$js" == "$expected" ]] || {
     echo >&2 -e "expected ls-files to return src.js gen1.js gen2.js gen3.js, was\n$js"
     exit 1
 }

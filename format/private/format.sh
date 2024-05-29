@@ -127,7 +127,10 @@ function ls-files {
     fi
 
     if [[ $disable_git_attribute_checks == true ]]; then
-      echo $files
+      # files should be returned newline separated to avoid a "File name too long" error
+      for file in $files; do
+        echo "$file"
+      done
       return
     fi
 
@@ -136,7 +139,7 @@ function ls-files {
         for file in $files; do
             # Check if any of the attributes we ignore are set for this file.
             if ! grep -qE "(^| )$file: (rules-lint-ignored|linguist-generated|gitlab-generated): set($| )" <<< $git_attributes; then
-                echo $file
+                echo "$file"
             fi
         done
     fi
