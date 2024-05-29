@@ -44,7 +44,7 @@ def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, o
     outputs = [stdout]
 
     if exit_code:
-        command = "{shellcheck} $@ >{stdout}; echo $? >" + exit_code.path
+        command = "{shellcheck} $@ >{stdout} 2>&1; echo $? >" + exit_code.path
         outputs.append(exit_code)
     else:
         # Create empty file on success, as Bazel expects one
