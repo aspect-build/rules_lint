@@ -45,10 +45,18 @@ load("@aspect_bazel_lib//lib:utils.bzl", "propagate_common_rule_attributes", "pr
 load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
-def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
+def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks):
     if mode not in ["check", "fix", "test"]:
         fail("Invalid mode", mode)
 
+    args = []
+    if disable_git_attribute_checks:
+        args.append("--disable_git_attribute_checks")
+
+    # this dict is used to create the attributes both to pass to command() (for
+    # format_multirun) and to sh_test() (for format_test, so it has to toggle
+    # between different attr names ("env" vs "environment", "args" vs
+    # "arguments")
     return {
         "name": target_name + (".check" if mode in "check" else ""),
         ("env" if mode == "test" else "environment"): {
@@ -61,13 +69,14 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode):
             "mode": "check" if mode == "test" else mode,
         },
         "data": [tool_label],
+        ("args" if mode == "test" else "arguments"): args,
     }
 
 languages = rule(
     implementation = lambda ctx: fail("languages rule is documentation-only; do not call it"),
     doc = """\
 Language attributes that may be passed to [format_multirun](#format_multirun) or [format_test](#format_test).
-    
+
 Files with matching extensions from [GitHub Linguist] will be formatted for the given language.
 
 Some languages have dialects:
@@ -89,7 +98,7 @@ Some languages have dialects:
     },
 )
 
-def format_multirun(name, jobs = 4, print_command = False, **kwargs):
+def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute_checks = False, **kwargs):
     """Create a [multirun] binary for the given languages.
 
     Intended to be used with `bazel run` to update source files in-place.
@@ -106,6 +115,7 @@ def format_multirun(name, jobs = 4, print_command = False, **kwargs):
         jobs: how many language formatters to spawn in parallel, ideally matching how many CPUs are available
         print_command: whether to print a progress message before calling the formatter of each language.
             Note that a line is printed for a formatter even if no files of that language are to be formatted.
+        disable_git_attribute_checks: Set to True to disable honoring .gitattributes filters
         **kwargs: attributes named for each language; see [languages](#languages)
     """
     commands = []
@@ -119,7 +129,7 @@ def format_multirun(name, jobs = 4, print_command = False, **kwargs):
             command(
                 command = Label("@aspect_rules_lint//format/private:format"),
                 description = "Formatting {} with {}...".format(lang, toolname),
-                **_format_attr_factory(target_name, lang, toolname, tool_label, mode)
+                **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks)
             )
         commands.append(target_name)
 
@@ -176,16 +186,13 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
         kwargs.pop(k)
 
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
-        attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test")
+        attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test", disable_git_attribute_checks)
         if srcs:
             attrs["data"] = [tool_label] + srcs
             attrs["args"] = ["$(location {})".format(i) for i in srcs]
         else:
             attrs["data"] = [tool_label, workspace]
             attrs["env"]["WORKSPACE"] = "$(location {})".format(workspace)
-
-        if disable_git_attribute_checks:
-            attrs["args"].push("--disable_git_attribute_checks")
 
         native.sh_test(
             srcs = [Label("@aspect_rules_lint//format/private:format.sh")],

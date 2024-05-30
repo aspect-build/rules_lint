@@ -6,7 +6,7 @@ load("//format/private:formatter_binary.bzl", "TOOLS")
 sh_test(
     name = "ls-files_test",
     srcs = ["ls-files_test.sh"],
-    deps = ["//format/private:format"],
+    data = ["//format/private:format"],
 )
 
 UNIQUE_TOOLS = sets.to_list(sets.make(TOOLS.values()))
