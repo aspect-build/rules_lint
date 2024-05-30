@@ -97,7 +97,7 @@ def format_multirun(name, jobs = 4, print_command = False, **kwargs):
     This macro produces a target named `[name].check` which does not edit files,
     rather it exits non-zero if any sources require formatting.
 
-    Not recommended: to check formatting with `bazel test`, use [format_test](#format_test) instead.
+    To check formatting with `bazel test`, use [format_test](#format_test) instead.
 
     [multirun]: https://registry.bazel.build/modules/rules_multirun
 
@@ -146,7 +146,7 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
     """Create test for the given formatters.
 
     Intended to be used with `bazel test` to verify files are formatted.
-    This is not recommended, because it is either non-hermetic or requires listing all source files.
+    **This is not recommended**, because it is either non-hermetic or requires listing all source files.
 
     To format with `bazel run`, see [format_multirun](#format_multirun).
 
