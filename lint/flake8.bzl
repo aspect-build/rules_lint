@@ -28,7 +28,7 @@ flake8 = lint_flake8_aspect(
 
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
 
-_MNEMONIC = "flake8"
+_MNEMONIC = "AspectRulesLintFlake8"
 
 def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None):
     """Run flake8 as an action under Bazel.
@@ -67,6 +67,7 @@ def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None):
         command = command.format(flake8 = executable.path, stdout = stdout.path),
         arguments = [args],
         mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with Flake8",
     )
 
 # buildifier: disable=function-docstring

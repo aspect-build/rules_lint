@@ -54,7 +54,7 @@ load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
 
-_MNEMONIC = "ktlint"
+_MNEMONIC = "AspectRulesLintKTLint"
 
 def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None):
     """ Runs ktlint as build action in Bazel.
@@ -122,6 +122,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
         command = command.format(ktlint = executable.path, stdout = stdout.path),
         arguments = [args],
         mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with Ktlint",
         env = env,
     )
 

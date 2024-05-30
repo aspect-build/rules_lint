@@ -16,7 +16,8 @@ shellcheck = shellcheck_aspect(
 
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
 
-_MNEMONIC = "shellcheck"
+_MNEMONIC = "AspectRulesLintShellCheck"
+_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
     """Run shellcheck as an action under Bazel.
@@ -59,6 +60,7 @@ def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, o
         ),
         arguments = [args],
         mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with ShellCheck",
         tools = [executable],
     )
 
@@ -70,7 +72,7 @@ def _shellcheck_aspect_impl(target, ctx):
     files_to_lint = filter_srcs(ctx.rule)
     if ctx.attr._options[LintOptionsInfo].fix:
         patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
-        discard_exit_code = ctx.actions.declare_file("{}.{}.aspect_rules_lint.patch_exit_code".format(_MNEMONIC, target.label.name))
+        discard_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
         shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, patch, discard_exit_code, ["--format", "diff"])
     else:
         report, exit_code, info = report_files(_MNEMONIC, target, ctx)

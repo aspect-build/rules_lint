@@ -25,7 +25,7 @@ lint_options = rule(
     },
 )
 
-_OUTFILE_FORMAT = "{label}.aspect_rules_lint.{mnemonic}.{suffix}"
+_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 # buildifier: disable=function-docstring
 def report_files(mnemonic, target, ctx):

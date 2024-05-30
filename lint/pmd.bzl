@@ -30,7 +30,7 @@ pmd = pmd_aspect(
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
 
-_MNEMONIC = "PMD"
+_MNEMONIC = "AspectRulesLintPMD"
 
 def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
     """Run PMD as an action under Bazel.
@@ -73,6 +73,7 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
         arguments = [args, "--file-list", src_args],
         mnemonic = _MNEMONIC,
         tools = [executable],
+        progress_message = "Linting %{label} with PMD",
     )
 
 # buildifier: disable=function-docstring
