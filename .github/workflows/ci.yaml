@@ -21,7 +21,7 @@ jobs:
     uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v6
     with:
       folders: '[".", "example"]'
-      # Only test with Bazel 6. And we don't try for Windows support yet.
+      # Root module is bzlmod-only, and don't try for Windows support yet.
       exclude: |
         [
           {"bzlmodEnabled": false, "folder": "."},
