@@ -119,7 +119,7 @@ Not recommended: to check formatting with `bazel test`, use [format_test](#forma
 | <a id="format_multirun-name"></a>name |  name of the resulting target, typically "format"   |  none |
 | <a id="format_multirun-jobs"></a>jobs |  how many language formatters to spawn in parallel, ideally matching how many CPUs are available   |  <code>4</code> |
 | <a id="format_multirun-print_command"></a>print_command |  whether to print a progress message before calling the formatter of each language. Note that a line is printed for a formatter even if no files of that language are to be formatted.   |  <code>False</code> |
-| <a id="format_multirun-disable_git_attribute_checks"></a>disable_git_attribute_checks |  set to True to disable the checking of each file's git attributes to check if it should be excluding from formatting. This check can be slow for large codebases.   |  <code>False</code> |
+| <a id="format_multirun-disable_git_attribute_checks"></a>disable_git_attribute_checks |  Set to True to disable honoring .gitattributes filters   |  <code>False</code> |
 | <a id="format_multirun-kwargs"></a>kwargs |  attributes named for each language; see [languages](#languages)   |  none |
 
 
