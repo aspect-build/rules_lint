@@ -1,3 +1,4 @@
+load("@aspect_bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
@@ -10,6 +11,13 @@ filegroup(
     name = "empty_styles",
     srcs = [],
     visibility = ["//visibility:public"],
+)
+
+_BAZEL_TOOLS = [
+    "@bazel_tools//tools/build_defs/repo:http.bzl",
+    "@bazel_tools//tools/build_defs/repo:utils.bzl",
+] + (
+    ["@bazel_tools//tools/build_defs/repo:cache.bzl"] if bazel_lib_utils.is_bazel_7_or_greater() else []
 )
 
 config_setting(
@@ -129,10 +137,8 @@ bzl_library(
     name = "pmd",
     srcs = ["pmd.bzl"],
     visibility = ["//visibility:public"],
-    deps = [
+    deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
-        "@bazel_tools//tools/build_defs/repo:http.bzl",
-        "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ],
 )
 
@@ -140,11 +146,9 @@ bzl_library(
     name = "ruff",
     srcs = ["ruff.bzl"],
     visibility = ["//visibility:public"],
-    deps = [
+    deps = _BAZEL_TOOLS + [
         ":ruff_versions",
         "//lint/private:lint_aspect",
-        "@bazel_tools//tools/build_defs/repo:http.bzl",
-        "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ],
 )
 
@@ -165,12 +169,10 @@ bzl_library(
     name = "vale",
     srcs = ["vale.bzl"],
     visibility = ["//visibility:public"],
-    deps = [
+    deps = _BAZEL_TOOLS + [
         ":vale_library",
         ":vale_versions",
         "//lint/private:lint_aspect",
-        "@bazel_tools//tools/build_defs/repo:http.bzl",
-        "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ],
 )
 
@@ -190,10 +192,8 @@ bzl_library(
     name = "ktlint",
     srcs = ["ktlint.bzl"],
     visibility = ["//visibility:public"],
-    deps = [
+    deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
         "@bazel_skylib//lib:dicts",
-        "@bazel_tools//tools/build_defs/repo:http.bzl",
-        "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ],
 )

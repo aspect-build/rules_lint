@@ -2,8 +2,6 @@
 # Take care to document any settings that you expect users to apply.
 # Settings that apply only to CI are in .github/workflows/ci.bazelrc
 
-common --enable_bzlmod
-
 # Load any settings specific to the current user.
 # .bazelrc.user should appear in .gitignore so that settings are not shared with team members
 # This needs to be last statement in this
