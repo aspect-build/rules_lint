@@ -57,7 +57,7 @@ load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "c
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
 
-_MNEMONIC = "ESLint"
+_MNEMONIC = "AspectRulesLintESLint"
 
 def _gather_inputs(ctx, srcs):
     inputs = copy_files_to_bin_actions(ctx, srcs)
@@ -118,6 +118,7 @@ def eslint_action(ctx, executable, srcs, report, exit_code = None):
             command = executable._eslint.path + " $@ && touch " + report.path,
             env = env,
             mnemonic = _MNEMONIC,
+            progress_message = "Linting %{label} with ESLint",
         )
     else:
         # Workaround: create an empty report file in case eslint doesn't write one
@@ -134,6 +135,7 @@ def eslint_action(ctx, executable, srcs, report, exit_code = None):
             arguments = [args],
             env = env,
             mnemonic = _MNEMONIC,
+            progress_message = "Linting %{label} with ESLint",
         )
 
 def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
@@ -173,6 +175,7 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
         },
         tools = [executable._eslint],
         mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with ESLint",
     )
 
 # buildifier: disable=function-docstring

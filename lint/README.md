@@ -52,8 +52,8 @@ Add these three things:
    It should call the `my_linter_action` function.
    It must always return a `rules_lint_report` output group, which is easiest by using the
    `report_files` helper in `//lint/private:lint_aspect.bzl`.
-   The simple lint.sh also relies on the report output file being named following the convention
-   `*.aspect_rules_lint.report`, though this is a design smell.
+   The simple lint.sh also relies on the report output filenames containing `AspectRulesLint`, which comes from
+   the convention that `AspectRulesLint` is the prefix for all rules_lint linter action mnemonics.
 
 3. A `my_linter_aspect` factory function. This is a higher-order function that returns an aspect.
    This pattern allows us to capture arguments like labels and toolchains which aren't legal

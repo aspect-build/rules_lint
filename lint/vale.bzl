@@ -68,7 +68,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files")
 load(":vale_library.bzl", "fetch_styles")
 load(":vale_versions.bzl", "VALE_VERSIONS")
 
-_MNEMONIC = "Vale"
+_MNEMONIC = "AspectRulesLintVale"
 
 def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None):
     """Run Vale as an action under Bazel.
@@ -116,6 +116,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None)
         env = env,
         arguments = [args],
         mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with Vale",
         tools = [executable],
     )
 

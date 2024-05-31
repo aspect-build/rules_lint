@@ -14,7 +14,7 @@ buf = buf_lint_aspect(
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files")
 
-_MNEMONIC = "buf"
+_MNEMONIC = "AspectRulesLintBuf"
 
 def _short_path(file, _):
     return file.path
@@ -80,6 +80,7 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
         ),
         arguments = [args],
         mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with Buf",
     )
 
 def _buf_lint_aspect_impl(target, ctx):

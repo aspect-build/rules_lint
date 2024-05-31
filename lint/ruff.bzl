@@ -17,7 +17,7 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
-_MNEMONIC = "ruff"
+_MNEMONIC = "AspectRulesLintRuff"
 
 def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
     """Run ruff as an action under Bazel.
@@ -67,6 +67,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
         command = command.format(ruff = executable.path, stdout = stdout.path),
         arguments = [args],
         mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with Ruff",
         tools = [executable],
     )
 
@@ -107,6 +108,7 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
         },
         tools = [executable._ruff],
         mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with Ruff",
     )
 
 # buildifier: disable=function-docstring

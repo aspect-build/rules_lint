@@ -30,7 +30,7 @@ args=(
 	"--norun_validations"
 	"--build_event_json_file=$buildevents"
 	"--output_groups=rules_lint_report"
-	"--remote_download_regex='.*aspect_rules_lint.*'"
+	"--remote_download_regex='.*AspectRulesLint.*'"
 )
 
 # This is a rudimentary flag parser.
