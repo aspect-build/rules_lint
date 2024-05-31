@@ -22,7 +22,11 @@ jobs:
     with:
       folders: '[".", "example"]'
       # Only test with Bazel 6. And we don't try for Windows support yet.
-      exclude: '[{"bazelversion": "5.4.0"}, {"os": "windows-latest"}]'
+      exclude: |
+        [
+          {"bzlmodEnabled": false, "folder": "."},
+          {"os": "windows-latest"}
+        ]
 
   integration-test:
     runs-on: ubuntu-latest
