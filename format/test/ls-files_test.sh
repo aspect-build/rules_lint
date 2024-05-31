@@ -36,6 +36,7 @@ kt=$(ls-files Kotlin)
 # .gitattributes should allow more excludes
 cat >.gitattributes <<EOF
 gen1.js rules-lint-ignored
+gen2.js rules-lint-ignored
 gen2.js gitlab-generated
 gen3.js linguist-generated
 EOF
@@ -45,6 +46,11 @@ js=$(ls-files JavaScript)
     exit 1
 }
 js=$(ls-files JavaScript src.js gen1.js gen2.js gen3.js)
+[[ "$js" == "src.js" ]] || {
+    echo >&2 -e "expected ls-files to return src.js, was\n$js"
+    exit 1
+}
+js=$(ls-files JavaScript  gen1.js gen2.js gen3.js src.js)
 [[ "$js" == "src.js" ]] || {
     echo >&2 -e "expected ls-files to return src.js, was\n$js"
     exit 1
