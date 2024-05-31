@@ -28,3 +28,12 @@ multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitoo
 multitool.hub(lockfile = "//format:multitool.lock.json")
 multitool.hub(lockfile = "//lint:multitool.lock.json")
 use_repo(multitool, "multitool")
+
+# Locally, use newer bazel-lib for stardoc
+single_version_override(
+    module_name = "aspect_bazel_lib",
+    version = "2.7.7",
+)
+
+# 0.5.4 is the first version with bzlmod support
+bazel_dep(name = "stardoc", version = "0.5.4", dev_dependency = True, repo_name = "io_bazel_stardoc")
