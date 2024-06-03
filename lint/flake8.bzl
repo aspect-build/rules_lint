@@ -75,8 +75,12 @@ def _flake8_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["py_binary", "py_library"]:
         return []
 
+    files_to_lint = filter_srcs(ctx.rule)
+    if len(files_to_lint) == 0:
+        return []
+
     report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-    flake8_action(ctx, ctx.executable._flake8, filter_srcs(ctx.rule), ctx.file._config_file, report, exit_code)
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, report, exit_code)
     return [info]
 
 def lint_flake8_aspect(binary, config):

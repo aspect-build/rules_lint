@@ -27,7 +27,7 @@ ktlint = ktlint_aspect(
 )
 ```
 
-If you plan on using Ktlint [custom rulesets](https://pinterest.github.io/ktlint/1.2.1/install/cli/#rule-sets), you can also declare 
+If you plan on using Ktlint [custom rulesets](https://pinterest.github.io/ktlint/1.2.1/install/cli/#rule-sets), you can also declare
 an additional `ruleset_jar` attribute pointing to your custom ruleset jar like this
 
 ```
@@ -135,7 +135,11 @@ def _ktlint_aspect_impl(target, ctx):
     if hasattr(ctx.attr, "_ruleset_jar"):
         ruleset_jar = ctx.file._ruleset_jar
 
-    ktlint_action(ctx, ctx.executable._ktlint, filter_srcs(ctx.rule), ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
+    files_to_lint = filter_srcs(ctx.rule)
+    if len(files_to_lint) == 0:
+        return []
+
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):

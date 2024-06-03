@@ -81,8 +81,12 @@ def _pmd_aspect_impl(target, ctx):
     if ctx.rule.kind not in ["java_binary", "java_library"]:
         return []
 
+    files_to_lint = filter_srcs(ctx.rule)
+    if len(files_to_lint) == 0:
+        return []
+
     report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-    pmd_action(ctx, ctx.executable._pmd, filter_srcs(ctx.rule), ctx.files._rulesets, report, exit_code)
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code)
     return [info]
 
 def lint_pmd_aspect(binary, rulesets):

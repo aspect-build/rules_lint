@@ -70,6 +70,9 @@ def _shellcheck_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
+    if len(files_to_lint) == 0:
+        return []
+
     if ctx.attr._options[LintOptionsInfo].fix:
         patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         discard_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))

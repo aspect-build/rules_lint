@@ -117,6 +117,9 @@ def _ruff_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
+    if len(files_to_lint) == 0:
+        return []
+
     if ctx.attr._options[LintOptionsInfo].fix:
         patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, report, exit_code)
