@@ -135,14 +135,35 @@ function ls-files {
     fi
 
     if [[ $files != "" ]]; then
-        git_attributes=$(git check-attr rules-lint-ignored linguist-generated gitlab-generated -- $files)
-        for file in $files; do
-            # Check if any of the attributes we ignore are set for this file.
-            if ! grep -qE "(^| )$file: (rules-lint-ignored|linguist-generated|gitlab-generated): set($| )" <<< $git_attributes; then
-                echo "$file"
-            fi
-        done
-    fi
+      git_attributes=$(git check-attr rules-lint-ignored linguist-generated gitlab-generated --stdin <<<"$files")
+
+      # Iterate over each line of the output, files will be reported multiple times, once per attribute checked. To keep from formatting a file twice, we keep track of when the file has changed.
+      last_file=""
+      attribute_set=false
+      while IFS= read -r line; do
+          # Extract the file name and attribute values
+          file="${line%%:*}"
+
+          if [[ "$file" != "$last_file" ]]; then
+              # If no attribute is set for the previous file, add it to the output
+              if [[ "$attribute_set" == false && "$last_file" != "" ]]; then
+                  echo "$last_file"
+              fi
+              last_file="$file"
+              attribute_set=false
+          fi
+
+          # Check if the attribute is set
+          if [[ "$line" == *"set" ]]; then
+              attribute_set=true
+          fi
+      done <<< "$git_attributes"
+
+      # Handle the last file
+      if [[ "$attribute_set" == false && "$last_file" != "" ]]; then
+          echo "$last_file"
+      fi
+  fi
 }
 
 function time-run {
