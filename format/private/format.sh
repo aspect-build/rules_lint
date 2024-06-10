@@ -142,7 +142,7 @@ function ls-files {
       attribute_set=false
       while IFS= read -r line; do
           # Extract the file name and attribute values
-          file=$(echo "$line" | cut -d ':' -f 1)
+          file="${line%%:*}"
 
           if [[ "$file" != "$last_file" ]]; then
               # If no attribute is set for the previous file, add it to the output
