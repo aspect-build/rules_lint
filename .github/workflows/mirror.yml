@@ -20,3 +20,17 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: "chore: mirror external releases"
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and Extract Latest Multitool
+        run: wget -O- https://github.com/theoremlp/multitool/releases/latest/download/multitool-x86_64-unknown-linux-gnu.tar.xz | tar --strip-components=1 -xJf -
+      - name: Find Updates and Render Lockfile
+        run: |
+          ./multitool --lockfile lint/multitool.lock.json update
+          ./multitool --lockfile format/multitool.lock.json update
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "chore: update multitool versions"
