@@ -55,7 +55,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files")
 
 _MNEMONIC = "AspectRulesLintESLint"
 
@@ -184,12 +184,19 @@ def _eslint_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
+
     if ctx.attr._options[LintOptionsInfo].fix:
         patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
-        eslint_fix(ctx, ctx.executable, files_to_lint, patch, report, exit_code)
+        if len(files_to_lint) == 0:
+            dummy_successful_lint_action(ctx, report, exit_code, patch)
+        else:
+            eslint_fix(ctx, ctx.executable, files_to_lint, patch, report, exit_code)
     else:
         report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-        eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code)
+        if len(files_to_lint) == 0:
+            dummy_successful_lint_action(ctx, report, exit_code)
+        else:
+            eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code)
 
     return [info]
 
