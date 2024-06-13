@@ -28,7 +28,7 @@ pmd = pmd_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files")
 
 _MNEMONIC = "AspectRulesLintPMD"
 
@@ -82,11 +82,12 @@ def _pmd_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-    if len(files_to_lint) == 0:
-        return []
 
     report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code)
+    if len(files_to_lint) == 0:
+        dummy_successful_lint_action(ctx, report, exit_code)
+    else:
+        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code)
     return [info]
 
 def lint_pmd_aspect(binary, rulesets):

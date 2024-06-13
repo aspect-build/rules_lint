@@ -52,7 +52,7 @@ If your custom ruleset is a third-party dependency and not a first-party depende
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files")
 
 _MNEMONIC = "AspectRulesLintKTLint"
 
@@ -136,10 +136,11 @@ def _ktlint_aspect_impl(target, ctx):
         ruleset_jar = ctx.file._ruleset_jar
 
     files_to_lint = filter_srcs(ctx.rule)
-    if len(files_to_lint) == 0:
-        return []
 
-    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
+    if len(files_to_lint) == 0:
+        dummy_successful_lint_action(ctx, report, exit_code)
+    else:
+        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):

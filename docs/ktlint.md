@@ -29,7 +29,7 @@ ktlint = ktlint_aspect(
 )
 ```
 
-If you plan on using Ktlint [custom rulesets](https://pinterest.github.io/ktlint/1.2.1/install/cli/#rule-sets), you can also declare 
+If you plan on using Ktlint [custom rulesets](https://pinterest.github.io/ktlint/1.2.1/install/cli/#rule-sets), you can also declare
 an additional `ruleset_jar` attribute pointing to your custom ruleset jar like this
 
 ```

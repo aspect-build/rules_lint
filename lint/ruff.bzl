@@ -14,7 +14,7 @@ ruff = ruff_aspect(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
@@ -117,15 +117,19 @@ def _ruff_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-    if len(files_to_lint) == 0:
-        return []
 
     if ctx.attr._options[LintOptionsInfo].fix:
         patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
-        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, report, exit_code)
+        if len(files_to_lint) == 0:
+            dummy_successful_lint_action(ctx, report, exit_code, patch)
+        else:
+            ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, report, exit_code)
     else:
         report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
+        if len(files_to_lint) == 0:
+            dummy_successful_lint_action(ctx, report, exit_code)
+        else:
+            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
     return [info]
 
 def lint_ruff_aspect(binary, configs):
