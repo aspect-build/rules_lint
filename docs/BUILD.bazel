@@ -52,4 +52,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//lint:ktlint",
 )
 
+stardoc_with_diff_test(
+    name = "clang-tidy",
+    bzl_library_target = "//lint:clang-tidy",
+)
+
 update_docs(name = "update")

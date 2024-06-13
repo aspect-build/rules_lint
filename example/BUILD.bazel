@@ -22,6 +22,7 @@ exports_files(
         ".vale.ini",
         ".editorconfig",
         "ktlint-baseline.xml",
+        ".clang-tidy",
     ],
     visibility = ["//visibility:public"],
 )

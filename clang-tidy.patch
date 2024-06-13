@@ -1,0 +1,589 @@
+commit 48e1989d9489243c4b326502e109494df329e5e4
+Author: Chris Brown <chris.c.brown@siemens.com>
+Date:   Thu Jun 13 17:06:29 2024 -0400
+
+    update
+
+diff --git a/README.md b/README.md
+index 398cce7..f8f75d9 100644
+--- a/README.md
++++ b/README.md
+@@ -27,7 +27,7 @@ It is also inspired by <https://github.com/github/super-linter>.
+ 
+ | Language               | Formatter             | Linter(s)        |
+ | ---------------------- | --------------------- | ---------------- |
+-| C / C++                | [clang-format]        | ([#112])         |
++| C / C++                | [clang-format]        | [clang-tidy]     |
+ | CSS                    | [Prettier]            |                  |
+ | Go                     | [gofmt] or [gofumpt]  | [golangci-lint]  |
+ | HCL (Hashicorp Config) | [terraform] fmt       |                  |
+@@ -70,6 +70,7 @@ It is also inspired by <https://github.com/github/super-linter>.
+ [shfmt]: https://github.com/mvdan/sh
+ [golangci-lint]: https://github.com/golangci/golangci-lint
+ [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
++[clang-tidy]: https://clang.llvm.org/extra/clang-tidy/
+ [#112]: https://github.com/aspect-build/rules_lint/issues/112
+ [vale]: https://vale.sh/
+ [yamlfmt]: https://github.com/google/yamlfmt
+diff --git a/docs/BUILD.bazel b/docs/BUILD.bazel
+index efbd745..09729d9 100644
+--- a/docs/BUILD.bazel
++++ b/docs/BUILD.bazel
+@@ -52,4 +52,9 @@ stardoc_with_diff_test(
+     bzl_library_target = "//lint:vale",
+ )
+ 
++stardoc_with_diff_test(
++    name = "clang-tidy",
++    bzl_library_target = "//lint:clang-tidy",
++)
++
+ update_docs(name = "update")
+diff --git a/example/.bazeliskrc b/example/.bazeliskrc
+deleted file mode 100644
+index cf672ae..0000000
+--- a/example/.bazeliskrc
++++ /dev/null
+@@ -1,2 +0,0 @@
+-BAZELISK_BASE_URL=https://github.com/aspect-build/aspect-cli/releases/download
+-USE_BAZEL_VERSION=aspect/5.8.20
+diff --git a/example/.bazelrc b/example/.bazelrc
+index 6c429f0..c55887e 100644
+--- a/example/.bazelrc
++++ b/example/.bazelrc
+@@ -8,3 +8,10 @@ build --repo_env=JAVA_HOME=../bazel_tools/jdk
+ common --lockfile_mode=off
+ 
+ startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
++
++common --enable_runfiles
++
++startup --windows_enable_symlinks
++
++common:clang-tidy --aspects=//tools/lint:linters.bzl%clang_tidy
++common:clang-tidy --output_groups=rules_lint_report
+diff --git a/example/.bazelversion b/example/.bazelversion
+index 66ce77b..0ee843c 100644
+--- a/example/.bazelversion
++++ b/example/.bazelversion
+@@ -1 +1 @@
+-7.0.0
++7.2.0
+diff --git a/example/.clangtidyrc b/example/.clangtidyrc
+new file mode 100644
+index 0000000..030fe5a
+--- /dev/null
++++ b/example/.clangtidyrc
+@@ -0,0 +1 @@
++-checks=cert-* -warnings-as-errors=*
+diff --git a/example/BUILD.bazel b/example/BUILD.bazel
+index 988666d..38c5711 100644
+--- a/example/BUILD.bazel
++++ b/example/BUILD.bazel
+@@ -21,6 +21,7 @@ exports_files(
+         ".scalafmt.conf",
+         ".golangci.yaml",
+         ".vale.ini",
++        ".clang-tidy",
+     ],
+     visibility = ["//visibility:public"],
+ )
+diff --git a/example/MODULE.bazel b/example/MODULE.bazel
+index 65433b0..ec8b3a4 100644
+--- a/example/MODULE.bazel
++++ b/example/MODULE.bazel
+@@ -4,7 +4,7 @@ bazel_dep(name = "aspect_rules_lint", version = "0.0.0")
+ bazel_dep(name = "aspect_bazel_lib", version = "1.38.0")
+ bazel_dep(name = "aspect_rules_js", version = "1.33.1")
+ bazel_dep(name = "aspect_rules_ts", version = "1.3.3")
+-bazel_dep(name = "rules_buf", version = "0.2.0")
++#bazel_dep(name = "rules_buf", version = "0.2.0")
+ bazel_dep(name = "bazel_skylib", version = "1.4.2")
+ bazel_dep(name = "toolchains_llvm", version = "0.10.3")
+ bazel_dep(name = "rules_java", version = "5.5.0")
+@@ -86,5 +86,5 @@ use_repo(
+     "unpinned_maven",
+ )
+ 
+-buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
+-use_repo(buf, "rules_buf_toolchains")
++#buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
++#use_repo(buf, "rules_buf_toolchains")
+diff --git a/example/WORKSPACE.bazel b/example/WORKSPACE.bazel
+index e96b4b9..fea7aac 100644
+--- a/example/WORKSPACE.bazel
++++ b/example/WORKSPACE.bazel
+@@ -156,20 +156,20 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+ 
+ protobuf_deps()
+ 
+-http_archive(
+-    name = "rules_buf",
+-    sha256 = "523a4e06f0746661e092d083757263a249fedca535bd6dd819a8c50de074731a",
+-    strip_prefix = "rules_buf-0.1.1",
+-    urls = [
+-        "https://github.com/bufbuild/rules_buf/archive/refs/tags/v0.1.1.zip",
+-    ],
+-)
++#http_archive(
++#    name = "rules_buf",
++#    sha256 = "523a4e06f0746661e092d083757263a249fedca535bd6dd819a8c50de074731a",
++#    strip_prefix = "rules_buf-0.1.1",
++#    urls = [
++#        "https://github.com/bufbuild/rules_buf/archive/refs/tags/v0.1.1.zip",
++#    ],
++#)
+ 
+-load("@rules_buf//buf:repositories.bzl", "rules_buf_dependencies", "rules_buf_toolchains")
++#load("@rules_buf//buf:repositories.bzl", "rules_buf_dependencies", "rules_buf_toolchains")
+ 
+-rules_buf_dependencies()
++#rules_buf_dependencies()#
+ 
+-rules_buf_toolchains(version = "v1.5.0")
++#rules_buf_toolchains(version = "v1.5.0")
+ 
+ load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
+ 
+diff --git a/example/WORKSPACE.bzlmod b/example/WORKSPACE.bzlmod
+index a6e8ad6..e0cbcc7 100644
+--- a/example/WORKSPACE.bzlmod
++++ b/example/WORKSPACE.bzlmod
+@@ -29,9 +29,9 @@ load("@aspect_rules_lint//lint:golangci-lint.bzl", "fetch_golangci_lint")
+ 
+ fetch_golangci_lint()
+ 
+-load("@aspect_rules_lint//lint:shellcheck.bzl", "fetch_shellcheck")
++#load("@aspect_rules_lint//lint:shellcheck.bzl", "fetch_shellcheck")
+ 
+-fetch_shellcheck()
++#fetch_shellcheck()
+ 
+ load("@aspect_rules_lint//lint:vale.bzl", "fetch_vale")
+ 
+diff --git a/example/lint.sh b/example/lint.sh
+index 3c3bf77..8e80e7d 100755
+--- a/example/lint.sh
++++ b/example/lint.sh
+@@ -20,8 +20,9 @@ buildevents=$(mktemp)
+ filter='.namedSetOfFiles | values | .files[] | ((.pathPrefix | join("/")) + "/" + .name)'
+ 
+ # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
++#	"--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck,golangci_lint,vale,clang_tidy} | tr ' ' ',')"
+ args=(
+-	"--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,pmd,ruff,shellcheck,golangci_lint,vale} | tr ' ' ',')"
++	"--aspects=//tools/lint:linters.bzl%clang_tidy"
+ 	"--build_event_json_file=$buildevents"
+ )
+ report_args=(
+@@ -53,6 +54,7 @@ if [ $1 == "--dry-run" ]; then
+ fi
+ 
+ # Produce report files
++echo bazel build ${args[@]} ${report_args[@]} $@
+ bazel build ${args[@]} ${report_args[@]} $@
+ 
+ # TODO: Maybe this could be hermetic with bazel run @aspect_bazel_lib//tools:jq or sth
+diff --git a/example/src/hello.cpp b/example/src/hello.cpp
+index af2f6a9..cb98e2b 100644
+--- a/example/src/hello.cpp
++++ b/example/src/hello.cpp
+@@ -1,3 +1,12 @@
+ #include <stdio.h>
++#include <stdlib.h>
++
++int string_to_int(const char *num) {
++  return atoi(num);
++}
++
++void ls() {
++  system("ls");
++}
+ 
+ int main() { printf("Hello, world!\n"); }
+diff --git a/example/tools/lint/BUILD.bazel b/example/tools/lint/BUILD.bazel
+index da15f48..32185e5 100644
+--- a/example/tools/lint/BUILD.bazel
++++ b/example/tools/lint/BUILD.bazel
+@@ -21,13 +21,14 @@ alias(
+         "@bazel_tools//src/conditions:linux_aarch64": "@ruff_aarch64-unknown-linux-gnu//:ruff",
+         "@bazel_tools//src/conditions:darwin_arm64": "@ruff_aarch64-apple-darwin//:ruff",
+         "@bazel_tools//src/conditions:darwin_x86_64": "@ruff_x86_64-apple-darwin//:ruff",
++        "@bazel_tools//src/conditions:windows_x64": "@ruff_x86_64-pc-windows-msvc//:ruff.exe",
+     }),
+ )
+ 
+-alias(
+-    name = "buf",
+-    actual = "@rules_buf_toolchains//:buf",
+-)
++#alias(
++#    name = "buf",
++#    actual = "@rules_buf_toolchains//:buf",
++#)
+ 
+ # We can test that it works with:
+ # bazel run :flake8 -- --help
+@@ -52,6 +53,7 @@ native_binary(
+             "@bazel_tools//src/conditions:linux_aarch64": "@golangci_lint_linux_aarch64//:golangci-lint",
+             "@bazel_tools//src/conditions:darwin_x86_64": "@golangci_lint_macos_x86_64//:golangci-lint",
+             "@bazel_tools//src/conditions:darwin_arm64": "@golangci_lint_macos_aarch64//:golangci-lint",
++            "@bazel_tools//src/conditions:windows_x64": "@golangci_lint_macos_aarch64//:golangci-lint",
+         },
+     ),
+     out = "golangci-lint",
+@@ -65,6 +67,7 @@ native_binary(
+             "@bazel_tools//src/conditions:linux_aarch64": "@vale_Linux_arm64//:vale",
+             "@bazel_tools//src/conditions:darwin_x86_64": "@vale_macOS_64-bit//:vale",
+             "@bazel_tools//src/conditions:darwin_arm64": "@vale_macOS_arm64//:vale",
++            "@bazel_tools//src/conditions:windows_x64": "@vale_Windows_64-bit//:vale.exe",
+         },
+     ),
+     out = "vale",
+@@ -85,3 +88,17 @@ copy_to_directory(
+ 
+ # bazel run :shellcheck -- --help
+ shellcheck_binary(name = "shellcheck")
++
++native_binary(
++    name = "clang_tidy",
++    src = select(
++        {
++            "@bazel_tools//src/conditions:linux_x86_64": "@llvm_toolchain_llvm//:bin/clang-tidy",
++            "@bazel_tools//src/conditions:linux_aarch64": "@llvm_toolchain_llvm//:bin/clang-tidy",
++            "@bazel_tools//src/conditions:darwin_x86_64": "@llvm_toolchain_llvm//:bin/clang-tidy",
++            "@bazel_tools//src/conditions:darwin_arm64": "@llvm_toolchain_llvm//:bin/clang-tidy",
++            "@bazel_tools//src/conditions:windows_x64": "clang-tidy.exe",
++        },
++    ),
++    out = "clang_tidy",
++)
+diff --git a/example/tools/lint/linters.bzl b/example/tools/lint/linters.bzl
+index 412b7ea..59684da 100644
+--- a/example/tools/lint/linters.bzl
++++ b/example/tools/lint/linters.bzl
+@@ -9,9 +9,14 @@ load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
+ load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
+ load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
+ load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
++load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
+ 
+-buf = lint_buf_aspect(
+-    config = "@@//:buf.yaml",
++#buf = lint_buf_aspect(
++#    config = "@@//:buf.yaml",
++#)
++buf = lint_pmd_aspect(
++    binary = "@@//tools/lint:pmd",
++    rulesets = ["@@//:pmd.xml"],
+ )
+ 
+ eslint = lint_eslint_aspect(
+@@ -50,9 +55,13 @@ ruff = lint_ruff_aspect(
+ 
+ ruff_test = lint_test(aspect = ruff)
+ 
+-shellcheck = lint_shellcheck_aspect(
+-    binary = "@@//tools/lint:shellcheck",
+-    config = "@@//:.shellcheckrc",
++#shellcheck = lint_shellcheck_aspect(
++#    binary = "@@//tools/lint:shellcheck",
++#    config = "@@//:.shellcheckrc",
++#)
++shellcheck = lint_pmd_aspect(
++    binary = "@@//tools/lint:pmd",
++    rulesets = ["@@//:pmd.xml"],
+ )
+ 
+ shellcheck_test = lint_test(aspect = shellcheck)
+@@ -69,3 +78,10 @@ vale = lint_vale_aspect(
+     config = "@@//:.vale.ini",
+     styles = "@@//tools/lint:vale_styles",
+ )
++
++clang_tidy = lint_clang_tidy_aspect(
++    binary = "@@//tools/lint:clang_tidy",
++    configs = ["@@//:.clang-tidy"],
++)
++
++clang_tidy_test = lint_test(aspect = clang_tidy)
+diff --git a/lint/BUILD.bazel b/lint/BUILD.bazel
+index 380b4eb..31a19cc 100644
+--- a/lint/BUILD.bazel
++++ b/lint/BUILD.bazel
+@@ -170,3 +170,9 @@ bzl_library(
+     srcs = ["vale_library.bzl"],
+     visibility = ["//visibility:public"],
+ )
++
++bzl_library(
++    name = "clang-tidy",
++    srcs = ["clang-tidy.bzl"],
++    visibility = ["//visibility:public"],
++)
+diff --git a/lint/clang_tidy.bzl b/lint/clang_tidy.bzl
+new file mode 100644
+index 0000000..32c0013
+--- /dev/null
++++ b/lint/clang_tidy.bzl
+@@ -0,0 +1,260 @@
++"""API for calling declaring a clang-tidy lint aspect.
++
++Typical usage:
++
++```
++load("@aspect_rules_lint//lint:clang_tidy.bzl", "clang_tidy_aspect")
++
++clang_tidy = clang_tidy_aspect(
++    binary = "@@//path/to:clang-tidy",
++    configs = "@@//path/to:.clang-tidy",
++)
++```
++"""
++
++load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
++load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
++load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
++load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
++load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "patch_and_report_files")
++
++_MNEMONIC = "clangtidy"
++
++def _rule_sources(ctx):
++    def check_valid_file_type(src):
++        """
++        Returns True if the file type matches one of the permitted srcs file types for C and C++ header/source files.
++        """
++        permitted_file_types = [
++            ".c", ".cc", ".cpp", ".cxx", ".c++", ".C", ".h", ".hh", ".hpp", ".hxx", ".inc", ".inl", ".H",
++        ]
++        for file_type in permitted_file_types:
++            if src.basename.endswith(file_type):
++                return True
++        return False
++
++    srcs = []
++    if hasattr(ctx.rule.attr, "srcs"):
++        for src in ctx.rule.attr.srcs:
++            srcs += [src for src in src.files.to_list() if src.is_source and check_valid_file_type(src)]
++    if hasattr(ctx.rule.attr, "hdrs"):
++        for hdr in ctx.rule.attr.hdrs:
++            srcs += [hdr for hdr in hdr.files.to_list() if hdr.is_source and check_valid_file_type(hdr)]
++    return srcs
++
++def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
++    cc_toolchain = find_cpp_toolchain(ctx)
++    feature_configuration = cc_common.configure_features(
++        ctx = ctx,
++        cc_toolchain = cc_toolchain,
++    )
++    compile_variables = cc_common.create_compile_variables(
++        feature_configuration = feature_configuration,
++        cc_toolchain = cc_toolchain,
++        user_compile_flags = ctx.fragments.cpp.cxxopts + ctx.fragments.cpp.copts,
++    )
++    flags = cc_common.get_memory_inefficient_command_line(
++        feature_configuration = feature_configuration,
++        action_name = action_name,
++        variables = compile_variables,
++    )
++    return flags
++
++def _safe_flags(flags):
++    # Some flags might be used by GCC, but not understood by Clang.
++    # Remove them here, to allow users to run clang-tidy, without having
++    # a clang toolchain configured (that would produce a good command line with --compiler clang)
++    unsupported_flags = [
++        "-fno-canonical-system-headers",
++        "-fstack-usage",
++    ]
++
++    return [flag for flag in flags if flag not in unsupported_flags]
++
++def clang_tidy_action(ctx, compilation_context, executable, src, report, use_exit_code = False):
++    """Create a Bazel Action that spawns a clang-tidy process.
++
++    Adapter for wrapping Bazel around
++    https://clang.llvm.org/extra/clang-tidy/
++
++    Args:
++        ctx: an action context OR aspect context
++        executable: struct with a clang-tidy field
++        srcs: list of file objects to lint
++        report: output: the stdout of clang-tidy containing any violations found
++        use_exit_code: whether a clang-tidy process exiting non-zero will be a build failure
++    """
++
++    args = ctx.actions.args()
++
++    # TODO: enable if debug config, similar to rules_ts
++    # args.add("--debug")
++
++    rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
++    c_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"]
++    cxx_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"]
++
++    # add args specified by the toolchain, on the command line and rule copts
++    # todo: switch between c and cxx flags
++    args.add_all(cxx_flags)
++
++    # add defines
++    for define in compilation_context.defines.to_list():
++        args.add("-D" + define)
++
++    for define in compilation_context.local_defines.to_list():
++        args.add("-D" + define)
++
++    # add includes
++    for i in compilation_context.framework_includes.to_list():
++        args.add("-F" + i)
++
++    for i in compilation_context.includes.to_list():
++        args.add("-I" + i)
++
++    args.add_all(compilation_context.quote_includes.to_list(), before_each = "-iquote")
++
++    args.add_all(compilation_context.system_includes.to_list(), before_each = "-isystem")
++    print(args)
++
++    if not use_exit_code:
++        # Workaround: create an empty report file in case clang-tidy doesn't write one
++        # Use `../../..` to return to the execroot?
++        #args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
++        args.add_all(["--output-file", report.short_path])
++
++    env = {"BAZEL_BINDIR": ctx.bin_dir.path}
++
++    if use_exit_code:
++        ctx.actions.run_shell(
++            inputs = [src],
++            outputs = [report],
++            tools = [executable._clang_tidy],
++            arguments = [args, src.short_path],
++            command = executable._clang_tidy.path + " $@ && touch " + report.path,
++            env = env,
++            mnemonic = _MNEMONIC,
++        )
++    else:
++        exit_code_out = ctx.actions.declare_file("_{}.exit_code_out".format(ctx.label.name))
++        env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code_out.path
++
++        ctx.actions.run(
++            inputs = [src],
++            outputs = [report, exit_code_out],
++            executable = executable._clang_tidy,
++            arguments = [args, src.short_path],
++            env = env,
++            mnemonic = _MNEMONIC,
++        )
++
++def clang_tidy_fix(ctx, compilation_context, executable, src, patch):
++    """Create a Bazel Action that spawns clang-tidy with --fix.
++
++    Args:
++        ctx: an action context OR aspect context
++        executable: struct with a clang_tidy field
++        srcs: list of file objects to lint
++        patch: output file containing the applied fixes that can be applied with the patch(1) command.
++    """
++    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
++
++    ctx.actions.write(
++        output = patch_cfg,
++        content = json.encode({
++            "linter": executable._clang_tidy.path,
++            "args": ["--fix"] + [src.short_path],
++            "env": {"BAZEL_BINDIR": ctx.bin_dir.path},
++            "files_to_diff": [src.path],
++            "output": patch.path,
++        }),
++    )
++
++    ctx.actions.run(
++        inputs = [src, patch_cfg],
++        outputs = [patch],
++        executable = executable._patcher,
++        arguments = [patch_cfg.path],
++        env = {"BAZEL_BINDIR": "."},
++        tools = [executable._clang_tidy],
++        mnemonic = _MNEMONIC,
++    )
++
++def report_file(mnemonic, target, ctx):
++    report = ctx.actions.declare_file("{}.{}.aspect_rules_lint.report".format(mnemonic, target.label.name))
++    return report, OutputGroupInfo(rules_lint_report = depset([report]))
++
++def patch_file(mnemonic, target, ctx):
++    patch = ctx.actions.declare_file("{}.{}.aspect_rules_lint.patch".format(mnemonic, target.label.name))
++    return patch, OutputGroupInfo(rules_lint_patch = depset([patch]))
++
++# buildifier: disable=function-docstring
++def _clang_tidy_aspect_impl(target, ctx):
++    print("in aspect")
++    if ctx.rule.kind not in ["cc_library", "cc_binary", "cc_shared_library"]:
++        return []
++
++    files_to_lint = filter_srcs(ctx.rule)
++    #files_to_lint = _rule_sources(ctx)
++    print(files_to_lint)
++    compilation_context = target[CcInfo].compilation_context
++    reports = []
++    patches = []
++    for file_to_lint in files_to_lint:
++        patch, _ = patch_file(_MNEMONIC, target, ctx)
++        report, _ = report_file(_MNEMONIC, target, ctx)
++        patches.append(patch)
++        reports.append(report)
++        clang_tidy_action(ctx, compilation_context, ctx.executable, file_to_lint, report, ctx.attr._options[LintOptionsInfo].fail_on_violation)
++        clang_tidy_fix(ctx, compilation_context, ctx.executable, file_to_lint, patch)
++    return [OutputGroupInfo(
++        rules_lint_report = depset(reports),
++        rules_lint_patch = depset(patches),
++    )]
++
++def lint_clang_tidy_aspect(binary, configs):
++    """A factory function to create a linter aspect.
++
++    Args:
++        binary: the clang-tidy binary, typically a rule like
++
++            ```
++            load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
++            eslint_bin.eslint_binary(name = "eslint")
++            ```
++        configs: label(s) of the .clang-tidy file
++    """
++
++    # syntax-sugar: allow a single config file in addition to a list
++    print("creating aspect")
++    print(binary)
++    print(configs)
++    if type(configs) == "string":
++        configs = [configs]
++    return aspect(
++        implementation = _clang_tidy_aspect_impl,
++        attrs = {
++            "_options": attr.label(
++                default = "//lint:fail_on_violation",
++                providers = [LintOptionsInfo],
++            ),
++            "_clang_tidy": attr.label(
++                default = binary,
++                executable = True,
++                cfg = "exec",
++            ),
++            "_config_files": attr.label_list(
++                default = configs,
++                allow_files = True,
++            ),
++            "_patcher": attr.label(
++                default = "@aspect_rules_lint//lint/private:patcher",
++                executable = True,
++                cfg = "exec",
++            ),
++            "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
++        },
++        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + ["@bazel_tools//tools/cpp:toolchain_type"],
++        fragments = ["cpp"],
++        required_providers = ["CcInfo"],
++    )

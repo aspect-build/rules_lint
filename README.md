@@ -1,3 +1,35 @@
+# Clang-tidy PR
+
+I'm attempting to integrate clang-tidy with rules_lint, by integrating some of the aspect approaches from
+bazel_clang_tidy into this linter framework. The idea of integrating these linters has been suggested by
+maintainers of both repos (https://github.com/erenon/bazel_clang_tidy/issues/35)
+
+## Windows setup
+copy clang-tidy.exe into examples/tools/lint
+
+## Example commands
+This command works, and generates a set of clang-tidy results
+``` 
+cd example
+bazel run //tools/lint:clang_tidy -- d:/workdir/rules_lint3/example/src/hello.cpp --config-file=d:/workdir/rules_lint3/example/.clang-tidy
+```
+
+This command does not produce any output:
+```
+cd example
+bazel build //src:hello_cc --config=clang-tidy
+(equivalent to:) 
+bazel build //src:hello_cc --aspects=//tools/lint:linters.bzl%clang_tidy --output_groups=rules_lint_report
+```
+
+## Questions
+- why doesn't the aspect work? !!!!
+- how best to debug an aspect? Print isn't working, I'm a bit stuck. Is there documentation on how to do this?
+- clang-tidy handles only a single source file at a time. This is different to all the other linters currently supported. What is the 
+best way to structure this code in clang_tidy.bzl? Pass one file to each invokation of clang_tidy_action? Or loop inside clang_tidy_action?
+- Any other inputs?
+
+
 # Run linters and formatters under Bazel
 
 This ruleset integrates linting and formatting as first-class concepts under Bazel.
@@ -23,7 +55,7 @@ New tools are being added frequently, so check this page again!
 
 | Language               | Formatter             | Linter(s)        |
 | ---------------------- | --------------------- | ---------------- |
-| C / C++                | [clang-format]        | ([#112])         |
+| C / C++                | [clang-format]        | ([clang-tidy])   |
 | CSS, Less, Sass        | [Prettier]            |                  |
 | Go                     | [gofmt] or [gofumpt]  |                  |
 | HCL (Hashicorp Config) | [terraform] fmt       |                  |
@@ -67,6 +99,7 @@ New tools are being added frequently, so check this page again!
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
+[clang-tidy]: https://clang.llvm.org/extra/clang-tidy/
 [#112]: https://github.com/aspect-build/rules_lint/issues/112
 [vale]: https://vale.sh/
 [yamlfmt]: https://github.com/google/yamlfmt

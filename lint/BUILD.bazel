@@ -197,3 +197,9 @@ bzl_library(
         "@bazel_skylib//lib:dicts",
     ],
 )
+
+bzl_library(
+    name = "clang-tidy",
+    srcs = ["clang-tidy.bzl"],
+    visibility = ["//visibility:public"],
+)
