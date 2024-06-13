@@ -7,10 +7,22 @@ does not support Windows as of 06/2024, but providing a native clang-tidy.exe wo
 
 Next, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
 
+e.g. using llvm_toolchain:
 ```starlark
-# todo
-load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
-eslint_bin.eslint_binary(name = "eslint")
+native_binary(
+    name = "clang_tidy",
+    src = "@llvm_toolchain_llvm//:bin/clang-tidy"
+    out = "clang_tidy",
+)
+```
+
+e.g as native binary:
+```starlark
+native_binary(
+    name = "clang_tidy",
+    src = "clang-tidy.exe"
+    out = "clang_tidy",
+)
 ```
 
 Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
@@ -33,6 +45,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 
+# todo; update or remove
 def _rule_sources(ctx):
     def check_valid_file_type(src):
         """
@@ -55,6 +68,7 @@ def _rule_sources(ctx):
             srcs += [hdr for hdr in hdr.files.to_list() if hdr.is_source and check_valid_file_type(hdr)]
     return srcs
 
+# todo; update or remove
 def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
     cc_toolchain = find_cpp_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
@@ -73,6 +87,7 @@ def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
     )
     return flags
 
+# todo; update or remove
 def _safe_flags(flags):
     # Some flags might be used by GCC, but not understood by Clang.
     # Remove them here, to allow users to run clang-tidy, without having
@@ -100,9 +115,6 @@ def clang_tidy_action(ctx, compilation_context, executable, src, report, exit_co
     """
 
     args = ctx.actions.args()
-
-    # TODO: enable if debug config, similar to rules_ts
-    # args.add("--debug")
 
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     c_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"]
@@ -219,6 +231,9 @@ def _clang_tidy_aspect_impl(target, ctx):
     reports = []
     patches = []
     # todo: once working, add support for dummy_successful_lint_action on zero files_to_lint
+    # todo: I really don't know the best way to handle multiple inputs, and that clang-tidy
+    # supports only one at a time. I'm not sure where the loop should go, and how to integrate
+    # with the various report helpers from aspect.
     for file_to_lint in files_to_lint:
         report, exit_code, _ = report_files(_MNEMONIC, target, ctx)
         reports.append(report)
@@ -265,6 +280,7 @@ def lint_clang_tidy_aspect(binary, configs):
                 executable = True,
                 cfg = "exec",
             ),
+            # todo, possibly only pass one config, as clang-tidy only supports one
             "_config_files": attr.label_list(
                 default = configs,
                 allow_files = True,
