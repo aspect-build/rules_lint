@@ -128,17 +128,6 @@ def angle_includes_option(ctx):
         return "-isystem"
     return "-I"
     
-def _is_windows(ctx):
-    # todo: how do I implement this?
-    return False
-
-# on linux, bazel will quote arguments that contain special characters, e.g. '-header-filter=.*/hello-world\.*'
-# on windows, bazel does not do this. Workaround this for the regex option.
-def _quote(ctx, string):
-    if _is_windows(ctx):
-        return "'"+string+"'"
-    return string
-
 def is_c(file):
     if file.extension == "c":
         return True
@@ -150,10 +139,10 @@ def get_args(ctx, compilation_context, src):
     args.append("--config-file="+ctx.file._config_file.path)
     if (ctx.attr._lint_matching_header):
         base_filename = src.basename.removesuffix("."+src.extension)
-        regex = _quote(ctx, ".*/"+base_filename+"\\.*")
+        regex = ".*/"+base_filename+"\\.*"
         args.append("-header-filter="+regex)
     elif (ctx.attr._header_filter):
-        regex = _quote(ctx, ctx.attr._header_filter)
+        regex = ctx.attr._header_filter
         args.append("-header-filter="+regex)
     args.append("--")
 
@@ -338,6 +327,7 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
                 default = kwargs.get("lint_matching_header", False),
             ),
             "_header_filter": attr.string(
+                default = kwargs.get("header_filter", ""),
             ),
             "_angle_includes_are_system": attr.bool(
                 default = kwargs.get("angle_includes_are_system", True)
