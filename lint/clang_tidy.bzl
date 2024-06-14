@@ -138,10 +138,6 @@ def get_args(ctx, compilation_context, src):
         args.add("-D" + define)
 
     # add includes
-    #for i in compilation_context.framework_includes.to_list():
-    #    args.add("-F" + i)
-    #for i in compilation_context.includes.to_list()
-    #    args.add("-I" + i)
     args.add_all(compilation_context.framework_includes.to_list(), before_each = "-F")
     args.add_all(compilation_context.includes.to_list(), before_each = "-I")
     args.add_all(compilation_context.quote_includes.to_list(), before_each = "-iquote")
