@@ -37,6 +37,7 @@ UNIQUE_TOOLS = sets.to_list(sets.make(TOOLS.values()))
 format_multirun(
     name = "format",
     cc = ":mock_clang-format.sh",
+    cuda = ":mock_clang-format.sh",
     css = ":mock_prettier.sh",
     go = ":mock_gofmt.sh",
     html = ":mock_prettier.sh",
