@@ -205,7 +205,6 @@ def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exi
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
     args = get_args(ctx, compilation_context, src)
-    print(str(args))
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
