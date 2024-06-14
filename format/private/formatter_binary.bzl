@@ -21,6 +21,7 @@ TOOLS = {
     "Shell": "shfmt",
     "Protocol Buffer": "buf",
     "C++": "clang-format",
+    "Cuda": "clang-format",
     "YAML": "yamlfmt",
     "Rust": "rustfmt",
 }

@@ -62,6 +62,7 @@ function ls-files {
     # using the ./mirror_linguist_languages.sh tool to transform to Bash code
     case "$language" in
       'C++') patterns=('*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
+      'Cuda') patterns=('*.cu' '*.cuh') ;;
       'CSS') patterns=('*.css') ;;
       'Go') patterns=('*.go') ;;
       'HTML') patterns=('*.html' '*.hta' '*.htm' '*.html.hl' '*.inc' '*.xht' '*.xhtml') ;;
