@@ -41,9 +41,41 @@ load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "c
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_file", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
+
+###############################################
+# START COPY CODE FROM private/lint_aspect.bzl
+#
+# this code needed to be changed to support generation of a report file
+# per-source-file, rather than per-target.
+###############################################
+_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
+
+def _report_files(mnemonic, src, ctx):
+    # TODO: not sure how to get the 'src/' prefix (the build file dir) programatically
+    relative_file = src.path.removeprefix("src/")
+    report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = relative_file, mnemonic = mnemonic, suffix = "report"))
+    outs = [report]
+    if ctx.attr._options[LintOptionsInfo].fail_on_violation:
+        # Fail on violation means the exit code is reported to Bazel as the action result
+        exit_code = None
+    else:
+        # The exit code should instead be provided as an action output so the build succeeds.
+        # Downstream tooling like `aspect lint` will be responsible for reading the exit codes
+        # and interpreting them.
+        exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = relative_file, mnemonic = mnemonic, suffix = "exit_code"))
+        outs.append(exit_code)
+    return report, exit_code, OutputGroupInfo(rules_lint_report = depset(outs))
+
+def _patch_file(mnemonic, src, ctx):
+    relative_file = src.path.removeprefix("src/")
+    patch = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = relative_file, mnemonic = mnemonic, suffix = "patch"))
+    return patch, OutputGroupInfo(rules_lint_patch = depset([patch]))
+###############################################
+# END COPY CODE FROM private/lint_aspect.bzl
+###############################################
 
 # todo; update or remove
 def _rule_sources(ctx):
@@ -99,7 +131,7 @@ def _safe_flags(flags):
 
     return [flag for flag in flags if flag not in unsupported_flags]
 
-def clang_tidy_action(ctx, compilation_context, executable, src, report, exit_code = None):
+def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_code = None):
     """Create a Bazel Action that spawns a clang-tidy process.
 
     Adapter for wrapping Bazel around
@@ -114,19 +146,18 @@ def clang_tidy_action(ctx, compilation_context, executable, src, report, exit_co
             If None, then fail the build when clang-tidy exits non-zero.
     """
 
-    args = ctx.actions.args()
-
+    # process copts/cxxopts
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     c_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"]
     cxx_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"]
 
-    # file to lint
-    args.add(src)
+    config = ctx.file._config_file
+    inputs = [src, config]
+    outputs = [stdout]
 
-    # we can specify a single config file
-    args.add("--config-file="+ctx.attr._config_files[0])
-
-    # start compiler args
+    args = ctx.actions.args()
+    args.add(src.short_path)
+    args.add("--config-file="+config.path)
     args.add("--")
 
     # add args specified by the toolchain, on the command line and rule copts
@@ -136,52 +167,33 @@ def clang_tidy_action(ctx, compilation_context, executable, src, report, exit_co
     # add defines
     for define in compilation_context.defines.to_list():
         args.add("-D" + define)
-
     for define in compilation_context.local_defines.to_list():
         args.add("-D" + define)
 
     # add includes
     for i in compilation_context.framework_includes.to_list():
         args.add("-F" + i)
-
     for i in compilation_context.includes.to_list():
         args.add("-I" + i)
-
     args.add_all(compilation_context.quote_includes.to_list(), before_each = "-iquote")
-
     args.add_all(compilation_context.system_includes.to_list(), before_each = "-isystem")
-    print(args)
 
-    env = {"BAZEL_BINDIR": ctx.bin_dir.path}
-
-    if not exit_code:
-        ctx.actions.run_shell(
-            inputs = [src] + ctx.attr._config_files,
-            outputs = [report],
-            tools = [executable._clang_tidy],
-            arguments = [args, src.short_path],
-            command = executable._clang_tidy.path + " $@ && touch " + report.path,
-            env = env,
-            mnemonic = _MNEMONIC,
-            progress_message = "Linting %{label} with clang-tidy",
-        )
+    if exit_code:
+        command = "{clang_tidy} $@ >{stdout}; echo $? > " + exit_code.path
+        outputs.append(exit_code)
     else:
-        # Workaround: create an empty report file in case clang-tidy doesn't write one
-        # Use `../../..` to return to the execroot?
-        #args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
-        args.add_all(["--output-file", report.short_path])
+        # Create empty stdout file on success, as Bazel expects one
+        command = "{clang_tidy} $@ && touch {stdout}"
 
-        env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
-
-        ctx.actions.run(
-            inputs = [src] + ctx.attr._config_files,
-            outputs = [report, exit_code],
-            executable = executable._clang_tidy,
-            arguments = [args, src.short_path],
-            env = env,
-            mnemonic = _MNEMONIC,
-            progress_message = "Linting %{label} with clang-tidy",
-        )
+    ctx.actions.run_shell(
+        inputs = [src, ctx.file._config_file],
+        outputs = outputs,
+        tools = [executable._clang_tidy],
+        command = command.format(clang_tidy = executable._clang_tidy.path, stdout = stdout.path),
+        arguments = [args, src.short_path],
+        mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with clang-tidy",
+    )
 
 def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exit_code):
     """Create a Bazel Action that spawns clang-tidy with --fix.
@@ -221,8 +233,22 @@ def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exi
 # buildifier: disable=function-docstring
 def _clang_tidy_aspect_impl(target, ctx):
     print("in aspect")
-    if ctx.rule.kind not in ["cc_library", "cc_binary", "cc_shared_library"]:
+    if not CcInfo in target:
         return []
+
+    # todo: keep this? #Ignore external targets
+    #if target.label.workspace_root.startswith("external"):
+    #    return []
+
+    # Targets with specific tags will not be formatted
+    ignore_tags = [
+        "noclangtidy",
+        "no-clang-tidy",
+    ]
+
+    for tag in ignore_tags:
+        if tag in ctx.rule.attr.tags:
+            return []
 
     files_to_lint = filter_srcs(ctx.rule)
     #files_to_lint = _rule_sources(ctx)
@@ -235,11 +261,12 @@ def _clang_tidy_aspect_impl(target, ctx):
     # supports only one at a time. I'm not sure where the loop should go, and how to integrate
     # with the various report helpers from aspect.
     for file_to_lint in files_to_lint:
-        report, exit_code, _ = report_files(_MNEMONIC, target, ctx)
+        report, exit_code, _ = _report_files(_MNEMONIC, file_to_lint, ctx)
         reports.append(report)
-        reports.append(exit_code)
+        if (exit_code):
+            reports.append(exit_code)
         if ctx.attr._options[LintOptionsInfo].fix:
-            patch, _ = patch_file(_MNEMONIC, target, ctx)
+            patch, _ = _patch_file(_MNEMONIC, file_to_lint, ctx)
             patches.append(patch)
             clang_tidy_fix(ctx, compilation_context, ctx.executable, file_to_lint, patch, report, exit_code)
         else:
@@ -249,25 +276,22 @@ def _clang_tidy_aspect_impl(target, ctx):
         rules_lint_patch = depset(patches),
     )]
 
-def lint_clang_tidy_aspect(binary, configs):
+def lint_clang_tidy_aspect(binary, config):
     """A factory function to create a linter aspect.
 
     Args:
         binary: the clang-tidy binary, typically a rule like
 
-            ```
-            load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
-            eslint_bin.eslint_binary(name = "eslint")
-            ```
-        configs: label(s) of the .clang-tidy file
+        ```starlark
+        native_binary(
+            name = "clang_tidy",
+            src = "clang-tidy.exe"
+            out = "clang_tidy",
+        )
+        ```
+        config: label of the .clang-tidy file
     """
 
-    # syntax-sugar: allow a single config file in addition to a list
-    print("creating aspect")
-    print(binary)
-    print(configs)
-    if type(configs) == "string":
-        configs = [configs]
     return aspect(
         implementation = _clang_tidy_aspect_impl,
         attrs = {
@@ -280,10 +304,9 @@ def lint_clang_tidy_aspect(binary, configs):
                 executable = True,
                 cfg = "exec",
             ),
-            # todo, possibly only pass one config, as clang-tidy only supports one
-            "_config_files": attr.label_list(
-                default = configs,
-                allow_files = True,
+            "_config_file": attr.label(
+                default = config,
+                allow_single_file = True,
             ),
             "_patcher": attr.label(
                 default = "@aspect_rules_lint//lint/private:patcher",
@@ -294,5 +317,4 @@ def lint_clang_tidy_aspect(binary, configs):
         },
         toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + ["@bazel_tools//tools/cpp:toolchain_type"],
         fragments = ["cpp"],
-        required_providers = ["CcInfo"],
     )

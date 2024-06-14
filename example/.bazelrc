@@ -7,5 +7,5 @@ common --@aspect_rules_ts//ts:skipLibCheck=always
 
 # For testing only clang-tidy only
 common:clang-tidy --aspects=//tools/lint:linters.bzl%clang_tidy
-common:clang-tidy --output_groups=rules_lint_report
+common:clang-tidy --output_groups=rules_lint_report --norun_validations --remote_download_regex=".*AspectRulesLint.*"
 startup --windows_enable_symlinks
