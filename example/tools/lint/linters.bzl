@@ -77,6 +77,7 @@ clang_tidy = lint_clang_tidy_aspect(
     binary = "@@//tools/lint:clang_tidy",
     config = "@@//:.clang-tidy",
     lint_matching_header = True,
+    angle_includes_are_system = False,
 )
 
 clang_tidy_test = lint_test(aspect = clang_tidy)

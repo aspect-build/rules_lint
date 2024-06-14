@@ -123,22 +123,46 @@ def add_all(array, list, **kwargs):
             array.append(kwargs["before_each"])
             array.append(arg)
 
+def angle_includes_option(ctx):
+    if (ctx.attr._angle_includes_are_system):
+        return "-isystem"
+    return "-I"
+    
+def _is_windows(ctx):
+    # todo: how do I implement this?
+    return False
+
+# on linux, bazel will quote arguments that contain special characters, e.g. '-header-filter=.*/hello-world\.*'
+# on windows, bazel does not do this. Workaround this for the regex option.
+def _quote(ctx, string):
+    if _is_windows(ctx):
+        return "'"+string+"'"
+    return string
+
+def is_c(file):
+    if file.extension == "c":
+        return True
+    return False
+
 def get_args(ctx, compilation_context, src):
     args = []
     args.append(src.short_path)
     args.append("--config-file="+ctx.file._config_file.path)
     if (ctx.attr._lint_matching_header):
-        args.append("-header-filter='.*/"+src.basename.removesuffix("."+src.extension)+"\\.*'")
+        base_filename = src.basename.removesuffix("."+src.extension)
+        regex = _quote(ctx, ".*/"+base_filename+"\\.*")
+        args.append("-header-filter="+regex)
     elif (ctx.attr._header_filter):
-        args.append("-header-filter='"+ctx.attr._header_filter+"'")
+        regex = _quote(ctx, ctx.attr._header_filter)
+        args.append("-header-filter="+regex)
     args.append("--")
 
     # add args specified by the toolchain, on the command line and rule copts
-    # todo: switch between c and cxx flags
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
-    c_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"]
-    cxx_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"]
-    add_all(args, cxx_flags)
+    if (is_c(src)):
+        add_all(args, _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"])
+    else:
+        add_all(args, _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"])
 
     # add defines
     for define in compilation_context.defines.to_list():
@@ -150,7 +174,7 @@ def get_args(ctx, compilation_context, src):
     add_all(args, compilation_context.framework_includes.to_list(), before_each = "-F")
     add_all(args, compilation_context.includes.to_list(), before_each = "-I")
     add_all(args, compilation_context.quote_includes.to_list(), before_each = "-iquote")
-    add_all(args, compilation_context.system_includes.to_list(), before_each = "-I")
+    add_all(args, compilation_context.system_includes.to_list(), before_each = angle_includes_option(ctx))
     add_all(args, compilation_context.external_includes.to_list(), before_each = "-isystem")
 
     args.append(src.short_path)
@@ -298,6 +322,9 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
         header_filter: optional, set to a posix regex to supply to clang-tidy with the -header-filter option
         lint_matching_header: optional, set to True to include the matching header file
         in the lint output results for each source. If supplied, overrides the header_filter option.
+        angle_includes_are_system: controls how angle includes are passed to clang-tidy. By default, Bazel
+        passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
+        them as regular header files.
     """
 
     return aspect(
@@ -311,6 +338,9 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
                 default = kwargs.get("lint_matching_header", False),
             ),
             "_header_filter": attr.string(
+            ),
+            "_angle_includes_are_system": attr.bool(
+                default = kwargs.get("angle_includes_are_system", True)
             ),
             "_clang_tidy": attr.label(
                 default = binary,
