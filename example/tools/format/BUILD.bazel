@@ -56,8 +56,8 @@ java_binary(
 format_multirun(
     name = "format",
     cc = "@llvm_toolchain_llvm//:bin/clang-format",
-    cuda = "@llvm_toolchain_llvm//:bin/clang-format",
     css = ":prettier",
+    cuda = "@llvm_toolchain_llvm//:bin/clang-format",
     go = "@aspect_rules_lint//format:gofumpt",
     html = ":prettier",
     # You can use standard gofmt instead of stricter gofumpt:
