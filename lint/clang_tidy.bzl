@@ -143,10 +143,10 @@ def get_args(ctx, compilation_context, src):
     args = ctx.actions.args()
     args.add(src.short_path)
     args.add("--config-file="+ctx.file._config_file.path)
-    if (ctx.attr._header_filter):
-        args.add("-header-filter='"+ctx.attr._header_filter+"'")
-    elif (ctx.attr._header_filter_only_matching_header):
+    if (ctx.attr._lint_matching_header):
         args.add("-header-filter='.*/"+src.basename.removesuffix("."+src.extension)+"\\.*'")
+    elif (ctx.attr._header_filter):
+        args.add("-header-filter='"+ctx.attr._header_filter+"'")
     args.add("--")
 
     # add args specified by the toolchain, on the command line and rule copts
@@ -248,7 +248,6 @@ def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exi
 
 # buildifier: disable=function-docstring
 def _clang_tidy_aspect_impl(target, ctx):
-    print("in aspect")
     if not CcInfo in target:
         return []
 
@@ -268,11 +267,10 @@ def _clang_tidy_aspect_impl(target, ctx):
 
     files_to_lint = filter_srcs(ctx.rule)
     #files_to_lint = _rule_sources(ctx)
-    print(files_to_lint)
     compilation_context = target[CcInfo].compilation_context
     reports = []
     patches = []
-    # todo: once working, add support for dummy_successful_lint_action on zero files_to_lint
+    # todo: add support for dummy_successful_lint_action on zero files_to_lint
     # todo: I really don't know the best way to handle multiple inputs, and that clang-tidy
     # supports only one at a time. I'm not sure where the loop should go, and how to integrate
     # with the various report helpers from aspect.
@@ -307,7 +305,7 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
         ```
         config: label of the .clang-tidy file
         header_filter: optional, set to a posix regex to supply to clang-tidy with the -header-filter option
-        header_filter_only_matching_header: optional, set to True to include the matching header file
+        lint_matching_header: optional, set to True to include the matching header file
         in the lint output results for each source. If supplied, overrides the header_filter option.
     """
 
@@ -318,8 +316,8 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
-            "_header_filter_only_matching_header": attr.bool(
-                default = kwargs.get("header_filter_only_matching_header", False),
+            "_lint_matching_header": attr.bool(
+                default = kwargs.get("lint_matching_header", False),
             ),
             "_header_filter": attr.string(
             ),
