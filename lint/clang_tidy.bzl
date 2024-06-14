@@ -114,38 +114,46 @@ def _safe_flags(flags):
 
     return [flag for flag in flags if flag not in unsupported_flags and not flag.startswith("/wd")]
 
+def add_all(array, list, **kwargs):
+    if not "before_each" in kwargs:
+        array = array + list
+    else:
+        for arg in list:
+            array.append(kwargs["before_each"])
+            array.append(arg)
+
 def get_args(ctx, compilation_context, src):
-    args = ctx.actions.args()
-    args.add(src.short_path)
-    args.add("--config-file="+ctx.file._config_file.path)
+    args = []
+    args.append(src.short_path)
+    args.append("--config-file="+ctx.file._config_file.path)
     if (ctx.attr._lint_matching_header):
-        args.add("-header-filter='.*/"+src.basename.removesuffix("."+src.extension)+"\\.*'")
+        args.append("-header-filter='.*/"+src.basename.removesuffix("."+src.extension)+"\\.*'")
     elif (ctx.attr._header_filter):
-        args.add("-header-filter='"+ctx.attr._header_filter+"'")
-    args.add("--")
+        args.append("-header-filter='"+ctx.attr._header_filter+"'")
+    args.append("--")
 
     # add args specified by the toolchain, on the command line and rule copts
     # todo: switch between c and cxx flags
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     c_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"]
     cxx_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"]
-    args.add_all(cxx_flags)
+    add_all(args, cxx_flags)
 
     # add defines
     for define in compilation_context.defines.to_list():
-        args.add("-D" + define)
+        args.append("-D" + define)
     for define in compilation_context.local_defines.to_list():
-        args.add("-D" + define)
+        args.append("-D" + define)
 
     # add includes
-    args.add_all(compilation_context.framework_includes.to_list(), before_each = "-F")
-    args.add_all(compilation_context.includes.to_list(), before_each = "-I")
-    args.add_all(compilation_context.quote_includes.to_list(), before_each = "-iquote")
-    args.add_all(compilation_context.system_includes.to_list(), before_each = "-I")
-    args.add_all(compilation_context.external_includes.to_list(), before_each = "-isystem")
+    add_all(args, compilation_context.framework_includes.to_list(), before_each = "-F")
+    add_all(args, compilation_context.includes.to_list(), before_each = "-I")
+    add_all(args, compilation_context.quote_includes.to_list(), before_each = "-iquote")
+    add_all(args, compilation_context.system_includes.to_list(), before_each = "-I")
+    add_all(args, compilation_context.external_includes.to_list(), before_each = "-isystem")
 
-    args.add(src.short_path)
-    return [args]
+    args.append(src.short_path)
+    return args
 
 def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_code):
     """Create a Bazel Action that spawns a clang-tidy process.
@@ -195,6 +203,8 @@ def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exi
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
+    args = get_args(ctx, compilation_context, src)
+    print(str(args))
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
