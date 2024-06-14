@@ -24,9 +24,7 @@ filter='.namedSetOfFiles | values | .files[] | select(.name | endswith($ext)) | 
 
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
 args=(
-	# testing only
-	"--aspects=//tools/lint:linters.bzl%clang_tidy"
-#	"--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale} | tr ' ' ',')"
+	"--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale,clang_tidy} | tr ' ' ',')"
 	# Allow lints of code that fails some validation action
 	# See https://github.com/aspect-build/rules_ts/pull/574#issuecomment-2073632879
 	"--norun_validations"
@@ -58,7 +56,6 @@ if [ $1 == "--dry-run" ]; then
 fi
 
 # Run linters
-echo bazel build ${args[@]} $@
 bazel build ${args[@]} $@
 
 # TODO: Maybe this could be hermetic with bazel run @aspect_bazel_lib//tools:jq or sth
