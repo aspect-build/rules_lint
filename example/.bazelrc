@@ -9,3 +9,9 @@ common --@aspect_rules_ts//ts:skipLibCheck=always
 common:clang-tidy --aspects=//tools/lint:linters.bzl%clang_tidy
 common:clang-tidy --output_groups=rules_lint_report --norun_validations --remote_download_regex=".*AspectRulesLint.*"
 startup --windows_enable_symlinks
+
+# clang-tidy needs the INCLUDE variable set to the system value. 
+# Would prefer to do this inside the aspect, not sure if it is possible.
+common --action_env=INCLUDE
+# ensure that minimal other envvars are passed by clang-tidy run_shell
+common --incompatible_strict_action_env

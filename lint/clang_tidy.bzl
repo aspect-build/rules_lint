@@ -77,6 +77,11 @@ def _patch_file(mnemonic, src, ctx):
 # END COPY CODE FROM private/lint_aspect.bzl
 ###############################################
 
+def _gather_inputs(ctx, src):
+    # todo: handle header files in deps
+    inputs = [src, ctx.file._config_file]
+    return inputs
+
 # todo; update or remove
 def _rule_sources(ctx):
     def check_valid_file_type(src):
@@ -131,6 +136,40 @@ def _safe_flags(flags):
 
     return [flag for flag in flags if flag not in unsupported_flags]
 
+def get_args(ctx, compilation_context, src):
+    args = ctx.actions.args()
+    args.add(src.short_path)
+    args.add("--config-file="+ctx.file._config_file.path)
+    args.add("-header-filter=.*")
+    args.add("--")
+
+    # add args specified by the toolchain, on the command line and rule copts
+    # todo: switch between c and cxx flags
+    rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
+    c_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"]
+    cxx_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"]
+    args.add_all(cxx_flags)
+
+    # add defines
+    for define in compilation_context.defines.to_list():
+        args.add("-D" + define)
+    for define in compilation_context.local_defines.to_list():
+        args.add("-D" + define)
+
+    # add includes
+    #for i in compilation_context.framework_includes.to_list():
+    #    args.add("-F" + i)
+    #for i in compilation_context.includes.to_list()
+    #    args.add("-I" + i)
+    args.add_all(compilation_context.framework_includes.to_list(), before_each = "-F")
+    args.add_all(compilation_context.includes.to_list(), before_each = "-I")
+    args.add_all(compilation_context.quote_includes.to_list(), before_each = "-iquote")
+    args.add_all(compilation_context.system_includes.to_list(), before_each = "-I")
+    args.add_all(compilation_context.external_includes.to_list(), before_each = "-isystem")
+
+    args.add(src.short_path)
+    return [args]
+
 def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_code = None):
     """Create a Bazel Action that spawns a clang-tidy process.
 
@@ -146,38 +185,7 @@ def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_co
             If None, then fail the build when clang-tidy exits non-zero.
     """
 
-    # process copts/cxxopts
-    rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
-    c_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"]
-    cxx_flags = _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"]
-
-    config = ctx.file._config_file
-    inputs = [src, config]
     outputs = [stdout]
-
-    args = ctx.actions.args()
-    args.add(src.short_path)
-    args.add("--config-file="+config.path)
-    args.add("--")
-
-    # add args specified by the toolchain, on the command line and rule copts
-    # todo: switch between c and cxx flags
-    args.add_all(cxx_flags)
-
-    # add defines
-    for define in compilation_context.defines.to_list():
-        args.add("-D" + define)
-    for define in compilation_context.local_defines.to_list():
-        args.add("-D" + define)
-
-    # add includes
-    for i in compilation_context.framework_includes.to_list():
-        args.add("-F" + i)
-    for i in compilation_context.includes.to_list():
-        args.add("-I" + i)
-    args.add_all(compilation_context.quote_includes.to_list(), before_each = "-iquote")
-    args.add_all(compilation_context.system_includes.to_list(), before_each = "-isystem")
-
     if exit_code:
         command = "{clang_tidy} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
@@ -186,11 +194,13 @@ def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_co
         command = "{clang_tidy} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
-        inputs = [src, ctx.file._config_file],
+        inputs = _gather_inputs(ctx, src),
         outputs = outputs,
         tools = [executable._clang_tidy],
         command = command.format(clang_tidy = executable._clang_tidy.path, stdout = stdout.path),
-        arguments = [args, src.short_path],
+        arguments = get_args(ctx, compilation_context, src),
+        use_default_shell_env = True,
+        #env = env,
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with clang-tidy",
     )
@@ -212,7 +222,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exi
         output = patch_cfg,
         content = json.encode({
             "linter": executable._clang_tidy.path,
-            "args": ["--fix"] + [src.short_path],
+            "args": ["--fix"] + get_args(ctx, compilation_context, src),
             "env": {"BAZEL_BINDIR": ctx.bin_dir.path},
             "files_to_diff": [src.path],
             "output": patch.path,
@@ -220,7 +230,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exi
     )
 
     ctx.actions.run(
-        inputs = [src, patch_cfg],
+        inputs = _gather_inputs(ctx, src),
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
