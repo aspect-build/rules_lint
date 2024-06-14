@@ -218,7 +218,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exi
     )
 
     ctx.actions.run(
-        inputs = _gather_inputs(ctx, compilation_context, src),
+        inputs = _gather_inputs(ctx, compilation_context, src) + [patch_cfg],
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
