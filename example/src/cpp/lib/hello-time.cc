@@ -4,5 +4,6 @@
 
 void print_localtime() {
   std::time_t result = std::time(nullptr);
-  std::cout << std::asctime(std::localtime(&result));
+  std::string result_str = std::asctime(std::localtime(&result));
+  printf("%s\n", result_str.c_str());
 }

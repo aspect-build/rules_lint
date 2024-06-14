@@ -6,13 +6,28 @@ maintainers of both repos (https://github.com/erenon/bazel_clang_tidy/issues/35)
 
 ## Windows setup
 copy clang-tidy.exe into examples/tools/lint
+del examples\\.bazeliskrc (aspect-cli does not support windows)
 
 ## Example commands
+Run on a binary
 ```
 cd example
-bazel build //src:hello_cc --config=clang-tidy
-(equivalent to:) 
-bazel build //src:hello_cc --aspects=//tools/lint:linters.bzl%clang_tidy --output_groups=rules_lint_report
+bazel build //src/cpp/main:hello-world --config=clang-tidy
+```
+
+Run with raw options, no config (this is exactly the same as above)
+```
+bazel build //src/cpp/main:hello-world --aspects=//tools/lint:linters.bzl%clang_tidy --output_groups=rules_lint_report
+```
+
+See clang-tidy command line for each invokation
+```
+bazel build //src/cpp/main:hello-world --config=clang-tidy -s
+```
+
+Run on a cc_library
+```
+bazel build //src/cpp/lib:hello-time --config=clang-tidy -s
 ```
 
 ## Questions

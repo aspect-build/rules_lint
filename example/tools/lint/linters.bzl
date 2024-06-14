@@ -76,6 +76,7 @@ ktlint_test = lint_test(aspect = ktlint)
 clang_tidy = lint_clang_tidy_aspect(
     binary = "@@//tools/lint:clang_tidy",
     config = "@@//:.clang-tidy",
+    header_filter_only_matching_header = True,
 )
 
 clang_tidy_test = lint_test(aspect = clang_tidy)

@@ -132,15 +132,21 @@ def _safe_flags(flags):
     unsupported_flags = [
         "-fno-canonical-system-headers",
         "-fstack-usage",
+        "/nologo",
+        "/COMPILER_MSVC",
+        "/showIncludes",
     ]
 
-    return [flag for flag in flags if flag not in unsupported_flags]
+    return [flag for flag in flags if flag not in unsupported_flags and not flag.startswith("/wd")]
 
 def get_args(ctx, compilation_context, src):
     args = ctx.actions.args()
     args.add(src.short_path)
     args.add("--config-file="+ctx.file._config_file.path)
-    args.add("-header-filter=.*")
+    if (ctx.attr._header_filter):
+        args.add("-header-filter='"+ctx.attr._header_filter+"'")
+    elif (ctx.attr._header_filter_only_matching_header):
+        args.add("-header-filter='.*/"+src.basename.removesuffix("."+src.extension)+"\\.*'")
     args.add("--")
 
     # add args specified by the toolchain, on the command line and rule copts
@@ -170,7 +176,7 @@ def get_args(ctx, compilation_context, src):
     args.add(src.short_path)
     return [args]
 
-def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_code = None):
+def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_code):
     """Create a Bazel Action that spawns a clang-tidy process.
 
     Adapter for wrapping Bazel around
@@ -286,7 +292,7 @@ def _clang_tidy_aspect_impl(target, ctx):
         rules_lint_patch = depset(patches),
     )]
 
-def lint_clang_tidy_aspect(binary, config):
+def lint_clang_tidy_aspect(binary, config, **kwargs):
     """A factory function to create a linter aspect.
 
     Args:
@@ -300,6 +306,9 @@ def lint_clang_tidy_aspect(binary, config):
         )
         ```
         config: label of the .clang-tidy file
+        header_filter: optional, set to a posix regex to supply to clang-tidy with the -header-filter option
+        header_filter_only_matching_header: optional, set to True to include the matching header file
+        in the lint output results for each source. If supplied, overrides the header_filter option.
     """
 
     return aspect(
@@ -308,6 +317,11 @@ def lint_clang_tidy_aspect(binary, config):
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
+            ),
+            "_header_filter_only_matching_header": attr.bool(
+                default = kwargs.get("header_filter_only_matching_header", False),
+            ),
+            "_header_filter": attr.string(
             ),
             "_clang_tidy": attr.label(
                 default = binary,
