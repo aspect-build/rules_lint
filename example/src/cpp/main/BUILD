@@ -4,6 +4,7 @@ cc_library(
     name = "hello-greet",
     srcs = ["hello-greet.cc"],
     hdrs = ["hello-greet.h"],
+    includes = ["."],
 )
 
 cc_binary(
@@ -13,4 +14,5 @@ cc_binary(
         ":hello-greet",
         "//src/cpp/lib:hello-time",
     ],
+    includes = ["."],
 )

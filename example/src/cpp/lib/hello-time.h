@@ -7,7 +7,7 @@
 
 void print_localtime();
 
-void print_localtime2() {
+inline void print_localtime2() {
     std::string a = "time";
     for (int i=0; i<a.size(); ++i) {
         printf("%s", a.c_str()[i]);

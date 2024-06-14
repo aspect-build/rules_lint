@@ -4,7 +4,7 @@
 #include <string>
 #include <stdio.h>
 
-void print_localtime3() {
+inline void print_localtime3() {
     std::string a = "time";
     for (int i=0; i<a.size(); ++i) {
         printf("%s", a.c_str()[i]);

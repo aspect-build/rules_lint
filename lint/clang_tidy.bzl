@@ -77,9 +77,9 @@ def _patch_file(mnemonic, src, ctx):
 # END COPY CODE FROM private/lint_aspect.bzl
 ###############################################
 
-def _gather_inputs(ctx, src):
+def _gather_inputs(ctx, compilation_context, src):
     # todo: handle header files in deps
-    inputs = [src, ctx.file._config_file]
+    inputs = [src, ctx.file._config_file] + compilation_context.headers.to_list()
     return inputs
 
 def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
@@ -179,7 +179,7 @@ def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_co
         command = "{clang_tidy} $@ && touch {stdout}"
 
     ctx.actions.run_shell(
-        inputs = _gather_inputs(ctx, src),
+        inputs = _gather_inputs(ctx, compilation_context, src),
         outputs = outputs,
         tools = [executable._clang_tidy],
         command = command.format(clang_tidy = executable._clang_tidy.path, stdout = stdout.path),
@@ -217,7 +217,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exi
     )
 
     ctx.actions.run(
-        inputs = _gather_inputs(ctx, src),
+        inputs = _gather_inputs(ctx, compilation_context, src),
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
