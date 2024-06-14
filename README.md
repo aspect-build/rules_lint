@@ -5,8 +5,12 @@ bazel_clang_tidy into this linter framework. The idea of integrating these linte
 maintainers of both repos (https://github.com/erenon/bazel_clang_tidy/issues/35)
 
 ## Windows setup
+```
 copy clang-tidy.exe into examples/tools/lint
 del examples\\.bazeliskrc (aspect-cli does not support windows)
+BAZEL_SH=c:\msys64\usr\bin\bash.exe # git bash doesn't seem to work
+BAZEL_VC=c:\apps\MVS16\VC
+```
 
 ## Example commands
 Run on a binary
