@@ -82,30 +82,6 @@ def _gather_inputs(ctx, src):
     inputs = [src, ctx.file._config_file]
     return inputs
 
-# todo; update or remove
-def _rule_sources(ctx):
-    def check_valid_file_type(src):
-        """
-        Returns True if the file type matches one of the permitted srcs file types for C and C++ header/source files.
-        """
-        permitted_file_types = [
-            ".c", ".cc", ".cpp", ".cxx", ".c++", ".C", ".h", ".hh", ".hpp", ".hxx", ".inc", ".inl", ".H",
-        ]
-        for file_type in permitted_file_types:
-            if src.basename.endswith(file_type):
-                return True
-        return False
-
-    srcs = []
-    if hasattr(ctx.rule.attr, "srcs"):
-        for src in ctx.rule.attr.srcs:
-            srcs += [src for src in src.files.to_list() if src.is_source and check_valid_file_type(src)]
-    if hasattr(ctx.rule.attr, "hdrs"):
-        for hdr in ctx.rule.attr.hdrs:
-            srcs += [hdr for hdr in hdr.files.to_list() if hdr.is_source and check_valid_file_type(hdr)]
-    return srcs
-
-# todo; update or remove
 def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
     cc_toolchain = find_cpp_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
@@ -124,7 +100,6 @@ def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
     )
     return flags
 
-# todo; update or remove
 def _safe_flags(flags):
     # Some flags might be used by GCC, but not understood by Clang.
     # Remove them here, to allow users to run clang-tidy, without having
