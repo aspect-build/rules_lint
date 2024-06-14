@@ -41,7 +41,7 @@ load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "c
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files", "patch_file")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 
@@ -53,7 +53,7 @@ _MNEMONIC = "AspectRulesLintClangTidy"
 ###############################################
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
-def _report_files(mnemonic, src, ctx):
+def _report_files_for_file(mnemonic, src, ctx):
     # TODO: not sure how to get the 'src/' prefix (the build file dir) programatically
     relative_file = src.path.removeprefix("src/")
     report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = relative_file, mnemonic = mnemonic, suffix = "report"))
@@ -69,7 +69,8 @@ def _report_files(mnemonic, src, ctx):
         outs.append(exit_code)
     return report, exit_code, OutputGroupInfo(rules_lint_report = depset(outs))
 
-def _patch_file(mnemonic, src, ctx):
+def _patch_file_for_file(mnemonic, src, ctx):
+    # TODO: not sure how to get the 'src/' prefix (the build file dir) programatically
     relative_file = src.path.removeprefix("src/")
     patch = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = relative_file, mnemonic = mnemonic, suffix = "patch"))
     return patch, OutputGroupInfo(rules_lint_patch = depset([patch]))
@@ -248,28 +249,38 @@ def _clang_tidy_aspect_impl(target, ctx):
 
     files_to_lint = filter_srcs(ctx.rule)
     #files_to_lint = _rule_sources(ctx)
-    compilation_context = target[CcInfo].compilation_context
-    reports = []
-    patches = []
-    # todo: add support for dummy_successful_lint_action on zero files_to_lint
-    # todo: I really don't know the best way to handle multiple inputs, and that clang-tidy
-    # supports only one at a time. I'm not sure where the loop should go, and how to integrate
-    # with the various report helpers from aspect.
-    for file_to_lint in files_to_lint:
-        report, exit_code, _ = _report_files(_MNEMONIC, file_to_lint, ctx)
-        reports.append(report)
-        if (exit_code):
-            reports.append(exit_code)
+
+    # handle zero-files case and keep bazel happy by returning something
+    if not any(files_to_lint):
         if ctx.attr._options[LintOptionsInfo].fix:
-            patch, _ = _patch_file(_MNEMONIC, file_to_lint, ctx)
-            patches.append(patch)
-            clang_tidy_fix(ctx, compilation_context, ctx.executable, file_to_lint, patch, report, exit_code)
+            patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+            dummy_successful_lint_action(ctx, report, exit_code, patch)
         else:
-            clang_tidy_action(ctx, compilation_context, ctx.executable, file_to_lint, report, exit_code)
-    return [OutputGroupInfo(
-        rules_lint_report = depset(reports),
-        rules_lint_patch = depset(patches),
-    )]
+            report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+            dummy_successful_lint_action(ctx, report, exit_code)
+    else:
+        compilation_context = target[CcInfo].compilation_context
+        reports = []
+        patches = []
+        # todo: I really don't know the best way to handle multiple inputs, and that clang-tidy
+        # supports only one at a time. I'm not sure where the loop should go, and how to integrate
+        # with the various report helpers from aspect.
+        for file_to_lint in files_to_lint:
+            report, exit_code, _ = _report_files_for_file(_MNEMONIC, file_to_lint, ctx)
+            reports.append(report)
+            if (exit_code):
+                reports.append(exit_code)
+            if ctx.attr._options[LintOptionsInfo].fix:
+                patch, _ = _patch_file_for_file(_MNEMONIC, file_to_lint, ctx)
+                patches.append(patch)
+                clang_tidy_fix(ctx, compilation_context, ctx.executable, file_to_lint, patch, report, exit_code)
+            else:
+                clang_tidy_action(ctx, compilation_context, ctx.executable, file_to_lint, report, exit_code)
+        info = [OutputGroupInfo(
+            rules_lint_report = depset(reports),
+            rules_lint_patch = depset(patches),
+        )]
+    return info
 
 def lint_clang_tidy_aspect(binary, config, **kwargs):
     """A factory function to create a linter aspect.
