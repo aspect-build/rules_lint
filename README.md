@@ -8,13 +8,6 @@ maintainers of both repos (https://github.com/erenon/bazel_clang_tidy/issues/35)
 copy clang-tidy.exe into examples/tools/lint
 
 ## Example commands
-This command works, and generates a set of clang-tidy results
-``` 
-cd example
-bazel run //tools/lint:clang_tidy -- d:/workdir/rules_lint3/example/src/hello.cpp --config-file=d:/workdir/rules_lint3/example/.clang-tidy
-```
-
-This command does not produce any output:
 ```
 cd example
 bazel build //src:hello_cc --config=clang-tidy
@@ -23,10 +16,7 @@ bazel build //src:hello_cc --aspects=//tools/lint:linters.bzl%clang_tidy --outpu
 ```
 
 ## Questions
-- why doesn't the aspect work? !!!!
-- how best to debug an aspect? Print isn't working, I'm a bit stuck. Is there documentation on how to do this?
-- clang-tidy handles only a single source file at a time. This is different to all the other linters currently supported. What is the 
-best way to structure this code in clang_tidy.bzl? Pass one file to each invokation of clang_tidy_action? Or loop inside clang_tidy_action?
+- clang-tidy handles only a single source file at a time. This is different to all the other linters currently supported. What is the best way to structure this code in clang_tidy.bzl? Pass one file to each invokation of clang_tidy_action? Or loop inside clang_tidy_action?
 - Any other inputs?
 
 
