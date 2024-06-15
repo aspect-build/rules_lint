@@ -197,3 +197,15 @@ bzl_library(
         "@bazel_skylib//lib:dicts",
     ],
 )
+
+bzl_library(
+    name = "clang-tidy",
+    srcs = ["clang-tidy.bzl"],
+    visibility = ["//visibility:public"],
+)
+
+sh_binary(
+    name = "clang_tidy_wrapper",
+    srcs = ["clang_tidy_wrapper.sh"],
+    visibility = ["//visibility:public"],
+)
