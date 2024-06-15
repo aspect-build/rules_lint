@@ -22,4 +22,5 @@ cc_library(
     srcs = ["hello-greet-with-error.cc"],
     hdrs = ["hello-greet-with-error.h"],
     includes = ["."],
+    tags = ["manual"],
 )

@@ -6,5 +6,5 @@
 // Deliberately bad code
 void print_localtime() {
   char* localtime = get_localtime();
-  printf("%s\n", result_str.c_str());
+  printf("%s\n", localtime);
 }
