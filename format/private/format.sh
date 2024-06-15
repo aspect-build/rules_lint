@@ -40,7 +40,9 @@ function on_exit {
       ;;
     *)
       echo >&2 "FAILED: A formatter tool exited with code $code"
-      echo >&2 "Try running '$FIX_CMD' to fix this."
+      if [ "$mode" == "check" ]; then
+        echo >&2 "Try running '$FIX_CMD' to fix this."
+      fi
       ;;
   esac
 }
