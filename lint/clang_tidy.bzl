@@ -122,11 +122,6 @@ def get_args(ctx, compilation_context, srcs):
         regex = ctx.attr._header_filter
         args.append("-header-filter="+regex)
 
-    # todo: experiment with -warnings-as-errors='*'
-    # by default, clang-tidy only returns error exit code if it encounters a compiler error
-    # should we always stop the linting in these cases?
-    # this flag can cause other clang-warnings to also return error exit code
-
     args.append("--")
 
     # add args specified by the toolchain, on the command line and rule copts
