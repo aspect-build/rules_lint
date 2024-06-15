@@ -9,6 +9,7 @@ load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
+load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
 
 buf = lint_buf_aspect(
     config = "@@//:buf.yaml",
@@ -71,3 +72,12 @@ ktlint = lint_ktlint_aspect(
 )
 
 ktlint_test = lint_test(aspect = ktlint)
+
+clang_tidy = lint_clang_tidy_aspect(
+    binary = "@@//tools/lint:clang_tidy",
+    config = "@@//:.clang-tidy",
+    lint_matching_header = True,
+    angle_includes_are_system = False,
+)
+
+clang_tidy_test = lint_test(aspect = clang_tidy)
