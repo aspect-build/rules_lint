@@ -2,6 +2,7 @@
 with_entries(select(.key | IN(
     "C++",
     "CSS",
+    "Cuda",
     "Markdown",
     "Go",
     "HCL",

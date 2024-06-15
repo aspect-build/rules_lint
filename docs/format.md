@@ -47,8 +47,8 @@ format_multirun(
 ## languages
 
 <pre>
-languages(<a href="#languages-name">name</a>, <a href="#languages-cc">cc</a>, <a href="#languages-css">css</a>, <a href="#languages-go">go</a>, <a href="#languages-html">html</a>, <a href="#languages-java">java</a>, <a href="#languages-javascript">javascript</a>, <a href="#languages-jsonnet">jsonnet</a>, <a href="#languages-kotlin">kotlin</a>, <a href="#languages-markdown">markdown</a>, <a href="#languages-protocol_buffer">protocol_buffer</a>,
-          <a href="#languages-python">python</a>, <a href="#languages-rust">rust</a>, <a href="#languages-scala">scala</a>, <a href="#languages-shell">shell</a>, <a href="#languages-sql">sql</a>, <a href="#languages-starlark">starlark</a>, <a href="#languages-swift">swift</a>, <a href="#languages-terraform">terraform</a>, <a href="#languages-yaml">yaml</a>)
+languages(<a href="#languages-name">name</a>, <a href="#languages-cc">cc</a>, <a href="#languages-css">css</a>, <a href="#languages-cuda">cuda</a>, <a href="#languages-go">go</a>, <a href="#languages-html">html</a>, <a href="#languages-java">java</a>, <a href="#languages-javascript">javascript</a>, <a href="#languages-jsonnet">jsonnet</a>, <a href="#languages-kotlin">kotlin</a>, <a href="#languages-markdown">markdown</a>,
+          <a href="#languages-protocol_buffer">protocol_buffer</a>, <a href="#languages-python">python</a>, <a href="#languages-rust">rust</a>, <a href="#languages-scala">scala</a>, <a href="#languages-shell">shell</a>, <a href="#languages-sql">sql</a>, <a href="#languages-starlark">starlark</a>, <a href="#languages-swift">swift</a>, <a href="#languages-terraform">terraform</a>, <a href="#languages-yaml">yaml</a>)
 </pre>
 
 Language attributes that may be passed to [format_multirun](#format_multirun) or [format_test](#format_test).
@@ -72,6 +72,7 @@ Some languages have dialects:
 | <a id="languages-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
 | <a id="languages-cc"></a>cc |  a <code>clang-format</code> binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="languages-css"></a>css |  a <code>prettier</code> binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="languages-cuda"></a>cuda |  a <code>clang-format</code> binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="languages-go"></a>go |  a <code>gofmt</code> binary, or any other tool that has a matching command-line interface. Use <code>@aspect_rules_lint//format:gofumpt</code> to choose the built-in tool.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="languages-html"></a>html |  a <code>prettier</code> binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="languages-java"></a>java |  a <code>java-format</code> binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
