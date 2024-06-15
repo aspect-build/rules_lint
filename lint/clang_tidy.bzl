@@ -122,6 +122,11 @@ def get_args(ctx, compilation_context, srcs):
         regex = ctx.attr._header_filter
         args.append("-header-filter="+regex)
 
+    # todo: experiment with -warnings-as-errors='*'
+    # by default, clang-tidy only returns error exit code if it encounters a compiler error
+    # should we always stop the linting in these cases?
+    # this flag can cause other clang-warnings to also return error exit code
+
     args.append("--")
 
     # add args specified by the toolchain, on the command line and rule copts
@@ -198,12 +203,13 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
-            "linter": executable._clang_tidy_wrapper.path + " $@",
+            "linter": executable._clang_tidy_wrapper.path,
             "args": [executable._clang_tidy.path, "--fix"] + get_args(ctx, compilation_context, srcs),
             "env": {
                 "BAZEL_BINDIR": ctx.bin_dir.path,
                 "CLANG_TIDY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
                 "CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE": stdout.path,
+                "CLANG_TIDY__VERBOSE": "1",
             },
             "files_to_diff": [src.path for src in srcs],
             "output": patch.path,

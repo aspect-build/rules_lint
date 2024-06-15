@@ -17,6 +17,9 @@ if [[ -n $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
     touch $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE
     # Clear the file if it does exist
     > $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE
+    if  [[ -n $CLANG_TIDY__VERBOSE ]]; then
+        echo "Writing to ${CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE}"
+    fi
 fi
 
 # Initialize arrays
