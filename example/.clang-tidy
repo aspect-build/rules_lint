@@ -1,6 +1,7 @@
 Checks: >
   -*,
   bugprone-*,
+  cppcoreguidelines-*,
   google-*,
   misc-*,
   modernize-*,

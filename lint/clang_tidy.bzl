@@ -68,7 +68,7 @@ def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
     )
     return flags
 
-def _safe_flags(flags):
+def _supported_flag(flag):
     # Some flags might be used by GCC, but not understood by Clang.
     # Remove them here, to allow users to run clang-tidy, without having
     # a clang toolchain configured (that would produce a good command line with --compiler clang)
@@ -79,16 +79,28 @@ def _safe_flags(flags):
         "/COMPILER_MSVC",
         "/showIncludes",
     ]
+    if (flag in unsupported_flags or flag.startswith("/wd") or flag.startswith("-W")):
+        return False
+    return True
 
-    return [flag for flag in flags if flag not in unsupported_flags and not flag.startswith("/wd")]
+def _update_flag(flag):
+    # update from MSVC C++ standard to clang C++ standard
+    if (flag.startswith("/std:")):
+        flag = "-std="+flag.removeprefix("/std:")
+    return flag
 
-def add_all(array, list, **kwargs):
-    if not "before_each" in kwargs:
-        array = array + list
-    else:
-        for arg in list:
-            array.append(kwargs["before_each"])
-            array.append(arg)
+def _safe_flags(flags):
+    # Some flags might be used by GCC, but not understood by Clang.
+    # Remove them here, to allow users to run clang-tidy, without having
+    # a clang toolchain configured (that would produce a good command line with --compiler clang)
+    return [_update_flag(flag) for flag in flags if (_supported_flag(flag))]
+
+def prefixed(list, prefix):
+    array = []
+    for arg in list:
+        array.append(prefix)
+        array.append(arg)
+    return array
 
 def angle_includes_option(ctx):
     if (ctx.attr._angle_includes_are_system):
@@ -133,9 +145,9 @@ def get_args(ctx, compilation_context, srcs):
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     sources_are_cxx = is_cxx(srcs[0])
     if (sources_are_cxx):
-        add_all(args, _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"])
+        args.extend(_safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"])
     else:
-        add_all(args, _safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"])
+        args.extend(_safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"])
 
     # add defines
     for define in compilation_context.defines.to_list():
@@ -144,11 +156,12 @@ def get_args(ctx, compilation_context, srcs):
         args.append("-D" + define)
 
     # add includes
-    add_all(args, compilation_context.framework_includes.to_list(), before_each = "-F")
-    add_all(args, compilation_context.includes.to_list(), before_each = "-I")
-    add_all(args, compilation_context.quote_includes.to_list(), before_each = "-iquote")
-    add_all(args, compilation_context.system_includes.to_list(), before_each = angle_includes_option(ctx))
-    add_all(args, compilation_context.external_includes.to_list(), before_each = "-isystem")
+    args.extend(prefixed(compilation_context.framework_includes.to_list(), "-F"))
+    args.extend(prefixed(compilation_context.includes.to_list(), "-I"))
+    args.extend(prefixed(compilation_context.quote_includes.to_list(), "-iquote"))
+    args.extend(prefixed(compilation_context.system_includes.to_list(), angle_includes_option(ctx)))
+    args.extend(prefixed(compilation_context.external_includes.to_list(), "-isystem"))
+
     return args
 
 def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code):
@@ -206,10 +219,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
             "linter": executable._clang_tidy_wrapper.path,
             "args": [executable._clang_tidy.path, "--fix"] + get_args(ctx, compilation_context, srcs),
             "env": {
-                "BAZEL_BINDIR": ctx.bin_dir.path,
-                "CLANG_TIDY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
-                "CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE": stdout.path,
-                "CLANG_TIDY__VERBOSE": "1",
+                #"CLANG_TIDY__VERBOSE": "1",
             },
             "files_to_diff": [src.path for src in srcs],
             "output": patch.path,
@@ -223,6 +233,9 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         arguments = [patch_cfg.path],
         env = {
             "BAZEL_BINDIR": ".",
+            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
+            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
+            "JS_BINARY__SILENT_ON_SUCCESS": "1",
         },
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
         mnemonic = _MNEMONIC,

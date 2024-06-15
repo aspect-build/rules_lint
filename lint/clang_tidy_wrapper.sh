@@ -37,13 +37,13 @@ add_matching_header=0
 # Loop over all arguments
 for arg in "$@"; do
     if [[ $double_dash_found -eq 1 ]]; then
-        compiler_args+=("$arg")
+        compiler_args+=("'$arg'")
     elif [[ $arg == "--" ]]; then
         double_dash_found=1
     elif [[ $arg == "--wrapper_add_matching_header" ]]; then
         add_matching_header=1
     elif [[ $arg == -* ]]; then
-        clang_tidy_args+=("$arg")
+        clang_tidy_args+=("'$arg'")
     else
         file_args+=("$arg")
     fi
@@ -77,7 +77,11 @@ for file in "${file_args[@]}"; do
     fi
     eval $command
     exit_status=$?
-    cat $temp_file >> $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE
+    if [[ -n $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
+        cat $temp_file >> $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE
+    else
+        cat $temp_file
+    fi
     # distinguish between compile (fatal) errors and warnings-as-errors errors
     fatal_error=0
     if [ $exit_status -ne 0 ] && [ -s $temp_file ]; then
