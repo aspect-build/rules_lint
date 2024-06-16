@@ -102,6 +102,8 @@ def _update_flag(flag):
     # remap defines
     if (flag.startswith("/D")):
         flag = "-"+flag[1:]
+    if (flag.startswith("/FI")):
+        flag = "-include="+flag.removeprefix("/FI")
     # skip other msvc options
     if (flag.startswith("/")):
         return None
