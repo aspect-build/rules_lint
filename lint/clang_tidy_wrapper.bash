@@ -2,6 +2,8 @@
 # This is a wrapper for clang-tidy which allows it to be run on a collection of files
 # Usage: clang-tidy-target.bash <clang-tidy-path> <file1> <file2> ... -- <compiler-args>
 #
+# Feature request for this to be upstreamed: https://github.com/llvm/llvm-project/issues/95717
+#
 # Controls:
 # - CLANG_TIDY__VERBOSE: If set, be verbose
 # - CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE: If set, write stdout and stderr to this file
