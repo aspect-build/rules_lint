@@ -18,11 +18,12 @@ jobs:
           npx @bazel/buildifier lint/ruff_versions.bzl
           bazel run docs:update
       - name: Download and Extract Latest Multitool
-        run: wget -O- https://github.com/theoremlp/multitool/releases/latest/download/multitool-x86_64-unknown-linux-gnu.tar.xz | tar --strip-components=1 -xJf -
+        run: wget -O- https://github.com/theoremlp/multitool/releases/v0.4.0/download/multitool-x86_64-unknown-linux-gnu.tar.xz | tar --strip-components=1 -xJf -
       - name: Find Updates and Render Lockfile
         run: |
           ./multitool --lockfile lint/multitool.lock.json update
           ./multitool --lockfile format/multitool.lock.json update
+          rm multitool
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
