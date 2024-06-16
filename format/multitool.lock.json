@@ -1,57 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/theoremlp/rules_multitool/main/lockfile.schema.json",
-  "yamlfmt": {
-    "binaries": [
-      {
-        "kind": "archive",
-        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Darwin_arm64.tar.gz",
-        "sha256": "f85998c143357f898d89dddc0589dbe3065eee9170958f99482d107370633d78",
-        "file": "yamlfmt",
-        "os": "macos",
-        "cpu": "arm64"
-      },
-      {
-        "kind": "archive",
-        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Darwin_x86_64.tar.gz",
-        "sha256": "499ad4ff8b842981d464b474e868905752833d55c71904ef019967229432da93",
-        "file": "yamlfmt",
-        "os": "macos",
-        "cpu": "x86_64"
-      },
-      {
-        "kind": "archive",
-        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Linux_arm64.tar.gz",
-        "sha256": "3c22d184acc2ebbe738a41c557d9a7534a08086ae3a66c96ce7c741e92c31049",
-        "file": "yamlfmt",
-        "os": "linux",
-        "cpu": "arm64"
-      },
-      {
-        "kind": "archive",
-        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Linux_x86_64.tar.gz",
-        "sha256": "50397343c927b5227c7eeb921b1cc1519432c751e045a97e5f276da423145165",
-        "file": "yamlfmt",
-        "os": "linux",
-        "cpu": "x86_64"
-      }
-    ]
-  },
   "gofumpt": {
     "binaries": [
-      {
-        "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.6.0/gofumpt_v0.6.0_darwin_arm64",
-        "sha256": "725f7a922bf3f88bed6818a4553e80554cc5cdb67a72236a01707325aa2dbb7b",
-        "os": "macos",
-        "cpu": "arm64"
-      },
-      {
-        "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.6.0/gofumpt_v0.6.0_darwin_amd64",
-        "sha256": "59e6047b3fa2fb65b60cf7f8be9b77cf6b31b428a9a24042ce29e85140868036",
-        "os": "macos",
-        "cpu": "x86_64"
-      },
       {
         "kind": "file",
         "url": "https://github.com/mvdan/gofumpt/releases/download/v0.6.0/gofumpt_v0.6.0_linux_arm64",
@@ -65,11 +15,75 @@
         "sha256": "bdb57c353e2bbc43d2b097bb7289a6e65ef2526787f89316b4b452a9e5086be4",
         "os": "linux",
         "cpu": "x86_64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.6.0/gofumpt_v0.6.0_darwin_arm64",
+        "sha256": "725f7a922bf3f88bed6818a4553e80554cc5cdb67a72236a01707325aa2dbb7b",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.6.0/gofumpt_v0.6.0_darwin_amd64",
+        "sha256": "59e6047b3fa2fb65b60cf7f8be9b77cf6b31b428a9a24042ce29e85140868036",
+        "os": "macos",
+        "cpu": "x86_64"
+      }
+    ]
+  },
+  "jsonnetfmt": {
+    "binaries": [
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Linux_arm64.tar.gz",
+        "file": "jsonnetfmt",
+        "sha256": "49fbc99c91dcd2be53fa856307de3b8708c91dc5c74740714fdf9317957322e0",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Linux_x86_64.tar.gz",
+        "file": "jsonnetfmt",
+        "sha256": "a137c5e969609c3995c4d05817a247cfef8a92760c5306c3ad7df0355dd62970",
+        "os": "linux",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Darwin_arm64.tar.gz",
+        "file": "jsonnetfmt",
+        "sha256": "a15a699a58eb172c6d91f4cbddf3681095a649008628e0cfd84f564db4244ee3",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Darwin_x86_64.tar.gz",
+        "file": "jsonnetfmt",
+        "sha256": "76901637f60589bb9bf91b3481d4aecbc31efcd35ca99ae72bcb510b00270ad9",
+        "os": "macos",
+        "cpu": "x86_64"
       }
     ]
   },
   "shfmt": {
     "binaries": [
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_arm64",
+        "sha256": "27e1f69b0d57c584bcbf5c882b4c4f78ffcf945d0efef45c1fbfc6692213c7c3",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64",
+        "sha256": "27b3c6f9d9592fc5b4856c341d1ff2c88856709b9e76469313642a1d7b558fe0",
+        "os": "linux",
+        "cpu": "x86_64"
+      },
       {
         "kind": "file",
         "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_darwin_arm64",
@@ -83,56 +97,6 @@
         "sha256": "c0218b47a0301bb006f49fad85d2c08de23df303472834faf5639d04121320f8",
         "os": "macos",
         "cpu": "x86_64"
-      },
-      {
-        "kind": "file",
-        "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64",
-        "sha256": "27b3c6f9d9592fc5b4856c341d1ff2c88856709b9e76469313642a1d7b558fe0",
-        "os": "linux",
-        "cpu": "x86_64"
-      },
-      {
-        "kind": "file",
-        "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_arm64",
-        "sha256": "27e1f69b0d57c584bcbf5c882b4c4f78ffcf945d0efef45c1fbfc6692213c7c3",
-        "os": "linux",
-        "cpu": "arm64"
-      }
-    ]
-  },
-  "jsonnetfmt": {
-    "binaries": [
-      {
-        "kind": "archive",
-        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Darwin_arm64.tar.gz",
-        "sha256": "a15a699a58eb172c6d91f4cbddf3681095a649008628e0cfd84f564db4244ee3",
-        "os": "macos",
-        "cpu": "arm64",
-        "file": "jsonnetfmt"
-      },
-      {
-        "kind": "archive",
-        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Darwin_x86_64.tar.gz",
-        "sha256": "76901637f60589bb9bf91b3481d4aecbc31efcd35ca99ae72bcb510b00270ad9",
-        "os": "macos",
-        "cpu": "x86_64",
-        "file": "jsonnetfmt"
-      },
-      {
-        "kind": "archive",
-        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Linux_x86_64.tar.gz",
-        "sha256": "a137c5e969609c3995c4d05817a247cfef8a92760c5306c3ad7df0355dd62970",
-        "os": "linux",
-        "cpu": "x86_64",
-        "file": "jsonnetfmt"
-      },
-      {
-        "kind": "archive",
-        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Linux_arm64.tar.gz",
-        "sha256": "49fbc99c91dcd2be53fa856307de3b8708c91dc5c74740714fdf9317957322e0",
-        "os": "linux",
-        "cpu": "arm64",
-        "file": "jsonnetfmt"
       }
     ]
   },
@@ -140,35 +104,71 @@
     "binaries": [
       {
         "kind": "archive",
-        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_arm64.zip",
-        "sha256": "99c4d4feafb0183af2f7fbe07beeea6f83e5f5a29ae29fee3168b6810e37ff98",
-        "os": "macos",
-        "cpu": "arm64",
-        "file": "terraform"
-      },
-      {
-        "kind": "archive",
-        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_amd64.zip",
-        "sha256": "0eaf64e28f82e2defd06f7a6f3187d8cea03d5d9fcd2af54f549a6c32d6833f7",
-        "os": "macos",
-        "cpu": "x86_64",
-        "file": "terraform"
+        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_arm64.zip",
+        "file": "terraform",
+        "sha256": "08631c385667dd28f03b3a3f77cb980393af4a2fcfc2236c148a678ad9150c8c",
+        "os": "linux",
+        "cpu": "arm64"
       },
       {
         "kind": "archive",
         "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip",
+        "file": "terraform",
         "sha256": "3ff056b5e8259003f67fd0f0ed7229499cfb0b41f3ff55cc184088589994f7a5",
         "os": "linux",
-        "cpu": "x86_64",
-        "file": "terraform"
+        "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_arm64.zip",
-        "sha256": "08631c385667dd28f03b3a3f77cb980393af4a2fcfc2236c148a678ad9150c8c",
+        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_arm64.zip",
+        "file": "terraform",
+        "sha256": "99c4d4feafb0183af2f7fbe07beeea6f83e5f5a29ae29fee3168b6810e37ff98",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_darwin_amd64.zip",
+        "file": "terraform",
+        "sha256": "0eaf64e28f82e2defd06f7a6f3187d8cea03d5d9fcd2af54f549a6c32d6833f7",
+        "os": "macos",
+        "cpu": "x86_64"
+      }
+    ]
+  },
+  "yamlfmt": {
+    "binaries": [
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Linux_arm64.tar.gz",
+        "file": "yamlfmt",
+        "sha256": "3c22d184acc2ebbe738a41c557d9a7534a08086ae3a66c96ce7c741e92c31049",
         "os": "linux",
-        "cpu": "arm64",
-        "file": "terraform"
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Linux_x86_64.tar.gz",
+        "file": "yamlfmt",
+        "sha256": "50397343c927b5227c7eeb921b1cc1519432c751e045a97e5f276da423145165",
+        "os": "linux",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Darwin_arm64.tar.gz",
+        "file": "yamlfmt",
+        "sha256": "f85998c143357f898d89dddc0589dbe3065eee9170958f99482d107370633d78",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Darwin_x86_64.tar.gz",
+        "file": "yamlfmt",
+        "sha256": "499ad4ff8b842981d464b474e868905752833d55c71904ef019967229432da93",
+        "os": "macos",
+        "cpu": "x86_64"
       }
     ]
   }
