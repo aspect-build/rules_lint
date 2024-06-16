@@ -76,7 +76,12 @@ fi
 bazel build ${args[@]} $@
 
 # TODO: Maybe this could be hermetic with bazel run @aspect_bazel_lib//tools:jq or sth
-valid_reports=$(jq --arg ext report --raw-output "$filter" "$buildevents")
+if [ $machine == "Windows" ]; then
+    # jq on windows outputs CRLF which breaks this script. https://github.com/jqlang/jq/issues/92
+    valid_reports=$(jq --arg ext report --raw-output "$filter" "$buildevents" | tr -d '\r')
+else
+    valid_reports=$(jq --arg ext report --raw-output "$filter" "$buildevents")
+fi
 
 # Show the results.
 while IFS= read -r report; do
@@ -94,7 +99,7 @@ done <<<"$valid_reports"
 # [*] 1 fixable with the `--fix` option.
 # so that the naive thing of pasting that flag to lint.sh will do what the user expects.
 if [ -n "$fix" ]; then
-	valid_patches=$(jq --arg ext patch --raw-output "$filter" "$buildevents")
+	valid_patches=$valid_reports
 	while IFS= read -r patch; do
 		# Exclude coverage reports, and check if the report is empty.
 		if [[ "$patch" == *coverage.dat ]] || [[ ! -s "$patch" ]]; then
