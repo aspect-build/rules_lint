@@ -153,15 +153,51 @@ def _filter_srcs(rule):
     else:
         return [s for s in rule.files.srcs if _is_source(s)]
 
+def is_parent_in_list(dir, list):
+    for l in list:
+        if (dir != l and dir.startswith(l)):
+            return True
+    return False
+
+def _common_prefixes(headers):
+    # crude code to work out a common directory prefix for all headers
+    # is there a canonical way to do this in starlark?
+    dirs = []
+    for h in headers:
+        dir = h.dirname
+        if dir not in dirs:
+            dirs.append(dir)
+    dirs2 = []
+    for dir in dirs:
+        if (not is_parent_in_list(dir, dirs)):
+            dirs2.append(dir)
+    return dirs2
+
+def _aggregate_regex(compilation_context):
+    dirs = _common_prefixes(compilation_context.direct_headers)
+    if not any(dirs):
+        regex = None
+    elif len(dirs) == 1:
+        regex = ".*"+dirs[0]+"/.*"
+    else:
+        regex = ".*"
+    return regex
+
+def _quoted_arg(arg):
+    return "\""+arg+"\""
+
 def _get_args(ctx, compilation_context, srcs):
-    args = [src.short_path for src in srcs]
+    args = []
     if (any(ctx.files._global_config)):
         args.append("--config-file="+ctx.files._global_config[0].short_path)
-    if (ctx.attr._lint_matching_header):
-        args.append("--wrapper_add_matching_header")
+    if (ctx.attr._lint_target_headers):
+        regex = _aggregate_regex(compilation_context)
+        if (regex):
+            args.append(_quoted_arg("-header-filter="+regex))
     elif (ctx.attr._header_filter):
         regex = ctx.attr._header_filter
-        args.append("-header-filter="+regex)
+        args.append(_quoted_arg("-header-filter="+regex))
+    args.extend([src.short_path for src in srcs])
 
     args.append("--")
 
@@ -312,8 +348,9 @@ def lint_clang_tidy_aspect(binary, **kwargs):
         global_config: label of a single global .clang-tidy file to pass to clang-tidy on the command line. This
             will cause clang-tidy to ignore any other config files in the source directories.
         header_filter: optional, set to a posix regex to supply to clang-tidy with the -header-filter option
-        lint_matching_header: optional, set to True to include the matching header file
-            in the lint output results for each source. If supplied, overrides the header_filter option.
+        lint_target_headers: optional, set to True to pass a pattern that includes all headers with the target's
+            directory prefix. This crude control may include headers from the linted target in the results. If 
+            supplied, overrides the header_filter option.
         angle_includes_are_system: controls how angle includes are passed to clang-tidy. By default, Bazel
             passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
             them as regular header files.
@@ -324,7 +361,7 @@ def lint_clang_tidy_aspect(binary, **kwargs):
     global_config = kwargs.pop("global_config", [])
     if type(global_config) == "string":
         global_config = [global_config]
-    lint_matching_header = kwargs.pop("lint_matching_header", False)
+    lint_target_headers = kwargs.pop("lint_target_headers", False)
     header_filter = kwargs.pop("header_filter", "")
     angle_includes_are_system = kwargs.pop("angle_includes_are_system", True)
     verbose = kwargs.pop("verbose", False)   
@@ -344,8 +381,8 @@ def lint_clang_tidy_aspect(binary, **kwargs):
                 default = global_config,
                 allow_files = True,
             ),
-            "_lint_matching_header": attr.bool(
-                default = lint_matching_header,
+            "_lint_target_headers": attr.bool(
+                default = lint_target_headers,
             ),
             "_header_filter": attr.string(
                 default = header_filter,

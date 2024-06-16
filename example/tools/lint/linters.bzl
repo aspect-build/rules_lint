@@ -79,7 +79,7 @@ clang_tidy = lint_clang_tidy_aspect(
         "@@//:.clang-tidy",
         "@@//src/cpp/lib:get/.clang-tidy",
     ],
-    lint_matching_header = True,
+    lint_target_headers = True,
     angle_includes_are_system = False,
     verbose = False,
 )
@@ -91,7 +91,7 @@ clang_tidy_test = lint_test(aspect = clang_tidy)
 clang_tidy_global_config = lint_clang_tidy_aspect(
     binary = "@@//tools/lint:clang_tidy",
     global_config = "@@//:.clang-tidy",
-    lint_matching_header = True,
+    lint_target_headers = True,
     angle_includes_are_system = False,
     verbose = False,
 )
