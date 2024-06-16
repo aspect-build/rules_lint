@@ -116,7 +116,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_C++_with_clang-format
     assert_success
 
-    assert_output --partial "+ clang-format -style=file --fallback-style=none -i example/src/hello.cpp"
+    assert_output --partial "+ clang-format -style=file --fallback-style=none -i example/src/cpp/lib/get/get-time.cc"
 }
 
 @test "should run clang-format on Cuda" {

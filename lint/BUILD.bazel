@@ -197,3 +197,21 @@ bzl_library(
         "@bazel_skylib//lib:dicts",
     ],
 )
+
+bzl_library(
+    name = "clang_tidy",
+    srcs = ["clang_tidy.bzl"],
+    visibility = ["//visibility:public"],
+    deps = _BAZEL_TOOLS + [
+        "//lint/private:lint_aspect",
+        "@bazel_skylib//lib:dicts",
+        "@bazel_tools//tools/build_defs/cc:action_names.bzl",
+        "@bazel_tools//tools/cpp:toolchain_utils.bzl",
+    ],
+)
+
+sh_binary(
+    name = "clang_tidy_wrapper",
+    srcs = ["clang_tidy_wrapper.bash"],
+    visibility = ["//visibility:public"],
+)
