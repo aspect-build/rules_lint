@@ -46,7 +46,6 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint
 _MNEMONIC = "AspectRulesLintClangTidy"
 
 def _gather_inputs(ctx, compilation_context, srcs):
-    # todo: handle header files in deps
     inputs = srcs + [ctx.file._config_file] + compilation_context.headers.to_list()
     return inputs
 
@@ -133,11 +132,6 @@ def get_args(ctx, compilation_context, srcs):
     elif (ctx.attr._header_filter):
         regex = ctx.attr._header_filter
         args.append("-header-filter="+regex)
-
-    # todo: experiment with -warnings-as-errors='*'
-    # by default, clang-tidy only returns error exit code if it encounters a compiler error
-    # should we always stop the linting in these cases?
-    # this flag can cause other clang-warnings to also return error exit code
 
     args.append("--")
 

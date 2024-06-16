@@ -199,8 +199,8 @@ bzl_library(
 )
 
 bzl_library(
-    name = "clang-tidy",
-    srcs = ["clang-tidy.bzl"],
+    name = "clang_tidy",
+    srcs = ["clang_tidy.bzl"],
     visibility = ["//visibility:public"],
 )
 
