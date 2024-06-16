@@ -151,7 +151,7 @@ def _get_args(ctx, compilation_context, srcs):
     args.extend(_prefixed(compilation_context.framework_includes.to_list(), "-F"))
     args.extend(_prefixed(compilation_context.includes.to_list(), "-I"))
     args.extend(_prefixed(compilation_context.quote_includes.to_list(), "-iquote"))
-    args.extend(_prefixed(compilation_context.system_includes.to_list(), angle_includes_option(ctx)))
+    args.extend(_prefixed(compilation_context.system_includes.to_list(), _angle_includes_option(ctx)))
     args.extend(_prefixed(compilation_context.external_includes.to_list(), "-isystem"))
 
     return args
@@ -206,7 +206,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
-    args = get_args(ctx, compilation_context, srcs)
+    args = _get_args(ctx, compilation_context, srcs)
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
