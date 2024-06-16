@@ -37,8 +37,6 @@ clang_tidy = clang_tidy_aspect(
 ```
 """
 
-load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
-load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "report_files", "patch_and_report_files")
@@ -94,24 +92,24 @@ def _safe_flags(flags):
     # a clang toolchain configured (that would produce a good command line with --compiler clang)
     return [_update_flag(flag) for flag in flags if (_supported_flag(flag))]
 
-def prefixed(list, prefix):
+def _prefixed(list, prefix):
     array = []
     for arg in list:
         array.append(prefix)
         array.append(arg)
     return array
 
-def angle_includes_option(ctx):
+def _angle_includes_option(ctx):
     if (ctx.attr._angle_includes_are_system):
         return "-isystem"
     return "-I"
     
-def is_cxx(file):
+def _is_cxx(file):
     if file.extension == "c":
         return False
     return True
 
-def is_source(file):
+def _is_source(file):
     permitted_source_types = [
         "c", "cc", "cpp", "cxx", "c++", "C",
     ]
@@ -122,9 +120,9 @@ def _filter_srcs(rule):
     if "lint-genfiles" in rule.attr.tags:
         return rule.files.srcs
     else:
-        return [s for s in rule.files.srcs if is_source(s)]
+        return [s for s in rule.files.srcs if _is_source(s)]
 
-def get_args(ctx, compilation_context, srcs):
+def _get_args(ctx, compilation_context, srcs):
     args = [src.short_path for src in srcs]
     args.append("--config-file="+ctx.file._config_file.short_path)
     if (ctx.attr._lint_matching_header):
@@ -137,7 +135,7 @@ def get_args(ctx, compilation_context, srcs):
 
     # add args specified by the toolchain, on the command line and rule copts
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
-    sources_are_cxx = is_cxx(srcs[0])
+    sources_are_cxx = _is_cxx(srcs[0])
     if (sources_are_cxx):
         args.extend(_safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"])
     else:
@@ -150,11 +148,11 @@ def get_args(ctx, compilation_context, srcs):
         args.append("-D" + define)
 
     # add includes
-    args.extend(prefixed(compilation_context.framework_includes.to_list(), "-F"))
-    args.extend(prefixed(compilation_context.includes.to_list(), "-I"))
-    args.extend(prefixed(compilation_context.quote_includes.to_list(), "-iquote"))
-    args.extend(prefixed(compilation_context.system_includes.to_list(), angle_includes_option(ctx)))
-    args.extend(prefixed(compilation_context.external_includes.to_list(), "-isystem"))
+    args.extend(_prefixed(compilation_context.framework_includes.to_list(), "-F"))
+    args.extend(_prefixed(compilation_context.includes.to_list(), "-I"))
+    args.extend(_prefixed(compilation_context.quote_includes.to_list(), "-iquote"))
+    args.extend(_prefixed(compilation_context.system_includes.to_list(), angle_includes_option(ctx)))
+    args.extend(_prefixed(compilation_context.external_includes.to_list(), "-isystem"))
 
     return args
 
@@ -166,6 +164,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
 
     Args:
         ctx: an action context OR aspect context
+        compilation_context: from target
         executable: struct with a clang-tidy field
         srcs: file objects to lint
         report: output file containing the stdout or --output-file of clang-tidy
@@ -186,7 +185,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
         outputs = outputs,
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
         command = executable._clang_tidy_wrapper.path + " $@",
-        arguments = [executable._clang_tidy.path] + get_args(ctx, compilation_context, srcs),
+        arguments = [executable._clang_tidy.path] + _get_args(ctx, compilation_context, srcs),
         use_default_shell_env = True,
         env = env,
         mnemonic = _MNEMONIC,
@@ -198,6 +197,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
 
     Args:
         ctx: an action context OR aspect context
+        compilation_context: from target
         executable: struct with a clang_tidy field
         srcs: list of file objects to lint
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
@@ -211,7 +211,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         output = patch_cfg,
         content = json.encode({
             "linter": executable._clang_tidy_wrapper.path,
-            "args": [executable._clang_tidy.path, "--fix"] + get_args(ctx, compilation_context, srcs),
+            "args": [executable._clang_tidy.path, "--fix"] + _get_args(ctx, compilation_context, srcs),
             "env": {
                 #"CLANG_TIDY__VERBOSE": "1",
             },
@@ -279,20 +279,20 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
     Args:
         binary: the clang-tidy binary, typically a rule like
 
-        ```starlark
-        native_binary(
-            name = "clang_tidy",
-            src = "clang-tidy.exe"
-            out = "clang_tidy",
-        )
-        ```
+            ```starlark
+            native_binary(
+                name = "clang_tidy",
+                src = "clang-tidy.exe"
+                out = "clang_tidy",
+            )
+            ```
         config: label of the .clang-tidy file
         header_filter: optional, set to a posix regex to supply to clang-tidy with the -header-filter option
         lint_matching_header: optional, set to True to include the matching header file
-        in the lint output results for each source. If supplied, overrides the header_filter option.
+            in the lint output results for each source. If supplied, overrides the header_filter option.
         angle_includes_are_system: controls how angle includes are passed to clang-tidy. By default, Bazel
-        passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
-        them as regular header files.
+            passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
+            them as regular header files.
     """
 
     return aspect(
@@ -332,6 +332,6 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
             ),
             "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
         },
-        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + ["@bazel_tools//tools/cpp:toolchain_type"],
+        toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
         fragments = ["cpp"],
     )
