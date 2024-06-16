@@ -12,18 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: |
+      - name: Update ruff
+        run: |
           ./lint/mirror_ruff.sh
           npx @bazel/buildifier lint/ruff_versions.bzl
           bazel run docs:update
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          commit-message: "chore: mirror external releases"
-  update:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - name: Download and Extract Latest Multitool
         run: wget -O- https://github.com/theoremlp/multitool/releases/latest/download/multitool-x86_64-unknown-linux-gnu.tar.xz | tar --strip-components=1 -xJf -
       - name: Find Updates and Render Lockfile
@@ -33,4 +26,4 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: "chore: update multitool versions"
+          commit-message: "chore: mirror external releases"
