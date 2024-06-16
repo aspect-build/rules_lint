@@ -212,6 +212,6 @@ bzl_library(
 
 sh_binary(
     name = "clang_tidy_wrapper",
-    srcs = ["clang_tidy_wrapper.sh"],
+    srcs = ["clang_tidy_wrapper.bash"],
     visibility = ["//visibility:public"],
 )

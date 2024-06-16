@@ -8,6 +8,8 @@
 # - CLANG_TIDY__EXIT_CODE_OUTPUT_FILE: If set, write the highest exit code 
 # to this file and return success
 
+echo "$@"
+
 # First arg is clang-tidy path
 clang_tidy=$1
 shift

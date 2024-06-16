@@ -44,7 +44,9 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint
 _MNEMONIC = "AspectRulesLintClangTidy"
 
 def _gather_inputs(ctx, compilation_context, srcs):
-    inputs = srcs + [ctx.file._config_file] + compilation_context.headers.to_list()
+    inputs = srcs + ctx.files._configs + compilation_context.headers.to_list()
+    if (any(ctx.files._global_config)):
+        inputs.append(ctx.files._global_config[0])
     return inputs
 
 def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
@@ -82,15 +84,44 @@ def _supported_flag(flag):
 
 def _update_flag(flag):
     # update from MSVC C++ standard to clang C++ standard
+    unsupported_flags = [
+        "-fno-canonical-system-headers",
+        "-fstack-usage",
+        "/nologo",
+        "/COMPILER_MSVC",
+        "/showIncludes",
+    ]
+    if (flag in unsupported_flags):
+        return None
+    # omit warning flags
+    if (flag.startswith("/wd") or flag.startswith("-W")):
+        return None
+    # remap c++ standard to clang
     if (flag.startswith("/std:")):
         flag = "-std="+flag.removeprefix("/std:")
+    # remap defines
+    if (flag.startswith("/D")):
+        flag = "-"+flag[1:]
+    # skip other msvc options
+    if (flag.startswith("/")):
+        return None
     return flag
 
-def _safe_flags(flags):
-    # Some flags might be used by GCC, but not understood by Clang.
-    # Remove them here, to allow users to run clang-tidy, without having
+def _safe_flags(ctx, flags):
+    # Some flags might be used by GCC/MSVC, but not understood by Clang.
+    # Remap or remove them here, to allow users to run clang-tidy, without having
     # a clang toolchain configured (that would produce a good command line with --compiler clang)
-    return [_update_flag(flag) for flag in flags if (_supported_flag(flag))]
+    flags = []
+    skipped_flags = []
+    for flag in flags:
+        flag = _update_flag(flag)
+        if (flag):
+            flags.append(flag)
+        elif (ctx.attr._verbose):
+            skipped_flags.append(flag)
+    if (ctx.attr._verbose and any(skipped_flags)):
+        print("skipped flags: "+" ".join(skipped_flags))
+    return flags
 
 def _prefixed(list, prefix):
     array = []
@@ -124,7 +155,8 @@ def _filter_srcs(rule):
 
 def _get_args(ctx, compilation_context, srcs):
     args = [src.short_path for src in srcs]
-    args.append("--config-file="+ctx.file._config_file.short_path)
+    if (any(ctx.files._global_config)):
+        args.append("--config-file="+ctx.files._global_config[0].short_path)
     if (ctx.attr._lint_matching_header):
         args.append("--wrapper_add_matching_header")
     elif (ctx.attr._header_filter):
@@ -137,9 +169,9 @@ def _get_args(ctx, compilation_context, srcs):
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     sources_are_cxx = _is_cxx(srcs[0])
     if (sources_are_cxx):
-        args.extend(_safe_flags(_toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"])
+        args.extend(_safe_flags(ctx, _toolchain_flags(ctx, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"])
     else:
-        args.extend(_safe_flags(_toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"])
+        args.extend(_safe_flags(ctx, _toolchain_flags(ctx, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"])
 
     # add defines
     for define in compilation_context.defines.to_list():
@@ -175,10 +207,11 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
     outputs = [stdout]
     env = {}
     env["CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE"] = stdout.path
-    #env["CLANG_TIDY__VERBOSE"] = "1"
     if exit_code:
         env["CLANG_TIDY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
         outputs.append(exit_code)
+    if (ctx.attr._verbose):
+        env["CLANG_TIDY__VERBOSE"] = "1"
 
     ctx.actions.run_shell(
         inputs = _gather_inputs(ctx, compilation_context, srcs),
@@ -207,14 +240,16 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
     args = _get_args(ctx, compilation_context, srcs)
+    env = {}
+    if (ctx.attr._verbose):
+        env["CLANG_TIDY__VERBOSE"] = "1"
+
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
             "linter": executable._clang_tidy_wrapper.path,
             "args": [executable._clang_tidy.path, "--fix"] + _get_args(ctx, compilation_context, srcs),
-            "env": {
-                #"CLANG_TIDY__VERBOSE": "1",
-            },
+            "env": env,
             "files_to_diff": [src.path for src in srcs],
             "output": patch.path,
         }),
@@ -241,21 +276,6 @@ def _clang_tidy_aspect_impl(target, ctx):
     if not CcInfo in target:
         return []
 
-    # todo: keep this? #Ignore external targets
-    #if target.label.workspace_root.startswith("external"):
-    #    return []
-
-    # Targets with specific tags will not be formatted
-    # todo: does this align with rules_lint framework?
-    ignore_tags = [
-        "noclangtidy",
-        "no-clang-tidy",
-    ]
-
-    for tag in ignore_tags:
-        if tag in ctx.rule.attr.tags:
-            return []
-
     files_to_lint = _filter_srcs(ctx.rule)
     compilation_context = target[CcInfo].compilation_context
 
@@ -273,7 +293,7 @@ def _clang_tidy_aspect_impl(target, ctx):
             clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code)
     return [info]
 
-def lint_clang_tidy_aspect(binary, config, **kwargs):
+def lint_clang_tidy_aspect(binary, **kwargs):
     """A factory function to create a linter aspect.
 
     Args:
@@ -286,14 +306,28 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
                 out = "clang_tidy",
             )
             ```
-        config: label of the .clang-tidy file
+        configs: labels of the .clang-tidy files to make available to clang-tidy's config search. These may be
+            in subdirectories and clang-tidy will apply them if appropriate. This may also include .clang-format
+            files which may be used for formatting fixes.
+        global_config: label of a single global .clang-tidy file to pass to clang-tidy on the command line. This
+            will cause clang-tidy to ignore any other config files in the source directories.
         header_filter: optional, set to a posix regex to supply to clang-tidy with the -header-filter option
         lint_matching_header: optional, set to True to include the matching header file
             in the lint output results for each source. If supplied, overrides the header_filter option.
         angle_includes_are_system: controls how angle includes are passed to clang-tidy. By default, Bazel
             passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
             them as regular header files.
+        verbose: print debug messages including clang-tidy command lines being invoked.
     """
+
+    configs = kwargs.pop("configs", [])
+    global_config = kwargs.pop("global_config", [])
+    if type(global_config) == "string":
+        global_config = [global_config]
+    lint_matching_header = kwargs.pop("lint_matching_header", False)
+    header_filter = kwargs.pop("header_filter", "")
+    angle_includes_are_system = kwargs.pop("angle_includes_are_system", True)
+    verbose = kwargs.pop("verbose", False)   
 
     return aspect(
         implementation = _clang_tidy_aspect_impl,
@@ -302,14 +336,25 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
+            "_configs": attr.label_list(
+                default = configs,
+                allow_files = True,
+            ),
+            "_global_config": attr.label_list(
+                default = global_config,
+                allow_files = True,
+            ),
             "_lint_matching_header": attr.bool(
-                default = kwargs.get("lint_matching_header", False),
+                default = lint_matching_header,
             ),
             "_header_filter": attr.string(
-                default = kwargs.get("header_filter", ""),
+                default = header_filter,
             ),
             "_angle_includes_are_system": attr.bool(
-                default = kwargs.get("angle_includes_are_system", True)
+                default = angle_includes_are_system,
+            ),
+            "_verbose": attr.bool(
+                default = verbose,
             ),
             "_clang_tidy": attr.label(
                 default = binary,
@@ -320,10 +365,6 @@ def lint_clang_tidy_aspect(binary, config, **kwargs):
                 default = Label("@aspect_rules_lint//lint:clang_tidy_wrapper"),
                 executable = True,
                 cfg = "exec",
-            ),
-            "_config_file": attr.label(
-                default = config,
-                allow_single_file = True,
             ),
             "_patcher": attr.label(
                 default = "@aspect_rules_lint//lint/private:patcher",
