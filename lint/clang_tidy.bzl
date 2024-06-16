@@ -39,7 +39,7 @@ clang_tidy = clang_tidy_aspect(
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "report_files", "patch_and_report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "patch_and_report_files", "report_files")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 
@@ -67,21 +67,6 @@ def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
     )
     return flags
 
-def _supported_flag(flag):
-    # Some flags might be used by GCC, but not understood by Clang.
-    # Remove them here, to allow users to run clang-tidy, without having
-    # a clang toolchain configured (that would produce a good command line with --compiler clang)
-    unsupported_flags = [
-        "-fno-canonical-system-headers",
-        "-fstack-usage",
-        "/nologo",
-        "/COMPILER_MSVC",
-        "/showIncludes",
-    ]
-    if (flag in unsupported_flags or flag.startswith("/wd") or flag.startswith("-W")):
-        return False
-    return True
-
 def _update_flag(flag):
     # update from MSVC C++ standard to clang C++ standard
     unsupported_flags = [
@@ -93,17 +78,21 @@ def _update_flag(flag):
     ]
     if (flag in unsupported_flags):
         return None
+
     # omit warning flags
     if (flag.startswith("/wd") or flag.startswith("-W")):
         return None
+
     # remap c++ standard to clang
     if (flag.startswith("/std:")):
-        flag = "-std="+flag.removeprefix("/std:")
+        flag = "-std=" + flag.removeprefix("/std:")
+
     # remap defines
     if (flag.startswith("/D")):
-        flag = "-"+flag[1:]
+        flag = "-" + flag[1:]
     if (flag.startswith("/FI")):
-        flag = "-include="+flag.removeprefix("/FI")
+        flag = "-include=" + flag.removeprefix("/FI")
+
     # skip other msvc options
     if (flag.startswith("/")):
         return None
@@ -122,7 +111,8 @@ def _safe_flags(ctx, flags):
         elif (ctx.attr._verbose):
             skipped_flags.append(flag)
     if (ctx.attr._verbose and any(skipped_flags)):
-        print("skipped flags: "+" ".join(skipped_flags))
+        # buildifier: disable=print
+        print("skipped flags: " + " ".join(skipped_flags))
     return flags
 
 def _prefixed(list, prefix):
@@ -136,7 +126,7 @@ def _angle_includes_option(ctx):
     if (ctx.attr._angle_includes_are_system):
         return "-isystem"
     return "-I"
-    
+
 def _is_cxx(file):
     if file.extension == "c":
         return False
@@ -144,7 +134,12 @@ def _is_cxx(file):
 
 def _is_source(file):
     permitted_source_types = [
-        "c", "cc", "cpp", "cxx", "c++", "C",
+        "c",
+        "cc",
+        "cpp",
+        "cxx",
+        "c++",
+        "C",
     ]
     return (file.is_source and file.extension in permitted_source_types)
 
@@ -156,8 +151,8 @@ def _filter_srcs(rule):
         return [s for s in rule.files.srcs if _is_source(s)]
 
 def is_parent_in_list(dir, list):
-    for l in list:
-        if (dir != l and dir.startswith(l)):
+    for item in list:
+        if (dir != item and dir.startswith(item)):
             return True
     return False
 
@@ -180,25 +175,25 @@ def _aggregate_regex(compilation_context):
     if not any(dirs):
         regex = None
     elif len(dirs) == 1:
-        regex = ".*"+dirs[0]+"/.*"
+        regex = ".*" + dirs[0] + "/.*"
     else:
         regex = ".*"
     return regex
 
 def _quoted_arg(arg):
-    return "\""+arg+"\""
+    return "\"" + arg + "\""
 
 def _get_args(ctx, compilation_context, srcs):
     args = []
     if (any(ctx.files._global_config)):
-        args.append("--config-file="+ctx.files._global_config[0].short_path)
+        args.append("--config-file=" + ctx.files._global_config[0].short_path)
     if (ctx.attr._lint_target_headers):
         regex = _aggregate_regex(compilation_context)
         if (regex):
-            args.append(_quoted_arg("-header-filter="+regex))
+            args.append(_quoted_arg("-header-filter=" + regex))
     elif (ctx.attr._header_filter):
         regex = ctx.attr._header_filter
-        args.append(_quoted_arg("-header-filter="+regex))
+        args.append(_quoted_arg("-header-filter=" + regex))
     args.extend([src.short_path for src in srcs])
 
     args.append("--")
@@ -237,7 +232,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
         compilation_context: from target
         executable: struct with a clang-tidy field
         srcs: file objects to lint
-        report: output file containing the stdout or --output-file of clang-tidy
+        stdout: output file containing the stdout or --output-file of clang-tidy
         exit_code: output file containing the exit code of clang-tidy.
             If None, then fail the build when clang-tidy exits non-zero.
     """
@@ -277,7 +272,6 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
-    args = _get_args(ctx, compilation_context, srcs)
     env = {}
     if (ctx.attr._verbose):
         env["CLANG_TIDY__VERBOSE"] = "1"
@@ -331,7 +325,7 @@ def _clang_tidy_aspect_impl(target, ctx):
             clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code)
     return [info]
 
-def lint_clang_tidy_aspect(binary, **kwargs):
+def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):
     """A factory function to create a linter aspect.
 
     Args:
@@ -351,7 +345,7 @@ def lint_clang_tidy_aspect(binary, **kwargs):
             will cause clang-tidy to ignore any other config files in the source directories.
         header_filter: optional, set to a posix regex to supply to clang-tidy with the -header-filter option
         lint_target_headers: optional, set to True to pass a pattern that includes all headers with the target's
-            directory prefix. This crude control may include headers from the linted target in the results. If 
+            directory prefix. This crude control may include headers from the linted target in the results. If
             supplied, overrides the header_filter option.
         angle_includes_are_system: controls how angle includes are passed to clang-tidy. By default, Bazel
             passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
@@ -359,14 +353,8 @@ def lint_clang_tidy_aspect(binary, **kwargs):
         verbose: print debug messages including clang-tidy command lines being invoked.
     """
 
-    configs = kwargs.pop("configs", [])
-    global_config = kwargs.pop("global_config", [])
     if type(global_config) == "string":
         global_config = [global_config]
-    lint_target_headers = kwargs.pop("lint_target_headers", False)
-    header_filter = kwargs.pop("header_filter", "")
-    angle_includes_are_system = kwargs.pop("angle_includes_are_system", True)
-    verbose = kwargs.pop("verbose", False)   
 
     return aspect(
         implementation = _clang_tidy_aspect_impl,

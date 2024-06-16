@@ -10,11 +10,11 @@ cc_library(
 cc_binary(
     name = "hello-world",
     srcs = ["hello-world.cc"],
+    includes = ["."],
     deps = [
         ":hello-greet",
         "//src/cpp/lib:hello-time",
     ],
-    includes = ["."],
 )
 
 cc_library(
