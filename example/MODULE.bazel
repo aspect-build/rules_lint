@@ -44,6 +44,12 @@ git_override(
   remote = "https://github.com/theoremlp/rules_multitool",
 )
 
+git_override(
+  module_name = "rules_multirun",
+  commit = "e75bb2b1217da35f357773304442e58b7f306dff",
+  remote = "https://github.com/peakschris/rules_multirun",
+)
+
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
 rules_ts_ext.deps()
 use_repo(rules_ts_ext, "npm_typescript")
