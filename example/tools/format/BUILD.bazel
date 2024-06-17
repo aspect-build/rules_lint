@@ -43,6 +43,7 @@ alias(
     actual = select({
         "@bazel_tools//src/conditions:linux": "@swiftformat",
         "@bazel_tools//src/conditions:darwin": "@swiftformat_mac",
+        "@bazel_tools//src/conditions:windows": "@swiftformat_windows",
     }),
 )
 
@@ -53,8 +54,16 @@ java_binary(
     runtime_deps = ["@maven//:org_scalameta_scalafmt_cli_2_13"],
 )
 
-format_multirun(
+alias(
     name = "format",
+    actual = select({
+        "@bazel_tools//src/conditions:windows": "format_windows",
+        "//conditions:default": "format_default",
+    }),
+)
+
+format_multirun(
+    name = "format_default",
     cc = "@llvm_toolchain_llvm//:bin/clang-format",
     css = ":prettier",
     cuda = "@llvm_toolchain_llvm//:bin/clang-format",
@@ -78,6 +87,11 @@ format_multirun(
     terraform = "@aspect_rules_lint//format:terraform",
     visibility = ["//:__subpackages__"],
     yaml = "@aspect_rules_lint//format:yamlfmt",
+)
+
+format_multirun(
+    name = "format_windows",
+    visibility = ["//:__subpackages__"],
 )
 
 format_test(

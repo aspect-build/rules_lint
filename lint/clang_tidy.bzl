@@ -403,3 +403,31 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
         toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
         fragments = ["cpp"],
     )
+
+
+
+def fetch_clang(tag = CLANG_VERSIONS.keys()[0]):
+    """A repository macro used from WORKSPACE to fetch clang binaries
+
+    Args:
+        tag: a tag of clang+llvm that we have mirrored, e.g. `18.1.6`
+    """
+    version = tag
+    url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-{version}/clang+llvm-{version}-{plat}.{ext}"
+
+    for plat, sha256 in CLANG_VERSIONS[tag].items():
+        is_windows = plat.startswith("Windows")
+
+        maybe(
+            http_archive,
+            name = "clang_" + plat,
+            url = url.format(
+                version = version,
+                plat = plat,
+                ext = "tar.gz" if plat == "armv7a-linux-gnueabihf" else "tar.xz",
+            ),
+            sha256 = sha256,
+            build_file_content = """exports_files(["clang-tidy", "clang-format", "clang-tidy.exe", "clang-format.exe"])""",
+        )
+
+        fetch_styles()

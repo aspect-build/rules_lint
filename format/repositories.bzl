@@ -58,8 +58,8 @@ def fetch_swiftformat():
         name = "swiftformat",
         build_file_content = "filegroup(name = \"swiftformat\", srcs=[\"swiftformat_linux\"], visibility=[\"//visibility:public\"])",
         patch_cmds = ["chmod u+x swiftformat_linux"],
-        sha256 = "f62813980c2848cb1941f1456a2a06251c2e2323183623760922058b98c70745",
-        url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.49.17/swiftformat_linux.zip",
+        #sha256 = "f62813980c2848cb1941f1456a2a06251c2e2323183623760922058b98c70745",
+        url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.54.0/swiftformat_linux.zip",
     )
 
     http_archive(
@@ -70,6 +70,13 @@ def fetch_swiftformat():
             "if command -v xattr > /dev/null; then xattr -c swiftformat; fi",
             "chmod u+x swiftformat",
         ],
-        sha256 = "978eaffdc3716bbc0859aecee0d83875cf3ab8d8725779448f0035309d9ad9f3",
-        url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.49.17/swiftformat.zip",
+        #sha256 = "978eaffdc3716bbc0859aecee0d83875cf3ab8d8725779448f0035309d9ad9f3",
+        url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.54.0/swiftformat.zip",
+    )
+
+    http_archive(
+        name = "swiftformat_windows",
+        build_file_content = "filegroup(name = \"swiftformat_windows\", srcs=[\"swiftformat.exe\"], visibility=[\"//visibility:public\"])",
+        #sha256 = "978eaffdc3716bbc0859aecee0d83875cf3ab8d8725779448f0035309d9ad9f3",
+        url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.54.0/swiftformat_windows.exe.zip",
     )
