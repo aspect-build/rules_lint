@@ -41,9 +41,21 @@ jq "$JQ_FILTER" <$RELEASES >$RAW
 # Combine the new versions with the existing ones.
 # New versions should appear first, but existing content should overwrite new
 CURRENT=$(mktemp)
-python -c 'import json; exec(open("$SCRIPT_DIR/clang_versions.bzl").read()); print(json.dumps(CLANG_VERSIONS))' > $CURRENT
+python3 -c "import json; exec(open('$SCRIPT_DIR/clang_versions.bzl').read()); print(json.dumps(CLANG_VERSIONS))" > $CURRENT
 OUT=$(mktemp)
 jq --slurp '.[0] * .[1]' $RAW $CURRENT > $OUT
+
+FIXED=$(mktemp)
+# Replace placeholder sha256 URLs with their content
+for tag in $(jq -r 'keys | .[]' < $OUT); do
+  # Download checksums for this tag
+  # Note: this is wasteful; we will curl for sha256 files even if the CURRENT content already had resolved them
+  for sha256url in $(jq --arg tag $tag -r "$SHA256_FILTER" < $RELEASES); do
+    sha256=$(curl --silent --location $sha256url | awk '{print $1}')
+    jq ".[\"$tag\"] |= with_entries(.value = (if .value == \"$sha256url\" then \"$sha256\" else .value end))" < $OUT > $FIXED
+    mv $FIXED $OUT
+  done
+done
 
 # Overwrite the file with updated content
 (
@@ -51,6 +63,3 @@ jq --slurp '.[0] * .[1]' $RAW $CURRENT > $OUT
   echo -n "CLANG_VERSIONS = "
   cat $OUT
 )>$SCRIPT_DIR/clang_versions.bzl
-
-echo "For now, you must manually replace placeholder sha256 with their content from checksums.txt:"
-echo "https://github.com/llvm/llvm-project/releases/download/18.1.7/llvm_checksums.txt"
