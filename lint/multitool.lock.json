@@ -33,6 +33,14 @@
         "sha256": "ef27684f23279d112d8ad84e0823642e43f838993bbb8c0963db9b58a90464c2",
         "os": "macos",
         "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/koalaman/shellcheck/releases/download/v0.10.0/shellcheck-v0.10.0.zip",
+        "file": "shellcheck.exe",
+        "sha256": "eb6cd53a54ea97a56540e9d296ce7e2fa68715aa507ff23574646c1e12b2e143",
+        "os": "windows",
+        "cpu": "x86_64"
       }
     ]
   }

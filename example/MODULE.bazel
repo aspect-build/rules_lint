@@ -1,20 +1,26 @@
 "Bazel dependencies"
 
+# todo, remove this comment
+#WARNING: For repository 'bazel_skylib', the root module requires module version bazel_skylib@1.4.2, but got bazel_skylib@1.5.0 in the resolved dependency graph.
+#WARNING: For repository 'rules_java', the root module requires module version rules_java@5.5.0, but got rules_java@7.4.0 in the resolved dependency graph.
+#WARNING: For repository 'rules_jvm_external', the root module requires module version rules_jvm_external@4.5, but got rules_jvm_external@5.3 in the resolved dependency graph.
+#WARNING: For repository 'rules_python', the root module requires module version rules_python@0.26.0, but got rules_python@0.27.1 in the resolved dependency graph.
+
 bazel_dep(name = "aspect_rules_lint", version = "0.0.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.7")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0-rc0")
 bazel_dep(name = "aspect_rules_ts", version = "3.0.0-rc0")
-bazel_dep(name = "rules_buf", version = "0.2.0")
-bazel_dep(name = "bazel_skylib", version = "1.4.2")
-bazel_dep(name = "toolchains_llvm", version = "0.10.3")
+bazel_dep(name = "rules_buf", version = "0.3.0")
+bazel_dep(name = "bazel_skylib", version = "1.5.0")
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
 bazel_dep(name = "toolchains_protoc", version = "0.3.0")
-bazel_dep(name = "rules_java", version = "5.5.0")
-bazel_dep(name = "rules_jvm_external", version = "4.5")
+bazel_dep(name = "rules_java", version = "7.4.0")
+bazel_dep(name = "rules_jvm_external", version = "5.3")
 bazel_dep(name = "rules_go", version = "0.42.0", repo_name = "io_bazel_rules_go")
 bazel_dep(name = "rules_proto", version = "6.0.0")
-bazel_dep(name = "rules_python", version = "0.26.0")
+bazel_dep(name = "rules_python", version = "0.27.1")
 bazel_dep(name = "rules_rust", version = "0.45.1")
-bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
+bazel_dep(name = "buildifier_prebuilt", version = "6.4.0")
 bazel_dep(name = "platforms", version = "0.0.8")
 bazel_dep(name = "rules_kotlin", version = "1.9.0")
 bazel_dep(name = "rules_cc", version = "0.0.9")
@@ -24,19 +30,34 @@ local_path_override(
     path = "..",
 )
 
+# chris overrides
+# Configure and register the toolchain.
+git_override(
+  module_name = "toolchains_llvm",
+  commit = "f2de4fc207ad0ad46da25969300e17b3ac7a2536",
+  remote = "https://github.com/peakschris/toolchains_llvm",
+)
+
+git_override(
+  module_name = "rules_multitool",
+  commit = "45ad7ae3e157e4922b80140afb8763c3bf1672f4",
+  remote = "https://github.com/theoremlp/rules_multitool",
+)
+
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
 rules_ts_ext.deps()
 use_repo(rules_ts_ext, "npm_typescript")
 
-# Configure and register the toolchain.
+
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
 llvm.toolchain(
     llvm_versions = {
-        "": "16.0.0",
+        "": "18.1.5",
         "darwin-x86_64": "15.0.7",
     },
 )
 use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
+register_toolchains("@llvm_toolchain//:all")
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(

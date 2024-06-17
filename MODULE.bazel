@@ -15,7 +15,7 @@ bazel_dep(name = "aspect_rules_js", version = "1.40.0")
 bazel_dep(name = "bazel_skylib", version = "1.4.2")
 bazel_dep(name = "platforms", version = "0.0.7")
 bazel_dep(name = "rules_multirun", version = "0.9.0")
-bazel_dep(name = "rules_multitool", version = "0.4.0")
+bazel_dep(name = "rules_multitool", version = "0.8.0")
 
 # Needed in the root because we dereference ProtoInfo in our aspect impl
 bazel_dep(name = "rules_proto", version = "6.0.0")
@@ -23,6 +23,12 @@ bazel_dep(name = "rules_proto", version = "6.0.0")
 # Needed in the root because we dereference the toolchain in our aspect impl
 bazel_dep(name = "rules_buf", version = "0.1.1")
 bazel_dep(name = "toolchains_protoc", version = "0.2.1")
+
+git_override(
+  module_name = "rules_multitool",
+  commit = "45ad7ae3e157e4922b80140afb8763c3bf1672f4",
+  remote = "https://github.com/theoremlp/rules_multitool",
+)
 
 multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitool")
 multitool.hub(lockfile = "//format:multitool.lock.json")

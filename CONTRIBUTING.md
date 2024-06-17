@@ -1,5 +1,10 @@
 # How to Contribute
 
+## Windows
+
+If running this repo on Windows, run `configure.bat` to set it up before running 
+any bazel commands. This removes features that are not supported yet on this platform.
+
 ## Formatting
 
 Starlark files should be formatted by buildifier.

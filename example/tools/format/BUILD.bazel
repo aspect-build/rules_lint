@@ -91,6 +91,8 @@ format_multirun(
 
 format_multirun(
     name = "format_windows",
+    cc = "@llvm_toolchain_llvm//:bin/clang-format.exe",
+    cuda = "@llvm_toolchain_llvm//:bin/clang-format.exe",
     visibility = ["//:__subpackages__"],
 )
 
