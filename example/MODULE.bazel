@@ -64,7 +64,7 @@ use_repo(rules_ts_ext, "npm_typescript")
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
 llvm.toolchain(
     llvm_versions = {
-        "": "18.1.5",
+        "": "18.1.4",
         "darwin-x86_64": "15.0.7",
     },
 )
