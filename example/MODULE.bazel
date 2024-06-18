@@ -50,6 +50,12 @@ git_override(
   remote = "https://github.com/peakschris/rules_multirun",
 )
 
+git_override(
+  module_name = "rules_buf",
+  commit = "a422f4ec6106e513c201992214321ea6b1765beb",
+  remote = "https://github.com/bufbuild/rules_buf",
+)
+
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
 rules_ts_ext.deps()
 use_repo(rules_ts_ext, "npm_typescript")
@@ -63,7 +69,7 @@ llvm.toolchain(
     },
 )
 use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
-register_toolchains("@llvm_toolchain//:all")
+#register_toolchains("@llvm_toolchain//:all")
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(

@@ -1,0 +1,29 @@
+// src/hello.proto:1:1:Enum value name "RAINY" should be prefixed with "CONDITION_".
+// src/hello.proto:1:1:Enum value name "SUNNY" should be prefixed with "CONDITION_".
+// src/hello.proto:1:1:Enum zero value name "SUNNY" should be suffixed with "_UNSPECIFIED".
+// src/hello.proto:1:1:Files with package "weather" must be within a directory "weather" relative to root but were in directory "src".
+// src/hello.proto:1:1:Package name "weather" should be suffixed with a correctly formed version, such as "weather.v1".
+// src/hello.proto:1:1:RPC request type "Location" should be named "GetWeatherRequest" or "WeatherServiceGetWeatherRequest".
+
+syntax = "proto3";
+
+package weather;
+
+enum Condition {
+  SUNNY = 0;
+  RAINY = 1;
+}
+
+message Location {
+  float latitude = 1;
+  float longitude = 2;
+}
+
+message GetWeatherResponse {
+  float temperature = 1;
+  Condition conditions = 2;
+}
+
+service WeatherService {
+  rpc GetWeather (Location) returns (GetWeatherResponse);
+}

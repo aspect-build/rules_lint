@@ -35,6 +35,11 @@ proto_library(
     deps = [":unused"],
 )
 
+proto_library(
+    name = "hello_proto",
+    srcs = ["hello.proto"],
+)
+
 py_library(
     name = "unused_import",
     srcs = ["unused_import.py"],

@@ -35,13 +35,13 @@ esac
 args=()
 if [ $machine == "Windows" ]; then
     # avoid missing linters on windows platform
-    args=("--aspects=$(echo //tools/lint:linters.bzl%{flake8,ktlint,pmd,ruff,shellcheck,vale,clang_tidy} | tr ' ' ',')")
+    args=("--aspects=$(echo //tools/lint:linters.bzl%{buf,flake8,pmd,ruff,shellcheck,vale,clang_tidy} | tr ' ' ',')")
 else
     args=("--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale,clang_tidy} | tr ' ' ',')")
 fi
 
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
-args+=(
+args+=
 	# Allow lints of code that fails some validation action
 	# See https://github.com/aspect-build/rules_ts/pull/574#issuecomment-2073632879
 	"--norun_validations"

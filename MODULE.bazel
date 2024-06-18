@@ -24,12 +24,6 @@ bazel_dep(name = "rules_proto", version = "6.0.0")
 bazel_dep(name = "rules_buf", version = "0.1.1")
 bazel_dep(name = "toolchains_protoc", version = "0.2.1")
 
-git_override(
-  module_name = "rules_multitool",
-  commit = "45ad7ae3e157e4922b80140afb8763c3bf1672f4",
-  remote = "https://github.com/theoremlp/rules_multitool",
-)
-
 multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitool")
 multitool.hub(lockfile = "//format:multitool.lock.json")
 multitool.hub(lockfile = "//lint:multitool.lock.json")
