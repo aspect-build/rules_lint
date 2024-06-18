@@ -26,8 +26,15 @@
       {
         "kind": "file",
         "url": "https://github.com/mvdan/gofumpt/releases/download/v0.6.0/gofumpt_v0.6.0_darwin_amd64",
-        "sha256": "59e6047b3fa2fb65b60cf7f8be9b77cf6b31b428a9a24042ce29e85140868036",
+        "sha256": "e7e188a93555b3172601170ce454aceb474cb139d935fd7b5d4ebec9ca158db1",
         "os": "macos",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.6.0/gofumpt_v0.6.0_windows_amd64.exe",
+        "sha256": "e7e188a93555b3172601170ce454aceb474cb139d935fd7b5d4ebec9ca158db1",
+        "os": "windows",
         "cpu": "x86_64"
       }
     ]
@@ -65,6 +72,22 @@
         "sha256": "76901637f60589bb9bf91b3481d4aecbc31efcd35ca99ae72bcb510b00270ad9",
         "os": "macos",
         "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Windows_arm64.tar.gz",
+        "file": "jsonnetfmt",
+        "sha256": "76901637f60589bb9bf91b3481d4aecbc31efcd35ca99ae72bcb510b00270ad9",
+        "os": "windows",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Windows_x86_64.tar.gz",
+        "file": "jsonnetfmt",
+        "sha256": "82440a646a8d29487a243afc880db245f612a205d3eccbb900bc76d7a4049ad1",
+        "os": "windows",
+        "cpu": "x86_64"
       }
     ]
   },
@@ -96,6 +119,20 @@
         "url": "https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_darwin_amd64",
         "sha256": "c0218b47a0301bb006f49fad85d2c08de23df303472834faf5639d04121320f8",
         "os": "macos",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Windows_arm64.tar.gz",
+        "sha256": "1481240d2a90d4f0b530688d76d4f9117d17a756b6027cfa42b96f0707317f83",
+        "os": "windows",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Windows_x86_64.tar.gz",
+        "sha256": "82440a646a8d29487a243afc880db245f612a205d3eccbb900bc76d7a4049ad1",
+        "os": "windows",
         "cpu": "x86_64"
       }
     ]
@@ -133,6 +170,14 @@
         "sha256": "0eaf64e28f82e2defd06f7a6f3187d8cea03d5d9fcd2af54f549a6c32d6833f7",
         "os": "macos",
         "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_windows_amd64.zip",
+        "file": "terraform",
+        "sha256": "9b7be6ae159191ec1f4b5b9d27529ae5243e41020fb545c0041235bec8d92269",
+        "os": "windows",
+        "cpu": "x86_64"
       }
     ]
   },
@@ -168,6 +213,22 @@
         "file": "yamlfmt",
         "sha256": "499ad4ff8b842981d464b474e868905752833d55c71904ef019967229432da93",
         "os": "macos",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Windows_arm64.tar.gz",
+        "file": "yamlfmt",
+        "sha256": "499ad4ff8b842981d464b474e868905752833d55c71904ef019967229432da93",
+        "os": "windows",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.12.1/yamlfmt_0.12.1_Windows_x86_64.tar.gz",
+        "file": "yamlfmt.exe",
+        "sha256": "904d07c75f18585f22b9e4f45a0d40619827b361721ff3e0ef90f2c13d503bdc",
+        "os": "windows",
         "cpu": "x86_64"
       }
     ]
