@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 # This is a wrapper for clang-tidy which gives us control over error handling
 # Usage: clang_tidy_wrapper.bash <clang-tidy-path> <file1> <file2> ... -- <compiler-args>
 #
