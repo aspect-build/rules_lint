@@ -28,9 +28,9 @@ native_binary(
 Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
 
 ```starlark
-load("@aspect_rules_lint//lint:clang_tidy.bzl", "clang_tidy_aspect")
+load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
 
-clang_tidy = clang_tidy_aspect(
+clang_tidy = lint_clang_tidy_aspect(
     binary = "@@//path/to:clang-tidy",
     configs = "@@//path/to:.clang-tidy",
 )
@@ -102,18 +102,18 @@ def _safe_flags(ctx, flags):
     # Some flags might be used by GCC/MSVC, but not understood by Clang.
     # Remap or remove them here, to allow users to run clang-tidy, without having
     # a clang toolchain configured (that would produce a good command line with --compiler clang)
-    flags = []
+    safe_flags = []
     skipped_flags = []
     for flag in flags:
         flag = _update_flag(flag)
         if (flag):
-            flags.append(flag)
+            safe_flags.append(flag)
         elif (ctx.attr._verbose):
             skipped_flags.append(flag)
     if (ctx.attr._verbose and any(skipped_flags)):
         # buildifier: disable=print
         print("skipped flags: " + " ".join(skipped_flags))
-    return flags
+    return safe_flags
 
 def _prefixed(list, prefix):
     array = []
@@ -128,9 +128,7 @@ def _angle_includes_option(ctx):
     return "-I"
 
 def _is_cxx(file):
-    if file.extension == "c":
-        return False
-    return True
+    return not file.extension == "c"
 
 def _is_source(file):
     permitted_source_types = [
