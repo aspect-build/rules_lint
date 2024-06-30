@@ -115,7 +115,7 @@ is_parent_in_list(<a href="#is_parent_in_list-dir">dir</a>, <a href="#is_parent_
 
 <pre>
 lint_clang_tidy_aspect(<a href="#lint_clang_tidy_aspect-binary">binary</a>, <a href="#lint_clang_tidy_aspect-name">name</a>, <a href="#lint_clang_tidy_aspect-configs">configs</a>, <a href="#lint_clang_tidy_aspect-global_config">global_config</a>, <a href="#lint_clang_tidy_aspect-header_filter">header_filter</a>, <a href="#lint_clang_tidy_aspect-lint_target_headers">lint_target_headers</a>,
-                       <a href="#lint_clang_tidy_aspect-angle_includes_are_system">angle_includes_are_system</a>, <a href="#lint_clang_tidy_aspect-verbose">verbose</a>)
+                       <a href="#lint_clang_tidy_aspect-angle_includes_are_system">angle_includes_are_system</a>, <a href="#lint_clang_tidy_aspect-verbose">verbose</a>, <a href="#lint_clang_tidy_aspect-mnemonic_suffix">mnemonic_suffix</a>)
 </pre>
 
 A factory function to create a linter aspect.
