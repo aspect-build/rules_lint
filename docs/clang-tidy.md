@@ -126,11 +126,12 @@ A factory function to create a linter aspect.
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="lint_clang_tidy_aspect-binary"></a>binary |  the clang-tidy binary, typically a rule like<br><br><pre><code>starlark native_binary(     name = "clang_tidy",     src = "clang-tidy.exe"     out = "clang_tidy", ) </code></pre>   |  none |
+| <a id="lint_clang_tidy_aspect-name"></a>name |  name of the aspect.   |  <code>"clang-tidy"</code> |
 | <a id="lint_clang_tidy_aspect-configs"></a>configs |  labels of the .clang-tidy files to make available to clang-tidy's config search. These may be in subdirectories and clang-tidy will apply them if appropriate. This may also include .clang-format files which may be used for formatting fixes.   |  <code>[]</code> |
 | <a id="lint_clang_tidy_aspect-global_config"></a>global_config |  label of a single global .clang-tidy file to pass to clang-tidy on the command line. This will cause clang-tidy to ignore any other config files in the source directories.   |  <code>[]</code> |
 | <a id="lint_clang_tidy_aspect-header_filter"></a>header_filter |  optional, set to a posix regex to supply to clang-tidy with the -header-filter option   |  <code>""</code> |
 | <a id="lint_clang_tidy_aspect-lint_target_headers"></a>lint_target_headers |  optional, set to True to pass a pattern that includes all headers with the target's directory prefix. This crude control may include headers from the linted target in the results. If supplied, overrides the header_filter option.   |  <code>False</code> |
 | <a id="lint_clang_tidy_aspect-angle_includes_are_system"></a>angle_includes_are_system |  controls how angle includes are passed to clang-tidy. By default, Bazel passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard them as regular header files.   |  <code>True</code> |
 | <a id="lint_clang_tidy_aspect-verbose"></a>verbose |  print debug messages including clang-tidy command lines being invoked.   |  <code>False</code> |
-
+| <a id="lint_clang_tidy_aspect-mnemonic_suffix"></a>mnemonic_suffix |  suffix of mneomnic to be used. A prefix of AspectRulesLint is always used.   |  <code>"ClangTidy"<code> |
 
