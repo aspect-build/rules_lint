@@ -15,8 +15,5 @@ startup --windows_enable_symlinks
 common:linux --action_env=BAZEL_CXXOPTS="-std=c++20"
 common:windows --action_env=BAZEL_CXXOPTS="/std:c++20"
 
-# clang-tidy needs the INCLUDE variable set to the system value. 
-# Would prefer to do this inside the aspect, not sure if it is possible.
-common --action_env=INCLUDE
 # ensure that minimal other envvars are passed by clang-tidy run_shell
 common --incompatible_strict_action_env
