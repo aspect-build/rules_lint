@@ -286,7 +286,6 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
         command = executable._clang_tidy_wrapper.path + " $@",
         arguments = [executable._clang_tidy.path] + _get_args(ctx, compilation_context, srcs),
-        use_default_shell_env = True,
         env = env,
         mnemonic = _mnemonic(ctx),
         progress_message = "Linting %{label} with " + ctx.attr.name,
