@@ -334,7 +334,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         },
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
         mnemonic = _mnemonic(ctx),
-        progress_message = "Linting %{label} with " + ctx.attr._name,
+        progress_message = "Linting %{label} with " + ctx.attr.name,
     )
 
 # buildifier: disable=function-docstring
@@ -372,6 +372,7 @@ def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_con
                 out = "clang_tidy",
             )
             ```
+        name: name of the aspect.
         configs: labels of the .clang-tidy files to make available to clang-tidy's config search. These may be
             in subdirectories and clang-tidy will apply them if appropriate. This may also include .clang-format
             files which may be used for formatting fixes.
@@ -385,7 +386,7 @@ def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_con
             passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
             them as regular header files.
         verbose: print debug messages including clang-tidy command lines being invoked.
-        mneomnic_suffix: suffix of mneomnic to be used
+        mnemonic_suffix: suffix of mneomnic to be used. A prefix of AspectRulesLint is always used.
     """
 
     if type(global_config) == "string":
