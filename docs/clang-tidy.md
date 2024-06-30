@@ -135,3 +135,4 @@ A factory function to create a linter aspect.
 | <a id="lint_clang_tidy_aspect-verbose"></a>verbose |  print debug messages including clang-tidy command lines being invoked.   |  <code>False</code> |
 | <a id="lint_clang_tidy_aspect-mnemonic_suffix"></a>mnemonic_suffix |  suffix of mneomnic to be used. A prefix of AspectRulesLint is always used.   |  <code>"ClangTidy"</code> |
 
+
