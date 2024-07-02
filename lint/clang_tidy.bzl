@@ -360,7 +360,7 @@ def _clang_tidy_aspect_impl(target, ctx):
             clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code)
     return [info]
 
-def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):
+def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):
     """A factory function to create a linter aspect.
 
     Args:
@@ -373,7 +373,6 @@ def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_con
                 out = "clang_tidy",
             )
             ```
-        name: name of the aspect.
         configs: labels of the .clang-tidy files to make available to clang-tidy's config search. These may be
             in subdirectories and clang-tidy will apply them if appropriate. This may also include .clang-format
             files which may be used for formatting fixes.
