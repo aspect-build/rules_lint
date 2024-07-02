@@ -114,7 +114,7 @@ is_parent_in_list(<a href="#is_parent_in_list-dir">dir</a>, <a href="#is_parent_
 ## lint_clang_tidy_aspect
 
 <pre>
-lint_clang_tidy_aspect(<a href="#lint_clang_tidy_aspect-binary">binary</a>, <a href="#lint_clang_tidy_aspect-name">name</a>, <a href="#lint_clang_tidy_aspect-configs">configs</a>, <a href="#lint_clang_tidy_aspect-global_config">global_config</a>, <a href="#lint_clang_tidy_aspect-header_filter">header_filter</a>, <a href="#lint_clang_tidy_aspect-lint_target_headers">lint_target_headers</a>,
+lint_clang_tidy_aspect(<a href="#lint_clang_tidy_aspect-binary">binary</a>, <a href="#lint_clang_tidy_aspect-configs">configs</a>, <a href="#lint_clang_tidy_aspect-global_config">global_config</a>, <a href="#lint_clang_tidy_aspect-header_filter">header_filter</a>, <a href="#lint_clang_tidy_aspect-lint_target_headers">lint_target_headers</a>,
                        <a href="#lint_clang_tidy_aspect-angle_includes_are_system">angle_includes_are_system</a>, <a href="#lint_clang_tidy_aspect-verbose">verbose</a>)
 </pre>
 
@@ -126,7 +126,6 @@ A factory function to create a linter aspect.
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="lint_clang_tidy_aspect-binary"></a>binary |  the clang-tidy binary, typically a rule like<br><br><pre><code>starlark native_binary(     name = "clang_tidy",     src = "clang-tidy.exe"     out = "clang_tidy", ) </code></pre>   |  none |
-| <a id="lint_clang_tidy_aspect-name"></a>name |  name of the aspect.   |  <code>"clang-tidy"</code> |
 | <a id="lint_clang_tidy_aspect-configs"></a>configs |  labels of the .clang-tidy files to make available to clang-tidy's config search. These may be in subdirectories and clang-tidy will apply them if appropriate. This may also include .clang-format files which may be used for formatting fixes.   |  <code>[]</code> |
 | <a id="lint_clang_tidy_aspect-global_config"></a>global_config |  label of a single global .clang-tidy file to pass to clang-tidy on the command line. This will cause clang-tidy to ignore any other config files in the source directories.   |  <code>[]</code> |
 | <a id="lint_clang_tidy_aspect-header_filter"></a>header_filter |  optional, set to a posix regex to supply to clang-tidy with the -header-filter option   |  <code>""</code> |
