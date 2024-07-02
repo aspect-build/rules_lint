@@ -294,7 +294,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
         arguments = [executable._clang_tidy.path] + _get_args(ctx, compilation_context, srcs),
         env = env,
         mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with " + ctx.attr.name,
+        progress_message = "Linting %{label} with clang-tidy",
     )
 
 def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, exit_code):
@@ -335,7 +335,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         },
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
         mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with " + ctx.attr.name,
+        progress_message = "Linting %{label} with clang-tidy",
     )
 
 # buildifier: disable=function-docstring
