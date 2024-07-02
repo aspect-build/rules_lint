@@ -176,7 +176,10 @@ def _ruff_workaround_20269_impl(rctx):
     # To workaround, we fetch the file and then use the BSD tar on the system to extract it.
     # TODO: remove for users on Bazel 8 (or maybe sooner if that fix is cherry-picked)
     rctx.download(sha256 = rctx.attr.sha256, url = rctx.attr.url, output = "ruff.tar.gz")
-    result = rctx.execute([rctx.which("tar"), "xzf", "ruff.tar.gz"])
+    tar_cmd = [rctx.which("tar"), "xzf", "ruff.tar.gz"]
+    if rctx.attr.strip_prefix:
+        tar_cmd.append("--strip-components=1")
+    result = rctx.execute(tar_cmd)
     if result.return_code:
         fail("Couldn't extract ruff: \nSTDOUT:\n{}\nSTDERR:\n{}".format(result.stdout, result.stderr))
     rctx.file("BUILD", rctx.attr.build_file_content)
@@ -187,6 +190,7 @@ ruff_workaround_20269 = repository_rule(
     attrs = {
         "build_file_content": attr.string(),
         "sha256": attr.string(),
+        "strip_prefix": attr.string(doc = "unlike http_archive, any value causes us to pass --strip-components=1 to tar"),
         "url": attr.string(),
     },
 )
@@ -208,7 +212,7 @@ def fetch_ruff(tag = RUFF_VERSIONS.keys()[0]):
 
     for plat, sha256 in RUFF_VERSIONS[tag].items():
         fetch_rule = http_archive
-        if plat.endswith("darwin"):
+        if plat.endswith("darwin") and not versions.is_at_least("7.2.0", versions.get()):
             fetch_rule = ruff_workaround_20269
         is_windows = plat.endswith("windows-msvc")
 
@@ -221,6 +225,7 @@ def fetch_ruff(tag = RUFF_VERSIONS.keys()[0]):
                 version = version,
                 ext = "zip" if is_windows else "tar.gz",
             ),
+            strip_prefix = "ruff-" + plat if versions.is_at_least("0.5.0", version) else None,
             sha256 = sha256,
             build_file_content = """exports_files(["ruff", "ruff.exe"])""",
         )

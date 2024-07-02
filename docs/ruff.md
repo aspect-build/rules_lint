@@ -19,7 +19,7 @@ ruff = ruff_aspect(
 ## ruff_workaround_20269
 
 <pre>
-ruff_workaround_20269(<a href="#ruff_workaround_20269-name">name</a>, <a href="#ruff_workaround_20269-build_file_content">build_file_content</a>, <a href="#ruff_workaround_20269-repo_mapping">repo_mapping</a>, <a href="#ruff_workaround_20269-sha256">sha256</a>, <a href="#ruff_workaround_20269-url">url</a>)
+ruff_workaround_20269(<a href="#ruff_workaround_20269-name">name</a>, <a href="#ruff_workaround_20269-build_file_content">build_file_content</a>, <a href="#ruff_workaround_20269-repo_mapping">repo_mapping</a>, <a href="#ruff_workaround_20269-sha256">sha256</a>, <a href="#ruff_workaround_20269-strip_prefix">strip_prefix</a>, <a href="#ruff_workaround_20269-url">url</a>)
 </pre>
 
 Workaround for https://github.com/bazelbuild/bazel/issues/20269
@@ -33,6 +33,7 @@ Workaround for https://github.com/bazelbuild/bazel/issues/20269
 | <a id="ruff_workaround_20269-build_file_content"></a>build_file_content |  -   | String | optional | <code>""</code> |
 | <a id="ruff_workaround_20269-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.&lt;p&gt;For example, an entry <code>"@foo": "@bar"</code> declares that, for any time this repository depends on <code>@foo</code> (such as a dependency on <code>@foo//some:target</code>, it should actually resolve that dependency within globally-declared <code>@bar</code> (<code>@bar//some:target</code>).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | required |  |
 | <a id="ruff_workaround_20269-sha256"></a>sha256 |  -   | String | optional | <code>""</code> |
+| <a id="ruff_workaround_20269-strip_prefix"></a>strip_prefix |  unlike http_archive, any value causes us to pass --strip-components=1 to tar   | String | optional | <code>""</code> |
 | <a id="ruff_workaround_20269-url"></a>url |  -   | String | optional | <code>""</code> |
 
 
