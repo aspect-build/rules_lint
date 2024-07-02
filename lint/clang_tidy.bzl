@@ -41,13 +41,33 @@ load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "patch_and_report_files", "report_files")
 
-_MNEMONIC = "AspectRulesLintClangTidy"
+# default mnemonic of AspectRulesLintClangTidy can be customized with mnemonic_suffix attribute
+_MNEMONIC_PREFIX = "AspectRulesLint"
 
 def _gather_inputs(ctx, compilation_context, srcs):
     inputs = srcs + ctx.files._configs + compilation_context.headers.to_list()
     if (any(ctx.files._global_config)):
         inputs.append(ctx.files._global_config[0])
     return inputs
+
+def _toolchain_env(ctx, action_name = ACTION_NAMES.cpp_compile):
+    cc_toolchain = find_cpp_toolchain(ctx)
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+    )
+    compile_variables = cc_common.create_compile_variables(
+        feature_configuration = feature_configuration,
+        cc_toolchain = cc_toolchain,
+        user_compile_flags = ctx.fragments.cpp.cxxopts + ctx.fragments.cpp.copts,
+    )
+    env = {}
+    env.update(cc_common.get_environment_variables(
+        feature_configuration = feature_configuration,
+        action_name = action_name,
+        variables = compile_variables,
+    ))
+    return env
 
 def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
     cc_toolchain = find_cpp_toolchain(ctx)
@@ -75,28 +95,33 @@ def _update_flag(flag):
         "/nologo",
         "/COMPILER_MSVC",
         "/showIncludes",
+        "/experimental:external",
+    ]
+    unsupported_prefixes = [
+        "/wd",
+        "-W",
+        "/W",
+        "/external",
     ]
     if (flag in unsupported_flags):
-        return None
+        return []
+    for prefix in unsupported_prefixes:
+        if flag.startswith(prefix):
+            return []
 
-    # omit warning flags
-    if (flag.startswith("/wd") or flag.startswith("-W")):
-        return None
-
-    # remap c++ standard to clang
+    flags = [flag]
+    # remap MSVC flags to clang-style
     if (flag.startswith("/std:")):
-        flag = "-std=" + flag.removeprefix("/std:")
-
-    # remap defines
-    if (flag.startswith("/D")):
-        flag = "-" + flag[1:]
-    if (flag.startswith("/FI")):
-        flag = "-include=" + flag.removeprefix("/FI")
-
-    # skip other msvc options
-    if (flag.startswith("/")):
-        return None
-    return flag
+        # remap c++ standard to clang
+        flags = ["-std=" + flag.removeprefix("/std:")]
+    elif (flag.startswith("/D")):
+        # remap defines
+        flags = ["-" + flag[1:]]
+    elif (flag.startswith("/FI")):
+        flags = ["-include", flag.removeprefix("/FI")]
+    elif (flag.startswith("/I")):
+        flags = ["-iquote", flag.removeprefix("/I")]
+    return flags
 
 def _safe_flags(ctx, flags):
     # Some flags might be used by GCC/MSVC, but not understood by Clang.
@@ -105,9 +130,9 @@ def _safe_flags(ctx, flags):
     safe_flags = []
     skipped_flags = []
     for flag in flags:
-        flag = _update_flag(flag)
-        if (flag):
-            safe_flags.append(flag)
+        updated = _update_flag(flag)
+        if (any(updated)):
+            safe_flags.extend(updated)
         elif (ctx.attr._verbose):
             skipped_flags.append(flag)
     if (ctx.attr._verbose and any(skipped_flags)):
@@ -168,25 +193,45 @@ def _common_prefixes(headers):
             dirs2.append(dir)
     return dirs2
 
-def _aggregate_regex(compilation_context):
+def _aggregate_regex(ctx, compilation_context):
+    if not any(compilation_context.direct_headers):
+        return None
     dirs = _common_prefixes(compilation_context.direct_headers)
     if not any(dirs):
         regex = None
     elif len(dirs) == 1:
-        regex = ".*" + dirs[0] + "/.*"
+        # clang-tidy reports headers with mixed '\\' and '/' separators on windows. Match either.
+        regex_dir = dirs[0].replace("\\", "[\\/]").replace("/", "[\\/]")
+        regex = ".*" + regex_dir + "/.*"
     else:
         regex = ".*"
+    if (ctx.attr._verbose):
+        # buildifier: disable=print
+        print("target header dirs: " + ",".join(dirs))
     return regex
 
 def _quoted_arg(arg):
     return "\"" + arg + "\""
+
+def _get_env(ctx, srcs):
+    sources_are_cxx = _is_cxx(srcs[0])
+    if (sources_are_cxx):
+        env = _toolchain_env(ctx, ACTION_NAMES.cpp_compile)
+    else:
+        env = _toolchain_env(ctx, ACTION_NAMES.c_compile)
+    if (ctx.attr._verbose):
+        env["CLANG_TIDY__VERBOSE"] = "1"
+    # in case we are running in msys bash, stop it from mangling pathnames
+    env["MSYS_NO_PATHCONV"] = "1"
+    env["MSYS_ARG_CONV_EXCL"] = "*"
+    return env
 
 def _get_args(ctx, compilation_context, srcs):
     args = []
     if (any(ctx.files._global_config)):
         args.append("--config-file=" + ctx.files._global_config[0].short_path)
     if (ctx.attr._lint_target_headers):
-        regex = _aggregate_regex(compilation_context)
+        regex = _aggregate_regex(ctx, compilation_context)
         if (regex):
             args.append(_quoted_arg("-header-filter=" + regex))
     elif (ctx.attr._header_filter):
@@ -219,6 +264,9 @@ def _get_args(ctx, compilation_context, srcs):
 
     return args
 
+def _mnemonic(ctx):
+    return _MNEMONIC_PREFIX + ctx.attr._mnemonic_suffix
+
 def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code):
     """Create a Bazel Action that spawns a clang-tidy process.
 
@@ -236,13 +284,11 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
     """
 
     outputs = [stdout]
-    env = {}
+    env = _get_env(ctx, srcs)
     env["CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE"] = stdout.path
     if exit_code:
         env["CLANG_TIDY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
         outputs.append(exit_code)
-    if (ctx.attr._verbose):
-        env["CLANG_TIDY__VERBOSE"] = "1"
 
     ctx.actions.run_shell(
         inputs = _gather_inputs(ctx, compilation_context, srcs),
@@ -250,10 +296,9 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
         command = executable._clang_tidy_wrapper.path + " $@",
         arguments = [executable._clang_tidy.path] + _get_args(ctx, compilation_context, srcs),
-        use_default_shell_env = True,
         env = env,
-        mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with clang-tidy",
+        mnemonic = _mnemonic(ctx),
+        progress_message = "Linting %{label} with " + ctx.attr.name,
     )
 
 def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, exit_code):
@@ -270,16 +315,12 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
-    env = {}
-    if (ctx.attr._verbose):
-        env["CLANG_TIDY__VERBOSE"] = "1"
-
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
             "linter": executable._clang_tidy_wrapper.path,
             "args": [executable._clang_tidy.path, "--fix"] + _get_args(ctx, compilation_context, srcs),
-            "env": env,
+            "env": _get_env(ctx, srcs),
             "files_to_diff": [src.path for src in srcs],
             "output": patch.path,
         }),
@@ -297,8 +338,8 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
         },
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
-        mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with clang-tidy",
+        mnemonic = _mnemonic(ctx),
+        progress_message = "Linting %{label} with " + ctx.attr.name,
     )
 
 # buildifier: disable=function-docstring
@@ -310,20 +351,20 @@ def _clang_tidy_aspect_impl(target, ctx):
     compilation_context = target[CcInfo].compilation_context
 
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        patch, report, exit_code, info = patch_and_report_files(_mnemonic(ctx), target, ctx)
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, report, exit_code, patch)
         else:
             clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, patch, report, exit_code)
     else:
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        report, exit_code, info = report_files(_mnemonic(ctx), target, ctx)
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, report, exit_code)
         else:
             clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code)
     return [info]
 
-def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):
+def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False, mnemonic_suffix = "ClangTidy"):
     """A factory function to create a linter aspect.
 
     Args:
@@ -336,6 +377,7 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
                 out = "clang_tidy",
             )
             ```
+        name: name of the aspect.
         configs: labels of the .clang-tidy files to make available to clang-tidy's config search. These may be
             in subdirectories and clang-tidy will apply them if appropriate. This may also include .clang-format
             files which may be used for formatting fixes.
@@ -349,6 +391,7 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
             passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
             them as regular header files.
         verbose: print debug messages including clang-tidy command lines being invoked.
+        mnemonic_suffix: suffix of mneomnic to be used. A prefix of AspectRulesLint is always used.
     """
 
     if type(global_config) == "string":
@@ -357,6 +400,9 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
     return aspect(
         implementation = _clang_tidy_aspect_impl,
         attrs = {
+            "name": attr.string(
+                default = name,
+            ),
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
@@ -380,6 +426,9 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
             ),
             "_verbose": attr.bool(
                 default = verbose,
+            ),
+            "_mnemonic_suffix": attr.string(
+                default = mnemonic_suffix,
             ),
             "_clang_tidy": attr.label(
                 default = binary,
