@@ -149,6 +149,7 @@ bzl_library(
     deps = _BAZEL_TOOLS + [
         ":ruff_versions",
         "//lint/private:lint_aspect",
+        "@bazel_skylib//lib:versions",
     ],
 )
 
