@@ -115,7 +115,7 @@ is_parent_in_list(<a href="#is_parent_in_list-dir">dir</a>, <a href="#is_parent_
 
 <pre>
 lint_clang_tidy_aspect(<a href="#lint_clang_tidy_aspect-binary">binary</a>, <a href="#lint_clang_tidy_aspect-configs">configs</a>, <a href="#lint_clang_tidy_aspect-global_config">global_config</a>, <a href="#lint_clang_tidy_aspect-header_filter">header_filter</a>, <a href="#lint_clang_tidy_aspect-lint_target_headers">lint_target_headers</a>,
-                       <a href="#lint_clang_tidy_aspect-angle_includes_are_system">angle_includes_are_system</a>, <a href="#lint_clang_tidy_aspect-verbose">verbose</a>)
+                       <a href="#lint_clang_tidy_aspect-angle_includes_are_system">angle_includes_are_system</a>, <a href="#lint_clang_tidy_aspect-verbose">verbose</a>, <a href="#lint_clang_tidy_aspect-mnemonic_suffix">mnemonic_suffix</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -132,5 +132,6 @@ A factory function to create a linter aspect.
 | <a id="lint_clang_tidy_aspect-lint_target_headers"></a>lint_target_headers |  optional, set to True to pass a pattern that includes all headers with the target's directory prefix. This crude control may include headers from the linted target in the results. If supplied, overrides the header_filter option.   |  <code>False</code> |
 | <a id="lint_clang_tidy_aspect-angle_includes_are_system"></a>angle_includes_are_system |  controls how angle includes are passed to clang-tidy. By default, Bazel passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard them as regular header files.   |  <code>True</code> |
 | <a id="lint_clang_tidy_aspect-verbose"></a>verbose |  print debug messages including clang-tidy command lines being invoked.   |  <code>False</code> |
+| <a id="lint_clang_tidy_aspect-mnemonic_suffix"></a>mnemonic_suffix |  suffix of mneomnic to be used. A prefix of AspectRulesLint is always used.   |  <code>"ClangTidy"</code> |
 
 
