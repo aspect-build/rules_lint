@@ -41,8 +41,7 @@ load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "patch_and_report_files", "report_files")
 
-# default mnemonic of AspectRulesLintClangTidy can be customized with mnemonic_suffix attribute
-_MNEMONIC_PREFIX = "AspectRulesLint"
+_MNEMONIC = "AspectRulesLintClangTidy"
 
 def _gather_inputs(ctx, compilation_context, srcs):
     inputs = srcs + ctx.files._configs + compilation_context.headers.to_list()
@@ -264,9 +263,6 @@ def _get_args(ctx, compilation_context, srcs):
 
     return args
 
-def _mnemonic(ctx):
-    return _MNEMONIC_PREFIX + ctx.attr._mnemonic_suffix
-
 def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code):
     """Create a Bazel Action that spawns a clang-tidy process.
 
@@ -297,7 +293,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
         command = executable._clang_tidy_wrapper.path + " $@",
         arguments = [executable._clang_tidy.path] + _get_args(ctx, compilation_context, srcs),
         env = env,
-        mnemonic = _mnemonic(ctx),
+        mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with " + ctx.attr.name,
     )
 
@@ -338,7 +334,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
         },
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
-        mnemonic = _mnemonic(ctx),
+        mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with " + ctx.attr.name,
     )
 
@@ -351,20 +347,20 @@ def _clang_tidy_aspect_impl(target, ctx):
     compilation_context = target[CcInfo].compilation_context
 
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, report, exit_code, info = patch_and_report_files(_mnemonic(ctx), target, ctx)
+        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, report, exit_code, patch)
         else:
             clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, patch, report, exit_code)
     else:
-        report, exit_code, info = report_files(_mnemonic(ctx), target, ctx)
+        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, report, exit_code)
         else:
             clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code)
     return [info]
 
-def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False, mnemonic_suffix = "ClangTidy"):
+def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):
     """A factory function to create a linter aspect.
 
     Args:
@@ -391,7 +387,6 @@ def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_con
             passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
             them as regular header files.
         verbose: print debug messages including clang-tidy command lines being invoked.
-        mnemonic_suffix: suffix of mneomnic to be used. A prefix of AspectRulesLint is always used.
     """
 
     if type(global_config) == "string":
@@ -426,9 +421,6 @@ def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_con
             ),
             "_verbose": attr.bool(
                 default = verbose,
-            ),
-            "_mnemonic_suffix": attr.string(
-                default = mnemonic_suffix,
             ),
             "_clang_tidy": attr.label(
                 default = binary,
