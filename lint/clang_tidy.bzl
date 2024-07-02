@@ -354,7 +354,7 @@ def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_con
             passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
             them as regular header files.
         verbose: print debug messages including clang-tidy command lines being invoked.
-        mnemonic_suffix: suffix of mneomnic to be used. A prefix of AspectRulesLint is always used.
+        mnemonic_suffix: suffix of mnemonic to be used. A prefix of AspectRulesLint is always used.
     """
 
     if type(global_config) == "string":
