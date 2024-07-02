@@ -75,6 +75,8 @@ def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
         cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
     )
     compile_variables = cc_common.create_compile_variables(
         feature_configuration = feature_configuration,
