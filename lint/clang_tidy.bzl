@@ -363,6 +363,9 @@ def lint_clang_tidy_aspect(binary, name = "clang-tidy", configs = [], global_con
     return aspect(
         implementation = _clang_tidy_aspect_impl,
         attrs = {
+            "name": attr.string(
+                default = name,                
+            ),
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
