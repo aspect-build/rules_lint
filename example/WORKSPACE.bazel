@@ -293,10 +293,6 @@ load("@aspect_rules_lint//lint:pmd.bzl", "fetch_pmd")
 
 fetch_pmd()
 
-load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
-
-fetch_ruff()
-
 load("@aspect_rules_lint//lint:vale.bzl", "fetch_vale")
 
 fetch_vale()

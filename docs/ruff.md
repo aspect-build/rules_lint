@@ -8,8 +8,43 @@ Typical usage:
 load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
 
 ruff = ruff_aspect(
-    binary = "@@//:ruff",
+    binary = "@multitool//tools/ruff",
     configs = "@@//:.ruff.toml",
+)
+```
+
+## Using a specific ruff version
+
+In `WORKSPACE`, fetch the desired version from https://github.com/astral-sh/ruff/releases
+
+```starlark
+load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
+
+# Specify a tag from the ruff repository
+fetch_ruff("v0.4.10")
+```
+
+In `tools/lint/BUILD.bazel`, select the tool for the host platform:
+
+```starlark
+alias(
+    name = "ruff",
+    actual = select({
+        "@bazel_tools//src/conditions:linux_x86_64": "@ruff_x86_64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:linux_aarch64": "@ruff_aarch64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:darwin_arm64": "@ruff_aarch64-apple-darwin//:ruff",
+        "@bazel_tools//src/conditions:darwin_x86_64": "@ruff_x86_64-apple-darwin//:ruff",
+        "@bazel_tools//src/conditions:windows_x64": "@ruff_x86_64-pc-windows-msvc//:ruff.exe",
+    }),
+)
+```
+
+Finally, reference this tool alias rather than the one from `@multitool`:
+
+```starlark
+ruff = lint_ruff_aspect(
+    binary = "@@//tools/lint:ruff",
+    ...
 )
 ```
 
@@ -45,14 +80,17 @@ Workaround for https://github.com/bazelbuild/bazel/issues/20269
 fetch_ruff(<a href="#fetch_ruff-tag">tag</a>)
 </pre>
 
-A repository macro used from WORKSPACE to fetch ruff binaries
+A repository macro used from WORKSPACE to fetch ruff binaries.
+
+Allows the user to select a particular ruff version, rather than get whatever is pinned in the `multitool.lock.json` file.
+
 
 **PARAMETERS**
 
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="fetch_ruff-tag"></a>tag |  a tag of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  <code>"0.5.0"</code> |
+| <a id="fetch_ruff-tag"></a>tag |  a tag of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  none |
 
 
 <a id="lint_ruff_aspect"></a>
