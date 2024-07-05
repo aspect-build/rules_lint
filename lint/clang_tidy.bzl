@@ -124,6 +124,9 @@ def _update_flag(flag):
         flags = ["-include", flag.removeprefix("/FI")]
     elif (flag.startswith("/I")):
         flags = ["-iquote", flag.removeprefix("/I")]
+    elif (flag in ["/MD", "/MDd", "/MT", "/MTd"]):
+        # mimic microsoft's behaviour and add a define
+        flags = [flag, "-D_MT"]
     return flags
 
 def _safe_flags(ctx, flags):
@@ -293,7 +296,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
     ctx.actions.run_shell(
         inputs = _gather_inputs(ctx, compilation_context, srcs),
         outputs = outputs,
-        tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
+        tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
         command = executable._clang_tidy_wrapper.path + " $@",
         arguments = [executable._clang_tidy.path] + _get_args(ctx, compilation_context, srcs),
         env = env,
@@ -337,7 +340,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
         },
-        tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
+        tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with clang-tidy",
     )
