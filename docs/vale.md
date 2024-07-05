@@ -79,7 +79,7 @@ A repository macro used from WORKSPACE to fetch vale binaries
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="fetch_vale-tag"></a>tag |  a tag of vale that we have mirrored, e.g. <code>v3.0.5</code>   |  <code>"v3.1.0"</code> |
+| <a id="fetch_vale-tag"></a>tag |  a tag of vale that we have mirrored, e.g. <code>v3.0.5</code>   |  <code>"v3.6.0"</code> |
 
 
 <a id="lint_vale_aspect"></a>

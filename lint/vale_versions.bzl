@@ -1,5 +1,13 @@
 "This file is automatically updated by mirror_vale.sh"
 VALE_VERSIONS = {
+    # https://github.com/errata-ai/vale/releases/download/v3.6.0/vale_3.6.0_checksums.txt
+    "v3.6.0": {
+        "Linux_64-bit": "d27cd03f920202a7be5bba3fd9e784a22fe8b33f838911853588ce3ce594a25d",
+        "Linux_arm64": "45295ab07fd99c87a9cac20dce5d230d7b63ffec1394b38c8d5d4496347a069b",
+        "macOS_64-bit": "4d1df61fc3b1e4109bd965b478dad6cb8998e2ca7836100b936c16c331c8c9f2",
+        "macOS_arm64": "df71e5fcbefca9413479737fa946e105249ec73e2a328ef1784e5558d92414b0",
+        "Windows_64-bit": "6b205cd9ee4df016d42287cd0b2b8f234acb45900fc371cda97a5c49bc69b350",
+    },
     "v3.1.0": {
         "Linux_386": "81564dde82bf90b3552f0f181fe56803a8ab727c65c350c82290120a9ca47fa3",
         "Linux_64-bit": "7c62da29c53dc58f836327bda3a763b7862633d7f957c1abf12e661c2d65a3e0",
