@@ -6,8 +6,43 @@ Typical usage:
 load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
 
 ruff = ruff_aspect(
-    binary = "@@//:ruff",
+    binary = "@multitool//tools/ruff",
     configs = "@@//:.ruff.toml",
+)
+```
+
+## Using a specific ruff version
+
+In `WORKSPACE`, fetch the desired version from https://github.com/astral-sh/ruff/releases
+
+```starlark
+load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
+
+# Specify a tag from the ruff repository
+fetch_ruff("v0.4.10")
+```
+
+In `tools/lint/BUILD.bazel`, select the tool for the host platform:
+
+```starlark
+alias(
+    name = "ruff",
+    actual = select({
+        "@bazel_tools//src/conditions:linux_x86_64": "@ruff_x86_64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:linux_aarch64": "@ruff_aarch64-unknown-linux-gnu//:ruff",
+        "@bazel_tools//src/conditions:darwin_arm64": "@ruff_aarch64-apple-darwin//:ruff",
+        "@bazel_tools//src/conditions:darwin_x86_64": "@ruff_x86_64-apple-darwin//:ruff",
+        "@bazel_tools//src/conditions:windows_x64": "@ruff_x86_64-pc-windows-msvc//:ruff.exe",
+    }),
+)
+```
+
+Finally, reference this tool alias rather than the one from `@multitool`:
+
+```starlark
+ruff = lint_ruff_aspect(
+    binary = "@@//tools/lint:ruff",
+    ...
 )
 ```
 """
@@ -195,8 +230,10 @@ ruff_workaround_20269 = repository_rule(
     },
 )
 
-def fetch_ruff(tag = RUFF_VERSIONS.keys()[0]):
-    """A repository macro used from WORKSPACE to fetch ruff binaries
+def fetch_ruff(tag):
+    """A repository macro used from WORKSPACE to fetch ruff binaries.
+
+    Allows the user to select a particular ruff version, rather than get whatever is pinned in the `multitool.lock.json` file.
 
     Args:
         tag: a tag of ruff that we have mirrored, e.g. `v0.1.0`
