@@ -33,6 +33,7 @@ BUILTIN_TOOL_LABELS = {
     "Shell": "@multitool//tools/shfmt",
     "Terraform": "@multitool//tools/terraform",
     "YAML": "@multitool//tools/yamlfmt",
+    "ruff": "@multitool//tools/ruff",
 }
 
 # Flags to pass each tool's CLI when running in check mode
