@@ -126,7 +126,10 @@ def _update_flag(flag):
         flags = ["-iquote", flag.removeprefix("/I")]
     elif (flag in ["/MD", "/MDd", "/MT", "/MTd"]):
         # mimic microsoft's behaviour and add a define
-        flags = [flag, "-D_MT"]
+        flags = ["-D_MT"]
+    elif (flag.startswith("/")):
+        # strip all other microsoft params
+        return []
     return flags
 
 def _safe_flags(ctx, flags):
@@ -244,10 +247,11 @@ def _get_args(ctx, compilation_context, srcs):
         regex = ctx.attr._header_filter
         args.append(_quoted_arg("-header-filter=" + regex))
     args.extend([src.short_path for src in srcs])
+    return args
 
-    args.append("--")
-
+def _get_compiler_args(ctx, compilation_context, srcs):
     # add args specified by the toolchain, on the command line and rule copts
+    args = []
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     sources_are_cxx = _is_cxx(srcs[0])
     if (sources_are_cxx):
@@ -267,7 +271,6 @@ def _get_args(ctx, compilation_context, srcs):
     args.extend(_prefixed(compilation_context.quote_includes.to_list(), "-iquote"))
     args.extend(_prefixed(compilation_context.system_includes.to_list(), _angle_includes_option(ctx)))
     args.extend(_prefixed(compilation_context.external_includes.to_list(), "-isystem"))
-
     return args
 
 def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code):
@@ -293,12 +296,19 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
         env["CLANG_TIDY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
         outputs.append(exit_code)
 
+    # pass compiler args via a params file. The command line may already be long due to
+    # sources, which can't go the params file, so materialize it always.
+    clang_tidy_args = _get_args(ctx, compilation_context, srcs)
+    compiler_args = ctx.actions.args()
+    compiler_args.add_all(_get_compiler_args(ctx, compilation_context, srcs))
+    compiler_args.use_param_file("--config %s", use_always=True)
+
     ctx.actions.run_shell(
         inputs = _gather_inputs(ctx, compilation_context, srcs),
         outputs = outputs,
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
         command = executable._clang_tidy_wrapper.path + " $@",
-        arguments = [executable._clang_tidy.path] + _get_args(ctx, compilation_context, srcs),
+        arguments = [executable._clang_tidy.path] + clang_tidy_args + ["--", compiler_args],
         env = env,
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with clang-tidy",
@@ -317,12 +327,14 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         exit_code: output file containing the exit code of clang-tidy
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
+    clang_tidy_args = _get_args(ctx, compilation_context, srcs)
+    compiler_args = _get_compiler_args(ctx, compilation_context, srcs)
 
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
             "linter": executable._clang_tidy_wrapper.path,
-            "args": [executable._clang_tidy.path, "--fix"] + _get_args(ctx, compilation_context, srcs),
+            "args": [executable._clang_tidy.path, "--fix"] + clang_tidy_args + ["--"] + compiler_args,
             "env": _get_env(ctx, srcs),
             "files_to_diff": [src.path for src in srcs],
             "output": patch.path,
