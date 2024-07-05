@@ -7,12 +7,11 @@ const char* get_localtime_impl();
 
 // Deliberatly bad code
 inline char* get_localtime() {
-  const char* time = get_localtime_impl();
-  char timebuf[20];
-  strcpy(timebuf, time);
-  // warning: Address of stack memory associated with local variable 'timebuf'
-  // returned to caller [clang-analyzer-core.StackAddressEscape]
-  return timebuf;
+    const char* time = get_localtime_impl();
+    char timebuf[20];
+    strcpy(timebuf, time);
+    // warning: Address of stack memory associated with local variable 'timebuf' returned to caller [clang-analyzer-core.StackAddressEscape]
+    return timebuf;
 }
 
 #endif

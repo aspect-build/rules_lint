@@ -69,14 +69,6 @@
         "sha256": "283a2d23af7d3b05173e34aade53c4d04694e44ca240b61e5b95c887a379eaf1",
         "os": "macos",
         "cpu": "x86_64"
-      },
-      {
-        "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.5.0/ruff-x86_64-pc-windows-msvc.zip",
-        "file": "ruff.exe",
-        "sha256": "3c5305938a44803ea5b2aafe896c1edbbd721d648a768dbd061bc66a18caee98",
-        "os": "windows",
-        "cpu": "x86_64"
       }
     ]
   }

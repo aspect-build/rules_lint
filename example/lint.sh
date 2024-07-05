@@ -24,20 +24,20 @@ filter='.namedSetOfFiles | values | .files[] | select(.name | endswith($ext)) | 
 
 unameOut="$(uname -s)"
 case "${unameOut}" in
-Linux*) machine=Linux ;;
-Darwin*) machine=Mac ;;
-CYGWIN*) machine=Windows ;;
-MINGW*) machine=Windows ;;
-MSYS_NT*) machine=Windows ;;
-*) machine="UNKNOWN:${unameOut}" ;;
+    Linux*)     machine=Linux;;
+    Darwin*)    machine=Mac;;
+    CYGWIN*)    machine=Windows;;
+    MINGW*)     machine=Windows;;
+    MSYS_NT*)   machine=Windows;;
+    *)          machine="UNKNOWN:${unameOut}"
 esac
 
 args=()
 if [ $machine == "Windows" ]; then
-	# avoid missing linters on windows platform
-	args=("--aspects=$(echo //tools/lint:linters.bzl%{flake8,pmd,ruff,vale,clang_tidy} | tr ' ' ',')")
+    # avoid missing linters on windows platform
+    args=("--aspects=$(echo //tools/lint:linters.bzl%{flake8,pmd,ruff,vale,clang_tidy} | tr ' ' ',')")
 else
-	args=("--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale,clang_tidy} | tr ' ' ',')")
+    args=("--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale,clang_tidy} | tr ' ' ',')")
 fi
 
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
@@ -77,10 +77,10 @@ bazel build ${args[@]} $@
 
 # TODO: Maybe this could be hermetic with bazel run @aspect_bazel_lib//tools:jq or sth
 if [ $machine == "Windows" ]; then
-	# jq on windows outputs CRLF which breaks this script. https://github.com/jqlang/jq/issues/92
-	valid_reports=$(jq --arg ext report --raw-output "$filter" "$buildevents" | tr -d '\r')
+    # jq on windows outputs CRLF which breaks this script. https://github.com/jqlang/jq/issues/92
+    valid_reports=$(jq --arg ext report --raw-output "$filter" "$buildevents" | tr -d '\r')
 else
-	valid_reports=$(jq --arg ext report --raw-output "$filter" "$buildevents")
+    valid_reports=$(jq --arg ext report --raw-output "$filter" "$buildevents")
 fi
 
 # Show the results.

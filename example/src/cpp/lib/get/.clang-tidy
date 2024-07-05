@@ -3,4 +3,5 @@
 # the configuration for files in this directory and below. It must be made
 # visibile through an export_files declaration in this package and added
 # to the 'configs' attribute in clang_tidy aspect.
+---
 Checks: "-*, misc-const-correctness"

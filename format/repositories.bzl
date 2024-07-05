@@ -24,9 +24,9 @@ def rules_lint_dependencies():
 
     http_archive(
         name = "rules_multitool",
-        sha256 = "7a86b4653b46a573a5cc25f5a2f05f104f1cbc73a427ab8977293eab0885a241",
-        strip_prefix = "rules_multitool-0.10.0",
-        url = "https://github.com/theoremlp/rules_multitool/releases/download/v0.10.0/rules_multitool-0.10.0.tar.gz",
+        sha256 = "557b71b7d8d9975afc7fc2381c4c0e4220d43a581fb019217ca0a040d6cbebff",
+        strip_prefix = "rules_multitool-0.6.0",
+        url = "https://github.com/theoremlp/rules_multitool/releases/download/v0.6.0/rules_multitool-0.6.0.tar.gz",
     )
 
     # Transitive of rules_multitool, included here for convenience
