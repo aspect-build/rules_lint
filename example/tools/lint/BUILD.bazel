@@ -52,7 +52,7 @@ copy_to_directory(
     srcs = [
         "@vale_{0}//:{0}".format(s)
         for s in VALE_STYLES
-        # Restrict to subset like Google and write-good to avoid GHA cache getting huge and exhasting disk.
+        # Restrict to subset like Google and write-good to avoid GHA cache getting huge and exhausting disk.
         # Comment this out to test that our code to fetch them is working.
         # Most users should just copy in the styles that are referenced in their .vale.ini file.
         if "oo" in s
