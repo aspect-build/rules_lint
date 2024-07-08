@@ -253,6 +253,11 @@ def fetch_ruff(tag):
             fetch_rule = ruff_workaround_20269
         is_windows = plat.endswith("windows-msvc")
 
+        # Account for ruff packaging change in 0.5.0
+        strip_prefix = None
+        if versions.is_at_least("0.5.0", version) and not is_windows:
+            strip_prefix = "ruff-" + plat
+
         maybe(
             fetch_rule,
             name = "ruff_" + plat,
@@ -262,7 +267,7 @@ def fetch_ruff(tag):
                 version = version,
                 ext = "zip" if is_windows else "tar.gz",
             ),
-            strip_prefix = "ruff-" + plat if versions.is_at_least("0.5.0", version) else None,
+            strip_prefix = strip_prefix,
             sha256 = sha256,
             build_file_content = """exports_files(["ruff", "ruff.exe"])""",
         )
