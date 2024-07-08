@@ -12,7 +12,7 @@ buf = buf_lint_aspect(
 )
 ```
 
-**Important:** while using buf's [`allow_comment_ignores` functionality](https://buf.build/docs/configuration/v1/buf-yaml#allow_comment_ignores), the bazel flag `--experimental_proto_descriptor_sets_include_source_info` is required. 
+**Important:** while using buf's [`allow_comment_ignores` functionality](https://buf.build/docs/configuration/v1/buf-yaml#allow_comment_ignores), the bazel flag `--experimental_proto_descriptor_sets_include_source_info` is required.
 
 
 <a id="buf_lint_action"></a>
