@@ -22,11 +22,12 @@ Features:
 New tools are being added frequently, so check this page again!
 
 | Language               | Formatter             | Linter(s)        |
-| ---------------------- | --------------------- | ---------------- |
+|------------------------| --------------------- |------------------|
 | C / C++                | [clang-format]        | ([#112])         |
 | Cuda                   | [clang-format]        |                  |
 | CSS, Less, Sass        | [Prettier]            |                  |
 | Go                     | [gofmt] or [gofumpt]  |                  |
+| GraphQL                | [Prettier]            |                  |
 | HCL (Hashicorp Config) | [terraform] fmt       |                  |
 | HTML                   | [Prettier]            |                  |
 | JSON                   | [Prettier]            |                  |

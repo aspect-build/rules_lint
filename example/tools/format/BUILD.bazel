@@ -59,6 +59,7 @@ format_multirun(
     css = ":prettier",
     cuda = "@llvm_toolchain_llvm//:bin/clang-format",
     go = "@aspect_rules_lint//format:gofumpt",
+    graphql = ":prettier",
     html = ":prettier",
     # You can use standard gofmt instead of stricter gofumpt:
     # go = "@go_sdk//:bin/gofmt",
