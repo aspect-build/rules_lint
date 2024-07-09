@@ -109,7 +109,7 @@ Create a Bazel Action that spawns eslint with --fix.
 ## lint_eslint_aspect
 
 <pre>
-lint_eslint_aspect(<a href="#lint_eslint_aspect-binary">binary</a>, <a href="#lint_eslint_aspect-configs">configs</a>)
+lint_eslint_aspect(<a href="#lint_eslint_aspect-binary">binary</a>, <a href="#lint_eslint_aspect-configs">configs</a>, <a href="#lint_eslint_aspect-rule_kinds">rule_kinds</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -121,5 +121,6 @@ A factory function to create a linter aspect.
 | :------------- | :------------- | :------------- |
 | <a id="lint_eslint_aspect-binary"></a>binary |  the eslint binary, typically a rule like<br><br><pre><code> load("@npm//:eslint/package_json.bzl", eslint_bin = "bin") eslint_bin.eslint_binary(name = "eslint") </code></pre>   |  none |
 | <a id="lint_eslint_aspect-configs"></a>configs |  label(s) of the eslint config file(s)   |  none |
+| <a id="lint_eslint_aspect-rule_kinds"></a>rule_kinds |  which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect   |  <code>["js_library", "ts_project", "ts_project_rule"]</code> |
 
 

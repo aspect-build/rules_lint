@@ -25,6 +25,25 @@ lint_options = rule(
     },
 )
 
+def should_visit(rule, allow_kinds, allow_filegroup_tags = []):
+    """Determine whether a rule is meant to be visited by a linter aspect
+
+    Args:
+        rule: a [rules_attributes](https://bazel.build/rules/lib/builtins/rule_attributes.html) object
+        allow_kinds (list of string): return true if the rule's kind is in the list
+        allow_filegroup_tags (list of string): return true if the rule is a filegroup and has a tag in this list
+
+    Returns:
+        whether to apply the aspect on this rule
+    """
+    if rule.kind in allow_kinds:
+        return True
+    if rule.kind == "filegroup":
+        for allow_tag in allow_filegroup_tags:
+            if allow_tag in rule.attr.tags:
+                return True
+    return False
+
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 # buildifier: disable=function-docstring

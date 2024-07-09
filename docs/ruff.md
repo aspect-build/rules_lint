@@ -98,7 +98,7 @@ Allows the user to select a particular ruff version, rather than get whatever is
 ## lint_ruff_aspect
 
 <pre>
-lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_ruff_aspect-configs">configs</a>)
+lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_ruff_aspect-configs">configs</a>, <a href="#lint_ruff_aspect-rule_kinds">rule_kinds</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -106,6 +106,7 @@ A factory function to create a linter aspect.
 Attrs:
     binary: a ruff executable
     configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
+    rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
 
 **PARAMETERS**
 
@@ -114,6 +115,7 @@ Attrs:
 | :------------- | :------------- | :------------- |
 | <a id="lint_ruff_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_ruff_aspect-configs"></a>configs |  <p align="center"> - </p>   |  none |
+| <a id="lint_ruff_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  <code>["py_binary", "py_library", "py_test"]</code> |
 
 
 <a id="ruff_action"></a>

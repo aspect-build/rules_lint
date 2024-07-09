@@ -100,7 +100,7 @@ https://pinterest.github.io/ktlint/latest/install/cli/
 ## lint_ktlint_aspect
 
 <pre>
-lint_ktlint_aspect(<a href="#lint_ktlint_aspect-binary">binary</a>, <a href="#lint_ktlint_aspect-editorconfig">editorconfig</a>, <a href="#lint_ktlint_aspect-baseline_file">baseline_file</a>, <a href="#lint_ktlint_aspect-ruleset_jar">ruleset_jar</a>)
+lint_ktlint_aspect(<a href="#lint_ktlint_aspect-binary">binary</a>, <a href="#lint_ktlint_aspect-editorconfig">editorconfig</a>, <a href="#lint_ktlint_aspect-baseline_file">baseline_file</a>, <a href="#lint_ktlint_aspect-ruleset_jar">ruleset_jar</a>, <a href="#lint_ktlint_aspect-rule_kinds">rule_kinds</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -114,6 +114,7 @@ A factory function to create a linter aspect.
 | <a id="lint_ktlint_aspect-editorconfig"></a>editorconfig |  The label of the file pointing to the .editorconfig file used by ktlint.   |  none |
 | <a id="lint_ktlint_aspect-baseline_file"></a>baseline_file |  An optional attribute pointing to the label of the baseline file used by ktlint.   |  none |
 | <a id="lint_ktlint_aspect-ruleset_jar"></a>ruleset_jar |  An optional, custom ktlint ruleset provided as a fat jar, and works on top of the standard rules.   |  <code>None</code> |
+| <a id="lint_ktlint_aspect-rule_kinds"></a>rule_kinds |  which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect   |  <code>["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]</code> |
 
 **RETURNS**
 

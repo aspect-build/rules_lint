@@ -41,7 +41,7 @@ Runs the buf lint tool as a Bazel action.
 ## lint_buf_aspect
 
 <pre>
-lint_buf_aspect(<a href="#lint_buf_aspect-config">config</a>, <a href="#lint_buf_aspect-toolchain">toolchain</a>)
+lint_buf_aspect(<a href="#lint_buf_aspect-config">config</a>, <a href="#lint_buf_aspect-toolchain">toolchain</a>, <a href="#lint_buf_aspect-rule_kinds">rule_kinds</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -53,5 +53,6 @@ A factory function to create a linter aspect.
 | :------------- | :------------- | :------------- |
 | <a id="lint_buf_aspect-config"></a>config |  label of the the buf.yaml file   |  none |
 | <a id="lint_buf_aspect-toolchain"></a>toolchain |  override the default toolchain of the protoc-gen-buf-lint tool   |  <code>"@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"</code> |
+| <a id="lint_buf_aspect-rule_kinds"></a>rule_kinds |  which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect   |  <code>["proto_library"]</code> |
 
 

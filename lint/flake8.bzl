@@ -26,7 +26,7 @@ flake8 = lint_flake8_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintFlake8"
 
@@ -72,7 +72,8 @@ def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None):
 
 # buildifier: disable=function-docstring
 def _flake8_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["py_binary", "py_library"]:
+    # Note: we don't inspect whether PyInfo in target to avoid a dep on rules_python
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     report, exit_code, info = report_files(_MNEMONIC, target, ctx)
@@ -85,7 +86,7 @@ def _flake8_aspect_impl(target, ctx):
         flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, report, exit_code)
     return [info]
 
-def lint_flake8_aspect(binary, config):
+def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"]):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -118,6 +119,9 @@ def lint_flake8_aspect(binary, config):
             "_config_file": attr.label(
                 default = config,
                 allow_single_file = True,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
     )
