@@ -87,7 +87,7 @@ A repository macro used from WORKSPACE to fetch vale binaries
 ## lint_vale_aspect
 
 <pre>
-lint_vale_aspect(<a href="#lint_vale_aspect-binary">binary</a>, <a href="#lint_vale_aspect-config">config</a>, <a href="#lint_vale_aspect-styles">styles</a>)
+lint_vale_aspect(<a href="#lint_vale_aspect-binary">binary</a>, <a href="#lint_vale_aspect-config">config</a>, <a href="#lint_vale_aspect-styles">styles</a>, <a href="#lint_vale_aspect-rule_kinds">rule_kinds</a>, <a href="#lint_vale_aspect-filegroup_tags">filegroup_tags</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -100,6 +100,8 @@ A factory function to create a linter aspect.
 | <a id="lint_vale_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_vale_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
 | <a id="lint_vale_aspect-styles"></a>styles |  <p align="center"> - </p>   |  <code>Label("//lint:empty_styles")</code> |
+| <a id="lint_vale_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  <code>["markdown_library"]</code> |
+| <a id="lint_vale_aspect-filegroup_tags"></a>filegroup_tags |  <p align="center"> - </p>   |  <code>["markdown", "lint-with-vale"]</code> |
 
 
 <a id="vale_action"></a>

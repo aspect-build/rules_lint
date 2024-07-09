@@ -55,7 +55,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintESLint"
 
@@ -180,7 +180,7 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
 
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["js_library", "ts_project", "ts_project_rule"]:
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
@@ -200,7 +200,7 @@ def _eslint_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_eslint_aspect(binary, configs):
+def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project", "ts_project_rule"]):
     """A factory function to create a linter aspect.
 
     Args:
@@ -211,6 +211,7 @@ def lint_eslint_aspect(binary, configs):
             eslint_bin.eslint_binary(name = "eslint")
             ```
         configs: label(s) of the eslint config file(s)
+        rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -246,6 +247,9 @@ def lint_eslint_aspect(binary, configs):
                 default = "@aspect_rules_lint//lint:eslint.bazel-formatter",
                 allow_single_file = True,
                 cfg = "exec",
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
         toolchains = COPY_FILE_TO_BIN_TOOLCHAINS,

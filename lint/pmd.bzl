@@ -28,7 +28,7 @@ pmd = pmd_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintPMD"
 
@@ -78,7 +78,7 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
 
 # buildifier: disable=function-docstring
 def _pmd_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["java_binary", "java_library"]:
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
@@ -90,7 +90,7 @@ def _pmd_aspect_impl(target, ctx):
         pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code)
     return [info]
 
-def lint_pmd_aspect(binary, rulesets):
+def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"]):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -128,6 +128,9 @@ def lint_pmd_aspect(binary, rulesets):
                 allow_empty = False,
                 doc = "Ruleset files.",
                 default = rulesets,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
     )

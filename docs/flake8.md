@@ -59,7 +59,7 @@ Based on https://flake8.pycqa.org/en/latest/user/invocation.html
 ## lint_flake8_aspect
 
 <pre>
-lint_flake8_aspect(<a href="#lint_flake8_aspect-binary">binary</a>, <a href="#lint_flake8_aspect-config">config</a>)
+lint_flake8_aspect(<a href="#lint_flake8_aspect-binary">binary</a>, <a href="#lint_flake8_aspect-config">config</a>, <a href="#lint_flake8_aspect-rule_kinds">rule_kinds</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -83,5 +83,6 @@ Attrs:
 | :------------- | :------------- | :------------- |
 | <a id="lint_flake8_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_flake8_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
+| <a id="lint_flake8_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  <code>["py_binary", "py_library"]</code> |
 
 

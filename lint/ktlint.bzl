@@ -52,7 +52,7 @@ If your custom ruleset is a third-party dependency and not a first-party depende
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintKTLint"
 
@@ -127,7 +127,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
     )
 
 def _ktlint_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]:
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     report, exit_code, info = report_files(_MNEMONIC, target, ctx)
@@ -143,7 +143,7 @@ def _ktlint_aspect_impl(target, ctx):
         ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
     return [info]
 
-def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):
+def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, rule_kinds = ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]):
     """A factory function to create a linter aspect.
 
     Args:
@@ -151,6 +151,7 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):
         editorconfig: The label of the file pointing to the .editorconfig file used by ktlint.
         baseline_file: An optional attribute pointing to the label of the baseline file used by ktlint.
         ruleset_jar: An optional, custom ktlint ruleset provided as a fat jar, and works on top of the standard rules.
+        rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
 
     Returns:
         An aspect definition for ktlint
@@ -192,6 +193,9 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None):
             ),
             "_java_runtime": attr.label(
                 default = "@bazel_tools//tools/jdk:current_java_runtime",
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         }, extra_attrs),
         toolchains = [

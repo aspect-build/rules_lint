@@ -46,7 +46,7 @@ fetch_pmd()
 ## lint_pmd_aspect
 
 <pre>
-lint_pmd_aspect(<a href="#lint_pmd_aspect-binary">binary</a>, <a href="#lint_pmd_aspect-rulesets">rulesets</a>)
+lint_pmd_aspect(<a href="#lint_pmd_aspect-binary">binary</a>, <a href="#lint_pmd_aspect-rulesets">rulesets</a>, <a href="#lint_pmd_aspect-rule_kinds">rule_kinds</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -72,6 +72,7 @@ Attrs:
 | :------------- | :------------- | :------------- |
 | <a id="lint_pmd_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_pmd_aspect-rulesets"></a>rulesets |  <p align="center"> - </p>   |  none |
+| <a id="lint_pmd_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  <code>["java_binary", "java_library"]</code> |
 
 
 <a id="pmd_action"></a>

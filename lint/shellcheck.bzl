@@ -14,7 +14,7 @@ shellcheck = shellcheck_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintShellCheck"
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
@@ -66,7 +66,7 @@ def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, o
 
 # buildifier: disable=function-docstring
 def _shellcheck_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["sh_binary", "sh_library"]:
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
@@ -89,7 +89,7 @@ def _shellcheck_aspect_impl(target, ctx):
         shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, report, exit_code)
     return [info]
 
-def lint_shellcheck_aspect(binary, config):
+def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_library"]):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -111,6 +111,9 @@ def lint_shellcheck_aspect(binary, config):
             "_config_file": attr.label(
                 default = config,
                 allow_single_file = True,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
     )

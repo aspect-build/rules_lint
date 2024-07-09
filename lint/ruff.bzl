@@ -50,7 +50,7 @@ ruff = lint_ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files", "should_visit")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
@@ -149,7 +149,7 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
 
 # buildifier: disable=function-docstring
 def _ruff_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["py_binary", "py_library", "py_test"]:
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
@@ -168,12 +168,13 @@ def _ruff_aspect_impl(target, ctx):
             ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
     return [info]
 
-def lint_ruff_aspect(binary, configs):
+def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"]):
     """A factory function to create a linter aspect.
 
     Attrs:
         binary: a ruff executable
         configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
+        rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -201,6 +202,9 @@ def lint_ruff_aspect(binary, configs):
             "_config_files": attr.label_list(
                 default = configs,
                 allow_files = True,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
     )

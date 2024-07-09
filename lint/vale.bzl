@@ -64,7 +64,7 @@ vale = vale_aspect(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files", "should_visit")
 load(":vale_library.bzl", "fetch_styles")
 load(":vale_versions.bzl", "VALE_VERSIONS")
 
@@ -122,11 +122,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None)
 
 # buildifier: disable=function-docstring
 def _vale_aspect_impl(target, ctx):
-    # There's no "official" markdown_library rule.
-    # Users might want to try https://github.com/dwtj/dwtj_rules_markdown but we expect many won't
-    # want to take that dependency.
-    # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
-    if ctx.rule.kind == "markdown_library" or (ctx.rule.kind == "filegroup" and "markdown" in ctx.rule.attr.tags):
+    if should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
         report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         styles = None
         if ctx.files._styles:
@@ -140,7 +136,11 @@ def _vale_aspect_impl(target, ctx):
 
     return []
 
-def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles")):
+# There's no "official" markdown_library rule.
+# Users might want to try https://github.com/dwtj/dwtj_rules_markdown but we expect many won't
+# want to take that dependency.
+# So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
+def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule_kinds = ["markdown_library"], filegroup_tags = ["markdown", "lint-with-vale"]):
     """A factory function to create a linter aspect."""
     return aspect(
         implementation = _vale_aspect_impl,
@@ -162,6 +162,12 @@ def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles")):
             ),
             "_styles": attr.label(
                 default = styles,
+            ),
+            "_filegroup_tags": attr.string_list(
+                default = filegroup_tags,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
     )
