@@ -101,7 +101,7 @@ A factory function to create a linter aspect.
 | <a id="lint_vale_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
 | <a id="lint_vale_aspect-styles"></a>styles |  <p align="center"> - </p>   |  <code>Label("//lint:empty_styles")</code> |
 | <a id="lint_vale_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  <code>["markdown_library"]</code> |
-| <a id="lint_vale_aspect-filegroup_tags"></a>filegroup_tags |  <p align="center"> - </p>   |  <code>["markdown"]</code> |
+| <a id="lint_vale_aspect-filegroup_tags"></a>filegroup_tags |  <p align="center"> - </p>   |  <code>["markdown", "lint-with-vale"]</code> |
 
 
 <a id="vale_action"></a>
