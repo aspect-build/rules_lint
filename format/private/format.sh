@@ -14,6 +14,7 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 # --- end runfiles.bash initialization v3 ---
 
 if [[ -n "$BUILD_WORKSPACE_DIRECTORY" ]]; then
+  unset BUILD_WORKING_DIRECTORY
   cd $BUILD_WORKSPACE_DIRECTORY
 elif [[ -n "$TEST_WORKSPACE" ]]; then
   if [[ -n "$WORKSPACE" ]]; then
