@@ -9,6 +9,7 @@ load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
+load("@aspect_rules_lint//lint:tfsec.bzl", "tfsec_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
 
 buf = lint_buf_aspect(
@@ -94,4 +95,8 @@ clang_tidy_global_config = lint_clang_tidy_aspect(
     lint_target_headers = True,
     angle_includes_are_system = False,
     verbose = False,
+)
+
+tfsec = tfsec_aspect(
+    binary = "@multitool//tools/tfsec",
 )

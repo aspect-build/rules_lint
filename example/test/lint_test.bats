@@ -33,6 +33,9 @@ EOF
 
 	# Vale
 	assert_output --partial "src/README.md:3:47:Google.We:Try to avoid using first-person plural like 'We'."
+	
+	# Tfsec
+	assert_output --partial "Overly permissive policies may grant access to sensitive resources"
 }
 
 @test "should produce reports" {

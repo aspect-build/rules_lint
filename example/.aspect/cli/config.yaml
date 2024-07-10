@@ -7,3 +7,4 @@ lint:
     - //tools/lint:linters.bzl%pmd
     - //tools/lint:linters.bzl%ruff
     - //tools/lint:linters.bzl%vale
+    - //tools/lint:linters.bzl%tfsec

@@ -57,4 +57,9 @@ stardoc_with_diff_test(
     bzl_library_target = "//lint:clang_tidy",
 )
 
+stardoc_with_diff_test(
+    name = "tfsec",
+    bzl_library_target = "//lint:tfsec",
+)
+
 update_docs(name = "update")

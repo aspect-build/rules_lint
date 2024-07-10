@@ -17,6 +17,14 @@ filegroup(
     tags = ["markdown"],
 )
 
+filegroup(
+    name = "tf",
+    srcs = ["hello.tf"],
+    # The tfsec linter will look for this `terraform` tag by default
+    # on filegroups, and include them in the targets to be linted.
+    tags = ["terraform"],
+)
+
 ts_project(
     name = "ts",
     srcs = ["file.ts"],

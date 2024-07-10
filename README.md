@@ -27,7 +27,7 @@ New tools are being added frequently, so check this page again!
 | Cuda                   | [clang-format]        |                  |
 | CSS, Less, Sass        | [Prettier]            |                  |
 | Go                     | [gofmt] or [gofumpt]  |                  |
-| HCL (Hashicorp Config) | [terraform] fmt       |                  |
+| HCL (Hashicorp Config) | [terraform] fmt       | [tfsec]          |
 | HTML                   | [Prettier]            |                  |
 | JSON                   | [Prettier]            |                  |
 | Java                   | [google-java-format]  | [pmd]            |
@@ -72,6 +72,7 @@ New tools are being added frequently, so check this page again!
 [vale]: https://vale.sh/
 [yamlfmt]: https://github.com/google/yamlfmt
 [rustfmt]: https://rust-lang.github.io/rustfmt
+[tfsec]: https://github.com/aquasecurity/tfsec
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift
