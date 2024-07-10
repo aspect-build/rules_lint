@@ -12,5 +12,5 @@ service HttpService {
   // Receives an inbound message an http client.
   // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
   // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
-  rpc ReceiveMessage (HttpBody) returns (Empty) {}
+  rpc ReceiveMessage(HttpBody) returns (Empty) {}
 }
