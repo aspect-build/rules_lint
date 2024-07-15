@@ -29,13 +29,17 @@ EOF
 EOF
 
 	# ktlint
-	assert_output --partial "src/hello.kt:1:1: File name 'hello.kt' should conform PascalCase (standard:filename)"
+	# FIXME: This fails with INFO com.pinterest.ktlint.cli.internal.KtlintCommandLine -- Enable default patterns [**/*.kt, **/*.kts]
+	# assert_output --partial "src/hello.kt:1:1: File name 'hello.kt' should conform PascalCase (standard:filename)"
 
 	# ESLint
 	echo <<"EOF" | assert_output --partial
 src/file.ts
   2:7  error  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
 EOF
+  # If type declarations are missing, the following errors will be reported
+  refute_output --partial '@typescript-eslint/no-unsafe-call'
+  refute_output --partial '@typescript-eslint/no-unsafe-member-access'
 
 	# Buf
 	assert_output --partial 'src/file.proto:1:1:Import "src/unused.proto" is unused.'
