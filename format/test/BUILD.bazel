@@ -40,6 +40,7 @@ format_multirun(
     css = ":mock_prettier.sh",
     cuda = ":mock_clang-format.sh",
     go = ":mock_gofmt.sh",
+    graphql = ":mock_prettier.sh",
     html = ":mock_prettier.sh",
     java = ":mock_java-format.sh",
     javascript = ":mock_prettier.sh",

@@ -7,6 +7,7 @@ TOOLS = {
     "JavaScript": "prettier",
     "Markdown": "prettier",
     "CSS": "prettier",
+    "GraphQL": "prettier",
     "HTML": "prettier",
     "Python": "ruff",
     "Starlark": "buildifier",

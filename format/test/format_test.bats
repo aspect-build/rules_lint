@@ -56,6 +56,13 @@ bats_load_library "bats-assert"
     assert_output --partial "+ prettier --write example/src/index.html"
 }
 
+@test "should run prettier on GraphQL" {
+    run bazel run //format/test:format_GraphQL_with_prettier
+    assert_success
+
+    assert_output --partial "+ prettier --write example/src/hello.graphql"
+}
+
 @test "should run prettier on SQL" {
     run bazel run //format/test:format_SQL_with_prettier
     assert_success
