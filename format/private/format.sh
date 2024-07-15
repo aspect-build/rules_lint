@@ -14,6 +14,9 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 # --- end runfiles.bash initialization v3 ---
 
 if [[ -n "$BUILD_WORKSPACE_DIRECTORY" ]]; then
+  # Needed for the rustfmt binary wrapper in rules_rust; see
+  # https://github.com/aspect-build/rules_lint/pull/327
+  unset BUILD_WORKING_DIRECTORY
   cd $BUILD_WORKSPACE_DIRECTORY
 elif [[ -n "$TEST_WORKSPACE" ]]; then
   if [[ -n "$WORKSPACE" ]]; then
