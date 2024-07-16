@@ -90,8 +90,9 @@ def _pmd_aspect_impl(target, ctx):
         dummy_successful_lint_action(ctx, stdout, exit_code)
     else:
         pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, stdout, exit_code)
-    if report:
-        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code = "discard")
+
+    # Run again for machine-readable output, only if rules_lint_report output_group is requested
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code = "discard")
     return [info]
 
 def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"]):

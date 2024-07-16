@@ -98,15 +98,16 @@ def _buf_lint_aspect_impl(target, ctx):
         stdout,
         exit_code,
     )
-    if report:
-        buf_lint_action(
-            ctx,
-            ctx.toolchains[ctx.attr._buf_toolchain].cli,
-            ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
-            target,
-            report,
-            exit_code = "discard",
-        )
+
+    # Run again for machine-readable output, only if rules_lint_report output_group is requested
+    buf_lint_action(
+        ctx,
+        ctx.toolchains[ctx.attr._buf_toolchain].cli,
+        ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
+        target,
+        report,
+        exit_code = "discard",
+    )
     return [info]
 
 def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type", rule_kinds = ["proto_library"]):

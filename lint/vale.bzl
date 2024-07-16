@@ -140,8 +140,8 @@ def _vale_aspect_impl(target, ctx):
             fail("Styles should be a directory containing installed styles")
     vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, stdout, exit_code)
 
-    if report:
-        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, exit_code = "discard", format = "line")
+    # Run again for machine-readable output, only if rules_lint_report output_group is requested
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, exit_code = "discard", format = "line")
     return [info]
 
 # There's no "official" markdown_library rule.

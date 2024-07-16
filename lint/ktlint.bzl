@@ -143,8 +143,9 @@ def _ktlint_aspect_impl(target, ctx):
         dummy_successful_lint_action(ctx, stdout, exit_code)
     else:
         ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
-    if report:
-        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code = "discard")
+
+    # Run again for machine-readable output, only if rules_lint_report output_group is requested
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code = "discard")
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, rule_kinds = ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]):

@@ -86,8 +86,9 @@ def _flake8_aspect_impl(target, ctx):
         dummy_successful_lint_action(ctx, stdout, exit_code)
     else:
         flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, stdout, exit_code)
-    if report:
-        flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, report, exit_code = "discard")
+
+    # Run again for machine-readable output, only if rules_lint_report output_group is requested
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, report, exit_code = "discard")
     return [info]
 
 def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"]):

@@ -169,8 +169,8 @@ def _ruff_aspect_impl(target, ctx):
         else:
             ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, stdout, exit_code)
 
-    if report:
-        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code = "discard")
+    # Run again for machine-readable output, only if rules_lint_report output_group is requested
+    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code = "discard")
 
     return [info]
 

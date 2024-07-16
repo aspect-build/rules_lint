@@ -211,8 +211,8 @@ def _eslint_aspect_impl(target, ctx):
         else:
             eslint_action(ctx, ctx.executable, files_to_lint, stdout, exit_code)
 
-    if report:
-        eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code = "discard", format = ctx.attr._formatter)
+    # Run again for machine-readable output, only if rules_lint_report output_group is requested
+    eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code = "discard", format = ctx.attr._formatter)
 
     return [info]
 

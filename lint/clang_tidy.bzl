@@ -314,17 +314,18 @@ def _clang_tidy_aspect_impl(target, ctx):
     if ctx.attr._options[LintOptionsInfo].fix:
         patch, stdout, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code, patch)
+            dummy_successful_lint_action(ctx, stdout, exit_code, patch)
         else:
-            clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, patch, report, exit_code)
+            clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, patch, stdout, exit_code)
     else:
         stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, stdout, exit_code)
         else:
             clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, stdout, exit_code)
-        if report:
-            clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code = "discard")
+
+    # Run again for machine-readable output, only if rules_lint_report output_group is requested
+    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code = "discard")
     return [info]
 
 def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):

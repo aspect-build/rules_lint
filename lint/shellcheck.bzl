@@ -90,8 +90,8 @@ def _shellcheck_aspect_impl(target, ctx):
         # So we must run a second action to populate the human-readable report.
         shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, stdout, exit_code)
 
-    if report:
-        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, report, exit_code = "discard")
+    # Run again for machine-readable output, only if rules_lint_report output_group is requested
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, report, exit_code = "discard")
 
     return [info]
 
