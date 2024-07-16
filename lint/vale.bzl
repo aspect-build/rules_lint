@@ -85,7 +85,9 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
         format: the value for the --output CLI flag
     """
     inputs = srcs + [config]
-    env = {}
+
+    # TODO(#332): enable color when requested
+    env = {"NO_COLOR": "1"}
     if styles:
         inputs.append(styles)
 

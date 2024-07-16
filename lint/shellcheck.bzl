@@ -88,7 +88,7 @@ def _shellcheck_aspect_impl(target, ctx):
     else:
         # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
         # So we must run a second action to populate the human-readable report.
-        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, stdout, exit_code, options = ["--color"])
+        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, stdout, exit_code)
 
     if report:
         shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, report, exit_code = "discard")
