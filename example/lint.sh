@@ -83,25 +83,25 @@ bazel build ${args[@]} $@
 # TODO: Maybe this could be hermetic with bazel run @aspect_bazel_lib//tools:jq or sth
 if [ $machine == "Windows" ]; then
     # jq on windows outputs CRLF which breaks this script. https://github.com/jqlang/jq/issues/92
-    valid_outputs=$(jq --arg ext .txt --raw-output "$filter" "$buildevents" | tr -d '\r')
+    valid_reports=$(jq --arg ext .txt --raw-output "$filter" "$buildevents" | tr -d '\r')
 else
-    valid_outputs=$(jq --arg ext .txt --raw-output "$filter" "$buildevents")
+    valid_reports=$(jq --arg ext .txt --raw-output "$filter" "$buildevents")
 fi
 
 # Show the results.
-while IFS= read -r output; do
+while IFS= read -r report; do
 	# Exclude coverage reports, and check if the output is empty.
-	if [[ "$output" == *coverage.dat ]] || [[ ! -s "$output" ]]; then
+	if [[ "$report" == *coverage.dat ]] || [[ ! -s "$report" ]]; then
 		# Report is empty. No linting errors.
 		continue
 	fi
-	echo "From ${output}:"
-	cat "${output}"
+	echo "From ${report}:"
+	cat "${report}"
 	echo
-done <<<"$valid_outputs"
+done <<<"$valid_reports"
 
 if [ -n "$fix" ]; then
-	valid_patches=$valid_outputs
+	valid_patches=$valid_reports
 	while IFS= read -r patch; do
 		# Exclude coverage, and check if the patch is empty.
 		if [[ "$patch" == *coverage.dat ]] || [[ ! -s "$patch" ]]; then
