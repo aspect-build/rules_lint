@@ -55,7 +55,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "discard_exit_code", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintESLint"
 
@@ -112,9 +112,6 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
         args.add_all(["--format", "../../../" + format.files.to_list()[0].path])
         file_inputs.append(format)
     args.add_all([s.short_path for s in srcs])
-
-    if exit_code == "discard":
-        exit_code = ctx.actions.declare_file("_discard_eslint_exit_code", sibling = stdout)
 
     if not exit_code:
         ctx.actions.run_shell(
@@ -212,7 +209,7 @@ def _eslint_aspect_impl(target, ctx):
             eslint_action(ctx, ctx.executable, files_to_lint, stdout, exit_code)
 
     # Run again for machine-readable output, only if rules_lint_report output_group is requested
-    eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code = "discard", format = ctx.attr._formatter)
+    eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code = discard_exit_code(_MNEMONIC, target, ctx), format = ctx.attr._formatter)
 
     return [info]
 

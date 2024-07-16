@@ -39,7 +39,7 @@ clang_tidy = lint_clang_tidy_aspect(
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "discard_exit_code", "dummy_successful_lint_action", "patch_and_report_files", "report_files")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 
@@ -238,8 +238,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
     outputs = [stdout]
     env = {}
     env["CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE"] = stdout.path
-    if exit_code == "discard":
-        exit_code = ctx.actions.declare_file("_exit_code_discard", sibling = stdout)
+
     if exit_code:
         env["CLANG_TIDY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
         outputs.append(exit_code)
@@ -325,7 +324,7 @@ def _clang_tidy_aspect_impl(target, ctx):
             clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, stdout, exit_code)
 
     # Run again for machine-readable output, only if rules_lint_report output_group is requested
-    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code = "discard")
+    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code = discard_exit_code(_MNEMONIC, target, ctx))
     return [info]
 
 def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):

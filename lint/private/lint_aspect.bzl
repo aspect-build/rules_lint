@@ -46,6 +46,13 @@ def should_visit(rule, allow_kinds, allow_filegroup_tags = []):
 
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
+def discard_exit_code(mnemonic, target, ctx):
+    """Utility to declare an output file which will never be read.
+
+    Needed as a workaround for js_binary which accepts an output file for the exit code,
+    allowing it to return 0 even if the spawned binary exits non-zero."""
+    return ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "exit_code.discard"))
+
 def report_files(mnemonic, target, ctx):
     """Declare linter output files.
 
