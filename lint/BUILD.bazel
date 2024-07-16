@@ -93,8 +93,8 @@ js_library(
 )
 
 js_library(
-    name = "eslint.compact-formatter",
-    srcs = ["eslint.compact-formatter.js"],
+    name = "eslint.bazel-formatter",
+    srcs = ["eslint.bazel-formatter.js"],
     visibility = ["//visibility:public"],
 )
 

@@ -212,7 +212,7 @@ def _eslint_aspect_impl(target, ctx):
             eslint_action(ctx, ctx.executable, files_to_lint, stdout, exit_code)
 
     if report:
-        eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code = "discard", format = ctx.attr._compact_formatter)
+        eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code = "discard", format = ctx.attr._formatter)
 
     return [info]
 
@@ -259,8 +259,8 @@ def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project"
                 allow_single_file = True,
                 cfg = "exec",
             ),
-            "_compact_formatter": attr.label(
-                default = "@aspect_rules_lint//lint:eslint.compact-formatter",
+            "_formatter": attr.label(
+                default = "@aspect_rules_lint//lint:eslint.bazel-formatter",
                 allow_single_file = True,
                 cfg = "exec",
             ),

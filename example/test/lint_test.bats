@@ -26,7 +26,7 @@ EOF
 	assert_output --partial "src/hello.kt:1:1: File name 'hello.kt' should conform PascalCase (standard:filename)"
 
 	# ESLint
-	assert_output --partial 'src/file.ts: line 2, col 7, Error - Type string trivially inferred from a string literal, remove type annotation. (@typescript-eslint/no-inferrable-types)'
+	assert_output --partial 'src/file.ts\n 2:7  error   Type string trivially inferred from a string literal, remove type annotation. (@typescript-eslint/no-inferrable-types)'
 
 	# Buf
 	assert_output --partial 'src/file.proto:1:1:Import "src/unused.proto" is unused.'

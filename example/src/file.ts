@@ -1,5 +1,5 @@
 // this is a linting violation, and is auto-fixed under `--fix`
-const a = "a";
+const a: string = "a";
 console.log(a);
 
 // linting violation; not auto-fixable
