@@ -239,7 +239,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
     env = {}
     env["CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE"] = stdout.path
     if exit_code == "discard":
-        exit_code = ctx.actions.declare_file(name = "_exit_code_discard", sibling = stdout)
+        exit_code = ctx.actions.declare_file("_exit_code_discard", sibling = stdout)
     if exit_code:
         env["CLANG_TIDY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
         outputs.append(exit_code)

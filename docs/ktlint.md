@@ -70,7 +70,7 @@ fetch_ktlint()
 
 <pre>
 ktlint_action(<a href="#ktlint_action-ctx">ctx</a>, <a href="#ktlint_action-executable">executable</a>, <a href="#ktlint_action-srcs">srcs</a>, <a href="#ktlint_action-editorconfig">editorconfig</a>, <a href="#ktlint_action-stdout">stdout</a>, <a href="#ktlint_action-baseline_file">baseline_file</a>, <a href="#ktlint_action-java_runtime">java_runtime</a>, <a href="#ktlint_action-ruleset_jar">ruleset_jar</a>,
-              <a href="#ktlint_action-exit_code">exit_code</a>)
+              <a href="#ktlint_action-exit_code">exit_code</a>, <a href="#ktlint_action-user_args">user_args</a>)
 </pre>
 
  Runs ktlint as build action in Bazel.
@@ -93,6 +93,7 @@ https://pinterest.github.io/ktlint/latest/install/cli/
 | <a id="ktlint_action-java_runtime"></a>java_runtime |  The Java Runtime configured for this build, pulled from the registered toolchain.   |  none |
 | <a id="ktlint_action-ruleset_jar"></a>ruleset_jar |  An optional, custom ktlint ruleset jar.   |  <code>None</code> |
 | <a id="ktlint_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when ktlint exits non-zero.   |  <code>None</code> |
+| <a id="ktlint_action-user_args"></a>user_args |  additional CLI arguments to the ktlint command   |  <code>[]</code> |
 
 
 <a id="lint_ktlint_aspect"></a>
