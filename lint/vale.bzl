@@ -70,7 +70,7 @@ load(":vale_versions.bzl", "VALE_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintVale"
 
-def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None):
+def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None, format = "CLI"):
     """Run Vale as an action under Bazel.
 
     Args:
@@ -82,6 +82,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None)
         stdout: output file containing stdout of Vale
         exit_code: output file containing Vale exit code.
             If None, then fail the build when Vale exits non-zero.
+        format: the value for the --output CLI flag
     """
     inputs = srcs + [config]
     env = {}
@@ -96,10 +97,12 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None)
     args = ctx.actions.args()
     args.add_all(srcs)
     args.add_all(["--config", config])
-    args.add_all(["--output", "line"])
+    args.add_all(["--output", format])
     outputs = [stdout]
 
-    if exit_code:
+    if exit_code == "discard":
+        command = "{vale} $@ >{stdout} || true"
+    elif exit_code:
         command = "{vale} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
@@ -122,19 +125,22 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None)
 
 # buildifier: disable=function-docstring
 def _vale_aspect_impl(target, ctx):
-    if should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-        styles = None
-        if ctx.files._styles:
-            if len(ctx.files._styles) != 1:
-                fail("Only a single directory should be in styles")
-            styles = ctx.files._styles[0]
-            if not styles.is_directory:
-                fail("Styles should be a directory containing installed styles")
-        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, exit_code)
-        return [info]
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
+        return []
 
-    return []
+    output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    styles = None
+    if ctx.files._styles:
+        if len(ctx.files._styles) != 1:
+            fail("Only a single directory should be in styles")
+        styles = ctx.files._styles[0]
+        if not styles.is_directory:
+            fail("Styles should be a directory containing installed styles")
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, output, exit_code)
+
+    if report:
+        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, exit_code = "discard", format = "line")
+    return [info]
 
 # There's no "official" markdown_library rule.
 # Users might want to try https://github.com/dwtj/dwtj_rules_markdown but we expect many won't

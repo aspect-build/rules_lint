@@ -238,6 +238,8 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
     outputs = [stdout]
     env = {}
     env["CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE"] = stdout.path
+    if exit_code == "discard":
+        exit_code = ctx.actions.declare_file(name = "_exit_code_discard", sibling = stdout)
     if exit_code:
         env["CLANG_TIDY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
         outputs.append(exit_code)
@@ -310,17 +312,19 @@ def _clang_tidy_aspect_impl(target, ctx):
     compilation_context = target[CcInfo].compilation_context
 
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        patch, output, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, report, exit_code, patch)
         else:
             clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, patch, report, exit_code)
     else:
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code)
+            dummy_successful_lint_action(ctx, output, exit_code)
         else:
-            clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code)
+            clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, output, exit_code)
+        if report:
+            clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code = "discard")
     return [info]
 
 def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):

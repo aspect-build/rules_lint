@@ -46,10 +46,20 @@ def should_visit(rule, allow_kinds, allow_filegroup_tags = []):
 
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
-# buildifier: disable=function-docstring
 def report_files(mnemonic, target, ctx):
+    """Declare linter output files.
+
+    Args:
+        mnemonic: used as part of the filename
+        target: the target being visited by a linter aspect
+        ctx: the aspect context
+
+    Returns:
+        4-tuple of output (human-readable stdout), report (machine-parsable), exit code of the tool, and the OutputGroupInfo provider
+    """
+    output = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "txt"))
     report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report"))
-    outs = [report]
+    outs = [output, report]
     if ctx.attr._options[LintOptionsInfo].fail_on_violation:
         # Fail on violation means the exit code is reported to Bazel as the action result
         exit_code = None
@@ -59,7 +69,11 @@ def report_files(mnemonic, target, ctx):
         # and interpreting them.
         exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "exit_code"))
         outs.append(exit_code)
-    return report, exit_code, OutputGroupInfo(rules_lint_report = depset(outs))
+
+    return output, report, exit_code, OutputGroupInfo(
+        rules_lint_output = depset([output]),
+        rules_lint_report = depset([f for f in [report, exit_code] if f]),
+    )
 
 def patch_file(mnemonic, target, ctx):
     patch = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "patch"))
@@ -69,8 +83,9 @@ def patch_file(mnemonic, target, ctx):
 # So we need a separate function to return both.
 def patch_and_report_files(*args):
     patch, _ = patch_file(*args)
-    report, exit_code, _ = report_files(*args)
-    return patch, report, exit_code, OutputGroupInfo(
+    output, report, exit_code, _ = report_files(*args)
+    return patch, output, report, exit_code, OutputGroupInfo(
+        rules_lint_output = depset([output]),
         rules_lint_report = depset([f for f in [report, exit_code] if f]),
         rules_lint_patch = depset([patch]),
     )

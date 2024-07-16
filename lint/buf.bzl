@@ -60,7 +60,9 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
     args.add_all(sources)
     outputs = [stderr]
 
-    if exit_code:
+    if exit_code == "discard":
+        command = "{protoc} $@ 2>{stderr} || true"
+    elif exit_code:
         command = "{protoc} $@ 2>{stderr}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
@@ -87,15 +89,24 @@ def _buf_lint_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     buf_lint_action(
         ctx,
         ctx.toolchains[ctx.attr._buf_toolchain].cli,
         ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
         target,
-        report,
+        output,
         exit_code,
     )
+    if report:
+        buf_lint_action(
+            ctx,
+            ctx.toolchains[ctx.attr._buf_toolchain].cli,
+            ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
+            target,
+            report,
+            exit_code = "discard",
+        )
     return [info]
 
 def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type", rule_kinds = ["proto_library"]):

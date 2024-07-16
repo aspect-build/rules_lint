@@ -56,7 +56,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint
 
 _MNEMONIC = "AspectRulesLintKTLint"
 
-def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None):
+def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None, user_args = []):
     """ Runs ktlint as build action in Bazel.
 
     Adapter for wrapping Bazel around
@@ -73,9 +73,11 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
         ruleset_jar: An optional, custom ktlint ruleset jar.
         exit_code: output file to write the exit code.
             If None, then fail the build when ktlint exits non-zero.
+        user_args: additional CLI arguments to the ktlint command
     """
 
     args = ctx.actions.args()
+    args.add_all(user_args)
     inputs = srcs
     outputs = [stdout]
 
@@ -108,7 +110,9 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
     # This makes hermetic java available to ktlint executable
     command = "export PATH=$PATH:$JAVA_HOME/bin\n"
 
-    if exit_code:
+    if exit_code == "discard":
+        command += "{ktlint} $@ >{stdout} || true"
+    elif exit_code:
         # Don't fail ktlint and just report the violations
         command += "{ktlint} $@ >{stdout}; echo $? >" + exit_code.path
         outputs.append(exit_code)
@@ -130,7 +134,7 @@ def _ktlint_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     ruleset_jar = None
     if hasattr(ctx.attr, "_ruleset_jar"):
         ruleset_jar = ctx.file._ruleset_jar
@@ -138,9 +142,11 @@ def _ktlint_aspect_impl(target, ctx):
     files_to_lint = filter_srcs(ctx.rule)
 
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, report, exit_code)
+        dummy_successful_lint_action(ctx, output, exit_code)
     else:
-        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
+        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, output, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code, ["--color"])
+    if report:
+        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code = "discard")
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, rule_kinds = ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]):

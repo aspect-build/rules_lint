@@ -55,7 +55,7 @@ load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
 
-def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
+def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}):
     """Run ruff as an action under Bazel.
 
     Ruff will select the configuration file to use for each source file, as documented here:
@@ -80,6 +80,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
         exit_code: output file to write the exit code.
             If None, then fail the build when ruff exits non-zero.
             See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes
+        env: environment variables - note that ruff accepts many command-line flags via environment as well
     """
     inputs = srcs + config
     outputs = [stdout]
@@ -90,7 +91,9 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
     args.add("check")
     args.add_all(srcs)
 
-    if exit_code:
+    if exit_code == "discard":
+        command = "{ruff} $@ >{stdout} || true"
+    elif exit_code:
         command = "{ruff} $@ >{stdout}; echo $? >" + exit_code.path
         outputs.append(exit_code)
     else:
@@ -102,6 +105,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
         outputs = outputs,
         command = command.format(ruff = executable.path, stdout = stdout.path),
         arguments = [args],
+        env = env,
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Ruff",
         tools = [executable],
@@ -153,19 +157,23 @@ def _ruff_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-
+    report = None
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        patch, output, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code, patch)
+            dummy_successful_lint_action(ctx, output, exit_code, patch)
         else:
-            ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, report, exit_code)
+            ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, output, exit_code)
     else:
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code)
+            dummy_successful_lint_action(ctx, output, exit_code)
         else:
-            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
+            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, output, exit_code, env = {"FORCE_COLOR": "1"})
+
+    if report:
+        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code = "discard")
+
     return [info]
 
 def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"]):
@@ -213,7 +221,6 @@ def _ruff_workaround_20269_impl(rctx):
     # download_and_extract has a bug due to the use of Apache Commons library within Bazel,
     # See https://github.com/bazelbuild/bazel/issues/20269
     # To workaround, we fetch the file and then use the BSD tar on the system to extract it.
-    # TODO: remove for users on Bazel 8 (or maybe sooner if that fix is cherry-picked)
     rctx.download(sha256 = rctx.attr.sha256, url = rctx.attr.url, output = "ruff.tar.gz")
     tar_cmd = [rctx.which("tar"), "xzf", "ruff.tar.gz"]
     if rctx.attr.strip_prefix:

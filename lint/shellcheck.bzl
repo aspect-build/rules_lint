@@ -44,7 +44,9 @@ def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, o
     args.add_all(srcs)
     outputs = [stdout]
 
-    if exit_code:
+    if exit_code == "discard":
+        command = "{shellcheck} $@ >{stdout} || true"
+    elif exit_code:
         command = "{shellcheck} $@ >{stdout}; echo $? >" + exit_code.path
         outputs.append(exit_code)
     else:
@@ -72,21 +74,25 @@ def _shellcheck_aspect_impl(target, ctx):
     files_to_lint = filter_srcs(ctx.rule)
 
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        patch, output, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         discard_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, patch, discard_exit_code)
         else:
             shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, patch, discard_exit_code, ["--format", "diff"])
     else:
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
 
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, report, exit_code)
+        dummy_successful_lint_action(ctx, output, exit_code)
     else:
         # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
         # So we must run a second action to populate the human-readable report.
-        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, report, exit_code)
+        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, output, exit_code, options = ["--color"])
+
+    if report:
+        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, report, exit_code = "discard")
+
     return [info]
 
 def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_library"]):

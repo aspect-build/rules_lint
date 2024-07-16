@@ -53,7 +53,9 @@ def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None):
     args.add_all(srcs)
     args.add(config, format = "--config=%s")
 
-    if exit_code:
+    if exit_code == "discard":
+        command = "{flake8} $@ >{stdout} || true"
+    elif exit_code:
         command = "{flake8} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
@@ -76,14 +78,16 @@ def _flake8_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
 
     files_to_lint = filter_srcs(ctx.rule)
 
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, report, exit_code)
+        dummy_successful_lint_action(ctx, output, exit_code)
     else:
-        flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, report, exit_code)
+        flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, output, exit_code)
+    if report:
+        flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, report, exit_code = "discard")
     return [info]
 
 def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"]):

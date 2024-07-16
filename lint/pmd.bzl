@@ -59,7 +59,9 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
     src_args.use_param_file("%s", use_always = True)
     src_args.add_all(srcs)
 
-    if exit_code:
+    if exit_code == "discard":
+        command = "{PMD} $@ >{stdout} || true"
+    elif exit_code:
         command = "{PMD} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
@@ -83,11 +85,13 @@ def _pmd_aspect_impl(target, ctx):
 
     files_to_lint = filter_srcs(ctx.rule)
 
-    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, report, exit_code)
+        dummy_successful_lint_action(ctx, output, exit_code)
     else:
-        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code)
+        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, output, exit_code)
+    if report:
+        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code = "discard")
     return [info]
 
 def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"]):
