@@ -198,20 +198,20 @@ def _eslint_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-    output = None
+    report = None
 
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, output, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        patch, stdout, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, report, exit_code, patch)
         else:
             eslint_fix(ctx, ctx.executable, files_to_lint, patch, report, exit_code)
     else:
-        output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, output, exit_code)
+            dummy_successful_lint_action(ctx, stdout, exit_code)
         else:
-            eslint_action(ctx, ctx.executable, files_to_lint, output, exit_code, format = "stylish", env = {
+            eslint_action(ctx, ctx.executable, files_to_lint, stdout, exit_code, format = "stylish", env = {
                 # https://www.npmjs.com/package/chalk#chalklevel
                 # Force 256 color support even when a tty isn't detected
                 "FORCE_COLOR": "2",

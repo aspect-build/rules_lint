@@ -85,11 +85,11 @@ def _pmd_aspect_impl(target, ctx):
 
     files_to_lint = filter_srcs(ctx.rule)
 
-    output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, output, exit_code)
+        dummy_successful_lint_action(ctx, stdout, exit_code)
     else:
-        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, output, exit_code)
+        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, stdout, exit_code)
     if report:
         pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code = "discard")
     return [info]

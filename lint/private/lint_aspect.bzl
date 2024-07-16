@@ -55,11 +55,11 @@ def report_files(mnemonic, target, ctx):
         ctx: the aspect context
 
     Returns:
-        4-tuple of output (human-readable stdout), report (machine-parsable), exit code of the tool, and the OutputGroupInfo provider
+        4-tuple of stdout (human-readable), report (machine-parsable), exit code of the tool, and the OutputGroupInfo provider
     """
-    output = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "txt"))
+    stdout = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "txt"))
     report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report"))
-    outs = [output, report]
+    outs = [stdout, report]
     if ctx.attr._options[LintOptionsInfo].fail_on_violation:
         # Fail on violation means the exit code is reported to Bazel as the action result
         exit_code = None
@@ -70,8 +70,8 @@ def report_files(mnemonic, target, ctx):
         exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "exit_code"))
         outs.append(exit_code)
 
-    return output, report, exit_code, OutputGroupInfo(
-        rules_lint_output = depset([output]),
+    return stdout, report, exit_code, OutputGroupInfo(
+        rules_lint_stdout = depset([stdout]),
         rules_lint_report = depset([f for f in [report, exit_code] if f]),
     )
 
@@ -83,9 +83,9 @@ def patch_file(mnemonic, target, ctx):
 # So we need a separate function to return both.
 def patch_and_report_files(*args):
     patch, _ = patch_file(*args)
-    output, report, exit_code, _ = report_files(*args)
-    return patch, output, report, exit_code, OutputGroupInfo(
-        rules_lint_output = depset([output]),
+    stdout, report, exit_code, _ = report_files(*args)
+    return patch, stdout, report, exit_code, OutputGroupInfo(
+        rules_lint_stdout = depset([stdout]),
         rules_lint_report = depset([f for f in [report, exit_code] if f]),
         rules_lint_patch = depset([patch]),
     )

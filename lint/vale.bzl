@@ -128,7 +128,7 @@ def _vale_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
         return []
 
-    output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     styles = None
     if ctx.files._styles:
         if len(ctx.files._styles) != 1:
@@ -136,7 +136,7 @@ def _vale_aspect_impl(target, ctx):
         styles = ctx.files._styles[0]
         if not styles.is_directory:
             fail("Styles should be a directory containing installed styles")
-    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, output, exit_code)
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, stdout, exit_code)
 
     if report:
         vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, exit_code = "discard", format = "line")

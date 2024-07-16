@@ -89,13 +89,13 @@ def _buf_lint_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
     buf_lint_action(
         ctx,
         ctx.toolchains[ctx.attr._buf_toolchain].cli,
         ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
         target,
-        output,
+        stdout,
         exit_code,
     )
     if report:

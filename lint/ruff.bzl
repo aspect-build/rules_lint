@@ -159,17 +159,17 @@ def _ruff_aspect_impl(target, ctx):
     files_to_lint = filter_srcs(ctx.rule)
     report = None
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, output, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        patch, stdout, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, output, exit_code, patch)
+            dummy_successful_lint_action(ctx, stdout, exit_code, patch)
         else:
-            ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, output, exit_code)
+            ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, stdout, exit_code)
     else:
-        output, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, output, exit_code)
+            dummy_successful_lint_action(ctx, stdout, exit_code)
         else:
-            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, output, exit_code, env = {"FORCE_COLOR": "1"})
+            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, stdout, exit_code, env = {"FORCE_COLOR": "1"})
 
     if report:
         ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code = "discard")
