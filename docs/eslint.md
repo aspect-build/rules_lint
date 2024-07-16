@@ -60,7 +60,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 ## eslint_action
 
 <pre>
-eslint_action(<a href="#eslint_action-ctx">ctx</a>, <a href="#eslint_action-executable">executable</a>, <a href="#eslint_action-srcs">srcs</a>, <a href="#eslint_action-stdout">stdout</a>, <a href="#eslint_action-exit_code">exit_code</a>, <a href="#eslint_action-format">format</a>, <a href="#eslint_action-env">env</a>)
+eslint_action(<a href="#eslint_action-ctx">ctx</a>, <a href="#eslint_action-executable">executable</a>, <a href="#eslint_action-srcs">srcs</a>, <a href="#eslint_action-stdout">stdout</a>, <a href="#eslint_action-exit_code">exit_code</a>, <a href="#eslint_action-format">format</a>)
 </pre>
 
 Create a Bazel Action that spawns an eslint process.
@@ -79,8 +79,7 @@ https://eslint.org/docs/latest/use/command-line-interface
 | <a id="eslint_action-srcs"></a>srcs |  list of file objects to lint   |  none |
 | <a id="eslint_action-stdout"></a>stdout |  output file containing the stdout or --output-file of eslint   |  none |
 | <a id="eslint_action-exit_code"></a>exit_code |  output file containing the exit code of eslint. If None, then fail the build when eslint exits non-zero.   |  <code>None</code> |
-| <a id="eslint_action-format"></a>format |  value for eslint <code>--format</code> CLI flag   |  <code>None</code> |
-| <a id="eslint_action-env"></a>env |  additional environment variables   |  <code>{}</code> |
+| <a id="eslint_action-format"></a>format |  value for eslint <code>--format</code> CLI flag   |  <code>"stylish"</code> |
 
 
 <a id="eslint_fix"></a>
@@ -88,7 +87,7 @@ https://eslint.org/docs/latest/use/command-line-interface
 ## eslint_fix
 
 <pre>
-eslint_fix(<a href="#eslint_fix-ctx">ctx</a>, <a href="#eslint_fix-executable">executable</a>, <a href="#eslint_fix-srcs">srcs</a>, <a href="#eslint_fix-patch">patch</a>, <a href="#eslint_fix-stdout">stdout</a>, <a href="#eslint_fix-exit_code">exit_code</a>)
+eslint_fix(<a href="#eslint_fix-ctx">ctx</a>, <a href="#eslint_fix-executable">executable</a>, <a href="#eslint_fix-srcs">srcs</a>, <a href="#eslint_fix-patch">patch</a>, <a href="#eslint_fix-stdout">stdout</a>, <a href="#eslint_fix-exit_code">exit_code</a>, <a href="#eslint_fix-format">format</a>)
 </pre>
 
 Create a Bazel Action that spawns eslint with --fix.
@@ -104,6 +103,7 @@ Create a Bazel Action that spawns eslint with --fix.
 | <a id="eslint_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
 | <a id="eslint_fix-stdout"></a>stdout |  output file containing the stdout or --output-file of eslint   |  none |
 | <a id="eslint_fix-exit_code"></a>exit_code |  output file containing the exit code of eslint   |  none |
+| <a id="eslint_fix-format"></a>format |  value for eslint <code>--format</code> CLI flag   |  <code>"stylish"</code> |
 
 
 <a id="lint_eslint_aspect"></a>

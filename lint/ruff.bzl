@@ -55,7 +55,7 @@ load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
 
-def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}):
+def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
     """Run ruff as an action under Bazel.
 
     Ruff will select the configuration file to use for each source file, as documented here:
@@ -80,7 +80,6 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
         exit_code: output file to write the exit code.
             If None, then fail the build when ruff exits non-zero.
             See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes
-        env: environment variables - note that ruff accepts many command-line flags via environment as well
     """
     inputs = srcs + config
     outputs = [stdout]
@@ -105,7 +104,6 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
         outputs = outputs,
         command = command.format(ruff = executable.path, stdout = stdout.path),
         arguments = [args],
-        env = env,
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Ruff",
         tools = [executable],
@@ -169,7 +167,7 @@ def _ruff_aspect_impl(target, ctx):
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, stdout, exit_code)
         else:
-            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, stdout, exit_code, env = {"FORCE_COLOR": "1"})
+            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, stdout, exit_code)
 
     if report:
         ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code = "discard")

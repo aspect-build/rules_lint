@@ -56,7 +56,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint
 
 _MNEMONIC = "AspectRulesLintKTLint"
 
-def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None, user_args = []):
+def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None):
     """ Runs ktlint as build action in Bazel.
 
     Adapter for wrapping Bazel around
@@ -73,11 +73,9 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
         ruleset_jar: An optional, custom ktlint ruleset jar.
         exit_code: output file to write the exit code.
             If None, then fail the build when ktlint exits non-zero.
-        user_args: additional CLI arguments to the ktlint command
     """
 
     args = ctx.actions.args()
-    args.add_all(user_args)
     inputs = srcs
     outputs = [stdout]
 
@@ -144,7 +142,7 @@ def _ktlint_aspect_impl(target, ctx):
     if len(files_to_lint) == 0:
         dummy_successful_lint_action(ctx, stdout, exit_code)
     else:
-        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code, ["--color"])
+        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
     if report:
         ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code = "discard")
     return [info]

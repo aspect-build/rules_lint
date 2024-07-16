@@ -84,7 +84,7 @@ def _gather_inputs(ctx, srcs, files):
     inputs.extend(js_inputs.to_list())
     return inputs
 
-def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = None, env = {}):
+def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "stylish"):
     """Create a Bazel Action that spawns an eslint process.
 
     Adapter for wrapping Bazel around
@@ -98,10 +98,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = None
         exit_code: output file containing the exit code of eslint.
             If None, then fail the build when eslint exits non-zero.
         format: value for eslint `--format` CLI flag
-        env: additional environment variables
     """
-
-    format = format or ctx.attr._compact_formatter
 
     args = ctx.actions.args()
     args.add("--no-warn-ignored")
@@ -126,9 +123,9 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = None
             tools = [executable._eslint],
             arguments = [args],
             command = executable._eslint.path + " $@ && touch " + stdout.path,
-            env = dict(env, **{
+            env = {
                 "BAZEL_BINDIR": ctx.bin_dir.path,
-            }),
+            },
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with ESLint",
         )
@@ -144,15 +141,15 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = None
             outputs = [stdout, exit_code],
             executable = executable._eslint,
             arguments = [args],
-            env = dict(env, **{
+            env = {
                 "BAZEL_BINDIR": ctx.bin_dir.path,
                 "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
-            }),
+            },
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with ESLint",
         )
 
-def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
+def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code, format = "stylish"):
     """Create a Bazel Action that spawns eslint with --fix.
 
     Args:
@@ -162,6 +159,7 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
         stdout: output file containing the stdout or --output-file of eslint
         exit_code: output file containing the exit code of eslint
+        format: value for eslint `--format` CLI flag
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
@@ -169,7 +167,7 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
         output = patch_cfg,
         content = json.encode({
             "linter": executable._eslint.path,
-            "args": ["--fix", "--format", "../../../" + ctx.file._compact_formatter.path] + [s.short_path for s in srcs],
+            "args": ["--fix", "--format", format] + [s.short_path for s in srcs],
             "env": {"BAZEL_BINDIR": ctx.bin_dir.path},
             "files_to_diff": [s.path for s in srcs],
             "output": patch.path,
@@ -177,7 +175,7 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
     )
 
     ctx.actions.run(
-        inputs = _gather_inputs(ctx, srcs, [ctx.attr._workaround_17660, ctx.attr._compact_formatter]) + [patch_cfg],
+        inputs = _gather_inputs(ctx, srcs, [ctx.attr._workaround_17660]) + [patch_cfg],
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
@@ -203,22 +201,18 @@ def _eslint_aspect_impl(target, ctx):
     if ctx.attr._options[LintOptionsInfo].fix:
         patch, stdout, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code, patch)
+            dummy_successful_lint_action(ctx, stdout, exit_code, patch)
         else:
-            eslint_fix(ctx, ctx.executable, files_to_lint, patch, report, exit_code)
+            eslint_fix(ctx, ctx.executable, files_to_lint, patch, stdout, exit_code)
     else:
         stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
             dummy_successful_lint_action(ctx, stdout, exit_code)
         else:
-            eslint_action(ctx, ctx.executable, files_to_lint, stdout, exit_code, format = "stylish", env = {
-                # https://www.npmjs.com/package/chalk#chalklevel
-                # Force 256 color support even when a tty isn't detected
-                "FORCE_COLOR": "2",
-            })
+            eslint_action(ctx, ctx.executable, files_to_lint, stdout, exit_code)
 
     if report:
-        eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code = "discard")
+        eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code = "discard", format = ctx.attr._compact_formatter)
 
     return [info]
 
