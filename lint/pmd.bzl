@@ -90,8 +90,8 @@ def _pmd_aspect_impl(target, ctx):
         return [info]
 
     # https://github.com/pmd/pmd/blob/master/docs/pages/pmd/userdocs/pmd_report_formats.md
-    format_args = ["--format", "textcolor" if ctx.attr._options[LintOptionsInfo].color else "text"]
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code, format_args)
+    format_options = ["--format", "textcolor" if ctx.attr._options[LintOptionsInfo].color else "text"]
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code, format_options)
     pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 

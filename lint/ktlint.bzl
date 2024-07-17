@@ -143,8 +143,8 @@ def _ktlint_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    color_args = ["--color"] if ctx.attr._options[LintOptionsInfo].color else []
-    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code, color_args)
+    color_options = ["--color"] if ctx.attr._options[LintOptionsInfo].color else []
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code, color_options)
     ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.machine.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code)
     return [info]
 

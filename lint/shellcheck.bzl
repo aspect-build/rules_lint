@@ -79,7 +79,7 @@ def _shellcheck_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    color_args = ["--color"] if ctx.attr._options[LintOptionsInfo].color else []
+    color_options = ["--color"] if ctx.attr._options[LintOptionsInfo].color else []
 
     # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
     # So we must run an action to generate the report separately from an action that writes the human-readable report.
@@ -87,7 +87,7 @@ def _shellcheck_aspect_impl(target, ctx):
         discard_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
         shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"])
 
-    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_args)
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options)
     shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.machine.out, outputs.machine.exit_code)
 
     return [info]

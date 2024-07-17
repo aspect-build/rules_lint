@@ -98,7 +98,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
         exit_code: output file containing the exit code of eslint.
             If None, then fail the build when eslint exits non-zero.
         format: value for eslint `--format` CLI flag
-        env: environment variaables for eslint
+        env: environment variables for eslint
     """
 
     args = ctx.actions.args()

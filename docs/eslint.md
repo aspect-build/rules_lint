@@ -80,7 +80,7 @@ https://eslint.org/docs/latest/use/command-line-interface
 | <a id="eslint_action-stdout"></a>stdout |  output file containing the stdout or --output-file of eslint   |  none |
 | <a id="eslint_action-exit_code"></a>exit_code |  output file containing the exit code of eslint. If None, then fail the build when eslint exits non-zero.   |  <code>None</code> |
 | <a id="eslint_action-format"></a>format |  value for eslint <code>--format</code> CLI flag   |  <code>"stylish"</code> |
-| <a id="eslint_action-env"></a>env |  environment variaables for eslint   |  <code>{}</code> |
+| <a id="eslint_action-env"></a>env |  environment variables for eslint   |  <code>{}</code> |
 
 
 <a id="eslint_fix"></a>
