@@ -59,12 +59,6 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "output
 
 _MNEMONIC = "AspectRulesLintESLint"
 
-# https://www.npmjs.com/package/chalk#chalklevel
-_FORCE_COLOR_ENV = {
-    # Force 256 color support even when a tty isn't detected
-    "FORCE_COLOR": "2",
-}
-
 def _gather_inputs(ctx, srcs, files):
     inputs = copy_files_to_bin_actions(ctx, srcs)
 
@@ -206,13 +200,15 @@ def _eslint_aspect_impl(target, ctx):
     else:
         outputs, info = output_files(_MNEMONIC, target, ctx)
 
-    human_env = _FORCE_COLOR_ENV if ctx.attr._options[LintOptionsInfo].color else {}
+    # https://www.npmjs.com/package/chalk#chalklevel
+    # 2: Force 256 color support even when a tty isn't detected
+    color_env = {"FORCE_COLOR": "2"} if ctx.attr._options[LintOptionsInfo].color else {}
 
     # eslint can produce a patch file at the same time it reports the unpatched violations
     if hasattr(outputs, "patch"):
-        eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, env = human_env)
+        eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, env = color_env)
     else:
-        eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, env = human_env)
+        eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, env = color_env)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     eslint_action(ctx, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code, format = ctx.attr._formatter)

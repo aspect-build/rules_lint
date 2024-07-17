@@ -79,7 +79,7 @@ def _shellcheck_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    color_args = ["--color"] if ctx.attr._options[LintOptionsInfo].color else {}
+    color_args = ["--color"] if ctx.attr._options[LintOptionsInfo].color else []
 
     # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
     # So we must run an action to generate the report separately from an action that writes the human-readable report.
