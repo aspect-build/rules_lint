@@ -39,7 +39,7 @@ clang_tidy = lint_clang_tidy_aspect(
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "noop_lint_action", "output_files", "patch_and_output_files")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 
@@ -238,6 +238,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
     outputs = [stdout]
     env = {}
     env["CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE"] = stdout.path
+
     if exit_code:
         env["CLANG_TIDY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
         outputs.append(exit_code)
@@ -308,19 +309,22 @@ def _clang_tidy_aspect_impl(target, ctx):
 
     files_to_lint = _filter_srcs(ctx.rule)
     compilation_context = target[CcInfo].compilation_context
-
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code, patch)
-        else:
-            clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, patch, report, exit_code)
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
     else:
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code)
-        else:
-            clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code)
+        outputs, info = output_files(_MNEMONIC, target, ctx)
+
+    if len(files_to_lint) == 0:
+        noop_lint_action(ctx, outputs)
+        return [info]
+
+    if hasattr(outputs, "patch"):
+        clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code)
+    else:
+        clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code)
+
+    # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
+    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
 def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):

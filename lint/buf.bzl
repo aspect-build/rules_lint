@@ -12,7 +12,7 @@ buf = buf_lint_aspect(
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintBuf"
 
@@ -87,15 +87,13 @@ def _buf_lint_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-    buf_lint_action(
-        ctx,
-        ctx.toolchains[ctx.attr._buf_toolchain].cli,
-        ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
-        target,
-        report,
-        exit_code,
-    )
+    buf = ctx.toolchains[ctx.attr._buf_toolchain].cli
+    protoc = ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable
+    outputs, info = output_files(_MNEMONIC, target, ctx)
+
+    # TODO(alex): there should be a reason to run the buf action again rather than just copy the files
+    buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code)
+    buf_lint_action(ctx, buf, protoc, target, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
 def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type", rule_kinds = ["proto_library"]):

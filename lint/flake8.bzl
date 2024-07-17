@@ -26,7 +26,7 @@ flake8 = lint_flake8_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintFlake8"
 
@@ -76,14 +76,17 @@ def _flake8_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    outputs, info = output_files(_MNEMONIC, target, ctx)
 
     files_to_lint = filter_srcs(ctx.rule)
 
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, report, exit_code)
-    else:
-        flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, report, exit_code)
+        noop_lint_action(ctx, outputs)
+        return [info]
+
+    # TODO(#332): colorize the human output
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code)
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
 def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"]):

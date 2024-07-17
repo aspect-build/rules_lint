@@ -50,7 +50,7 @@ ruff = lint_ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
@@ -155,17 +155,23 @@ def _ruff_aspect_impl(target, ctx):
     files_to_lint = filter_srcs(ctx.rule)
 
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code, patch)
-        else:
-            ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, report, exit_code)
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
     else:
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code)
-        else:
-            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code)
+        outputs, info = output_files(_MNEMONIC, target, ctx)
+
+    if len(files_to_lint) == 0:
+        noop_lint_action(ctx, outputs)
+        return [info]
+
+    # Ruff can produce a patch at the same time as reporting the unpatched violations
+    if hasattr(outputs, "patch"):
+        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.out, outputs.human.exit_code)
+    else:
+        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.out, outputs.human.exit_code)
+
+    # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
+    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.machine.out, outputs.machine.exit_code)
+
     return [info]
 
 def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"]):
@@ -213,14 +219,13 @@ def _ruff_workaround_20269_impl(rctx):
     # download_and_extract has a bug due to the use of Apache Commons library within Bazel,
     # See https://github.com/bazelbuild/bazel/issues/20269
     # To workaround, we fetch the file and then use the BSD tar on the system to extract it.
-    # TODO: remove for users on Bazel 8 (or maybe sooner if that fix is cherry-picked)
     rctx.download(sha256 = rctx.attr.sha256, url = rctx.attr.url, output = "ruff.tar.gz")
     tar_cmd = [rctx.which("tar"), "xzf", "ruff.tar.gz"]
     if rctx.attr.strip_prefix:
         tar_cmd.append("--strip-components=1")
     result = rctx.execute(tar_cmd)
     if result.return_code:
-        fail("Couldn't extract ruff: \nSTDOUT:\n{}\nSTDERR:\n{}".format(result.stdout, result.stderr))
+        fail("Couldn't extract ruff: \nSTDOUT:\n{}\nSTDERR:\n{}".format(result.out, result.stderr))
     rctx.file("BUILD", rctx.attr.build_file_content)
 
 ruff_workaround_20269 = repository_rule(

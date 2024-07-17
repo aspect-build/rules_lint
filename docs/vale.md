@@ -109,7 +109,7 @@ A factory function to create a linter aspect.
 ## vale_action
 
 <pre>
-vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable">executable</a>, <a href="#vale_action-srcs">srcs</a>, <a href="#vale_action-styles">styles</a>, <a href="#vale_action-config">config</a>, <a href="#vale_action-stdout">stdout</a>, <a href="#vale_action-exit_code">exit_code</a>)
+vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable">executable</a>, <a href="#vale_action-srcs">srcs</a>, <a href="#vale_action-styles">styles</a>, <a href="#vale_action-config">config</a>, <a href="#vale_action-stdout">stdout</a>, <a href="#vale_action-exit_code">exit_code</a>, <a href="#vale_action-output">output</a>)
 </pre>
 
 Run Vale as an action under Bazel.
@@ -126,5 +126,6 @@ Run Vale as an action under Bazel.
 | <a id="vale_action-config"></a>config |  label of the .vale.ini file, see https://vale.sh/docs/vale-cli/structure/#valeini   |  none |
 | <a id="vale_action-stdout"></a>stdout |  output file containing stdout of Vale   |  none |
 | <a id="vale_action-exit_code"></a>exit_code |  output file containing Vale exit code. If None, then fail the build when Vale exits non-zero.   |  <code>None</code> |
+| <a id="vale_action-output"></a>output |  the value for the --output flag   |  <code>"CLI"</code> |
 
 

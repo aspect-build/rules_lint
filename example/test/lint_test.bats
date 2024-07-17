@@ -26,13 +26,19 @@ EOF
 	assert_output --partial "src/hello.kt:1:1: File name 'hello.kt' should conform PascalCase (standard:filename)"
 
 	# ESLint
-	assert_output --partial 'src/file.ts: line 2, col 7, Error - Type string trivially inferred from a string literal, remove type annotation. (@typescript-eslint/no-inferrable-types)'
+	echo <<"EOF" | assert_output --partial
+src/file.ts
+  2:7  error  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
+EOF
 
 	# Buf
 	assert_output --partial 'src/file.proto:1:1:Import "src/unused.proto" is unused.'
 
 	# Vale
-	assert_output --partial "src/README.md:3:47:Google.We:Try to avoid using first-person plural like 'We'."
+	echo <<"EOF" | assert_output --partial
+3:47  warning  Try to avoid using              Google.We
+               first-person plural like 'We'.
+EOF
 }
 
 @test "should produce reports" {
