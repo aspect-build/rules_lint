@@ -82,7 +82,7 @@ def _flake8_aspect_impl(target, ctx):
 
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
-        return []
+        return [info]
 
     # TODO(#332): colorize the human output
     flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.stdout, outputs.human.exit_code)

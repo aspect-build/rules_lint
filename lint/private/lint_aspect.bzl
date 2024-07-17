@@ -126,6 +126,9 @@ def filter_srcs(rule):
 def noop_lint_action(ctx, outputs):
     """Action that creates expected outputs when no files are provided to a lint action.
 
+    This is needed for linters that error when they are given no srcs to inspect.
+    It is also a performance optimisation in other cases.
+
     Args:
         ctx: Bazel Rule or Aspect evaluation context
         outputs: struct returned from output_files or patch_and_output_files
