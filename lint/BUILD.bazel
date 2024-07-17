@@ -108,8 +108,14 @@ js_library(
 )
 
 js_library(
-    name = "eslint.bazel-formatter",
-    srcs = ["eslint.bazel-formatter.js"],
+    name = "eslint.compact-formatter",
+    srcs = ["eslint.compact-formatter.js"],
+    visibility = ["//visibility:public"],
+)
+
+js_library(
+    name = "eslint.stylish-formatter",
+    srcs = ["eslint.stylish-formatter.js"],
     visibility = ["//visibility:public"],
 )
 
