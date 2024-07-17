@@ -48,7 +48,7 @@ EOF
 }
 
 @test "should produce reports" {
-	run $BATS_TEST_DIRNAME/../lint.sh //src:all --@aspect_rules_lint//lint:color=false
+	run $BATS_TEST_DIRNAME/../lint.sh //src:all --no@aspect_rules_lint//lint:color
 	assert_success
 	assert_lints
 
