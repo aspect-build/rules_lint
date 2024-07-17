@@ -56,7 +56,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_l
 
 _MNEMONIC = "AspectRulesLintKTLint"
 
-def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None):
+def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None, options = []):
     """ Runs ktlint as build action in Bazel.
 
     Adapter for wrapping Bazel around
@@ -73,9 +73,11 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
         ruleset_jar: An optional, custom ktlint ruleset jar.
         exit_code: output file to write the exit code.
             If None, then fail the build when ktlint exits non-zero.
+        options: additional command-line arguments to ktlint, see https://pinterest.github.io/ktlint/latest/install/cli/#miscellaneous-flags-and-commands
     """
 
     args = ctx.actions.args()
+    args.add_all(options)
     inputs = srcs
     outputs = [stdout]
 
@@ -141,8 +143,8 @@ def _ktlint_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    # TODO(#332): colorize the human output
-    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code)
+    color_args = ["--color"] if ctx.attr._options[LintOptionsInfo].color else []
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code, color_args)
     ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.machine.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code)
     return [info]
 

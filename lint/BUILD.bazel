@@ -69,8 +69,23 @@ config_setting(
     flag_values = {":fix": "true"},
 )
 
+bool_flag(
+    name = "color",
+    build_setting_default = True,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "color.enabled",
+    flag_values = {":color": "true"},
+)
+
 lint_options(
     name = "options",
+    color = select({
+        ":color.enabled": True,
+        "//conditions:default": False,
+    }),
     debug = select({
         ":debug.enabled": True,
         "//conditions:default": False,

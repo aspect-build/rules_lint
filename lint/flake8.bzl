@@ -30,7 +30,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_l
 
 _MNEMONIC = "AspectRulesLintFlake8"
 
-def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None):
+def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
     """Run flake8 as an action under Bazel.
 
     Based on https://flake8.pycqa.org/en/latest/user/invocation.html
@@ -43,6 +43,7 @@ def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None):
         stdout: output file containing stdout of flake8
         exit_code: output file containing exit code of flake8
             If None, then fail the build when flake8 exits non-zero.
+        options: additional command-line options, see https://flake8.pycqa.org/en/latest/user/options.html
     """
     inputs = srcs + [config]
     outputs = [stdout]
@@ -50,6 +51,7 @@ def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None):
     # Wire command-line options, see
     # https://flake8.pycqa.org/en/latest/user/options.html
     args = ctx.actions.args()
+    args.add_all(options)
     args.add_all(srcs)
     args.add(config, format = "--config=%s")
 
@@ -84,8 +86,8 @@ def _flake8_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    # TODO(#332): colorize the human output
-    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code)
+    color_args = ["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_args)
     flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 

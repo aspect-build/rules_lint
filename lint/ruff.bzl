@@ -55,7 +55,7 @@ load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
 
-def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
+def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}):
     """Run ruff as an action under Bazel.
 
     Ruff will select the configuration file to use for each source file, as documented here:
@@ -80,6 +80,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
         exit_code: output file to write the exit code.
             If None, then fail the build when ruff exits non-zero.
             See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes
+        env: environment variaables for ruff
     """
     inputs = srcs + config
     outputs = [stdout]
@@ -103,11 +104,12 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
         command = command.format(ruff = executable.path, stdout = stdout.path),
         arguments = [args],
         mnemonic = _MNEMONIC,
+        env = env,
         progress_message = "Linting %{label} with Ruff",
         tools = [executable],
     )
 
-def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
+def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code, env = {}):
     """Create a Bazel Action that spawns ruff with --fix.
 
     Args:
@@ -118,6 +120,7 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
         stdout: output file of linter results to generate
         exit_code: output file to write the exit code
+        env: environment variaables for ruff
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
@@ -136,12 +139,12 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code):
         outputs = [patch, exit_code, stdout],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
-        env = {
+        env = dict(env, **{
             "BAZEL_BINDIR": ".",
             "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        },
+        }),
         tools = [executable._ruff],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Ruff",
@@ -153,7 +156,6 @@ def _ruff_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
     else:
@@ -163,11 +165,13 @@ def _ruff_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
+    color_env = {"FORCE_COLOR": "1"} if ctx.attr._options[LintOptionsInfo].color else {}
+
     # Ruff can produce a patch at the same time as reporting the unpatched violations
     if hasattr(outputs, "patch"):
-        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.out, outputs.human.exit_code)
+        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.out, outputs.human.exit_code, env = color_env)
     else:
-        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.out, outputs.human.exit_code)
+        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.out, outputs.human.exit_code, env = color_env)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.machine.out, outputs.machine.exit_code)
