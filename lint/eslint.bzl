@@ -104,8 +104,8 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
     args.add("--no-warn-ignored")
     file_inputs = [ctx.attr._workaround_17660]
 
-    # TODO: enable if debug config, similar to rules_ts
-    # args.add("--debug")
+    if ctx.attr._options[LintOptionsInfo].debug:
+        args.add("--debug")
     if type(format) == "string":
         args.add_all(["--format", format])
     else:
