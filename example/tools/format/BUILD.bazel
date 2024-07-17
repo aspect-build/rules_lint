@@ -16,7 +16,9 @@ prettier.prettier_binary(
     env = {"BAZEL_BINDIR": "."},
     # default log level is "log" which spams on success
     # https://prettier.io/docs/en/cli.html#--log-level
-    fixed_args = ["--log-level=warn"],
+    # NB: prettier 2 names this loglevel, in prettier 3 it's renamed log-level, see
+    # https://prettier.io/blog/2023/07/05/3.0.0.html#cli-1
+    fixed_args = ["--loglevel=warn"],
 )
 
 java_binary(
@@ -58,11 +60,11 @@ format_multirun(
     cc = "@llvm_toolchain_llvm//:bin/clang-format",
     css = ":prettier",
     cuda = "@llvm_toolchain_llvm//:bin/clang-format",
+    # You can use standard gofmt instead of stricter gofumpt:
+    # go = "@go_sdk//:bin/gofmt",
     go = "@aspect_rules_lint//format:gofumpt",
     graphql = ":prettier",
     html = ":prettier",
-    # You can use standard gofmt instead of stricter gofumpt:
-    # go = "@go_sdk//:bin/gofmt",
     java = ":java-format",
     javascript = ":prettier",
     jsonnet = "@aspect_rules_lint//format:jsonnetfmt",

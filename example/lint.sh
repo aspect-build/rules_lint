@@ -24,20 +24,20 @@ filter='.namedSetOfFiles | values | .files[] | select(.name | endswith($ext)) | 
 
 unameOut="$(uname -s)"
 case "${unameOut}" in
-    Linux*)     machine=Linux;;
-    Darwin*)    machine=Mac;;
-    CYGWIN*)    machine=Windows;;
-    MINGW*)     machine=Windows;;
-    MSYS_NT*)   machine=Windows;;
-    *)          machine="UNKNOWN:${unameOut}"
+Linux*) machine=Linux ;;
+Darwin*) machine=Mac ;;
+CYGWIN*) machine=Windows ;;
+MINGW*) machine=Windows ;;
+MSYS_NT*) machine=Windows ;;
+*) machine="UNKNOWN:${unameOut}" ;;
 esac
 
 args=()
 if [ $machine == "Windows" ]; then
-    # avoid missing linters on windows platform
-    args=("--aspects=$(echo //tools/lint:linters.bzl%{flake8,pmd,ruff,vale,clang_tidy} | tr ' ' ',')")
+	# avoid missing linters on windows platform
+	args=("--aspects=$(echo //tools/lint:linters.bzl%{flake8,pmd,ruff,vale,clang_tidy} | tr ' ' ',')")
 else
-    args=("--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale,clang_tidy} | tr ' ' ',')")
+	args=("--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,ktlint,pmd,ruff,shellcheck,vale,clang_tidy} | tr ' ' ',')")
 fi
 
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?

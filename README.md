@@ -22,8 +22,8 @@ Features:
 New tools are being added frequently, so check this page again!
 
 | Language               | Formatter             | Linter(s)        |
-|------------------------| --------------------- |------------------|
-| C / C++                | [clang-format]        | ([#112])         |
+| ---------------------- | --------------------- | ---------------- |
+| C / C++                | [clang-format]        | [clang-tidy]     |
 | Cuda                   | [clang-format]        |                  |
 | CSS, Less, Sass        | [Prettier]            |                  |
 | Go                     | [gofmt] or [gofumpt]  |                  |
@@ -69,7 +69,7 @@ New tools are being added frequently, so check this page again!
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
-[#112]: https://github.com/aspect-build/rules_lint/issues/112
+[clang-tidy]: https://clang.llvm.org/extra/clang-tidy/
 [vale]: https://vale.sh/
 [yamlfmt]: https://github.com/google/yamlfmt
 [rustfmt]: https://rust-lang.github.io/rustfmt
@@ -106,7 +106,7 @@ To format files, run the target you create when you install rules_lint.
 
 We recommend using a Git pre-commit hook to format changed files, and [Aspect Workflows] to provide the check on CI.
 
-[![asciicast](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT.svg)](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT)
+[![asciicast](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3.svg)](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3)
 
 See [Formatting](./docs/formatting.md) for more ways to use the formatter.
 
