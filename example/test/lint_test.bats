@@ -20,7 +20,13 @@ EOF
 	assert_output --partial "src/unused_import.py:13:1: F401 'os' imported but unused"
 
 	# PMD
-	assert_output --partial 'src/Foo.java:9:	FinalizeOverloaded:	Finalize methods should not be overloaded'
+	echo <<"EOF" | assert_output --partial
+* file: src/Foo.java
+    src:  Foo.java:9:9
+    rule: FinalizeOverloaded
+    msg:  Finalize methods should not be overloaded
+    code: protected void finalize(int a) {}
+EOF
 
 	# ktlint
 	assert_output --partial "src/hello.kt:1:1: File name 'hello.kt' should conform PascalCase (standard:filename)"
