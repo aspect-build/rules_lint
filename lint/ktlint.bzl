@@ -52,7 +52,7 @@ If your custom ruleset is a third-party dependency and not a first-party depende
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintKTLint"
 
@@ -138,10 +138,11 @@ def _ktlint_aspect_impl(target, ctx):
     files_to_lint = filter_srcs(ctx.rule)
 
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
-    else:
-        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code)
+        noop_lint_action(ctx, outputs)
+        return [info]
 
+    # TODO(#332): colorize the human output
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code)
     ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.machine.stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code)
     return [info]
 

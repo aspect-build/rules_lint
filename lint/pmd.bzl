@@ -28,7 +28,7 @@ pmd = pmd_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintPMD"
 
@@ -82,13 +82,13 @@ def _pmd_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-
     outputs, info = output_files(_MNEMONIC, target, ctx)
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
-    else:
-        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.stdout, outputs.human.exit_code)
+        noop_lint_action(ctx, outputs)
+        return [info]
 
+    # TODO(#332): colorize the human output
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.stdout, outputs.human.exit_code)
     pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.machine.stdout, outputs.machine.exit_code)
     return [info]
 

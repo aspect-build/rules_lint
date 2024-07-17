@@ -14,7 +14,7 @@ shellcheck = shellcheck_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintShellCheck"
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
@@ -70,24 +70,23 @@ def _shellcheck_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
-        discard_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, outputs.patch, discard_exit_code)
-        else:
-            shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"])
     else:
         outputs, info = output_files(_MNEMONIC, target, ctx)
 
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
-    else:
-        # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
-        # So we must run a second action to populate the human-readable report.
-        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.stdout, outputs.human.exit_code)
+        noop_lint_action(ctx, outputs)
+        return [info]
 
+    # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
+    # So we must run an action to generate the report separately from an action that writes the human-readable report.
+    if hasattr(outputs, "patch"):
+        discard_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
+        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"])
+
+    # TODO(#332): the human action should run with color enabled
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.stdout, outputs.human.exit_code)
     shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.machine.stdout, outputs.machine.exit_code)
 
     return [info]

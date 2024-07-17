@@ -50,7 +50,7 @@ ruff = lint_ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
@@ -156,17 +156,20 @@ def _ruff_aspect_impl(target, ctx):
 
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code, outputs.patch)
-        else:
-            ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
     else:
         outputs, info = output_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
-        else:
-            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.stdout, outputs.human.exit_code)
 
+    if len(files_to_lint) == 0:
+        noop_lint_action(ctx, outputs)
+        return [info]
+
+    # Ruff can produce a patch at the same time as reporting the unpatched violations
+    if hasattr(outputs, "patch"):
+        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
+    else:
+        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.stdout, outputs.human.exit_code)
+
+    # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.machine.stdout, outputs.machine.exit_code)
 
     return [info]

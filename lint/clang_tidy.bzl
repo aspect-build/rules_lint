@@ -39,7 +39,7 @@ clang_tidy = lint_clang_tidy_aspect(
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "output_files", "patch_and_output_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "noop_lint_action", "output_files", "patch_and_output_files")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 
@@ -309,20 +309,21 @@ def _clang_tidy_aspect_impl(target, ctx):
 
     files_to_lint = _filter_srcs(ctx.rule)
     compilation_context = target[CcInfo].compilation_context
-
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code, outputs.patch)
-        else:
-            clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
     else:
         outputs, info = output_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
-        else:
-            clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.stdout, outputs.human.exit_code)
 
+    if len(files_to_lint) == 0:
+        noop_lint_action(ctx, outputs)
+        return [info]
+
+    if hasattr(outputs, "patch"):
+        clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
+    else:
+        clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.stdout, outputs.human.exit_code)
+
+    # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.machine.stdout, outputs.machine.exit_code)
     return [info]
 

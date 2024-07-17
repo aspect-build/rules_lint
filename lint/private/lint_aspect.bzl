@@ -123,32 +123,30 @@ def filter_srcs(rule):
     else:
         return [s for s in rule.files.srcs if s.is_source]
 
-def dummy_successful_lint_action(ctx, stdout, exit_code = None, patch = None):
-    """Dummy action for creating expected outputs when no files are provided to a lint action.
+def noop_lint_action(ctx, outputs):
+    """Action that creates expected outputs when no files are provided to a lint action.
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        stdout: output file that will be empty
-        exit_code: output file containing 0 exit code.
-            If None, continue successfully
-        patch: output file for the patch
-            If None, continue successfully
+        outputs: struct returned from output_files or patch_and_output_files
     """
     inputs = []
-    outputs = [stdout]
+    outputs = [outputs.human.stdout, outputs.human.exit_code, outputs.machine.stdout, outputs.machine.exit_code]
 
-    command = "touch {stdout}".format(stdout = stdout.path)
+    commands = []
+    commands.append("touch {}".format(outputs.human.stdout.path))
+    commands.append("touch {}".format(outputs.machine.stdout.path))
 
-    if exit_code:
-        command += " && echo 0 > {exit_code}".format(exit_code = exit_code.path)
-        outputs.append(exit_code)
+    # NB: if we write JSON machine-readable outputs, then an empty file won't be appropriate
+    commands.append("echo 0 > {}".format(outputs.human.exit_code.path))
+    commands.append("echo 0 > {}".format(outputs.machine.exit_code.path))
 
-    if patch:
-        command += " && touch {patch}".format(patch = patch.path)
-        outputs.append(patch)
+    if hasattr(outputs, "patch"):
+        commands.append("touch {}".format(outputs.patch.path))
+        outputs.append(outputs.patch)
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
-        command = command,
+        command = " && ".join(commands),
     )

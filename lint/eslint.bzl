@@ -55,7 +55,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "output_files", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintESLint"
 
@@ -193,20 +193,18 @@ def _eslint_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code, outputs.patch)
-        else:
-            eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
     else:
         outputs, info = output_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
-        else:
-            eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.stdout, outputs.human.exit_code)
 
+    # eslint can produce a patch file at the same time it reports the unpatched violations
+    if hasattr(outputs, "patch"):
+        eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
+    else:
+        eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.stdout, outputs.human.exit_code)
+
+    # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     eslint_action(ctx, ctx.executable, files_to_lint, outputs.machine.stdout, outputs.machine.exit_code, format = ctx.attr._formatter)
 
     return [info]

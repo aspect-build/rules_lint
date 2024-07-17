@@ -70,7 +70,7 @@ load(":vale_versions.bzl", "VALE_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintVale"
 
-def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None, format = "CLI"):
+def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None, output = "CLI"):
     """Run Vale as an action under Bazel.
 
     Args:
@@ -82,7 +82,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
         stdout: output file containing stdout of Vale
         exit_code: output file containing Vale exit code.
             If None, then fail the build when Vale exits non-zero.
-        format: the value for the --output CLI flag
+        output: the value for the --output flag
     """
     inputs = srcs + [config]
 
@@ -99,7 +99,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
     args = ctx.actions.args()
     args.add_all(srcs)
     args.add_all(["--config", config])
-    args.add_all(["--output", format])
+    args.add_all(["--output", output])
     outputs = [stdout]
 
     if exit_code:
@@ -138,7 +138,7 @@ def _vale_aspect_impl(target, ctx):
             fail("Styles should be a directory containing installed styles")
     vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.stdout, outputs.human.exit_code)
 
-    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.machine.stdout, outputs.machine.exit_code, format = "line")
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.machine.stdout, outputs.machine.exit_code, output = "line")
     return [info]
 
 # There's no "official" markdown_library rule.
