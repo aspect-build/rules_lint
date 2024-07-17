@@ -3,6 +3,7 @@
 LintOptionsInfo = provider(
     doc = "Global options for running linters",
     fields = {
+        "color": "whether ANSI color escape codes are desired in the human-readable stdout",
         "debug": "print additional information for rules_lint developers",
         "fail_on_violation": "whether to honor the exit code of linter tools run as actions",
         "fix": "whether to run linters in their --fix mode. Fixes are collected into patch files.",
@@ -11,6 +12,7 @@ LintOptionsInfo = provider(
 
 def _lint_options_impl(ctx):
     return LintOptionsInfo(
+        color = ctx.attr.color,
         debug = ctx.attr.debug,
         fail_on_violation = ctx.attr.fail_on_violation,
         fix = ctx.attr.fix,
@@ -19,6 +21,7 @@ def _lint_options_impl(ctx):
 lint_options = rule(
     implementation = _lint_options_impl,
     attrs = {
+        "color": attr.bool(),
         "debug": attr.bool(),
         "fix": attr.bool(),
         "fail_on_violation": attr.bool(),

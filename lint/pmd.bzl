@@ -32,7 +32,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_l
 
 _MNEMONIC = "AspectRulesLintPMD"
 
-def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
+def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, options = []):
     """Run PMD as an action under Bazel.
 
     Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running-pmd-via-command-line
@@ -45,6 +45,7 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
         stdout: output file to generate
         exit_code: output file to write the exit code.
             If None, then fail the build when PMD exits non-zero.
+        options: additional command-line options, see https://pmd.github.io/pmd/pmd_userdocs_cli_reference.html
     """
     inputs = srcs + rulesets
     outputs = [stdout]
@@ -52,6 +53,7 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
     # Wire command-line options, see
     # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
     args = ctx.actions.args()
+    args.add_all(options)
     args.add("--rulesets")
     args.add_joined(rulesets, join_with = ",")
 
@@ -87,8 +89,9 @@ def _pmd_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    # TODO(#332): colorize the human output
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code)
+    # https://github.com/pmd/pmd/blob/master/docs/pages/pmd/userdocs/pmd_report_formats.md
+    format_options = ["--format", "textcolor" if ctx.attr._options[LintOptionsInfo].color else "text"]
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code, format_options)
     pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 

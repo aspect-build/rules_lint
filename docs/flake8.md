@@ -33,7 +33,7 @@ flake8 = lint_flake8_aspect(
 ## flake8_action
 
 <pre>
-flake8_action(<a href="#flake8_action-ctx">ctx</a>, <a href="#flake8_action-executable">executable</a>, <a href="#flake8_action-srcs">srcs</a>, <a href="#flake8_action-config">config</a>, <a href="#flake8_action-stdout">stdout</a>, <a href="#flake8_action-exit_code">exit_code</a>)
+flake8_action(<a href="#flake8_action-ctx">ctx</a>, <a href="#flake8_action-executable">executable</a>, <a href="#flake8_action-srcs">srcs</a>, <a href="#flake8_action-config">config</a>, <a href="#flake8_action-stdout">stdout</a>, <a href="#flake8_action-exit_code">exit_code</a>, <a href="#flake8_action-options">options</a>)
 </pre>
 
 Run flake8 as an action under Bazel.
@@ -52,6 +52,7 @@ Based on https://flake8.pycqa.org/en/latest/user/invocation.html
 | <a id="flake8_action-config"></a>config |  label of the flake8 config file (setup.cfg, tox.ini, or .flake8)   |  none |
 | <a id="flake8_action-stdout"></a>stdout |  output file containing stdout of flake8   |  none |
 | <a id="flake8_action-exit_code"></a>exit_code |  output file containing exit code of flake8 If None, then fail the build when flake8 exits non-zero.   |  <code>None</code> |
+| <a id="flake8_action-options"></a>options |  additional command-line options, see https://flake8.pycqa.org/en/latest/user/options.html   |  <code>[]</code> |
 
 
 <a id="lint_flake8_aspect"></a>

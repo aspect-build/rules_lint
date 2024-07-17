@@ -80,7 +80,7 @@ Attrs:
 ## pmd_action
 
 <pre>
-pmd_action(<a href="#pmd_action-ctx">ctx</a>, <a href="#pmd_action-executable">executable</a>, <a href="#pmd_action-srcs">srcs</a>, <a href="#pmd_action-rulesets">rulesets</a>, <a href="#pmd_action-stdout">stdout</a>, <a href="#pmd_action-exit_code">exit_code</a>)
+pmd_action(<a href="#pmd_action-ctx">ctx</a>, <a href="#pmd_action-executable">executable</a>, <a href="#pmd_action-srcs">srcs</a>, <a href="#pmd_action-rulesets">rulesets</a>, <a href="#pmd_action-stdout">stdout</a>, <a href="#pmd_action-exit_code">exit_code</a>, <a href="#pmd_action-options">options</a>)
 </pre>
 
 Run PMD as an action under Bazel.
@@ -99,5 +99,6 @@ Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running
 | <a id="pmd_action-rulesets"></a>rulesets |  list of labels of the PMD ruleset files   |  none |
 | <a id="pmd_action-stdout"></a>stdout |  output file to generate   |  none |
 | <a id="pmd_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when PMD exits non-zero.   |  <code>None</code> |
+| <a id="pmd_action-options"></a>options |  additional command-line options, see https://pmd.github.io/pmd/pmd_userdocs_cli_reference.html   |  <code>[]</code> |
 
 
