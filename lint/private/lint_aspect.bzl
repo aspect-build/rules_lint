@@ -130,9 +130,6 @@ def noop_lint_action(ctx, outputs):
         ctx: Bazel Rule or Aspect evaluation context
         outputs: struct returned from output_files or patch_and_output_files
     """
-    inputs = []
-    outputs = [outputs.human.stdout, outputs.human.exit_code, outputs.machine.stdout, outputs.machine.exit_code]
-
     commands = []
     commands.append("touch {}".format(outputs.human.stdout.path))
     commands.append("touch {}".format(outputs.machine.stdout.path))
@@ -141,12 +138,13 @@ def noop_lint_action(ctx, outputs):
     commands.append("echo 0 > {}".format(outputs.human.exit_code.path))
     commands.append("echo 0 > {}".format(outputs.machine.exit_code.path))
 
+    outs = [outputs.human.stdout, outputs.human.exit_code, outputs.machine.stdout, outputs.machine.exit_code]
     if hasattr(outputs, "patch"):
         commands.append("touch {}".format(outputs.patch.path))
-        outputs.append(outputs.patch)
+        outs.append(outputs.patch)
 
     ctx.actions.run_shell(
-        inputs = inputs,
-        outputs = outputs,
+        inputs = [],
+        outputs = outs,
         command = " && ".join(commands),
     )
