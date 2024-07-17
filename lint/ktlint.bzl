@@ -52,7 +52,7 @@ If your custom ruleset is a third-party dependency and not a first-party depende
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintKTLint"
 
@@ -108,9 +108,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
     # This makes hermetic java available to ktlint executable
     command = "export PATH=$PATH:$JAVA_HOME/bin\n"
 
-    if exit_code == "discard":
-        command += "{ktlint} $@ >{stdout} || true"
-    elif exit_code:
+    if exit_code:
         # Don't fail ktlint and just report the violations
         command += "{ktlint} $@ >{stdout}; echo $? >" + exit_code.path
         outputs.append(exit_code)
@@ -132,7 +130,7 @@ def _ktlint_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    outputs, info = output_files(_MNEMONIC, target, ctx)
     ruleset_jar = None
     if hasattr(ctx.attr, "_ruleset_jar"):
         ruleset_jar = ctx.file._ruleset_jar
@@ -140,12 +138,11 @@ def _ktlint_aspect_impl(target, ctx):
     files_to_lint = filter_srcs(ctx.rule)
 
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, stdout, exit_code)
+        dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
     else:
-        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code)
+        ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code)
 
-    # Run again for machine-readable output, only if rules_lint_report output_group is requested
-    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, exit_code = "discard")
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.machine.stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code)
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, rule_kinds = ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]):

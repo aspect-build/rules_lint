@@ -12,7 +12,7 @@ buf = buf_lint_aspect(
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintBuf"
 
@@ -60,9 +60,7 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
     args.add_all(sources)
     outputs = [stderr]
 
-    if exit_code == "discard":
-        command = "{protoc} $@ 2>{stderr} || true"
-    elif exit_code:
+    if exit_code:
         command = "{protoc} $@ 2>{stderr}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
@@ -89,24 +87,23 @@ def _buf_lint_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    outputs, info = output_files(_MNEMONIC, target, ctx)
     buf_lint_action(
         ctx,
         ctx.toolchains[ctx.attr._buf_toolchain].cli,
         ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
         target,
-        stdout,
-        exit_code,
+        outputs.human.stdout,
+        outputs.human.exit_code,
     )
 
-    # Run again for machine-readable output, only if rules_lint_report output_group is requested
     buf_lint_action(
         ctx,
         ctx.toolchains[ctx.attr._buf_toolchain].cli,
         ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
         target,
-        report,
-        exit_code = "discard",
+        outputs.machine.stdout,
+        outputs.machine.exit_code,
     )
     return [info]
 

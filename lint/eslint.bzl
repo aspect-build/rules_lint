@@ -55,7 +55,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "discard_exit_code", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "output_files", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintESLint"
 
@@ -193,23 +193,21 @@ def _eslint_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-    report = None
 
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, stdout, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, stdout, exit_code, patch)
+            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code, outputs.patch)
         else:
-            eslint_fix(ctx, ctx.executable, files_to_lint, patch, stdout, exit_code)
+            eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
     else:
-        stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        outputs, info = output_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, stdout, exit_code)
+            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
         else:
-            eslint_action(ctx, ctx.executable, files_to_lint, stdout, exit_code)
+            eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.stdout, outputs.human.exit_code)
 
-    # Run again for machine-readable output, only if rules_lint_report output_group is requested
-    eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code = discard_exit_code(_MNEMONIC, target, ctx), format = ctx.attr._formatter)
+    eslint_action(ctx, ctx.executable, files_to_lint, outputs.machine.stdout, outputs.machine.exit_code, format = ctx.attr._formatter)
 
     return [info]
 

@@ -50,7 +50,7 @@ ruff = lint_ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "output_files", "patch_and_output_files", "should_visit")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
@@ -90,9 +90,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None):
     args.add("check")
     args.add_all(srcs)
 
-    if exit_code == "discard":
-        command = "{ruff} $@ >{stdout} || true"
-    elif exit_code:
+    if exit_code:
         command = "{ruff} $@ >{stdout}; echo $? >" + exit_code.path
         outputs.append(exit_code)
     else:
@@ -155,22 +153,21 @@ def _ruff_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-    report = None
-    if ctx.attr._options[LintOptionsInfo].fix:
-        patch, stdout, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, stdout, exit_code, patch)
-        else:
-            ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, patch, stdout, exit_code)
-    else:
-        stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, stdout, exit_code)
-        else:
-            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, stdout, exit_code)
 
-    # Run again for machine-readable output, only if rules_lint_report output_group is requested
-    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, report, exit_code = "discard")
+    if ctx.attr._options[LintOptionsInfo].fix:
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
+        if len(files_to_lint) == 0:
+            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code, outputs.patch)
+        else:
+            ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
+    else:
+        outputs, info = output_files(_MNEMONIC, target, ctx)
+        if len(files_to_lint) == 0:
+            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
+        else:
+            ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.stdout, outputs.human.exit_code)
+
+    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.machine.stdout, outputs.machine.exit_code)
 
     return [info]
 

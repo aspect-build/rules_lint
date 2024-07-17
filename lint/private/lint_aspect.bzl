@@ -46,14 +46,7 @@ def should_visit(rule, allow_kinds, allow_filegroup_tags = []):
 
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
-def discard_exit_code(mnemonic, target, ctx):
-    """Utility to declare an output file which will never be read.
-
-    Needed as a workaround for js_binary which accepts an output file for the exit code,
-    allowing it to return 0 even if the spawned binary exits non-zero."""
-    return ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "exit_code.discard"))
-
-def report_files(mnemonic, target, ctx):
+def output_files(mnemonic, target, ctx):
     """Declare linter output files.
 
     Args:
@@ -62,24 +55,41 @@ def report_files(mnemonic, target, ctx):
         ctx: the aspect context
 
     Returns:
-        4-tuple of stdout (human-readable), report (machine-parsable), exit code of the tool, and the OutputGroupInfo provider
+        tuple of struct() of output files, and the OutputGroupInfo provider that the rule should return
     """
-    stdout = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "txt"))
-    report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report"))
-    outs = [stdout, report]
+    human_out = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "txt"))
+
+    # NB: named ".report" as there are existing callers depending on that
+    machine_out = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report"))
+
     if ctx.attr._options[LintOptionsInfo].fail_on_violation:
         # Fail on violation means the exit code is reported to Bazel as the action result
-        exit_code = None
+        human_exit_code = None
+        machine_exit_code = None
     else:
-        # The exit code should instead be provided as an action output so the build succeeds.
+        # The exit codes should instead be provided as action outputs so the build succeeds.
         # Downstream tooling like `aspect lint` will be responsible for reading the exit codes
         # and interpreting them.
-        exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "exit_code"))
-        outs.append(exit_code)
+        human_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "txt.exit_code"))
+        machine_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report.exit_code"))
 
-    return stdout, report, exit_code, OutputGroupInfo(
-        rules_lint_stdout = depset([stdout]),
-        rules_lint_report = depset([f for f in [report, exit_code] if f]),
+    human_outputs = [f for f in [human_out, human_exit_code] if f]
+    machine_outputs = [f for f in [machine_out, machine_exit_code] if f]
+    return struct(
+        human = struct(
+            stdout = human_out,
+            exit_code = human_exit_code,
+        ),
+        machine = struct(
+            stdout = machine_out,
+            exit_code = machine_exit_code,
+        ),
+    ), OutputGroupInfo(
+        rules_lint_human = depset(human_outputs),
+        rules_lint_machine = depset(machine_outputs),
+        # Legacy name used by existing callers.
+        # TODO(2.0): remove
+        rules_lint_report = depset(machine_outputs),
     )
 
 def patch_file(mnemonic, target, ctx):
@@ -88,13 +98,23 @@ def patch_file(mnemonic, target, ctx):
 
 # If we return multiple OutputGroupInfo from a rule implementation, only one will get used.
 # So we need a separate function to return both.
-def patch_and_report_files(*args):
+# buildifier: disable=function-docstring
+def patch_and_output_files(*args):
     patch, _ = patch_file(*args)
-    stdout, report, exit_code, _ = report_files(*args)
-    return patch, stdout, report, exit_code, OutputGroupInfo(
-        rules_lint_stdout = depset([stdout]),
-        rules_lint_report = depset([f for f in [report, exit_code] if f]),
+    outputs, _ = output_files(*args)
+    human_outputs = [outputs.human.stdout, outputs.human.exit_code]
+    machine_outputs = [outputs.machine.stdout, outputs.machine.exit_code]
+    return struct(
+        human = outputs.human,
+        machine = outputs.machine,
+        patch = patch,
+    ), OutputGroupInfo(
+        rules_lint_human = depset(human_outputs),
+        rules_lint_machine = depset(machine_outputs),
         rules_lint_patch = depset([patch]),
+        # Legacy name used by existing callers.
+        # TODO(2.0): remove
+        rules_lint_report = depset(machine_outputs),
     )
 
 def filter_srcs(rule):

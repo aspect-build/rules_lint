@@ -39,7 +39,7 @@ clang_tidy = lint_clang_tidy_aspect(
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "discard_exit_code", "dummy_successful_lint_action", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "output_files", "patch_and_output_files")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 
@@ -311,20 +311,19 @@ def _clang_tidy_aspect_impl(target, ctx):
     compilation_context = target[CcInfo].compilation_context
 
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, stdout, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, stdout, exit_code, patch)
+            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code, outputs.patch)
         else:
-            clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, patch, stdout, exit_code)
+            clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
     else:
-        stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        outputs, info = output_files(_MNEMONIC, target, ctx)
         if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, stdout, exit_code)
+            dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
         else:
-            clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, stdout, exit_code)
+            clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.stdout, outputs.human.exit_code)
 
-    # Run again for machine-readable output, only if rules_lint_report output_group is requested
-    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, report, exit_code = discard_exit_code(_MNEMONIC, target, ctx))
+    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.machine.stdout, outputs.machine.exit_code)
     return [info]
 
 def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):

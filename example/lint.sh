@@ -46,7 +46,7 @@ args+=(
 	# See https://github.com/aspect-build/rules_ts/pull/574#issuecomment-2073632879
 	"--norun_validations"
 	"--build_event_json_file=$buildevents"
-	"--output_groups=rules_lint_stdout"
+	"--output_groups=rules_lint_human"
 	"--remote_download_regex='.*AspectRulesLint.*'"
 )
 

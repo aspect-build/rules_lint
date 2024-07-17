@@ -64,7 +64,7 @@ vale = vale_aspect(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "output_files", "should_visit")
 load(":vale_library.bzl", "fetch_styles")
 load(":vale_versions.bzl", "VALE_VERSIONS")
 
@@ -102,9 +102,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
     args.add_all(["--output", format])
     outputs = [stdout]
 
-    if exit_code == "discard":
-        command = "{vale} $@ >{stdout} || true"
-    elif exit_code:
+    if exit_code:
         command = "{vale} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
@@ -130,7 +128,7 @@ def _vale_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
         return []
 
-    stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    outputs, info = output_files(_MNEMONIC, target, ctx)
     styles = None
     if ctx.files._styles:
         if len(ctx.files._styles) != 1:
@@ -138,10 +136,9 @@ def _vale_aspect_impl(target, ctx):
         styles = ctx.files._styles[0]
         if not styles.is_directory:
             fail("Styles should be a directory containing installed styles")
-    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, stdout, exit_code)
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.stdout, outputs.human.exit_code)
 
-    # Run again for machine-readable output, only if rules_lint_report output_group is requested
-    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, exit_code = "discard", format = "line")
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.machine.stdout, outputs.machine.exit_code, format = "line")
     return [info]
 
 # There's no "official" markdown_library rule.

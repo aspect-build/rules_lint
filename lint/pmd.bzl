@@ -28,7 +28,7 @@ pmd = pmd_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintPMD"
 
@@ -59,9 +59,7 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
     src_args.use_param_file("%s", use_always = True)
     src_args.add_all(srcs)
 
-    if exit_code == "discard":
-        command = "{PMD} $@ >{stdout} || true"
-    elif exit_code:
+    if exit_code:
         command = "{PMD} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
@@ -85,14 +83,13 @@ def _pmd_aspect_impl(target, ctx):
 
     files_to_lint = filter_srcs(ctx.rule)
 
-    stdout, report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    outputs, info = output_files(_MNEMONIC, target, ctx)
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, stdout, exit_code)
+        dummy_successful_lint_action(ctx, outputs.human.stdout, outputs.human.exit_code)
     else:
-        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, stdout, exit_code)
+        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.stdout, outputs.human.exit_code)
 
-    # Run again for machine-readable output, only if rules_lint_report output_group is requested
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code = "discard")
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.machine.stdout, outputs.machine.exit_code)
     return [info]
 
 def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"]):
