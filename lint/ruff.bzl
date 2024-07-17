@@ -165,12 +165,12 @@ def _ruff_aspect_impl(target, ctx):
 
     # Ruff can produce a patch at the same time as reporting the unpatched violations
     if hasattr(outputs, "patch"):
-        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
+        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.out, outputs.human.exit_code)
     else:
-        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.stdout, outputs.human.exit_code)
+        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.out, outputs.human.exit_code)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.machine.stdout, outputs.machine.exit_code)
+    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.machine.out, outputs.machine.exit_code)
 
     return [info]
 
@@ -225,7 +225,7 @@ def _ruff_workaround_20269_impl(rctx):
         tar_cmd.append("--strip-components=1")
     result = rctx.execute(tar_cmd)
     if result.return_code:
-        fail("Couldn't extract ruff: \nSTDOUT:\n{}\nSTDERR:\n{}".format(result.stdout, result.stderr))
+        fail("Couldn't extract ruff: \nSTDOUT:\n{}\nSTDERR:\n{}".format(result.out, result.stderr))
     rctx.file("BUILD", rctx.attr.build_file_content)
 
 ruff_workaround_20269 = repository_rule(

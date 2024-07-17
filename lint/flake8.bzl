@@ -85,8 +85,8 @@ def _flake8_aspect_impl(target, ctx):
         return [info]
 
     # TODO(#332): colorize the human output
-    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.stdout, outputs.human.exit_code)
-    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.machine.stdout, outputs.machine.exit_code)
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code)
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
 def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"]):

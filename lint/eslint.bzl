@@ -200,12 +200,12 @@ def _eslint_aspect_impl(target, ctx):
 
     # eslint can produce a patch file at the same time it reports the unpatched violations
     if hasattr(outputs, "patch"):
-        eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
+        eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code)
     else:
-        eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.stdout, outputs.human.exit_code)
+        eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    eslint_action(ctx, ctx.executable, files_to_lint, outputs.machine.stdout, outputs.machine.exit_code, format = ctx.attr._formatter)
+    eslint_action(ctx, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code, format = ctx.attr._formatter)
 
     return [info]
 

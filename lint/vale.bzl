@@ -136,9 +136,9 @@ def _vale_aspect_impl(target, ctx):
         styles = ctx.files._styles[0]
         if not styles.is_directory:
             fail("Styles should be a directory containing installed styles")
-    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.stdout, outputs.human.exit_code)
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.out, outputs.human.exit_code)
 
-    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.machine.stdout, outputs.machine.exit_code, output = "line")
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.machine.out, outputs.machine.exit_code, output = "line")
     return [info]
 
 # There's no "official" markdown_library rule.

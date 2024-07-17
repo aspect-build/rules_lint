@@ -319,12 +319,12 @@ def _clang_tidy_aspect_impl(target, ctx):
         return [info]
 
     if hasattr(outputs, "patch"):
-        clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, outputs.patch, outputs.human.stdout, outputs.human.exit_code)
+        clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code)
     else:
-        clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.stdout, outputs.human.exit_code)
+        clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.machine.stdout, outputs.machine.exit_code)
+    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
 def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):

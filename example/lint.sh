@@ -83,9 +83,9 @@ bazel build ${args[@]} $@
 # TODO: Maybe this could be hermetic with bazel run @aspect_bazel_lib//tools:jq or sth
 if [ $machine == "Windows" ]; then
     # jq on windows outputs CRLF which breaks this script. https://github.com/jqlang/jq/issues/92
-    valid_reports=$(jq --arg ext .txt --raw-output "$filter" "$buildevents" | tr -d '\r')
+    valid_reports=$(jq --arg ext .out --raw-output "$filter" "$buildevents" | tr -d '\r')
 else
-    valid_reports=$(jq --arg ext .txt --raw-output "$filter" "$buildevents")
+    valid_reports=$(jq --arg ext .out --raw-output "$filter" "$buildevents")
 fi
 
 # Show the results.

@@ -42,7 +42,7 @@ def _write_assert(ctx, files):
     output = None
     exit_code = None
     for f in files.to_list():
-        if f.path.endswith(".txt"):
+        if f.path.endswith(".out"):
             output = f
         elif f.path.endswith(".exit_code"):
             exit_code = f

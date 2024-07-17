@@ -142,8 +142,8 @@ def _ktlint_aspect_impl(target, ctx):
         return [info]
 
     # TODO(#332): colorize the human output
-    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code)
-    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.machine.stdout, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code)
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code)
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.machine.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code)
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, rule_kinds = ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]):

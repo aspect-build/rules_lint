@@ -88,8 +88,8 @@ def _pmd_aspect_impl(target, ctx):
         return [info]
 
     # TODO(#332): colorize the human output
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.stdout, outputs.human.exit_code)
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.machine.stdout, outputs.machine.exit_code)
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code)
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
 def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"]):

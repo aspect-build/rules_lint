@@ -91,8 +91,9 @@ def _buf_lint_aspect_impl(target, ctx):
     protoc = ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable
     outputs, info = output_files(_MNEMONIC, target, ctx)
 
-    buf_lint_action(ctx, buf, protoc, target, outputs.human.stdout, outputs.human.exit_code)
-    buf_lint_action(ctx, buf, protoc, target, outputs.machine.stdout, outputs.machine.exit_code)
+    # TODO(alex): there should be a reason to run the buf action again rather than just copy the files
+    buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code)
+    buf_lint_action(ctx, buf, protoc, target, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
 def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type", rule_kinds = ["proto_library"]):

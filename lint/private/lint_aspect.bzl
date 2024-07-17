@@ -57,7 +57,7 @@ def output_files(mnemonic, target, ctx):
     Returns:
         tuple of struct() of output files, and the OutputGroupInfo provider that the rule should return
     """
-    human_out = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "txt"))
+    human_out = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "out"))
 
     # NB: named ".report" as there are existing callers depending on that
     machine_out = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report"))
@@ -70,18 +70,18 @@ def output_files(mnemonic, target, ctx):
         # The exit codes should instead be provided as action outputs so the build succeeds.
         # Downstream tooling like `aspect lint` will be responsible for reading the exit codes
         # and interpreting them.
-        human_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "txt.exit_code"))
+        human_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "out.exit_code"))
         machine_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report.exit_code"))
 
     human_outputs = [f for f in [human_out, human_exit_code] if f]
     machine_outputs = [f for f in [machine_out, machine_exit_code] if f]
     return struct(
         human = struct(
-            stdout = human_out,
+            out = human_out,
             exit_code = human_exit_code,
         ),
         machine = struct(
-            stdout = machine_out,
+            out = machine_out,
             exit_code = machine_exit_code,
         ),
     ), OutputGroupInfo(
@@ -102,8 +102,8 @@ def patch_file(mnemonic, target, ctx):
 def patch_and_output_files(*args):
     patch, _ = patch_file(*args)
     outputs, _ = output_files(*args)
-    human_outputs = [outputs.human.stdout, outputs.human.exit_code]
-    machine_outputs = [outputs.machine.stdout, outputs.machine.exit_code]
+    human_outputs = [outputs.human.out, outputs.human.exit_code]
+    machine_outputs = [outputs.machine.out, outputs.machine.exit_code]
     return struct(
         human = outputs.human,
         machine = outputs.machine,
@@ -134,14 +134,14 @@ def noop_lint_action(ctx, outputs):
         outputs: struct returned from output_files or patch_and_output_files
     """
     commands = []
-    commands.append("touch {}".format(outputs.human.stdout.path))
-    commands.append("touch {}".format(outputs.machine.stdout.path))
+    commands.append("touch {}".format(outputs.human.out.path))
+    commands.append("touch {}".format(outputs.machine.out.path))
 
     # NB: if we write JSON machine-readable outputs, then an empty file won't be appropriate
     commands.append("echo 0 > {}".format(outputs.human.exit_code.path))
     commands.append("echo 0 > {}".format(outputs.machine.exit_code.path))
 
-    outs = [outputs.human.stdout, outputs.human.exit_code, outputs.machine.stdout, outputs.machine.exit_code]
+    outs = [outputs.human.out, outputs.human.exit_code, outputs.machine.out, outputs.machine.exit_code]
     if hasattr(outputs, "patch"):
         commands.append("touch {}".format(outputs.patch.path))
         outs.append(outputs.patch)

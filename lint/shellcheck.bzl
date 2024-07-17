@@ -86,8 +86,8 @@ def _shellcheck_aspect_impl(target, ctx):
         shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"])
 
     # TODO(#332): the human action should run with color enabled
-    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.stdout, outputs.human.exit_code)
-    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.machine.stdout, outputs.machine.exit_code)
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code)
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.machine.out, outputs.machine.exit_code)
 
     return [info]
 
