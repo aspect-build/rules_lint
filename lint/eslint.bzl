@@ -162,11 +162,21 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code, format = "stylis
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
+    file_inputs = [ctx.attr._workaround_17660]
+    args = ["--fix"]
+
+    if type(format) == "string":
+        args.extend(["--format", format])
+    else:
+        args.extend(["--format", "../../../" + format.files.to_list()[0].path])
+        file_inputs.append(format)
+    args.extend([s.short_path for s in srcs])
+
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
             "linter": executable._eslint.path,
-            "args": ["--fix", "--format", format] + [s.short_path for s in srcs],
+            "args": args,
             "env": dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
             "files_to_diff": [s.path for s in srcs],
             "output": patch.path,
@@ -174,7 +184,7 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code, format = "stylis
     )
 
     ctx.actions.run(
-        inputs = _gather_inputs(ctx, srcs, [ctx.attr._workaround_17660]) + [patch_cfg],
+        inputs = _gather_inputs(ctx, srcs, file_inputs) + [patch_cfg],
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
@@ -206,12 +216,12 @@ def _eslint_aspect_impl(target, ctx):
 
     # eslint can produce a patch file at the same time it reports the unpatched violations
     if hasattr(outputs, "patch"):
-        eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, env = color_env)
+        eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, format = ctx.attr._stylish_formatter, env = color_env)
     else:
-        eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, env = color_env)
+        eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, format = ctx.attr._stylish_formatter, env = color_env)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    eslint_action(ctx, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code, format = ctx.attr._formatter)
+    eslint_action(ctx, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code, format = ctx.attr._compact_formatter)
 
     return [info]
 
@@ -258,8 +268,13 @@ def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project"
                 allow_single_file = True,
                 cfg = "exec",
             ),
-            "_formatter": attr.label(
-                default = "@aspect_rules_lint//lint:eslint.bazel-formatter",
+            "_compact_formatter": attr.label(
+                default = "@aspect_rules_lint//lint:eslint.compact-formatter",
+                allow_single_file = True,
+                cfg = "exec",
+            ),
+            "_stylish_formatter": attr.label(
+                default = "@aspect_rules_lint//lint:eslint.stylish-formatter",
                 allow_single_file = True,
                 cfg = "exec",
             ),
