@@ -29,8 +29,7 @@ EOF
 EOF
 
 	# ktlint
-	# FIXME: This fails with INFO com.pinterest.ktlint.cli.internal.KtlintCommandLine -- Enable default patterns [**/*.kt, **/*.kts]
-	# assert_output --partial "src/hello.kt:1:1: File name 'hello.kt' should conform PascalCase (standard:filename)"
+	assert_output --partial "src/hello.kt:1:1: File name 'hello.kt' should conform PascalCase (standard:filename)"
 
 	# ESLint
 	echo <<"EOF" | assert_output --partial
