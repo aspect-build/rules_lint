@@ -1,7 +1,7 @@
-query
-{
-  world(greeting:
-  "hello") {
-    ... on Hello { salutation }
+query {
+  world(greeting: "hello") {
+    ... on Hello {
+      salutation
+    }
   }
 }
