@@ -18,11 +18,22 @@ filegroup(
 )
 
 ts_project(
+    name = "ts_dep",
+    srcs = ["file-dep.ts"],
+    declaration = True,
+    transpiler = "tsc",
+    deps = [],
+)
+
+ts_project(
     name = "ts",
     srcs = ["file.ts"],
     declaration = True,
     transpiler = "tsc",
-    deps = ["//:node_modules/moment"],
+    deps = [
+        ":ts_dep",
+        "//:node_modules/dayjs",
+    ],
 )
 
 proto_library(
