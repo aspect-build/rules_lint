@@ -37,9 +37,9 @@ EOF
 src/file.ts
   2:7  error  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
 EOF
-  # If type declarations are missing, the following errors will be reported
-  refute_output --partial '@typescript-eslint/no-unsafe-call'
-  refute_output --partial '@typescript-eslint/no-unsafe-member-access'
+	# If type declarations are missing, the following errors will be reported
+	refute_output --partial '@typescript-eslint/no-unsafe-call'
+	refute_output --partial '@typescript-eslint/no-unsafe-member-access'
 
 	# Buf
 	assert_output --partial 'src/file.proto:1:1:Import "src/unused.proto" is unused.'
