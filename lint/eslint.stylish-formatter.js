@@ -17,10 +17,13 @@
 // That means we can grab the path of the eslint entry point, which is beneath its node modules tree.
 const eslintEntry = process.argv[1];
 // Walk up the tree to the location where eslint normally roots the searchPath of its require() calls
-const searchPath = eslintEntry.substring(
-  0,
-  eslintEntry.length - "/node_modules/eslint/bin/eslint.js".length
-);
+const idx = eslintEntry.lastIndexOf("node_modules");
+if (idx < 0) {
+  throw new Error(
+    "node_modules not found in eslint entry point " + eslintEntry
+  );
+}
+const searchPath = eslintEntry.substring(0, idx);
 // Modify the upstream code to pass through an explicit `require.resolve` that starts from eslint
 const chalk = require(require.resolve("chalk", { paths: [searchPath] })),
   stripAnsi = require(require.resolve("strip-ansi", { paths: [searchPath] })),
