@@ -10,7 +10,7 @@ bats_load_library "bats-assert"
     assert_success
 
     assert_output --partial "+ prettier --write example/eslint.config.mjs"
-    assert_output --partial "+ prettier --write example/src/file.ts example/src/subdir/test.ts example/test/no_violations.ts"
+    assert_output --partial "+ prettier --write example/src/file-dep.ts example/src/file.ts example/src/subdir/test.ts example/test/no_violations.ts"
     assert_output --partial "+ prettier --write example/src/hello.tsx"
     assert_output --partial "+ prettier --write example/src/hello.vue"
     assert_output --partial "+ prettier --write .bcr/metadata.template.json"

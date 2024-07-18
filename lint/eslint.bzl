@@ -66,7 +66,7 @@ def _gather_inputs(ctx, srcs, files):
     if "gather_files_from_js_providers" in dir(js_lib_helpers):
         # rules_js 1.x
         js_inputs = js_lib_helpers.gather_files_from_js_providers(
-            ctx.attr._config_files + files,
+            ctx.attr._config_files + ctx.rule.attr.deps + files,
             include_transitive_sources = True,
             include_declarations = True,
             include_npm_linked_packages = True,
@@ -74,7 +74,7 @@ def _gather_inputs(ctx, srcs, files):
     else:
         # rules_js 2.x
         js_inputs = js_lib_helpers.gather_files_from_js_infos(
-            ctx.attr._config_files + files,
+            ctx.attr._config_files + ctx.rule.attr.deps + files,
             include_sources = True,
             include_transitive_sources = True,
             include_types = True,
