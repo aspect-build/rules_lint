@@ -17,18 +17,26 @@ See the `filegroup_tags` and `rule_kinds` attributes below to customize this beh
 
 ## Usage
 
-```starlark
-load("@aspect_rules_lint//lint:vale.bzl", "vale_aspect")
+Add `stylelint` as a `devDependency` in your `package.json`, and declare a binary target for Bazel to execute it.
 
-vale = vale_aspect(
-    binary = "@@//tools/lint:vale",
-    # A copy_to_bin rule that places the .vale.ini file into bazel-bin
-    config = "@@//:.vale_ini",
-    # Optional.
-    # A copy_to_directory rule that "installs" custom styles together into a single folder
-    styles = "@@//tools/lint:vale_styles",
+For example in `tools/lint/BUILD.bazel`:
+
+```starlark
+load("@npm//:stylelint/package_json.bzl", stylelint_bin = "bin")
+stylelint_bin.stylelint_binary(name = "stylelint")
+```
+
+Then declare the linter aspect, typically in `tools/lint/linters.bzl`:
+
+```starlark
+load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
+stylelint = lint_stylelint_aspect(
+    binary = "@@//tools/lint:stylelint",
+    config = "@@//:stylelintrc",
 )
 ```
+
+Finally, register the aspect with your linting workflow, such as in `.aspect/cli/config.yaml` for `aspect lint`.
 
 
 <a id="lint_stylelint_aspect"></a>
@@ -47,9 +55,9 @@ A factory function to create a linter aspect.
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="lint_stylelint_aspect-binary"></a>binary |  the stylelint binary, typically a rule like<br><br><pre><code> load("@npm//:stylelint/package_json.bzl", stylelint_bin = "bin") stylelint_bin.stylelint_binary(name = "stylelint") </code></pre>   |  none |
-| <a id="lint_stylelint_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
+| <a id="lint_stylelint_aspect-config"></a>config |  label(s) of the stylelint config file(s)   |  none |
 | <a id="lint_stylelint_aspect-rule_kinds"></a>rule_kinds |  which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect   |  <code>["css_library"]</code> |
-| <a id="lint_stylelint_aspect-filegroup_tags"></a>filegroup_tags |  <p align="center"> - </p>   |  <code>["lint-with-stylelint"]</code> |
+| <a id="lint_stylelint_aspect-filegroup_tags"></a>filegroup_tags |  which tags on a <code>filegroup</code> indicate that it should be visited by the aspect   |  <code>["lint-with-stylelint"]</code> |
 
 
 <a id="stylelint_action"></a>
@@ -70,7 +78,7 @@ Spawn stylelint as a Bazel action
 | <a id="stylelint_action-ctx"></a>ctx |  an action context OR aspect context   |  none |
 | <a id="stylelint_action-executable"></a>executable |  struct with an _stylelint field   |  none |
 | <a id="stylelint_action-srcs"></a>srcs |  list of file objects to lint   |  none |
-| <a id="stylelint_action-config"></a>config |  <p align="center"> - </p>   |  none |
+| <a id="stylelint_action-config"></a>config |  js_library representing the config file (and its dependencies)   |  none |
 | <a id="stylelint_action-stderr"></a>stderr |  output file containing the stderr or --output-file of stylelint   |  none |
 | <a id="stylelint_action-exit_code"></a>exit_code |  output file containing the exit code of stylelint. If None, then fail the build when eslint exits non-zero. Exit codes may be:     1 - fatal error     2 - lint problem     64 - invalid CLI usage     78 - invalid configuration file   |  <code>None</code> |
 | <a id="stylelint_action-env"></a>env |  environment variables for stylelint   |  <code>{}</code> |
@@ -95,7 +103,7 @@ Create a Bazel Action that spawns stylelint with --fix.
 | <a id="stylelint_fix-ctx"></a>ctx |  an action context OR aspect context   |  none |
 | <a id="stylelint_fix-executable"></a>executable |  struct with a _stylelint field   |  none |
 | <a id="stylelint_fix-srcs"></a>srcs |  list of file objects to lint   |  none |
-| <a id="stylelint_fix-config"></a>config |  <p align="center"> - </p>   |  none |
+| <a id="stylelint_fix-config"></a>config |  js_library representing the config file (and its dependencies)   |  none |
 | <a id="stylelint_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
 | <a id="stylelint_fix-stderr"></a>stderr |  output file containing the stderr or --output-file of stylelint   |  none |
 | <a id="stylelint_fix-exit_code"></a>exit_code |  output file containing the exit code of stylelint   |  none |

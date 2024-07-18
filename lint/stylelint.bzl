@@ -15,18 +15,26 @@ See the `filegroup_tags` and `rule_kinds` attributes below to customize this beh
 
 ## Usage
 
-```starlark
-load("@aspect_rules_lint//lint:vale.bzl", "vale_aspect")
+Add `stylelint` as a `devDependency` in your `package.json`, and declare a binary target for Bazel to execute it.
 
-vale = vale_aspect(
-    binary = "@@//tools/lint:vale",
-    # A copy_to_bin rule that places the .vale.ini file into bazel-bin
-    config = "@@//:.vale_ini",
-    # Optional.
-    # A copy_to_directory rule that "installs" custom styles together into a single folder
-    styles = "@@//tools/lint:vale_styles",
+For example in `tools/lint/BUILD.bazel`:
+
+```starlark
+load("@npm//:stylelint/package_json.bzl", stylelint_bin = "bin")
+stylelint_bin.stylelint_binary(name = "stylelint")
+```
+
+Then declare the linter aspect, typically in `tools/lint/linters.bzl`:
+
+```starlark
+load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
+stylelint = lint_stylelint_aspect(
+    binary = "@@//tools/lint:stylelint",
+    config = "@@//:stylelintrc",
 )
 ```
+
+Finally, register the aspect with your linting workflow, such as in `.aspect/cli/config.yaml` for `aspect lint`.
 """
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
