@@ -54,8 +54,6 @@ def stylelint_action(ctx, executable, srcs, config, stderr, exit_code = None, en
         options: additional command-line arguments
     """
     inputs = copy_files_to_bin_actions(ctx, srcs + config)
-
-    # NB: the docs say standard output, see https://github.com/stylelint/stylelint/issues/7863
     outputs = [stderr]
 
     # Wire command-line options, see https://stylelint.io/user-guide/cli#options
