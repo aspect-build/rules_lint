@@ -4,7 +4,7 @@ bazel_dep(name = "aspect_rules_lint", version = "0.0.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.7")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0-rc0")
 bazel_dep(name = "aspect_rules_ts", version = "3.0.0-rc0")
-bazel_dep(name = "rules_buf", version = "0.2.0")
+bazel_dep(name = "rules_buf", version = "0.3.0")
 bazel_dep(name = "bazel_skylib", version = "1.4.2")
 bazel_dep(name = "toolchains_llvm", version = "0.10.3")
 bazel_dep(name = "toolchains_protoc", version = "0.3.0")
@@ -99,6 +99,9 @@ use_repo(
 )
 
 buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
+
+# see https://github.com/bufbuild/buf/releases
+buf.toolchains(version = "v1.34.0")
 use_repo(buf, "rules_buf_toolchains")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
