@@ -9,6 +9,7 @@ load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
+load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
 
 buf = lint_buf_aspect(
@@ -27,6 +28,11 @@ eslint = lint_eslint_aspect(
 )
 
 eslint_test = lint_test(aspect = eslint)
+
+stylelint = lint_stylelint_aspect(
+    binary = "@@//tools/lint:stylelint",
+    config = "@@//:stylelintrc",
+)
 
 flake8 = lint_flake8_aspect(
     binary = "@@//tools/lint:flake8",

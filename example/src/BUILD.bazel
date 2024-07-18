@@ -12,6 +12,12 @@ ts_config(
 )
 
 filegroup(
+    name = "css",
+    srcs = ["hello.css"],
+    tags = ["lint-with-stylelint"],
+)
+
+filegroup(
     name = "md",
     srcs = ["README.md"],
     tags = ["markdown"],

@@ -10,3 +10,9 @@ src/hello.css
 */
 .h1 {
 }
+
+/* Duplicate properties - can be auto-fixed */
+a {
+  color: pink;
+  color: orange;
+}
