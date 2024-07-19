@@ -33,6 +33,11 @@ stardoc_with_diff_test(
 )
 
 stardoc_with_diff_test(
+    name = "stylelint",
+    bzl_library_target = "//lint:stylelint",
+)
+
+stardoc_with_diff_test(
     name = "ruff",
     bzl_library_target = "//lint:ruff",
 )

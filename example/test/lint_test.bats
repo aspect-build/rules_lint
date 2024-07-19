@@ -48,6 +48,12 @@ EOF
 3:47  warning  Try to avoid using              Google.We
                first-person plural like 'We'.
 EOF
+
+	# stylelint
+	echo <<"EOF" | assert_output --partial
+src/hello.css
+  11:5  ✖  Unexpected empty block  block-no-empty
+EOF
 }
 
 @test "should produce reports" {

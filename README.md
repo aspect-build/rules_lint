@@ -25,7 +25,7 @@ New tools are being added frequently, so check this page again!
 | ---------------------- | --------------------- | ---------------- |
 | C / C++                | [clang-format]        | [clang-tidy]     |
 | Cuda                   | [clang-format]        |                  |
-| CSS, Less, Sass        | [Prettier]            |                  |
+| CSS, Less, Sass        | [Prettier]            | [Stylelint]      |
 | Go                     | [gofmt] or [gofumpt]  |                  |
 | GraphQL                | [Prettier]            |                  |
 | HCL (Hashicorp Config) | [terraform] fmt       |                  |
@@ -73,6 +73,7 @@ New tools are being added frequently, so check this page again!
 [vale]: https://vale.sh/
 [yamlfmt]: https://github.com/google/yamlfmt
 [rustfmt]: https://rust-lang.github.io/rustfmt
+[stylelint]: https://stylelint.io
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift

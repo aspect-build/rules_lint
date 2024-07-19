@@ -36,6 +36,11 @@ js_library(
     ],
 )
 
+js_library(
+    name = "stylelintrc",
+    srcs = ["stylelint.config.mjs"],
+)
+
 # NB: this alias does NOT cause Bazel's Loading phase to load the tools/BUILD file.
 # That's important as we don't want users to wait for "Eager fetching" for ~EVERY language which
 # that build file loads from.
