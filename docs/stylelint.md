@@ -80,7 +80,7 @@ Spawn stylelint as a Bazel action
 | <a id="stylelint_action-srcs"></a>srcs |  list of file objects to lint   |  none |
 | <a id="stylelint_action-config"></a>config |  js_library representing the config file (and its dependencies)   |  none |
 | <a id="stylelint_action-stderr"></a>stderr |  output file containing the stderr or --output-file of stylelint   |  none |
-| <a id="stylelint_action-exit_code"></a>exit_code |  output file containing the exit code of stylelint. If None, then fail the build when eslint exits non-zero. Exit codes may be:     1 - fatal error     2 - lint problem     64 - invalid CLI usage     78 - invalid configuration file   |  <code>None</code> |
+| <a id="stylelint_action-exit_code"></a>exit_code |  output file containing the exit code of stylelint. If None, then fail the build when stylelint exits non-zero. Exit codes may be:     1 - fatal error     2 - lint problem     64 - invalid CLI usage     78 - invalid configuration file   |  <code>None</code> |
 | <a id="stylelint_action-env"></a>env |  environment variables for stylelint   |  <code>{}</code> |
 | <a id="stylelint_action-options"></a>options |  additional command-line arguments   |  <code>[]</code> |
 
@@ -107,7 +107,7 @@ Create a Bazel Action that spawns stylelint with --fix.
 | <a id="stylelint_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
 | <a id="stylelint_fix-stderr"></a>stderr |  output file containing the stderr or --output-file of stylelint   |  none |
 | <a id="stylelint_fix-exit_code"></a>exit_code |  output file containing the exit code of stylelint   |  none |
-| <a id="stylelint_fix-env"></a>env |  environment variaables for eslint   |  <code>{}</code> |
+| <a id="stylelint_fix-env"></a>env |  environment variables for stylelint   |  <code>{}</code> |
 | <a id="stylelint_fix-options"></a>options |  additional command line options   |  <code>[]</code> |
 
 
