@@ -52,7 +52,7 @@ def stylelint_action(ctx, executable, srcs, config, stderr, exit_code = None, en
         config: js_library representing the config file (and its dependencies)
         stderr: output file containing the stderr or --output-file of stylelint
         exit_code: output file containing the exit code of stylelint.
-            If None, then fail the build when eslint exits non-zero.
+            If None, then fail the build when stylelint exits non-zero.
             Exit codes may be:
                 1 - fatal error
                 2 - lint problem
@@ -100,7 +100,7 @@ def stylelint_fix(ctx, executable, srcs, config, patch, stderr, exit_code, env =
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
         stderr: output file containing the stderr or --output-file of stylelint
         exit_code: output file containing the exit code of stylelint
-        env: environment variaables for eslint
+        env: environment variables for stylelint
         options: additional command line options
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
