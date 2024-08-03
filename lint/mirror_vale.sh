@@ -53,4 +53,4 @@ jq --slurp '.[0] * .[1]' $RAW $CURRENT > $OUT
 )>$SCRIPT_DIR/vale_versions.bzl
 
 echo "For now, you must manually replace placeholder sha256 with their content from checksums.txt:"
-echo "https://github.com/errata-ai/vale/releases/download/v3.0.7/vale_3.0.7_checksums.txt"
+echo "https://github.com/errata-ai/vale/releases/download/v3.7.0/vale_3.7.0_checksums.txt"
