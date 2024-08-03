@@ -124,7 +124,7 @@ def filter_srcs(rule):
     if "lint-genfiles" in rule.attr.tags:
         return rule.files.srcs
     else:
-        return [s for s in rule.files.srcs if s.is_source]
+        return [s for s in rule.files.srcs if s.is_source and s.owner.workspace_name == ""]
 
 def noop_lint_action(ctx, outputs):
     """Action that creates expected outputs when no files are provided to a lint action.
