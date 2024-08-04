@@ -205,7 +205,6 @@ def _get_args(ctx, compilation_context, srcs):
     else:
         user_flags = ctx.fragments.cpp.copts
         args.extend(_safe_flags(ctx, _toolchain_flags(ctx, user_flags, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"])
-    print(args)
 
     # add defines
     for define in compilation_context.defines.to_list():
