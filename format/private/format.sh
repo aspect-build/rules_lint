@@ -66,7 +66,8 @@ function ls-files {
     # https://github.com/github-linguist/linguist/blob/559a6426942abcae16b6d6b328147476432bf6cb/lib/linguist/languages.yml
     # using the ./mirror_linguist_languages.sh tool to transform to Bash code
     case "$language" in
-      'C++') patterns=('*.c' '*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
+      'C') patterns=('*.c' '*.cats' '*.h' '*.idc') ;;
+      'C++') patterns=('*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
       'Cuda') patterns=('*.cu' '*.cuh') ;;
       'CSS') patterns=('*.css') ;;
       'Go') patterns=('*.go') ;;
