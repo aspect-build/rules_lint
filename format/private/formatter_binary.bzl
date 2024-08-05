@@ -21,6 +21,7 @@ TOOLS = {
     "SQL": "prettier",
     "Shell": "shfmt",
     "Protocol Buffer": "buf",
+    "C": "clang-format",
     "C++": "clang-format",
     "Cuda": "clang-format",
     "YAML": "yamlfmt",
