@@ -140,11 +140,17 @@ def noop_lint_action(ctx, outputs):
     commands.append("touch {}".format(outputs.human.out.path))
     commands.append("touch {}".format(outputs.machine.out.path))
 
-    # NB: if we write JSON machine-readable outputs, then an empty file won't be appropriate
-    commands.append("echo 0 > {}".format(outputs.human.exit_code.path))
-    commands.append("echo 0 > {}".format(outputs.machine.exit_code.path))
+    outs = [outputs.human.out, outputs.machine.out]
 
-    outs = [outputs.human.out, outputs.human.exit_code, outputs.machine.out, outputs.machine.exit_code]
+    # NB: if we write JSON machine-readable outputs, then an empty file won't be appropriate
+    if outputs.human.exit_code:
+      commands.append("echo 0 > {}".format(outputs.human.exit_code.path))
+      outs += [outputs.human.exit_code]
+
+    if outputs.machine.exit_code:
+      commands.append("echo 0 > {}".format(outputs.machine.exit_code.path))
+      outs += [outputs.machine.exit_code]
+
     if hasattr(outputs, "patch"):
         commands.append("touch {}".format(outputs.patch.path))
         outs.append(outputs.patch)
