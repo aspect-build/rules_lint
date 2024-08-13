@@ -38,12 +38,13 @@ stylelint = lint_stylelint_aspect(
 
 Finally, register the aspect with your linting workflow, such as in `.aspect/cli/config.yaml` for `aspect lint`.
 
-
 <a id="lint_stylelint_aspect"></a>
 
 ## lint_stylelint_aspect
 
 <pre>
+load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
+
 lint_stylelint_aspect(<a href="#lint_stylelint_aspect-binary">binary</a>, <a href="#lint_stylelint_aspect-config">config</a>, <a href="#lint_stylelint_aspect-rule_kinds">rule_kinds</a>, <a href="#lint_stylelint_aspect-filegroup_tags">filegroup_tags</a>)
 </pre>
 
@@ -54,10 +55,10 @@ A factory function to create a linter aspect.
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="lint_stylelint_aspect-binary"></a>binary |  the stylelint binary, typically a rule like<br><br><pre><code> load("@npm//:stylelint/package_json.bzl", stylelint_bin = "bin") stylelint_bin.stylelint_binary(name = "stylelint") </code></pre>   |  none |
+| <a id="lint_stylelint_aspect-binary"></a>binary |  the stylelint binary, typically a rule like<br><br><pre><code>load("@npm//:stylelint/package_json.bzl", stylelint_bin = "bin")&#10;stylelint_bin.stylelint_binary(name = "stylelint")</code></pre>   |  none |
 | <a id="lint_stylelint_aspect-config"></a>config |  label(s) of the stylelint config file(s)   |  none |
-| <a id="lint_stylelint_aspect-rule_kinds"></a>rule_kinds |  which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect   |  <code>["css_library"]</code> |
-| <a id="lint_stylelint_aspect-filegroup_tags"></a>filegroup_tags |  which tags on a <code>filegroup</code> indicate that it should be visited by the aspect   |  <code>["lint-with-stylelint"]</code> |
+| <a id="lint_stylelint_aspect-rule_kinds"></a>rule_kinds |  which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect   |  `["css_library"]` |
+| <a id="lint_stylelint_aspect-filegroup_tags"></a>filegroup_tags |  which tags on a `filegroup` indicate that it should be visited by the aspect   |  `["lint-with-stylelint"]` |
 
 
 <a id="stylelint_action"></a>
@@ -65,6 +66,8 @@ A factory function to create a linter aspect.
 ## stylelint_action
 
 <pre>
+load("@aspect_rules_lint//lint:stylelint.bzl", "stylelint_action")
+
 stylelint_action(<a href="#stylelint_action-ctx">ctx</a>, <a href="#stylelint_action-executable">executable</a>, <a href="#stylelint_action-srcs">srcs</a>, <a href="#stylelint_action-config">config</a>, <a href="#stylelint_action-stderr">stderr</a>, <a href="#stylelint_action-exit_code">exit_code</a>, <a href="#stylelint_action-env">env</a>, <a href="#stylelint_action-options">options</a>)
 </pre>
 
@@ -80,9 +83,9 @@ Spawn stylelint as a Bazel action
 | <a id="stylelint_action-srcs"></a>srcs |  list of file objects to lint   |  none |
 | <a id="stylelint_action-config"></a>config |  js_library representing the config file (and its dependencies)   |  none |
 | <a id="stylelint_action-stderr"></a>stderr |  output file containing the stderr or --output-file of stylelint   |  none |
-| <a id="stylelint_action-exit_code"></a>exit_code |  output file containing the exit code of stylelint. If None, then fail the build when stylelint exits non-zero. Exit codes may be:     1 - fatal error     2 - lint problem     64 - invalid CLI usage     78 - invalid configuration file   |  <code>None</code> |
-| <a id="stylelint_action-env"></a>env |  environment variables for stylelint   |  <code>{}</code> |
-| <a id="stylelint_action-options"></a>options |  additional command-line arguments   |  <code>[]</code> |
+| <a id="stylelint_action-exit_code"></a>exit_code |  output file containing the exit code of stylelint. If None, then fail the build when stylelint exits non-zero. Exit codes may be:     1 - fatal error     2 - lint problem     64 - invalid CLI usage     78 - invalid configuration file   |  `None` |
+| <a id="stylelint_action-env"></a>env |  environment variables for stylelint   |  `{}` |
+| <a id="stylelint_action-options"></a>options |  additional command-line arguments   |  `[]` |
 
 
 <a id="stylelint_fix"></a>
@@ -90,6 +93,8 @@ Spawn stylelint as a Bazel action
 ## stylelint_fix
 
 <pre>
+load("@aspect_rules_lint//lint:stylelint.bzl", "stylelint_fix")
+
 stylelint_fix(<a href="#stylelint_fix-ctx">ctx</a>, <a href="#stylelint_fix-executable">executable</a>, <a href="#stylelint_fix-srcs">srcs</a>, <a href="#stylelint_fix-config">config</a>, <a href="#stylelint_fix-patch">patch</a>, <a href="#stylelint_fix-stderr">stderr</a>, <a href="#stylelint_fix-exit_code">exit_code</a>, <a href="#stylelint_fix-env">env</a>, <a href="#stylelint_fix-options">options</a>)
 </pre>
 
@@ -107,7 +112,7 @@ Create a Bazel Action that spawns stylelint with --fix.
 | <a id="stylelint_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
 | <a id="stylelint_fix-stderr"></a>stderr |  output file containing the stderr or --output-file of stylelint   |  none |
 | <a id="stylelint_fix-exit_code"></a>exit_code |  output file containing the exit code of stylelint   |  none |
-| <a id="stylelint_fix-env"></a>env |  environment variables for stylelint   |  <code>{}</code> |
-| <a id="stylelint_fix-options"></a>options |  additional command line options   |  <code>[]</code> |
+| <a id="stylelint_fix-env"></a>env |  environment variables for stylelint   |  `{}` |
+| <a id="stylelint_fix-options"></a>options |  additional command line options   |  `[]` |
 
 

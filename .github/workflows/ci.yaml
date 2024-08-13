@@ -21,14 +21,13 @@ jobs:
     uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v6
     with:
       folders: '[".", "example"]'
-      # Root module is bzlmod-only.
       # Don't try for Windows support yet.
-      # Example uses a bazel7-only flag.
+      exclude_windows: true
+      # Root module is bzlmod-only and uses newer stardoc that requires Bazel 7.
       exclude: |
         [
           {"bzlmodEnabled": false, "folder": "."},
-          {"os": "windows-latest"},
-          {"bazelversion": "6.4.0", "folder": "example"}
+          {"bazelversion": "6.4.0", "folder": "."}
         ]
 
   integration-test:
