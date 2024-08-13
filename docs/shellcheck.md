@@ -15,12 +15,13 @@ shellcheck = shellcheck_aspect(
 )
 ```
 
-
 <a id="lint_shellcheck_aspect"></a>
 
 ## lint_shellcheck_aspect
 
 <pre>
+load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
+
 lint_shellcheck_aspect(<a href="#lint_shellcheck_aspect-binary">binary</a>, <a href="#lint_shellcheck_aspect-config">config</a>, <a href="#lint_shellcheck_aspect-rule_kinds">rule_kinds</a>)
 </pre>
 
@@ -37,7 +38,7 @@ Attrs:
 | :------------- | :------------- | :------------- |
 | <a id="lint_shellcheck_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_shellcheck_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
-| <a id="lint_shellcheck_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  <code>["sh_binary", "sh_library"]</code> |
+| <a id="lint_shellcheck_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["sh_binary", "sh_library"]` |
 
 
 <a id="shellcheck_action"></a>
@@ -45,6 +46,8 @@ Attrs:
 ## shellcheck_action
 
 <pre>
+load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_action")
+
 shellcheck_action(<a href="#shellcheck_action-ctx">ctx</a>, <a href="#shellcheck_action-executable">executable</a>, <a href="#shellcheck_action-srcs">srcs</a>, <a href="#shellcheck_action-config">config</a>, <a href="#shellcheck_action-stdout">stdout</a>, <a href="#shellcheck_action-exit_code">exit_code</a>, <a href="#shellcheck_action-options">options</a>)
 </pre>
 
@@ -63,7 +66,7 @@ Based on https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md
 | <a id="shellcheck_action-srcs"></a>srcs |  bash files to be linted   |  none |
 | <a id="shellcheck_action-config"></a>config |  label of the .shellcheckrc file   |  none |
 | <a id="shellcheck_action-stdout"></a>stdout |  output file containing stdout of shellcheck   |  none |
-| <a id="shellcheck_action-exit_code"></a>exit_code |  output file containing shellcheck exit code. If None, then fail the build when vale exits non-zero. See https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#return-values   |  <code>None</code> |
-| <a id="shellcheck_action-options"></a>options |  additional command-line options, see https://github.com/koalaman/shellcheck/blob/master/shellcheck.hs#L95   |  <code>[]</code> |
+| <a id="shellcheck_action-exit_code"></a>exit_code |  output file containing shellcheck exit code. If None, then fail the build when vale exits non-zero. See https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#return-values   |  `None` |
+| <a id="shellcheck_action-options"></a>options |  additional command-line options, see https://github.com/koalaman/shellcheck/blob/master/shellcheck.hs#L95   |  `[]` |
 
 
