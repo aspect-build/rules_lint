@@ -17,9 +17,18 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
+  # Stardoc should only run on Bazel 7 because it uses a different extractor there
+  docgen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bazel test //docs:all
+
   bazel-test:
     uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v6
     with:
+      # Don't run diff_test in the docs/ folder, it's a separate job above
+      bazel_test_command: bazel test //... --test_lang_filters=-_diff
       folders: '[".", "example"]'
       # Root module is bzlmod-only.
       # Don't try for Windows support yet.
