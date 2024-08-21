@@ -45,9 +45,9 @@ http_archive(
 
 http_archive(
     name = "aspect_rules_js",
-    sha256 = "389021e29b3aeed2f6fb3a7a1478f8fc52947a6500b198a7ec0f3358c2842415",
-    strip_prefix = "rules_js-2.0.0-rc0",
-    url = "https://github.com/aspect-build/rules_js/releases/download/v2.0.0-rc0/rules_js-v2.0.0-rc0.tar.gz",
+    sha256 = "6b7e73c35b97615a09281090da3645d9f03b2a09e8caa791377ad9022c88e2e6",
+    strip_prefix = "rules_js-2.0.0",
+    url = "https://github.com/aspect-build/rules_js/releases/download/v2.0.0/rules_js-v2.0.0.tar.gz",
 )
 
 http_archive(
@@ -98,15 +98,29 @@ npm_repositories()
 
 http_archive(
     name = "aspect_rules_ts",
-    sha256 = "3ea5cdb825d5dbffe286b3d9c5197a2648cf04b5e6bd8b913a45823cdf0ae960",
-    strip_prefix = "rules_ts-3.0.0-rc0",
-    url = "https://github.com/aspect-build/rules_ts/releases/download/v3.0.0-rc0/rules_ts-v3.0.0-rc0.tar.gz",
+    sha256 = "ee7dcc35faef98f3050df9cf26f2a72ef356cab8ad927efb1c4dc119ac082a19",
+    strip_prefix = "rules_ts-3.0.0",
+    url = "https://github.com/aspect-build/rules_ts/releases/download/v3.0.0/rules_ts-v3.0.0.tar.gz",
 )
 
 load("@aspect_rules_ts//ts:repositories.bzl", "rules_ts_dependencies")
 
 rules_ts_dependencies(
     ts_version_from = "//:package.json",
+)
+
+http_archive(
+    name = "aspect_rules_swc",
+    sha256 = "d63d7b283249fa942f78d2716ecff3edbdc10104ee1b9a6b9464ece471ef95ea",
+    strip_prefix = "rules_swc-2.0.0",
+    url = "https://github.com/aspect-build/rules_swc/releases/download/v2.0.0/rules_swc-v2.0.0.tar.gz",
+)
+
+load("@aspect_rules_swc//swc:repositories.bzl", "LATEST_SWC_VERSION", "swc_register_toolchains")
+
+swc_register_toolchains(
+    name = "swc",
+    swc_version = LATEST_SWC_VERSION,
 )
 
 http_archive(
