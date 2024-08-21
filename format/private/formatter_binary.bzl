@@ -78,7 +78,6 @@ FIX_FLAGS = {
     # as command-line arguments; see
     # https://github.com/scalameta/scalafmt/pull/2020
     "scalafmt": "--respect-project-filters",
-    "scalafmt": "",
     "clang-format": "-style=file --fallback-style=none -i",
     "yamlfmt": "",
     "rustfmt": "",
