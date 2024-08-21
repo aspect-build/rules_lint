@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 
 exports_files(["ruff.toml"])
@@ -17,7 +18,9 @@ ts_project(
     name = "ts",
     srcs = ["test.ts"],
     declaration = True,
-    transpiler = "tsc",
+    # verify that even when the macro expands to have js_library targets
+    # we don't try to lint the output javascript files
+    transpiler = swc,
     tsconfig = "//src:tsconfig",
     deps = [
         "//:node_modules/@types/node",
