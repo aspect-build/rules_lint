@@ -129,8 +129,9 @@ def filter_srcs(rule):
 def noop_lint_action(ctx, outputs):
     """Action that creates expected outputs when no files are provided to a lint action.
 
-    This is needed for linters that error when they are given no srcs to inspect.
-    It is also a performance optimisation in other cases.
+    This is needed for a linter that does the wrong thing when given zero srcs to inspect,
+    for example it might error, or try to lint all files it can find.
+    It is also a performance optimisation in other cases; use this in every linter implementation.
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
@@ -144,12 +145,12 @@ def noop_lint_action(ctx, outputs):
 
     # NB: if we write JSON machine-readable outputs, then an empty file won't be appropriate
     if outputs.human.exit_code:
-      commands.append("echo 0 > {}".format(outputs.human.exit_code.path))
-      outs += [outputs.human.exit_code]
+        commands.append("echo 0 > {}".format(outputs.human.exit_code.path))
+        outs.append(outputs.human.exit_code)
 
     if outputs.machine.exit_code:
-      commands.append("echo 0 > {}".format(outputs.machine.exit_code.path))
-      outs += [outputs.machine.exit_code]
+        commands.append("echo 0 > {}".format(outputs.machine.exit_code.path))
+        outs.append(outputs.machine.exit_code)
 
     if hasattr(outputs, "patch"):
         commands.append("touch {}".format(outputs.patch.path))

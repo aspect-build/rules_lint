@@ -55,7 +55,7 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintESLint"
 
@@ -213,6 +213,10 @@ def _eslint_aspect_impl(target, ctx):
     # https://www.npmjs.com/package/chalk#chalklevel
     # 2: Force 256 color support even when a tty isn't detected
     color_env = {"FORCE_COLOR": "2"} if ctx.attr._options[LintOptionsInfo].color else {}
+
+    if len(files_to_lint) == 0:
+        noop_lint_action(ctx, outputs)
+        return [info]
 
     # eslint can produce a patch file at the same time it reports the unpatched violations
     if hasattr(outputs, "patch"):

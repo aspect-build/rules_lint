@@ -1,8 +1,10 @@
 load("@aspect_rules_lint//format:defs.bzl", "format_test")
+load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
+load("//tools/lint:linters.bzl", "eslint_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -35,11 +37,17 @@ ts_project(
     name = "ts",
     srcs = ["file.ts"],
     declaration = True,
-    transpiler = "tsc",
+    transpiler = swc,
     deps = [
         ":ts_dep",
         "//:node_modules/dayjs",
     ],
+)
+
+# Regression test for https://github.com/aspect-build/rules_lint/issues/368
+eslint_test(
+    name = "eslint_empty_report",
+    srcs = [":ts"],
 )
 
 proto_library(
