@@ -109,7 +109,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Scala_with_scalafmt
     assert_success
 
-    assert_output --partial "+ scalafmt example/src/hello.scala"
+    assert_output --partial "+ scalafmt --respect-project-filters example/src/hello.scala"
 }
 
 @test "should run gofmt on Go" {
