@@ -32,7 +32,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_l
 
 _MNEMONIC = "AspectRulesLintCheckstyle"
 
-def checkstyle_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
+def checkstyle_action(ctx, executable, srcs, config, data, stdout, exit_code = None, options = []):
     """Run Checkstyle as an action under Bazel.
 
     Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running-pmd-via-command-line
@@ -42,29 +42,22 @@ def checkstyle_action(ctx, executable, srcs, config, stdout, exit_code = None, o
         executable: label of the the PMD program
         srcs: java files to be linted
         config: label of the checkstyle.xml file
+        data: labels of additional xml files such as suppressions.xml
         stdout: output file to generate
         exit_code: output file to write the exit code.
             If None, then fail the build when PMD exits non-zero.
         options: additional command-line options, see https://pmd.github.io/pmd/pmd_userdocs_cli_reference.html
     """
-    inputs = srcs + [config]
+    inputs = srcs + [config] + data
     outputs = [stdout]
 
     # Wire command-line options, see
     # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
     args = ctx.actions.args()
     args.add_all(options)
+
     args.add_all(["-c", config.path])
-
-    args.add_all(["--debug"])
-
     args.add_all(srcs)
-    #    args.add("--rulesets")
-    # args.add_joined(rulesets, join_with = ",")
-    #    src_args = ctx.actions.args()
-    #    src_args.use_param_file("%s", use_always = True)
-    #    src_args.add_all(srcs)
-    #    print(args, src_args)
 
     if exit_code:
         command = "{CHECKSTYLE} $@ >{stdout}; echo $? > " + exit_code.path
@@ -77,7 +70,7 @@ def checkstyle_action(ctx, executable, srcs, config, stdout, exit_code = None, o
         inputs = inputs,
         outputs = outputs,
         command = command.format(CHECKSTYLE = executable.path, stdout = stdout.path),
-        arguments = [args],  #src_args],
+        arguments = [args],
         mnemonic = _MNEMONIC,
         tools = [executable],
         progress_message = "Linting %{label} with Checkstyle",
@@ -97,11 +90,11 @@ def _checkstyle_aspect_impl(target, ctx):
     # https://github.com/pmd/pmd/blob/master/docs/pages/pmd/userdocs/pmd_report_formats.md
     # format_options = ["textcolor" if ctx.attr._options[LintOptionsInfo].color else "text"]
     format_options = []
-    checkstyle_action(ctx, ctx.executable._checkstyle, files_to_lint, ctx.file._config, outputs.human.out, outputs.human.exit_code, format_options)
-    checkstyle_action(ctx, ctx.executable._checkstyle, files_to_lint, ctx.file._config, outputs.machine.out, outputs.machine.exit_code)
+    checkstyle_action(ctx, ctx.executable._checkstyle, files_to_lint, ctx.file._config, ctx.files._data, outputs.human.out, outputs.human.exit_code, format_options)
+    checkstyle_action(ctx, ctx.executable._checkstyle, files_to_lint, ctx.file._config, ctx.files._data, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
-def lint_checkstyle_aspect(binary, config, rule_kinds = ["java_binary", "java_library"]):
+def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary", "java_library"]):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -138,6 +131,11 @@ def lint_checkstyle_aspect(binary, config, rule_kinds = ["java_binary", "java_li
                 mandatory = True,
                 doc = "Config file",
                 default = config,
+            ),
+            "_data": attr.label_list(
+                doc = "Additional files to make available to Checkstyle such as any included XML files",
+                allow_files = True,
+                default = data,
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
