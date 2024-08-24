@@ -3,7 +3,7 @@
 load("@aspect_rules_lint//format:defs.bzl", "format_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("//tools/lint:linters.bzl", "eslint_test", "flake8_test", "pmd_test", "ruff_test", "shellcheck_test")
+load("//tools/lint:linters.bzl", "checkstyle_test", "eslint_test", "flake8_test", "pmd_test", "ruff_test", "shellcheck_test")
 
 write_file(
     name = "ts_code_generator",
@@ -91,6 +91,12 @@ pmd_test(
     srcs = ["//src:foo"],
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
+    tags = ["manual"],
+)
+
+checkstyle_test(
+    name = "checkstyle",
+    srcs = ["//src:bar"],
     tags = ["manual"],
 )
 
