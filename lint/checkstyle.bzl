@@ -87,9 +87,26 @@ def _checkstyle_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    format_options = []
-    checkstyle_action(ctx, ctx.executable._checkstyle, files_to_lint, ctx.file._config, ctx.files._data, outputs.human.out, outputs.human.exit_code, format_options)
-    checkstyle_action(ctx, ctx.executable._checkstyle, files_to_lint, ctx.file._config, ctx.files._data, outputs.machine.out, outputs.machine.exit_code)
+    checkstyle_action(
+        ctx,
+        ctx.executable._checkstyle,
+        files_to_lint,
+        ctx.file._config,
+        ctx.files._data,
+        outputs.human.out,
+        outputs.human.exit_code,
+        ["-f", "plain"],
+    )
+    checkstyle_action(
+        ctx,
+        ctx.executable._checkstyle,
+        files_to_lint,
+        ctx.file._config,
+        ctx.files._data,
+        outputs.machine.out,
+        outputs.machine.exit_code,
+        ["-f", "sarif"],
+    )
     return [info]
 
 def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary", "java_library"]):
