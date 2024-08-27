@@ -24,7 +24,7 @@ load("@aspect_rules_lint//lint:checkstyle.bzl", "checkstyle_aspect")
 
 checkstyle = checkstyle_aspect(
     binary = "@@//tools/lint:checkstyle",
-    rulesets = ["@@//:checkstyle.xml"],
+    config = ["@@//:checkstyle.xml"],
 )
 ```
 
@@ -96,7 +96,7 @@ Attrs:
         )
         ```
 
-    config: the PMD ruleset XML files
+    config: the Checkstyle XML file
 
 **PARAMETERS**
 

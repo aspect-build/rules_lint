@@ -22,7 +22,7 @@ load("@aspect_rules_lint//lint:checkstyle.bzl", "checkstyle_aspect")
 
 checkstyle = checkstyle_aspect(
     binary = "@@//tools/lint:checkstyle",
-    rulesets = ["@@//:checkstyle.xml"],
+    config = ["@@//:checkstyle.xml"],
 )
 ```
 """
@@ -107,7 +107,7 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
             )
             ```
 
-        config: the PMD ruleset XML files
+        config: the Checkstyle XML file
     """
     return aspect(
         implementation = _checkstyle_aspect_impl,
