@@ -1,4 +1,4 @@
-"""API for declaring a PMD lint aspect that visits java_library rules.
+"""API for declaring a checkstyle lint aspect that visits java_library rules.
 
 Typical usage:
 
@@ -35,24 +35,24 @@ _MNEMONIC = "AspectRulesLintCheckstyle"
 def checkstyle_action(ctx, executable, srcs, config, data, stdout, exit_code = None, options = []):
     """Run Checkstyle as an action under Bazel.
 
-    Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running-pmd-via-command-line
+    Based on https://checkstyle.sourceforge.io/cmdline.html
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the PMD program
+        executable: label of the the Checkstyle program
         srcs: java files to be linted
         config: label of the checkstyle.xml file
         data: labels of additional xml files such as suppressions.xml
         stdout: output file to generate
         exit_code: output file to write the exit code.
-            If None, then fail the build when PMD exits non-zero.
-        options: additional command-line options, see https://pmd.github.io/pmd/pmd_userdocs_cli_reference.html
+            If None, then fail the build when Checkstyle exits non-zero.
+        options: additional command-line options, see https://checkstyle.sourceforge.io/cmdline.html
     """
     inputs = srcs + [config] + data
     outputs = [stdout]
 
     # Wire command-line options, see
-    # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
+    # https://checkstyle.sourceforge.io/cmdline.html
     args = ctx.actions.args()
     args.add_all(options)
 
@@ -87,8 +87,6 @@ def _checkstyle_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    # https://github.com/pmd/pmd/blob/master/docs/pages/pmd/userdocs/pmd_report_formats.md
-    # format_options = ["textcolor" if ctx.attr._options[LintOptionsInfo].color else "text"]
     format_options = []
     checkstyle_action(ctx, ctx.executable._checkstyle, files_to_lint, ctx.file._config, ctx.files._data, outputs.human.out, outputs.human.exit_code, format_options)
     checkstyle_action(ctx, ctx.executable._checkstyle, files_to_lint, ctx.file._config, ctx.files._data, outputs.machine.out, outputs.machine.exit_code)
