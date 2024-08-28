@@ -71,6 +71,11 @@ java_library(
     srcs = ["Foo.java"],
 )
 
+java_library(
+    name = "bar",
+    srcs = ["Bar.java"],
+)
+
 sh_library(
     name = "hello_shell",
     srcs = ["hello.sh"],

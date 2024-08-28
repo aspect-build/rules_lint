@@ -1,6 +1,7 @@
 "Define linter aspects"
 
 load("@aspect_rules_lint//lint:buf.bzl", "lint_buf_aspect")
+load("@aspect_rules_lint//lint:checkstyle.bzl", "lint_checkstyle_aspect")
 load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
 load("@aspect_rules_lint//lint:eslint.bzl", "lint_eslint_aspect")
 load("@aspect_rules_lint//lint:flake8.bzl", "lint_flake8_aspect")
@@ -47,6 +48,14 @@ pmd = lint_pmd_aspect(
 )
 
 pmd_test = lint_test(aspect = pmd)
+
+checkstyle = lint_checkstyle_aspect(
+    binary = "@@//tools/lint:checkstyle",
+    config = "@@//:checkstyle.xml",
+    data = ["@@//:checkstyle-suppressions.xml"],
+)
+
+checkstyle_test = lint_test(aspect = checkstyle)
 
 ruff = lint_ruff_aspect(
     binary = "@multitool//tools/ruff",

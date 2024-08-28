@@ -16,6 +16,8 @@ exports_files(
         "buf.yaml",
         ".flake8",
         "pmd.xml",
+        "checkstyle.xml",
+        "checkstyle-suppressions.xml",
         ".ruff.toml",
         ".shellcheckrc",
         ".scalafmt.conf",

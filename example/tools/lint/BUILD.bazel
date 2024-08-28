@@ -36,6 +36,12 @@ java_binary(
     runtime_deps = ["@net_sourceforge_pmd"],
 )
 
+java_binary(
+    name = "checkstyle",
+    main_class = "com.puppycrawl.tools.checkstyle.Main",
+    runtime_deps = ["@com_puppycrawl_tools_checkstyle//jar"],
+)
+
 native_binary(
     name = "vale",
     src = select(
