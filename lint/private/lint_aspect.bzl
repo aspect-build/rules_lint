@@ -105,8 +105,8 @@ def patch_file(mnemonic, target, ctx):
 def patch_and_output_files(*args):
     patch, _ = patch_file(*args)
     outputs, _ = output_files(*args)
-    human_outputs = [outputs.human.out, outputs.human.exit_code]
-    machine_outputs = [outputs.machine.out, outputs.machine.exit_code]
+    human_outputs = [f for f in [outputs.human.out, outputs.human.exit_code] if f]
+    machine_outputs = [f for f in [outputs.machine.out, outputs.machine.exit_code] if f]
     return struct(
         human = outputs.human,
         machine = outputs.machine,
