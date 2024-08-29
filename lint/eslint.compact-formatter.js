@@ -27,6 +27,7 @@ module.exports = function (results, context) {
     total += messages.length;
 
     messages.forEach((message) => {
+      // LOCAL MODIFICATION: print path relative to the working directory
       output += `${path.relative(context.cwd, result.filePath)}: `;
       output += `line ${message.line || 0}`;
       output += `, col ${message.column || 0}`;

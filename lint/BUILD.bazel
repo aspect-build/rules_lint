@@ -69,8 +69,23 @@ config_setting(
     flag_values = {":fix": "true"},
 )
 
+bool_flag(
+    name = "color",
+    build_setting_default = True,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "color.enabled",
+    flag_values = {":color": "true"},
+)
+
 lint_options(
     name = "options",
+    color = select({
+        ":color.enabled": True,
+        "//conditions:default": False,
+    }),
     debug = select({
         ":debug.enabled": True,
         "//conditions:default": False,
@@ -93,8 +108,14 @@ js_library(
 )
 
 js_library(
-    name = "eslint.bazel-formatter",
-    srcs = ["eslint.bazel-formatter.js"],
+    name = "eslint.compact-formatter",
+    srcs = ["eslint.compact-formatter.js"],
+    visibility = ["//visibility:public"],
+)
+
+js_library(
+    name = "eslint.stylish-formatter",
+    srcs = ["eslint.stylish-formatter.js"],
     visibility = ["//visibility:public"],
 )
 
@@ -143,6 +164,15 @@ bzl_library(
 )
 
 bzl_library(
+    name = "checkstyle",
+    srcs = ["checkstyle.bzl"],
+    visibility = ["//visibility:public"],
+    deps = _BAZEL_TOOLS + [
+        "//lint/private:lint_aspect",
+    ],
+)
+
+bzl_library(
     name = "ruff",
     srcs = ["ruff.bzl"],
     visibility = ["//visibility:public"],
@@ -158,6 +188,16 @@ bzl_library(
     srcs = ["shellcheck.bzl"],
     visibility = ["//visibility:public"],
     deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
+    name = "stylelint",
+    srcs = ["stylelint.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "@aspect_bazel_lib//lib:copy_to_bin",
+    ],
 )
 
 bzl_library(

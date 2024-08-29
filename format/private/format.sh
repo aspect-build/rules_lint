@@ -14,6 +14,9 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 # --- end runfiles.bash initialization v3 ---
 
 if [[ -n "$BUILD_WORKSPACE_DIRECTORY" ]]; then
+  # Needed for the rustfmt binary wrapper in rules_rust; see
+  # https://github.com/aspect-build/rules_lint/pull/327
+  unset BUILD_WORKING_DIRECTORY
   cd $BUILD_WORKSPACE_DIRECTORY
 elif [[ -n "$TEST_WORKSPACE" ]]; then
   if [[ -n "$WORKSPACE" ]]; then
@@ -63,10 +66,12 @@ function ls-files {
     # https://github.com/github-linguist/linguist/blob/559a6426942abcae16b6d6b328147476432bf6cb/lib/linguist/languages.yml
     # using the ./mirror_linguist_languages.sh tool to transform to Bash code
     case "$language" in
+      'C') patterns=('*.c' '*.cats' '*.h' '*.idc') ;;
       'C++') patterns=('*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
       'Cuda') patterns=('*.cu' '*.cuh') ;;
       'CSS') patterns=('*.css') ;;
       'Go') patterns=('*.go') ;;
+      'GraphQL') patterns=('*.graphql' '*.gql' '*.graphqls') ;;
       'HTML') patterns=('*.html' '*.hta' '*.htm' '*.html.hl' '*.inc' '*.xht' '*.xhtml') ;;
       'JSON') patterns=('.all-contributorsrc' '.arcconfig' '.auto-changelog' '.c8rc' '.htmlhintrc' '.imgbotconfig' '.nycrc' '.tern-config' '.tern-project' '.watchmanconfig' 'Pipfile.lock' 'composer.lock' 'deno.lock' 'flake.lock' 'mcmod.info' '*.json' '*.4DForm' '*.4DProject' '*.avsc' '*.geojson' '*.gltf' '*.har' '*.ice' '*.JSON-tmLanguage' '*.jsonl' '*.mcmeta' '*.tfstate' '*.tfstate.backup' '*.topojson' '*.webapp' '*.webmanifest' '*.yy' '*.yyp') ;;
       'Java') patterns=('*.java' '*.jav' '*.jsh') ;;

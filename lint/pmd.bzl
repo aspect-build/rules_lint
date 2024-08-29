@@ -28,11 +28,11 @@ pmd = pmd_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintPMD"
 
-def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
+def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, options = []):
     """Run PMD as an action under Bazel.
 
     Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running-pmd-via-command-line
@@ -45,6 +45,7 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
         stdout: output file to generate
         exit_code: output file to write the exit code.
             If None, then fail the build when PMD exits non-zero.
+        options: additional command-line options, see https://pmd.github.io/pmd/pmd_userdocs_cli_reference.html
     """
     inputs = srcs + rulesets
     outputs = [stdout]
@@ -52,6 +53,7 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
     # Wire command-line options, see
     # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
     args = ctx.actions.args()
+    args.add_all(options)
     args.add("--rulesets")
     args.add_joined(rulesets, join_with = ",")
 
@@ -78,19 +80,22 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None):
 
 # buildifier: disable=function-docstring
 def _pmd_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["java_binary", "java_library"]:
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-
-    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+    outputs, info = output_files(_MNEMONIC, target, ctx)
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, report, exit_code)
-    else:
-        pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, report, exit_code)
+        noop_lint_action(ctx, outputs)
+        return [info]
+
+    # https://github.com/pmd/pmd/blob/master/docs/pages/pmd/userdocs/pmd_report_formats.md
+    format_options = ["--format", "textcolor" if ctx.attr._options[LintOptionsInfo].color else "text"]
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code, format_options)
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
-def lint_pmd_aspect(binary, rulesets):
+def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"]):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -128,6 +133,9 @@ def lint_pmd_aspect(binary, rulesets):
                 allow_empty = False,
                 doc = "Ruleset files.",
                 default = rulesets,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
     )

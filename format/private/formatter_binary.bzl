@@ -7,6 +7,7 @@ TOOLS = {
     "JavaScript": "prettier",
     "Markdown": "prettier",
     "CSS": "prettier",
+    "GraphQL": "prettier",
     "HTML": "prettier",
     "Python": "ruff",
     "Starlark": "buildifier",
@@ -20,6 +21,7 @@ TOOLS = {
     "SQL": "prettier",
     "Shell": "shfmt",
     "Protocol Buffer": "buf",
+    "C": "clang-format",
     "C++": "clang-format",
     "Cuda": "clang-format",
     "YAML": "yamlfmt",
@@ -49,7 +51,7 @@ CHECK_FLAGS = {
     "buf": "format -d --exit-code",
     "terraform-fmt": "fmt -check -diff",
     "jsonnetfmt": "--test",
-    "scalafmt": "--test",
+    "scalafmt": "--test --respect-project-filters",
     "clang-format": "--style=file --fallback-style=none --dry-run -Werror",
     "yamlfmt": "-lint",
     "rustfmt": "--check",
@@ -72,7 +74,10 @@ FIX_FLAGS = {
     "buf": "format -w",
     "terraform-fmt": "fmt",
     "jsonnetfmt": "--in-place",
-    "scalafmt": "",
+    # Force exclusions in the configuration file to be honored even when file paths are supplied
+    # as command-line arguments; see
+    # https://github.com/scalameta/scalafmt/pull/2020
+    "scalafmt": "--respect-project-filters",
     "clang-format": "-style=file --fallback-style=none -i",
     "yamlfmt": "",
     "rustfmt": "",

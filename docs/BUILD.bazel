@@ -28,8 +28,18 @@ stardoc_with_diff_test(
 )
 
 stardoc_with_diff_test(
+    name = "checkstyle",
+    bzl_library_target = "//lint:checkstyle",
+)
+
+stardoc_with_diff_test(
     name = "format",
     bzl_library_target = "//format:defs",
+)
+
+stardoc_with_diff_test(
+    name = "stylelint",
+    bzl_library_target = "//lint:stylelint",
 )
 
 stardoc_with_diff_test(
