@@ -13,7 +13,7 @@ filegroup(
 )
 ```
 
-or use a `markdown_library` rule such as the one in &lt;https://github.com/dwtj/dwtj_rules_markdown&gt;.
+or use a `markdown_library` rule such as the one in <https://github.com/dwtj/dwtj_rules_markdown>.
 Aspect plans to provide support for Markdown in [configure]() so these rules can be automatically
 maintained rather than requiring developers to write them by hand.
 
@@ -63,12 +63,13 @@ vale = vale_aspect(
 )
 ```
 
-
 <a id="fetch_vale"></a>
 
 ## fetch_vale
 
 <pre>
+load("@aspect_rules_lint//lint:vale.bzl", "fetch_vale")
+
 fetch_vale(<a href="#fetch_vale-tag">tag</a>)
 </pre>
 
@@ -79,7 +80,7 @@ A repository macro used from WORKSPACE to fetch vale binaries
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="fetch_vale-tag"></a>tag |  a tag of vale that we have mirrored, e.g. <code>v3.0.5</code>   |  <code>"v3.6.0"</code> |
+| <a id="fetch_vale-tag"></a>tag |  a tag of vale that we have mirrored, e.g. `v3.0.5`   |  `"v3.7.0"` |
 
 
 <a id="lint_vale_aspect"></a>
@@ -87,7 +88,9 @@ A repository macro used from WORKSPACE to fetch vale binaries
 ## lint_vale_aspect
 
 <pre>
-lint_vale_aspect(<a href="#lint_vale_aspect-binary">binary</a>, <a href="#lint_vale_aspect-config">config</a>, <a href="#lint_vale_aspect-styles">styles</a>)
+load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
+
+lint_vale_aspect(<a href="#lint_vale_aspect-binary">binary</a>, <a href="#lint_vale_aspect-config">config</a>, <a href="#lint_vale_aspect-styles">styles</a>, <a href="#lint_vale_aspect-rule_kinds">rule_kinds</a>, <a href="#lint_vale_aspect-filegroup_tags">filegroup_tags</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -99,7 +102,9 @@ A factory function to create a linter aspect.
 | :------------- | :------------- | :------------- |
 | <a id="lint_vale_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_vale_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
-| <a id="lint_vale_aspect-styles"></a>styles |  <p align="center"> - </p>   |  <code>Label("//lint:empty_styles")</code> |
+| <a id="lint_vale_aspect-styles"></a>styles |  <p align="center"> - </p>   |  `Label("@aspect_rules_lint//lint:empty_styles")` |
+| <a id="lint_vale_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["markdown_library"]` |
+| <a id="lint_vale_aspect-filegroup_tags"></a>filegroup_tags |  <p align="center"> - </p>   |  `["markdown", "lint-with-vale"]` |
 
 
 <a id="vale_action"></a>
@@ -107,7 +112,9 @@ A factory function to create a linter aspect.
 ## vale_action
 
 <pre>
-vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable">executable</a>, <a href="#vale_action-srcs">srcs</a>, <a href="#vale_action-styles">styles</a>, <a href="#vale_action-config">config</a>, <a href="#vale_action-stdout">stdout</a>, <a href="#vale_action-exit_code">exit_code</a>)
+load("@aspect_rules_lint//lint:vale.bzl", "vale_action")
+
+vale_action(<a href="#vale_action-ctx">ctx</a>, <a href="#vale_action-executable">executable</a>, <a href="#vale_action-srcs">srcs</a>, <a href="#vale_action-styles">styles</a>, <a href="#vale_action-config">config</a>, <a href="#vale_action-stdout">stdout</a>, <a href="#vale_action-exit_code">exit_code</a>, <a href="#vale_action-output">output</a>, <a href="#vale_action-env">env</a>)
 </pre>
 
 Run Vale as an action under Bazel.
@@ -123,6 +130,8 @@ Run Vale as an action under Bazel.
 | <a id="vale_action-styles"></a>styles |  a directory containing vale extensions, following https://vale.sh/docs/topics/styles/   |  none |
 | <a id="vale_action-config"></a>config |  label of the .vale.ini file, see https://vale.sh/docs/vale-cli/structure/#valeini   |  none |
 | <a id="vale_action-stdout"></a>stdout |  output file containing stdout of Vale   |  none |
-| <a id="vale_action-exit_code"></a>exit_code |  output file containing Vale exit code. If None, then fail the build when Vale exits non-zero.   |  <code>None</code> |
+| <a id="vale_action-exit_code"></a>exit_code |  output file containing Vale exit code. If None, then fail the build when Vale exits non-zero.   |  `None` |
+| <a id="vale_action-output"></a>output |  the value for the --output flag   |  `"CLI"` |
+| <a id="vale_action-env"></a>env |  environment variables for vale   |  `{}` |
 
 

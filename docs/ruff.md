@@ -48,35 +48,13 @@ ruff = lint_ruff_aspect(
 )
 ```
 
-
-<a id="ruff_workaround_20269"></a>
-
-## ruff_workaround_20269
-
-<pre>
-ruff_workaround_20269(<a href="#ruff_workaround_20269-name">name</a>, <a href="#ruff_workaround_20269-build_file_content">build_file_content</a>, <a href="#ruff_workaround_20269-repo_mapping">repo_mapping</a>, <a href="#ruff_workaround_20269-sha256">sha256</a>, <a href="#ruff_workaround_20269-strip_prefix">strip_prefix</a>, <a href="#ruff_workaround_20269-url">url</a>)
-</pre>
-
-Workaround for https://github.com/bazelbuild/bazel/issues/20269
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="ruff_workaround_20269-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="ruff_workaround_20269-build_file_content"></a>build_file_content |  -   | String | optional | <code>""</code> |
-| <a id="ruff_workaround_20269-repo_mapping"></a>repo_mapping |  A dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.&lt;p&gt;For example, an entry <code>"@foo": "@bar"</code> declares that, for any time this repository depends on <code>@foo</code> (such as a dependency on <code>@foo//some:target</code>, it should actually resolve that dependency within globally-declared <code>@bar</code> (<code>@bar//some:target</code>).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | required |  |
-| <a id="ruff_workaround_20269-sha256"></a>sha256 |  -   | String | optional | <code>""</code> |
-| <a id="ruff_workaround_20269-strip_prefix"></a>strip_prefix |  unlike http_archive, any value causes us to pass --strip-components=1 to tar   | String | optional | <code>""</code> |
-| <a id="ruff_workaround_20269-url"></a>url |  -   | String | optional | <code>""</code> |
-
-
 <a id="fetch_ruff"></a>
 
 ## fetch_ruff
 
 <pre>
+load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
+
 fetch_ruff(<a href="#fetch_ruff-tag">tag</a>)
 </pre>
 
@@ -90,7 +68,7 @@ Allows the user to select a particular ruff version, rather than get whatever is
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="fetch_ruff-tag"></a>tag |  a tag of ruff that we have mirrored, e.g. <code>v0.1.0</code>   |  none |
+| <a id="fetch_ruff-tag"></a>tag |  a tag of ruff that we have mirrored, e.g. `v0.1.0`   |  none |
 
 
 <a id="lint_ruff_aspect"></a>
@@ -98,7 +76,9 @@ Allows the user to select a particular ruff version, rather than get whatever is
 ## lint_ruff_aspect
 
 <pre>
-lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_ruff_aspect-configs">configs</a>)
+load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
+
+lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_ruff_aspect-configs">configs</a>, <a href="#lint_ruff_aspect-rule_kinds">rule_kinds</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -106,6 +86,7 @@ A factory function to create a linter aspect.
 Attrs:
     binary: a ruff executable
     configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
+    rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
 
 **PARAMETERS**
 
@@ -114,6 +95,7 @@ Attrs:
 | :------------- | :------------- | :------------- |
 | <a id="lint_ruff_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_ruff_aspect-configs"></a>configs |  <p align="center"> - </p>   |  none |
+| <a id="lint_ruff_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["py_binary", "py_library", "py_test"]` |
 
 
 <a id="ruff_action"></a>
@@ -121,7 +103,9 @@ Attrs:
 ## ruff_action
 
 <pre>
-ruff_action(<a href="#ruff_action-ctx">ctx</a>, <a href="#ruff_action-executable">executable</a>, <a href="#ruff_action-srcs">srcs</a>, <a href="#ruff_action-config">config</a>, <a href="#ruff_action-stdout">stdout</a>, <a href="#ruff_action-exit_code">exit_code</a>)
+load("@aspect_rules_lint//lint:ruff.bzl", "ruff_action")
+
+ruff_action(<a href="#ruff_action-ctx">ctx</a>, <a href="#ruff_action-executable">executable</a>, <a href="#ruff_action-srcs">srcs</a>, <a href="#ruff_action-config">config</a>, <a href="#ruff_action-stdout">stdout</a>, <a href="#ruff_action-exit_code">exit_code</a>, <a href="#ruff_action-env">env</a>)
 </pre>
 
 Run ruff as an action under Bazel.
@@ -150,7 +134,8 @@ However this is needed because:
 | <a id="ruff_action-srcs"></a>srcs |  python files to be linted   |  none |
 | <a id="ruff_action-config"></a>config |  labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)   |  none |
 | <a id="ruff_action-stdout"></a>stdout |  output file of linter results to generate   |  none |
-| <a id="ruff_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when ruff exits non-zero. See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes   |  <code>None</code> |
+| <a id="ruff_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when ruff exits non-zero. See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes   |  `None` |
+| <a id="ruff_action-env"></a>env |  environment variaables for ruff   |  `{}` |
 
 
 <a id="ruff_fix"></a>
@@ -158,7 +143,9 @@ However this is needed because:
 ## ruff_fix
 
 <pre>
-ruff_fix(<a href="#ruff_fix-ctx">ctx</a>, <a href="#ruff_fix-executable">executable</a>, <a href="#ruff_fix-srcs">srcs</a>, <a href="#ruff_fix-config">config</a>, <a href="#ruff_fix-patch">patch</a>, <a href="#ruff_fix-stdout">stdout</a>, <a href="#ruff_fix-exit_code">exit_code</a>)
+load("@aspect_rules_lint//lint:ruff.bzl", "ruff_fix")
+
+ruff_fix(<a href="#ruff_fix-ctx">ctx</a>, <a href="#ruff_fix-executable">executable</a>, <a href="#ruff_fix-srcs">srcs</a>, <a href="#ruff_fix-config">config</a>, <a href="#ruff_fix-patch">patch</a>, <a href="#ruff_fix-stdout">stdout</a>, <a href="#ruff_fix-exit_code">exit_code</a>, <a href="#ruff_fix-env">env</a>)
 </pre>
 
 Create a Bazel Action that spawns ruff with --fix.
@@ -175,5 +162,31 @@ Create a Bazel Action that spawns ruff with --fix.
 | <a id="ruff_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
 | <a id="ruff_fix-stdout"></a>stdout |  output file of linter results to generate   |  none |
 | <a id="ruff_fix-exit_code"></a>exit_code |  output file to write the exit code   |  none |
+| <a id="ruff_fix-env"></a>env |  environment variaables for ruff   |  `{}` |
+
+
+<a id="ruff_workaround_20269"></a>
+
+## ruff_workaround_20269
+
+<pre>
+load("@aspect_rules_lint//lint:ruff.bzl", "ruff_workaround_20269")
+
+ruff_workaround_20269(<a href="#ruff_workaround_20269-name">name</a>, <a href="#ruff_workaround_20269-build_file_content">build_file_content</a>, <a href="#ruff_workaround_20269-repo_mapping">repo_mapping</a>, <a href="#ruff_workaround_20269-sha256">sha256</a>, <a href="#ruff_workaround_20269-strip_prefix">strip_prefix</a>, <a href="#ruff_workaround_20269-url">url</a>)
+</pre>
+
+Workaround for https://github.com/bazelbuild/bazel/issues/20269
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="ruff_workaround_20269-name"></a>name |  A unique name for this repository.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="ruff_workaround_20269-build_file_content"></a>build_file_content |  -   | String | optional |  `""`  |
+| <a id="ruff_workaround_20269-repo_mapping"></a>repo_mapping |  In `WORKSPACE` context only: a dictionary from local repository name to global repository name. This allows controls over workspace dependency resolution for dependencies of this repository.<br><br>For example, an entry `"@foo": "@bar"` declares that, for any time this repository depends on `@foo` (such as a dependency on `@foo//some:target`, it should actually resolve that dependency within globally-declared `@bar` (`@bar//some:target`).<br><br>This attribute is _not_ supported in `MODULE.bazel` context (when invoking a repository rule inside a module extension's implementation function).   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  |
+| <a id="ruff_workaround_20269-sha256"></a>sha256 |  -   | String | optional |  `""`  |
+| <a id="ruff_workaround_20269-strip_prefix"></a>strip_prefix |  unlike http_archive, any value causes us to pass --strip-components=1 to tar   | String | optional |  `""`  |
+| <a id="ruff_workaround_20269-url"></a>url |  -   | String | optional |  `""`  |
 
 

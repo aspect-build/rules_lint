@@ -50,7 +50,7 @@ Add these three things:
 2. A `_my_linter_aspect_impl` function, following the https://bazel.build/extending/aspects#aspect_implementation API.
    This is responsible for selecting which rule types in the graph it "knows how to lint".
    It should call the `my_linter_action` function.
-   It must always return a `rules_lint_report` output group, which is easiest by using the
+   It must always return the correct output groups, which is easiest by using the
    `report_files` helper in `//lint/private:lint_aspect.bzl`.
    The simple lint.sh also relies on the report output filenames containing `AspectRulesLint`, which comes from
    the convention that `AspectRulesLint` is the prefix for all rules_lint linter action mnemonics.

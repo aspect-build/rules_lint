@@ -28,12 +28,13 @@ pmd = pmd_aspect(
 )
 ```
 
-
 <a id="fetch_pmd"></a>
 
 ## fetch_pmd
 
 <pre>
+load("@aspect_rules_lint//lint:pmd.bzl", "fetch_pmd")
+
 fetch_pmd()
 </pre>
 
@@ -46,7 +47,9 @@ fetch_pmd()
 ## lint_pmd_aspect
 
 <pre>
-lint_pmd_aspect(<a href="#lint_pmd_aspect-binary">binary</a>, <a href="#lint_pmd_aspect-rulesets">rulesets</a>)
+load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
+
+lint_pmd_aspect(<a href="#lint_pmd_aspect-binary">binary</a>, <a href="#lint_pmd_aspect-rulesets">rulesets</a>, <a href="#lint_pmd_aspect-rule_kinds">rule_kinds</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -72,6 +75,7 @@ Attrs:
 | :------------- | :------------- | :------------- |
 | <a id="lint_pmd_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_pmd_aspect-rulesets"></a>rulesets |  <p align="center"> - </p>   |  none |
+| <a id="lint_pmd_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["java_binary", "java_library"]` |
 
 
 <a id="pmd_action"></a>
@@ -79,7 +83,9 @@ Attrs:
 ## pmd_action
 
 <pre>
-pmd_action(<a href="#pmd_action-ctx">ctx</a>, <a href="#pmd_action-executable">executable</a>, <a href="#pmd_action-srcs">srcs</a>, <a href="#pmd_action-rulesets">rulesets</a>, <a href="#pmd_action-stdout">stdout</a>, <a href="#pmd_action-exit_code">exit_code</a>)
+load("@aspect_rules_lint//lint:pmd.bzl", "pmd_action")
+
+pmd_action(<a href="#pmd_action-ctx">ctx</a>, <a href="#pmd_action-executable">executable</a>, <a href="#pmd_action-srcs">srcs</a>, <a href="#pmd_action-rulesets">rulesets</a>, <a href="#pmd_action-stdout">stdout</a>, <a href="#pmd_action-exit_code">exit_code</a>, <a href="#pmd_action-options">options</a>)
 </pre>
 
 Run PMD as an action under Bazel.
@@ -97,6 +103,7 @@ Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running
 | <a id="pmd_action-srcs"></a>srcs |  java files to be linted   |  none |
 | <a id="pmd_action-rulesets"></a>rulesets |  list of labels of the PMD ruleset files   |  none |
 | <a id="pmd_action-stdout"></a>stdout |  output file to generate   |  none |
-| <a id="pmd_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when PMD exits non-zero.   |  <code>None</code> |
+| <a id="pmd_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when PMD exits non-zero.   |  `None` |
+| <a id="pmd_action-options"></a>options |  additional command-line options, see https://pmd.github.io/pmd/pmd_userdocs_cli_reference.html   |  `[]` |
 
 

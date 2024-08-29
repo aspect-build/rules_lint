@@ -38,13 +38,14 @@ http_archive(
     url = "https://github.com/aspect-build/rules_lint/releases/download/${TAG}/${ARCHIVE}",
 )
 
-# aspect_rules_lint depends on aspect_bazel_lib. Either 1.x or 2.x works.
+# aspect_rules_lint depends on aspect_bazel_lib.
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "979667bb7276ee8fcf2c114c9be9932b9a3052a64a647e0dcaacfb9c0016f0a3",
-    strip_prefix = "bazel-lib-2.4.1",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.4.1/bazel-lib-v2.4.1.tar.gz",
+    sha256 = "6d758a8f646ecee7a3e294fbe4386daafbe0e5966723009c290d493f227c390b",
+    strip_prefix = "bazel-lib-2.7.7",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.7/bazel-lib-v2.7.7.tar.gz",
 )
+
 load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies")
 
 # aspect_bazel_lib depends on bazel_skylib

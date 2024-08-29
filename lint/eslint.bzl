@@ -55,18 +55,18 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintESLint"
 
-def _gather_inputs(ctx, srcs):
+def _gather_inputs(ctx, srcs, files):
     inputs = copy_files_to_bin_actions(ctx, srcs)
 
     # Add the config file along with any deps it has on npm packages
     if "gather_files_from_js_providers" in dir(js_lib_helpers):
         # rules_js 1.x
         js_inputs = js_lib_helpers.gather_files_from_js_providers(
-            ctx.attr._config_files + [ctx.attr._workaround_17660, ctx.attr._formatter],
+            ctx.attr._config_files + ctx.rule.attr.deps + files,
             include_transitive_sources = True,
             include_declarations = True,
             include_npm_linked_packages = True,
@@ -74,7 +74,7 @@ def _gather_inputs(ctx, srcs):
     else:
         # rules_js 2.x
         js_inputs = js_lib_helpers.gather_files_from_js_infos(
-            ctx.attr._config_files + [ctx.attr._workaround_17660, ctx.attr._formatter],
+            ctx.attr._config_files + ctx.rule.attr.deps + files,
             include_sources = True,
             include_transitive_sources = True,
             include_types = True,
@@ -84,7 +84,7 @@ def _gather_inputs(ctx, srcs):
     inputs.extend(js_inputs.to_list())
     return inputs
 
-def eslint_action(ctx, executable, srcs, report, exit_code = None):
+def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "stylish", env = {}):
     """Create a Bazel Action that spawns an eslint process.
 
     Adapter for wrapping Bazel around
@@ -94,51 +94,60 @@ def eslint_action(ctx, executable, srcs, report, exit_code = None):
         ctx: an action context OR aspect context
         executable: struct with an eslint field
         srcs: list of file objects to lint
-        report: output file containing the stdout or --output-file of eslint
+        stdout: output file containing the stdout or --output-file of eslint
         exit_code: output file containing the exit code of eslint.
             If None, then fail the build when eslint exits non-zero.
+        format: value for eslint `--format` CLI flag
+        env: environment variables for eslint
     """
 
     args = ctx.actions.args()
+    args.add("--no-warn-ignored")
+    file_inputs = [ctx.attr._workaround_17660]
 
-    # TODO: enable if debug config, similar to rules_ts
-    # args.add("--debug")
-
-    args.add_all(["--format", "../../../" + ctx.file._formatter.path])
+    if ctx.attr._options[LintOptionsInfo].debug:
+        args.add("--debug")
+    if type(format) == "string":
+        args.add_all(["--format", format])
+    else:
+        args.add_all(["--format", "../../../" + format.files.to_list()[0].path])
+        file_inputs.append(format)
     args.add_all([s.short_path for s in srcs])
-
-    env = {"BAZEL_BINDIR": ctx.bin_dir.path}
 
     if not exit_code:
         ctx.actions.run_shell(
-            inputs = _gather_inputs(ctx, srcs),
-            outputs = [report],
+            inputs = _gather_inputs(ctx, srcs, file_inputs),
+            outputs = [stdout],
             tools = [executable._eslint],
             arguments = [args],
-            command = executable._eslint.path + " $@ && touch " + report.path,
-            env = env,
+            command = executable._eslint.path + " $@ && touch " + stdout.path,
+            env = dict(env, **{
+                "BAZEL_BINDIR": ctx.bin_dir.path,
+            }),
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with ESLint",
         )
     else:
-        # Workaround: create an empty report file in case eslint doesn't write one
+        # Workaround: create an empty file in case eslint doesn't write one
         # Use `../../..` to return to the execroot?
         args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
 
-        args.add_all(["--output-file", report.short_path])
-        env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
+        args.add_all(["--output-file", stdout.short_path])
 
         ctx.actions.run(
-            inputs = _gather_inputs(ctx, srcs),
-            outputs = [report, exit_code],
+            inputs = _gather_inputs(ctx, srcs, file_inputs),
+            outputs = [stdout, exit_code],
             executable = executable._eslint,
             arguments = [args],
-            env = env,
+            env = dict(env, **{
+                "BAZEL_BINDIR": ctx.bin_dir.path,
+                "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
+            }),
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with ESLint",
         )
 
-def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
+def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code, format = "stylish", env = {}):
     """Create a Bazel Action that spawns eslint with --fix.
 
     Args:
@@ -148,31 +157,43 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
         stdout: output file containing the stdout or --output-file of eslint
         exit_code: output file containing the exit code of eslint
+        format: value for eslint `--format` CLI flag
+        env: environment variaables for eslint
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
+
+    file_inputs = [ctx.attr._workaround_17660]
+    args = ["--fix"]
+
+    if type(format) == "string":
+        args.extend(["--format", format])
+    else:
+        args.extend(["--format", "../../../" + format.files.to_list()[0].path])
+        file_inputs.append(format)
+    args.extend([s.short_path for s in srcs])
 
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
             "linter": executable._eslint.path,
-            "args": ["--fix", "--format", "../../../" + ctx.file._formatter.path] + [s.short_path for s in srcs],
-            "env": {"BAZEL_BINDIR": ctx.bin_dir.path},
+            "args": args,
+            "env": dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
             "files_to_diff": [s.path for s in srcs],
             "output": patch.path,
         }),
     )
 
     ctx.actions.run(
-        inputs = _gather_inputs(ctx, srcs) + [patch_cfg],
+        inputs = _gather_inputs(ctx, srcs, file_inputs) + [patch_cfg],
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
-        env = {
+        env = dict(env, **{
             "BAZEL_BINDIR": ".",
             "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        },
+        }),
         tools = [executable._eslint],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with ESLint",
@@ -180,27 +201,35 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code):
 
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["js_library", "ts_project", "ts_project_rule"]:
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code, patch)
-        else:
-            eslint_fix(ctx, ctx.executable, files_to_lint, patch, report, exit_code)
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
     else:
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, report, exit_code)
-        else:
-            eslint_action(ctx, ctx.executable, files_to_lint, report, exit_code)
+        outputs, info = output_files(_MNEMONIC, target, ctx)
+
+    # https://www.npmjs.com/package/chalk#chalklevel
+    # 2: Force 256 color support even when a tty isn't detected
+    color_env = {"FORCE_COLOR": "2"} if ctx.attr._options[LintOptionsInfo].color else {}
+
+    if len(files_to_lint) == 0:
+        noop_lint_action(ctx, outputs)
+        return [info]
+
+    # eslint can produce a patch file at the same time it reports the unpatched violations
+    if hasattr(outputs, "patch"):
+        eslint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, format = ctx.attr._stylish_formatter, env = color_env)
+    else:
+        eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, format = ctx.attr._stylish_formatter, env = color_env)
+
+    # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
+    eslint_action(ctx, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code, format = ctx.attr._compact_formatter)
 
     return [info]
 
-def lint_eslint_aspect(binary, configs):
+def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project", "ts_project_rule"]):
     """A factory function to create a linter aspect.
 
     Args:
@@ -211,6 +240,7 @@ def lint_eslint_aspect(binary, configs):
             eslint_bin.eslint_binary(name = "eslint")
             ```
         configs: label(s) of the eslint config file(s)
+        rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -242,10 +272,18 @@ def lint_eslint_aspect(binary, configs):
                 allow_single_file = True,
                 cfg = "exec",
             ),
-            "_formatter": attr.label(
-                default = "@aspect_rules_lint//lint:eslint.bazel-formatter",
+            "_compact_formatter": attr.label(
+                default = "@aspect_rules_lint//lint:eslint.compact-formatter",
                 allow_single_file = True,
                 cfg = "exec",
+            ),
+            "_stylish_formatter": attr.label(
+                default = "@aspect_rules_lint//lint:eslint.stylish-formatter",
+                allow_single_file = True,
+                cfg = "exec",
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
         toolchains = COPY_FILE_TO_BIN_TOOLCHAINS,

@@ -64,13 +64,13 @@ vale = vale_aspect(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "output_files", "should_visit")
 load(":vale_library.bzl", "fetch_styles")
 load(":vale_versions.bzl", "VALE_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintVale"
 
-def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None):
+def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None, output = "CLI", env = {}):
     """Run Vale as an action under Bazel.
 
     Args:
@@ -82,21 +82,23 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None)
         stdout: output file containing stdout of Vale
         exit_code: output file containing Vale exit code.
             If None, then fail the build when Vale exits non-zero.
+        output: the value for the --output flag
+        env: environment variables for vale
     """
     inputs = srcs + [config]
-    env = {}
+
     if styles:
         inputs.append(styles)
 
         # Introduced in https://github.com/errata-ai/vale/commit/2139c4176a4d2e62d7dfb95dca24b96b9e8b7251
         # and released in v3.1.0
-        env["VALE_STYLES_PATH"] = styles.path
+        env = dict(env, **{"VALE_STYLES_PATH": styles.path})
 
     # Wire command-line options, see output of vale --help
     args = ctx.actions.args()
     args.add_all(srcs)
     args.add_all(["--config", config])
-    args.add_all(["--output", "line"])
+    args.add_all(["--output", output])
     outputs = [stdout]
 
     if exit_code:
@@ -122,25 +124,28 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None)
 
 # buildifier: disable=function-docstring
 def _vale_aspect_impl(target, ctx):
-    # There's no "official" markdown_library rule.
-    # Users might want to try https://github.com/dwtj/dwtj_rules_markdown but we expect many won't
-    # want to take that dependency.
-    # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
-    if ctx.rule.kind == "markdown_library" or (ctx.rule.kind == "filegroup" and "markdown" in ctx.rule.attr.tags):
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-        styles = None
-        if ctx.files._styles:
-            if len(ctx.files._styles) != 1:
-                fail("Only a single directory should be in styles")
-            styles = ctx.files._styles[0]
-            if not styles.is_directory:
-                fail("Styles should be a directory containing installed styles")
-        vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, report, exit_code)
-        return [info]
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
+        return []
 
-    return []
+    # The "CLI" output style is automatically colored unless disabled
+    color_env = {} if ctx.attr._options[LintOptionsInfo].color else {"NO_COLOR": "1"}
+    outputs, info = output_files(_MNEMONIC, target, ctx)
+    styles = None
+    if ctx.files._styles:
+        if len(ctx.files._styles) != 1:
+            fail("Only a single directory should be in styles")
+        styles = ctx.files._styles[0]
+        if not styles.is_directory:
+            fail("Styles should be a directory containing installed styles")
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.out, outputs.human.exit_code, env = color_env)
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.machine.out, outputs.machine.exit_code, output = "line")
+    return [info]
 
-def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles")):
+# There's no "official" markdown_library rule.
+# Users might want to try https://github.com/dwtj/dwtj_rules_markdown but we expect many won't
+# want to take that dependency.
+# So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
+def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule_kinds = ["markdown_library"], filegroup_tags = ["markdown", "lint-with-vale"]):
     """A factory function to create a linter aspect."""
     return aspect(
         implementation = _vale_aspect_impl,
@@ -162,6 +167,12 @@ def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles")):
             ),
             "_styles": attr.label(
                 default = styles,
+            ),
+            "_filegroup_tags": attr.string_list(
+                default = filegroup_tags,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
     )

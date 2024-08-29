@@ -14,7 +14,7 @@ buf = buf_lint_aspect(
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintBuf"
 
@@ -86,26 +86,25 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
     )
 
 def _buf_lint_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["proto_library"]:
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    report, exit_code, info = report_files(_MNEMONIC, target, ctx)
-    buf_lint_action(
-        ctx,
-        ctx.toolchains[ctx.attr._buf_toolchain].cli,
-        ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable,
-        target,
-        report,
-        exit_code,
-    )
+    buf = ctx.toolchains[ctx.attr._buf_toolchain].cli
+    protoc = ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable
+    outputs, info = output_files(_MNEMONIC, target, ctx)
+
+    # TODO(alex): there should be a reason to run the buf action again rather than just copy the files
+    buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code)
+    buf_lint_action(ctx, buf, protoc, target, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
-def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type"):
+def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type", rule_kinds = ["proto_library"]):
     """A factory function to create a linter aspect.
 
     Args:
         config: label of the the buf.yaml file
         toolchain: override the default toolchain of the protoc-gen-buf-lint tool
+        rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
     """
     return aspect(
         implementation = _buf_lint_aspect_impl,
@@ -121,6 +120,9 @@ def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
             "_config": attr.label(
                 default = config,
                 allow_single_file = True,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
         toolchains = [toolchain, "@rules_proto//proto:toolchain_type"],
