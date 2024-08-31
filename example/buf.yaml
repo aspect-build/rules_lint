@@ -2,7 +2,6 @@ version: v2
 lint:
   use:
     - DEFAULT
-  allow_comment_ignores: true
   except:
     - IMPORT_USED
     - RPC_REQUEST_STANDARD_NAME
