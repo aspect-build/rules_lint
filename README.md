@@ -22,7 +22,7 @@ Features:
 New tools are being added frequently, so check this page again!
 
 | Language               | Formatter             | Linter(s)            |
-| ---------------------- | --------------------- |----------------------|
+| ---------------------- | --------------------- | -------------------- |
 | C / C++                | [clang-format]        | [clang-tidy]         |
 | Cuda                   | [clang-format]        |                      |
 | CSS, Less, Sass        | [Prettier]            | [Stylelint]          |
@@ -108,17 +108,20 @@ To format files, run the target you create when you install rules_lint.
 
 We recommend using a Git pre-commit hook to format changed files, and [Aspect Workflows] to provide the check on CI.
 
-[![asciicast](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3.svg)](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3)
-
 See [Formatting](./docs/formatting.md) for more ways to use the formatter.
+
+Demo:
+![pre-commit format](./docs/format-demo.svg)
+![format on CI](./docs/format-ci-demo.png)
 
 ### Lint
 
 To lint code, we recommend using the [Aspect CLI] to get the missing `lint` command, and [Aspect Workflows] to provide first-class support for "linters as code reviewers".
 
-For example, running `bazel lint //src:all` prints lint warnings to the terminal for all targets in the `//src` package:
+For example, running `bazel lint //src:all` prints lint warnings to the terminal for all targets in the `//src` package.
+Suggested fixes from the linter tools are presented interactively.
 
-[![asciicast](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq.svg)](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq)
+![bazel lint demo](./docs/lint-fix-demo.svg)
 
 See [Linting](./docs/linting.md) for more ways to use the linter.
 

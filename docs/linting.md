@@ -12,7 +12,9 @@ You must declare your linters as Bazel aspects.
 We suggest creating a `linters.bzl` file in whatever package contains most of your
 custom Bazel configuration, commonly in `tools/lint`.
 This `linters.bzl` should contain linter aspect declarations.
-See the `docs/` folder for "aspect factory functions" that declare your linters.
+
+See the [example linters.bzl](./examples/tools/lint/linters.bzl) for a complete install example.
+See the `docs/` folder for API docs of the "aspect factory functions" that declare your linters.
 
 Finally, register those linter aspects in the lint runner. See details below.
 
