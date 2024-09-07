@@ -111,15 +111,17 @@ We recommend using a Git pre-commit hook to format changed files, and [Aspect Wo
 See [Formatting](./docs/formatting.md) for more ways to use the formatter.
 
 Demo:
-[![asciicast](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3.svg)](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3)
+![pre-commit format](./docs/format-demo.svg)
+![format on CI](./docs/format-ci-demo.png)
 
 ### Lint
 
 To lint code, we recommend using the [Aspect CLI] to get the missing `lint` command, and [Aspect Workflows] to provide first-class support for "linters as code reviewers".
 
-For example, running `bazel lint //src:all` prints lint warnings to the terminal for all targets in the `//src` package:
+For example, running `bazel lint //src:all` prints lint warnings to the terminal for all targets in the `//src` package.
+Suggested fixes from the linter tools are presented interactively.
 
-[![asciicast](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq.svg)](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq)
+![bazel lint demo](./docs/lint-fix-demo.svg)
 
 See [Linting](./docs/linting.md) for more ways to use the linter.
 

@@ -1,5 +1,5 @@
 {
-  hello:: function( name) (
-    { hello: name  }
+  hello:: function(name) (
+    { hello: name }
   ),
 }
