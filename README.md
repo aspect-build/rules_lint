@@ -22,7 +22,7 @@ Features:
 New tools are being added frequently, so check this page again!
 
 | Language               | Formatter             | Linter(s)            |
-| ---------------------- | --------------------- |----------------------|
+| ---------------------- | --------------------- | -------------------- |
 | C / C++                | [clang-format]        | [clang-tidy]         |
 | Cuda                   | [clang-format]        |                      |
 | CSS, Less, Sass        | [Prettier]            | [Stylelint]          |
@@ -108,9 +108,10 @@ To format files, run the target you create when you install rules_lint.
 
 We recommend using a Git pre-commit hook to format changed files, and [Aspect Workflows] to provide the check on CI.
 
-[![asciicast](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3.svg)](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3)
-
 See [Formatting](./docs/formatting.md) for more ways to use the formatter.
+
+Demo:
+[![asciicast](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3.svg)](https://asciinema.org/a/IdWOvcpHLpYwVGnknUlRClCS3)
 
 ### Lint
 
