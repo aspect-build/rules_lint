@@ -112,7 +112,6 @@ See [Formatting](./docs/formatting.md) for more ways to use the formatter.
 
 Demo:
 ![pre-commit format](./docs/format-demo.svg)
-![format on CI](./docs/format-ci-demo.png)
 
 ### Lint
 
@@ -121,9 +120,10 @@ To lint code, we recommend using the [Aspect CLI] to get the missing `lint` comm
 For example, running `bazel lint //src:all` prints lint warnings to the terminal for all targets in the `//src` package.
 Suggested fixes from the linter tools are presented interactively.
 
-![bazel lint demo](./docs/lint-fix-demo.svg)
-
 See [Linting](./docs/linting.md) for more ways to use the linter.
+
+Demo:
+![bazel lint demo](./docs/lint-fix-demo.svg)
 
 ### Ignoring files
 
