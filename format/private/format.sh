@@ -162,7 +162,7 @@ function ls-files {
           fi
 
           # Check if the attribute is set
-          if [[ "$line" == *"set" ]]; then
+          if [[ "$line" == *": set" || "$line" == *": true" ]]; then
               attribute_set=true
           fi
       done <<< "$git_attributes"

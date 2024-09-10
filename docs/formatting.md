@@ -84,11 +84,11 @@ Assuming you installed with the typical layout:
 Commonly, the underlying formatters that rules_lint invokes provide their own methods of excluding files (.prettierignore for example). At times when that is not the case, rules_lint provides its
 own escape hatch to exclude files from linting using attributes specified via [`.gitattributes` files](https://git-scm.com/docs/gitattributes).
 
-If any of following attributes are set on a file it will be excluded:
+If any of following attributes are set or have a value of `true` on a file it will be excluded:
 
-- `rules-lint-ignored`
-- `gitlab-generated`
-- `linguist-generated`
+- `rules-lint-ignored=true`
+- `gitlab-generated=true`
+- `linguist-generated=true`
 
 ### Install as a pre-commit hook
 
