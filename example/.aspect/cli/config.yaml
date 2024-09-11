@@ -9,3 +9,4 @@ lint:
     - //tools/lint:linters.bzl%ruff
     - //tools/lint:linters.bzl%vale
     - //tools/lint:linters.bzl%checkstyle
+    - //tools/lint:linters.bzl%clang_tidy

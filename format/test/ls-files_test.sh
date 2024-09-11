@@ -36,8 +36,8 @@ kt=$(ls-files Kotlin)
 # .gitattributes should allow more excludes
 cat >.gitattributes <<EOF
 gen1.js rules-lint-ignored
-gen2.js rules-lint-ignored
-gen2.js gitlab-generated
+gen2.js rules-lint-ignored=false
+gen2.js gitlab-generated=true
 gen3.js linguist-generated
 EOF
 js=$(ls-files JavaScript)
