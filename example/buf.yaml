@@ -3,5 +3,5 @@ lint:
   use:
     - DEFAULT
   except:
-    - IMPORT_USED
     - RPC_REQUEST_STANDARD_NAME
+    - PACKAGE_DEFINED
