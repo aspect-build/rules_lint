@@ -43,7 +43,7 @@ CHECK_FLAGS = {
     "buildifier": "-mode=check",
     "swiftformat": "--lint",
     "prettier": "--check",
-    "ruff": "format --check --force-exclude",
+    "ruff": "format --check --force-exclude --diff",
     "shfmt": "--diff --apply-ignore",
     "java-format": "--set-exit-if-changed --dry-run",
     "ktfmt": "--set-exit-if-changed --dry-run",
