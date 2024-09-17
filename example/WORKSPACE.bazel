@@ -273,9 +273,8 @@ kt_register_toolchains()
 
 http_archive(
     name = "rules_rust",
-    integrity = "sha256-Eg0TqoZgX2BG0VEhB6qfWrxL5luctWwFhogWgtzYQ78=",
-    strip_prefix = "rules_rust-4a3ffcb1e89b3f20b12a37b55595682f4bc866b7",
-    urls = ["https://github.com/bazelbuild/rules_rust/archive/4a3ffcb1e89b3f20b12a37b55595682f4bc866b7.tar.gz"],
+    integrity = "sha256-MZscNcESBO9WsdlKVJ9rnTUygTt3jwLXCe9oyDcDbPE=",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.50.1/rules_rust-v0.50.1.tar.gz"],
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
