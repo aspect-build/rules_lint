@@ -73,7 +73,11 @@ format_multirun(
     markdown = ":prettier",
     protocol_buffer = "//tools/lint:buf",
     python = "@aspect_rules_lint//format:ruff",
-    rust = "@rules_rust//tools/rustfmt:upstream_rustfmt",
+    # Note, older rules_rust versions may need
+    # @rules_rust//tools/rustfmt:upstream_rustfmt
+    # which was later deprecated in
+    # https://github.com/bazelbuild/rules_rust/pull/2703
+    rust = "@rules_rust//tools/upstream_wrapper:rustfmt",
     scala = ":scalafmt",
     shell = "@aspect_rules_lint//format:shfmt",
     sql = ":prettier",
