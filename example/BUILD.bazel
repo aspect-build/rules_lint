@@ -41,6 +41,9 @@ js_library(
 js_library(
     name = "stylelintrc",
     srcs = ["stylelint.config.mjs"],
+    deps = [
+        ":node_modules/stylelint-config-standard",
+    ],
 )
 
 # NB: this alias does NOT cause Bazel's Loading phase to load the tools/BUILD file.
