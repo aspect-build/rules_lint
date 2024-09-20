@@ -38,11 +38,37 @@ Finally, register the aspect with your linting workflow, such as in `.aspect/cli
 """
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
+load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "output_files", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintStylelint"
 
-def stylelint_action(ctx, executable, srcs, config, stderr, exit_code = None, env = {}, options = []):
+def _gather_inputs(ctx, srcs):
+    inputs = copy_files_to_bin_actions(ctx, srcs)
+
+    # Add the config file along with any deps it has on npm packages
+    if "gather_files_from_js_providers" in dir(js_lib_helpers):
+        # rules_js 1.x
+        js_inputs = js_lib_helpers.gather_files_from_js_providers(
+            [ctx.attr._config_file],
+            include_transitive_sources = True,
+            include_declarations = False,
+            include_npm_linked_packages = True,
+        )
+    else:
+        # rules_js 2.x
+        js_inputs = js_lib_helpers.gather_files_from_js_infos(
+            [ctx.attr._config_file],
+            include_sources = True,
+            include_transitive_sources = True,
+            include_types = False,
+            include_transitive_types = False,
+            include_npm_sources = True,
+        )
+    inputs.extend(js_inputs.to_list())
+    return inputs
+
+def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, options = []):
     """Spawn stylelint as a Bazel action
 
     Args:
@@ -61,7 +87,6 @@ def stylelint_action(ctx, executable, srcs, config, stderr, exit_code = None, en
         env: environment variables for stylelint
         options: additional command-line arguments
     """
-    inputs = copy_files_to_bin_actions(ctx, srcs + config)
     outputs = [stderr]
 
     # Wire command-line options, see https://stylelint.io/user-guide/cli#options
@@ -77,7 +102,7 @@ def stylelint_action(ctx, executable, srcs, config, stderr, exit_code = None, en
         command = "{stylelint} $@ && touch {stderr}"
 
     ctx.actions.run_shell(
-        inputs = inputs,
+        inputs = _gather_inputs(ctx, srcs),
         outputs = outputs,
         command = command.format(stylelint = executable._stylelint.path, stderr = stderr.path),
         arguments = [args],
@@ -89,7 +114,7 @@ def stylelint_action(ctx, executable, srcs, config, stderr, exit_code = None, en
         tools = [executable._stylelint],
     )
 
-def stylelint_fix(ctx, executable, srcs, config, patch, stderr, exit_code, env = {}, options = []):
+def stylelint_fix(ctx, executable, srcs, patch, stderr, exit_code, env = {}, options = []):
     """Create a Bazel Action that spawns stylelint with --fix.
 
     Args:
@@ -104,7 +129,6 @@ def stylelint_fix(ctx, executable, srcs, config, patch, stderr, exit_code, env =
         options: additional command line options
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
-    inputs = copy_files_to_bin_actions(ctx, srcs + config)
     args = ["--fix"]
     args.extend(options)
     args.extend([s.short_path for s in srcs])
@@ -121,7 +145,7 @@ def stylelint_fix(ctx, executable, srcs, config, patch, stderr, exit_code, env =
     )
 
     ctx.actions.run(
-        inputs = inputs + [patch_cfg],
+        inputs = _gather_inputs(ctx, srcs) + [patch_cfg],
         outputs = [patch, stderr, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
@@ -152,12 +176,12 @@ def _stylelint_aspect_impl(target, ctx):
 
     # stylelint can produce a patch file at the same time it reports the unpatched violations
     if hasattr(outputs, "patch"):
-        stylelint_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_file, outputs.patch, outputs.human.out, outputs.human.exit_code, options = color_options)
+        stylelint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, options = color_options)
     else:
-        stylelint_action(ctx, ctx.executable, files_to_lint, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, options = color_options)
+        stylelint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, options = color_options)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    stylelint_action(ctx, ctx.executable, files_to_lint, ctx.files._config_file, outputs.machine.out, outputs.machine.exit_code, options = ["--formatter", "compact"])
+    stylelint_action(ctx, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code, options = ["--formatter", "compact"])
 
     return [info]
 
@@ -171,7 +195,7 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
             load("@npm//:stylelint/package_json.bzl", stylelint_bin = "bin")
             stylelint_bin.stylelint_binary(name = "stylelint")
             ```
-        config: label(s) of the stylelint config file(s)
+        config: label(s) of the stylelint config file
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: which tags on a `filegroup` indicate that it should be visited by the aspect
     """

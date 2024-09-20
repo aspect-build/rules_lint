@@ -197,6 +197,7 @@ bzl_library(
     deps = [
         "//lint/private:lint_aspect",
         "@aspect_bazel_lib//lib:copy_to_bin",
+        "@aspect_rules_js//js:libs",
     ],
 )
 
