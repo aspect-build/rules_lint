@@ -25,6 +25,8 @@ fetch_ruff("v0.4.10")
 In `tools/lint/BUILD.bazel`, select the tool for the host platform:
 
 ```starlark
+# Note: this won't interact properly with the --platform flag, see
+# https://github.com/aspect-build/rules_lint/issues/389
 alias(
     name = "ruff",
     actual = select({
