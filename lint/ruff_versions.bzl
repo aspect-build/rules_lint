@@ -1,5 +1,24 @@
 "This file is automatically updated by mirror_ruff.sh"
 RUFF_VERSIONS = {
+    "0.6.7": {
+        "aarch64-apple-darwin": "29b1a72c35eed5b2240ff365e1f45d07bc0c40b9331a119c2b59cca44c0f322e",
+        "aarch64-pc-windows-msvc": "c5b3cba584d6a81f49fa41952feccb0733c0a7fea3cc95b5f58b6ef7bc9b9008",
+        "aarch64-unknown-linux-gnu": "ee705976bebce8f74f98215ad8437ae4e1e098309fa81df280569756050346e3",
+        "aarch64-unknown-linux-musl": "543fc039d88ce2f9cae645869d0fe15168b1eea9f3bf196ed9d7a55ac091aacb",
+        "arm-unknown-linux-musleabihf": "7cbb73bb7c3b226e72d2db9a662f0f39a7e314fca05f7e2d78455919c6c910b8",
+        "armv7-unknown-linux-gnueabihf": "41973e61bb3b1292c05c7fd684478f21a1afd92cf49881513c2c0dc0ffeaf2e5",
+        "armv7-unknown-linux-musleabihf": "f9599c21930d8ff5563c662317d79703356b973a0b4f026d28dc8098073ac27a",
+        "i686-pc-windows-msvc": "fdace3417e0ed2215f18f62b3f7fa14e1b34ea64523ac40ce5726dc7483f483f",
+        "i686-unknown-linux-gnu": "88a8dfbcb9949f5bb0e949b508fe6be7cb8d1f79b875e0173255de5e5dde642a",
+        "i686-unknown-linux-musl": "c80fe8d576336308efb2e73c2983fe0e1169c487011432e2866f9b3c03809c03",
+        "powerpc64-unknown-linux-gnu": "65dc1e517125af6013ce9b3e9d15dfbb5123c6ed64f822637fff6e46c377aa74",
+        "powerpc64le-unknown-linux-gnu": "a4a70f9ddf364c6c99737990ee8cee706e6e286961a729c588c65f67a341e0cc",
+        "s390x-unknown-linux-gnu": "042744856fb9ffba4c3018d85603d0b5b7e2cc7ce6e4fffe56281c60080eb39f",
+        "x86_64-apple-darwin": "5b724bd2c95d926ea46da07dfa6ac5568637db04740838698bb4b1909d8eba0d",
+        "x86_64-pc-windows-msvc": "1f6c97e24b8bc8d741ae444f853afad4542a251ca229e2eae139cc98a134b760",
+        "x86_64-unknown-linux-gnu": "52ed7e34c15809f313e3f8ed4281fe523e7e5f0667e7bf9958885b7e6f2270a8",
+        "x86_64-unknown-linux-musl": "3f0ce01397038ffb09e8ee19a059e8fa39204f87f08430a1877e242348d9ad64",
+    },
     "0.6.6": {
         "aarch64-apple-darwin": "4f6e10c538e921f324b65fd23925d973b930e59ca26c1aaa0512b84aaed00985",
         "aarch64-pc-windows-msvc": "dae68f9a8b481b6c15b67cbcb55e5b4f8f80a29b417b57ff2c05837e3bbe436c",
