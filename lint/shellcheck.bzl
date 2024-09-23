@@ -92,7 +92,7 @@ def _shellcheck_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_library"]):
+def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_library", "sh_test"]):
     """A factory function to create a linter aspect.
 
     Attrs:
