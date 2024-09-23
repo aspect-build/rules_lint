@@ -38,7 +38,7 @@ Attrs:
 | :------------- | :------------- | :------------- |
 | <a id="lint_shellcheck_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_shellcheck_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
-| <a id="lint_shellcheck_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["sh_binary", "sh_library"]` |
+| <a id="lint_shellcheck_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["sh_binary", "sh_library", "sh_test"]` |
 
 
 <a id="shellcheck_action"></a>
