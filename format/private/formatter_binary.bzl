@@ -42,7 +42,7 @@ BUILTIN_TOOL_LABELS = {
 CHECK_FLAGS = {
     "buildifier": "-mode=check",
     "swiftformat": "--lint",
-    "prettier": "--check --log-level error",
+    "prettier": "--check --log-level warn",
     "ruff": "format --check --force-exclude --diff",
     "shfmt": "--diff --apply-ignore",
     "java-format": "--set-exit-if-changed --dry-run",
@@ -61,7 +61,7 @@ CHECK_FLAGS = {
 FIX_FLAGS = {
     "buildifier": "-mode=fix",
     "swiftformat": "",
-    "prettier": "--write --log-level error",
+    "prettier": "--write --log-level warn",
     # Force exclusions in the configuration file to be honored even when file paths are supplied
     # as command-line arguments; see
     # https://github.com/astral-sh/ruff/discussions/5857#discussioncomment-6583943
