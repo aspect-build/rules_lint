@@ -9,11 +9,11 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_JavaScript_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write --log-level error example/eslint.config.mjs"
-    assert_output --partial "+ prettier --write --log-level error example/src/file-dep.ts example/src/file.ts example/src/subdir/test.ts example/test/no_violations.ts"
-    assert_output --partial "+ prettier --write --log-level error example/src/hello.tsx"
-    assert_output --partial "+ prettier --write --log-level error example/src/hello.vue"
-    assert_output --partial "+ prettier --write --log-level error .bcr/metadata.template.json"
+    assert_output --partial "+ prettier --write --log-level warn example/eslint.config.mjs"
+    assert_output --partial "+ prettier --write --log-level warn example/src/file-dep.ts example/src/file.ts example/src/subdir/test.ts example/test/no_violations.ts"
+    assert_output --partial "+ prettier --write --log-level warn example/src/hello.tsx"
+    assert_output --partial "+ prettier --write --log-level warn example/src/hello.vue"
+    assert_output --partial "+ prettier --write --log-level warn .bcr/metadata.template.json"
 }
 
 # File arguments: will filter with find
@@ -37,37 +37,37 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Markdown_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write --log-level error .bcr/README.md CONTRIBUTING.md README.md"
+    assert_output --partial "+ prettier --write --log-level warn .bcr/README.md CONTRIBUTING.md README.md"
 }
 
 @test "should run prettier on CSS" {
     run bazel run //format/test:format_CSS_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write --log-level error example/src/hello.css"
-    assert_output --partial "+ prettier --write --log-level error example/src/hello.less"
-    assert_output --partial "+ prettier --write --log-level error example/src/hello.scss"
+    assert_output --partial "+ prettier --write --log-level warn example/src/hello.css"
+    assert_output --partial "+ prettier --write --log-level warn example/src/hello.less"
+    assert_output --partial "+ prettier --write --log-level warn example/src/hello.scss"
 }
 
 @test "should run prettier on HTML" {
     run bazel run //format/test:format_HTML_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write --log-level error example/src/index.html"
+    assert_output --partial "+ prettier --write --log-level warn example/src/index.html"
 }
 
 @test "should run prettier on GraphQL" {
     run bazel run //format/test:format_GraphQL_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write --log-level error example/src/hello.graphql"
+    assert_output --partial "+ prettier --write --log-level warn example/src/hello.graphql"
 }
 
 @test "should run prettier on SQL" {
     run bazel run //format/test:format_SQL_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write --log-level error example/src/hello.sql"
+    assert_output --partial "+ prettier --write --log-level warn example/src/hello.sql"
 }
 
 @test "should run ruff on Python" {
