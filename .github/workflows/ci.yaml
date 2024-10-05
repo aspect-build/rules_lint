@@ -21,8 +21,6 @@ jobs:
     uses: bazel-contrib/.github/.github/workflows/bazel.yaml@bazel8
     with:
       folders: '[".", "example"]'
-      # Don't try for Windows support yet.
-      exclude_windows: true
 
   integration-test:
     runs-on: ubuntu-latest
