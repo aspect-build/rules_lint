@@ -101,7 +101,7 @@ Some languages have dialects:
 <pre>
 load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 
-format_multirun(<a href="#format_multirun-name">name</a>, <a href="#format_multirun-jobs">jobs</a>, <a href="#format_multirun-print_command">print_command</a>, <a href="#format_multirun-disable_git_attribute_checks">disable_git_attribute_checks</a>, <a href="#format_multirun-kwargs">**kwargs</a>)
+format_multirun(<a href="#format_multirun-name">name</a>, <a href="#format_multirun-jobs">jobs</a>, <a href="#format_multirun-print_command">print_command</a>, <a href="#format_multirun-disable_git_attribute_checks">disable_git_attribute_checks</a>, <a href="#format_multirun-kwargs">kwargs</a>)
 </pre>
 
 Create a [multirun] binary for the given languages.
@@ -135,7 +135,7 @@ To check formatting with `bazel test`, use [format_test](#format_test) instead.
 <pre>
 load("@aspect_rules_lint//format:defs.bzl", "format_test")
 
-format_test(<a href="#format_test-name">name</a>, <a href="#format_test-srcs">srcs</a>, <a href="#format_test-workspace">workspace</a>, <a href="#format_test-no_sandbox">no_sandbox</a>, <a href="#format_test-disable_git_attribute_checks">disable_git_attribute_checks</a>, <a href="#format_test-tags">tags</a>, <a href="#format_test-kwargs">**kwargs</a>)
+format_test(<a href="#format_test-name">name</a>, <a href="#format_test-srcs">srcs</a>, <a href="#format_test-workspace">workspace</a>, <a href="#format_test-no_sandbox">no_sandbox</a>, <a href="#format_test-disable_git_attribute_checks">disable_git_attribute_checks</a>, <a href="#format_test-tags">tags</a>, <a href="#format_test-kwargs">kwargs</a>)
 </pre>
 
 Create test for the given formatters.
