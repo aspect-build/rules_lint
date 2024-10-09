@@ -23,6 +23,8 @@ jobs:
       folders: '[".", "example"]'
       # Don't try for Windows support yet.
       exclude_windows: true
+      exclude: |
+        [{"bzlmodEnabled": false, "folder": "."}]
 
   integration-test:
     runs-on: ubuntu-latest
