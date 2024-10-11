@@ -29,11 +29,11 @@ eslint = lint_eslint_aspect(
 )
 ```
 
-### With ts_project
+### With ts_project <=3.2.0
 
-Note, when used with `ts_project` and a custom `transpiler`,
-the macro expands to several targets,
-see https://github.com/aspect-build/rules_ts/blob/main/docs/transpiler.md#macro-expansion.
+Prior to [commit 5e25e91]https://github.com/aspect-build/rules_ts/commit/5e25e91420947e3a81938d8eb076803e5cf51fe2)
+the rule produced by the `ts_project` macro and a custom `transpiler` expanded the macro to
+multiple targets, including changing the default target to `js_library`.
 
 Since you want to lint the original TypeScript source files, the `ts_project` rule produced
 by the macro is the one you want to lint, so when used with an `eslint_test` you should use
