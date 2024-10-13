@@ -120,7 +120,7 @@ $ chmod u+x .git/hooks/pre-commit
 We recommend using [Aspect Workflows] to hook up the CI check to notify developers of formatting changes,
 and supply a patch file that can be locally applied.
 
-![format on CI](./docs/format-ci-demo.png)
+![format on CI](./format-ci-demo.png)
 
 To set this up manually, there are two supported methods:
 
