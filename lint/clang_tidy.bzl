@@ -70,7 +70,7 @@ def _toolchain_env(ctx, user_flags, action_name = ACTION_NAMES.cpp_compile):
     ))
     return env
 
-def _toolchain_flags(ctx, action_name = ACTION_NAMES.cpp_compile):
+def _toolchain_flags(ctx, user_flags, action_name = ACTION_NAMES.cpp_compile):
     cc_toolchain = find_cpp_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
@@ -226,9 +226,11 @@ def _quoted_arg(arg):
 def _get_env(ctx, srcs):
     sources_are_cxx = _is_cxx(srcs[0])
     if (sources_are_cxx):
-        env = _toolchain_env(ctx, ACTION_NAMES.cpp_compile)
+        user_flags = ctx.fragments.cpp.cxxopts + ctx.fragments.cpp.copts
+        env = _toolchain_env(ctx, user_flags, ACTION_NAMES.cpp_compile)
     else:
-        env = _toolchain_env(ctx, ACTION_NAMES.c_compile)
+        user_flags = ctx.fragments.cpp.copts
+        env = _toolchain_env(ctx, user_flags, ACTION_NAMES.c_compile)
     if (ctx.attr._verbose):
         env["CLANG_TIDY__VERBOSE"] = "1"
 
