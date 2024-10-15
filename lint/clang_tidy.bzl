@@ -49,11 +49,34 @@ def _gather_inputs(ctx, compilation_context, srcs):
         inputs.append(ctx.files._global_config[0])
     return inputs
 
+def _toolchain_env(ctx, user_flags, action_name = ACTION_NAMES.cpp_compile):
+    cc_toolchain = find_cpp_toolchain(ctx)
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
+    )
+    compile_variables = cc_common.create_compile_variables(
+        feature_configuration = feature_configuration,
+        cc_toolchain = cc_toolchain,
+        user_compile_flags = user_flags,
+    )
+    env = {}
+    env.update(cc_common.get_environment_variables(
+        feature_configuration = feature_configuration,
+        action_name = action_name,
+        variables = compile_variables,
+    ))
+    return env
+
 def _toolchain_flags(ctx, user_flags, action_name = ACTION_NAMES.cpp_compile):
     cc_toolchain = find_cpp_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
         cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
     )
     compile_variables = cc_common.create_compile_variables(
         feature_configuration = feature_configuration,
@@ -75,28 +98,40 @@ def _update_flag(flag):
         "/nologo",
         "/COMPILER_MSVC",
         "/showIncludes",
+        "/experimental:external",
+    ]
+    unsupported_prefixes = [
+        "/wd",
+        "-W",
+        "/W",
+        "/external",
     ]
     if (flag in unsupported_flags):
-        return None
+        return []
+    for prefix in unsupported_prefixes:
+        if flag.startswith(prefix):
+            return []
 
-    # omit warning flags
-    if (flag.startswith("/wd") or flag.startswith("-W")):
-        return None
+    flags = [flag]
 
-    # remap c++ standard to clang
+    # remap MSVC flags to clang-style
     if (flag.startswith("/std:")):
-        flag = "-std=" + flag.removeprefix("/std:")
-
-    # remap defines
-    if (flag.startswith("/D")):
-        flag = "-" + flag[1:]
-    if (flag.startswith("/FI")):
-        flag = "-include=" + flag.removeprefix("/FI")
-
-    # skip other msvc options
-    if (flag.startswith("/")):
-        return None
-    return flag
+        # remap c++ standard to clang
+        flags = ["-std=" + flag.removeprefix("/std:")]
+    elif (flag.startswith("/D")):
+        # remap defines
+        flags = ["-" + flag[1:]]
+    elif (flag.startswith("/FI")):
+        flags = ["-include", flag.removeprefix("/FI")]
+    elif (flag.startswith("/I")):
+        flags = ["-iquote", flag.removeprefix("/I")]
+    elif (flag in ["/MD", "/MDd", "/MT", "/MTd"]):
+        # mimic microsoft's behaviour and add a define
+        flags = ["-D_MT"]
+    elif (flag.startswith("/")):
+        # strip all other microsoft params
+        return []
+    return flags
 
 def _safe_flags(ctx, flags):
     # Some flags might be used by GCC/MSVC, but not understood by Clang.
@@ -105,9 +140,9 @@ def _safe_flags(ctx, flags):
     safe_flags = []
     skipped_flags = []
     for flag in flags:
-        flag = _update_flag(flag)
-        if (flag):
-            safe_flags.append(flag)
+        updated = _update_flag(flag)
+        if (any(updated)):
+            safe_flags.extend(updated)
         elif (ctx.attr._verbose):
             skipped_flags.append(flag)
     if (ctx.attr._verbose and any(skipped_flags)):
@@ -168,35 +203,59 @@ def _common_prefixes(headers):
             dirs2.append(dir)
     return dirs2
 
-def _aggregate_regex(compilation_context):
+def _aggregate_regex(ctx, compilation_context):
+    if not any(compilation_context.direct_headers):
+        return None
     dirs = _common_prefixes(compilation_context.direct_headers)
     if not any(dirs):
         regex = None
     elif len(dirs) == 1:
-        regex = ".*" + dirs[0] + "/.*"
+        # clang-tidy reports headers with mixed '\\' and '/' separators on windows. Match either.
+        regex_dir = dirs[0].replace("\\", "[\\/]").replace("/", "[\\/]")
+        regex = ".*" + regex_dir + "/.*"
     else:
         regex = ".*"
+    if (ctx.attr._verbose):
+        # buildifier: disable=print
+        print("target header dirs: " + ",".join(dirs))
     return regex
 
 def _quoted_arg(arg):
     return "\"" + arg + "\""
+
+def _get_env(ctx, srcs):
+    sources_are_cxx = _is_cxx(srcs[0])
+    if (sources_are_cxx):
+        user_flags = ctx.fragments.cpp.cxxopts + ctx.fragments.cpp.copts
+        env = _toolchain_env(ctx, user_flags, ACTION_NAMES.cpp_compile)
+    else:
+        user_flags = ctx.fragments.cpp.copts
+        env = _toolchain_env(ctx, user_flags, ACTION_NAMES.c_compile)
+    if (ctx.attr._verbose):
+        env["CLANG_TIDY__VERBOSE"] = "1"
+
+    # in case we are running in msys bash, stop it from mangling pathnames
+    env["MSYS_NO_PATHCONV"] = "1"
+    env["MSYS_ARG_CONV_EXCL"] = "*"
+    return env
 
 def _get_args(ctx, compilation_context, srcs):
     args = []
     if (any(ctx.files._global_config)):
         args.append("--config-file=" + ctx.files._global_config[0].short_path)
     if (ctx.attr._lint_target_headers):
-        regex = _aggregate_regex(compilation_context)
+        regex = _aggregate_regex(ctx, compilation_context)
         if (regex):
             args.append(_quoted_arg("-header-filter=" + regex))
     elif (ctx.attr._header_filter):
         regex = ctx.attr._header_filter
         args.append(_quoted_arg("-header-filter=" + regex))
     args.extend([src.short_path for src in srcs])
+    return args
 
-    args.append("--")
-
+def _get_compiler_args(ctx, compilation_context, srcs):
     # add args specified by the toolchain, on the command line and rule copts
+    args = []
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     sources_are_cxx = _is_cxx(srcs[0])
     if (sources_are_cxx):
@@ -218,7 +277,6 @@ def _get_args(ctx, compilation_context, srcs):
     args.extend(_prefixed(compilation_context.quote_includes.to_list(), "-iquote"))
     args.extend(_prefixed(compilation_context.system_includes.to_list(), _angle_includes_option(ctx)))
     args.extend(_prefixed(compilation_context.external_includes.to_list(), "-isystem"))
-
     return args
 
 def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code):
@@ -238,22 +296,26 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
     """
 
     outputs = [stdout]
-    env = {}
+    env = _get_env(ctx, srcs)
     env["CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE"] = stdout.path
 
     if exit_code:
         env["CLANG_TIDY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
         outputs.append(exit_code)
-    if (ctx.attr._verbose):
-        env["CLANG_TIDY__VERBOSE"] = "1"
+
+    # pass compiler args via a params file. The command line may already be long due to
+    # sources, which can't go the params file, so materialize it always.
+    clang_tidy_args = _get_args(ctx, compilation_context, srcs)
+    compiler_args = ctx.actions.args()
+    compiler_args.add_all(_get_compiler_args(ctx, compilation_context, srcs))
+    compiler_args.use_param_file("--config %s", use_always = True)
 
     ctx.actions.run_shell(
         inputs = _gather_inputs(ctx, compilation_context, srcs),
         outputs = outputs,
-        tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
+        tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
         command = executable._clang_tidy_wrapper.path + " $@",
-        arguments = [executable._clang_tidy.path] + _get_args(ctx, compilation_context, srcs),
-        use_default_shell_env = True,
+        arguments = [executable._clang_tidy.path] + clang_tidy_args + ["--", compiler_args],
         env = env,
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with clang-tidy",
@@ -272,17 +334,15 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         exit_code: output file containing the exit code of clang-tidy
     """
     patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
-
-    env = {}
-    if (ctx.attr._verbose):
-        env["CLANG_TIDY__VERBOSE"] = "1"
+    clang_tidy_args = _get_args(ctx, compilation_context, srcs)
+    compiler_args = _get_compiler_args(ctx, compilation_context, srcs)
 
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
             "linter": executable._clang_tidy_wrapper.path,
-            "args": [executable._clang_tidy.path, "--fix"] + _get_args(ctx, compilation_context, srcs),
-            "env": env,
+            "args": [executable._clang_tidy.path, "--fix"] + clang_tidy_args + ["--"] + compiler_args,
+            "env": _get_env(ctx, srcs),
             "files_to_diff": [src.path for src in srcs],
             "output": patch.path,
         }),
@@ -299,7 +359,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
         },
-        tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
+        tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with clang-tidy",
     )
