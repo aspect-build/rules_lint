@@ -36,12 +36,13 @@ flake8_test(
 )
 ```
 
-
 <a id="lint_test"></a>
 
 ## lint_test
 
 <pre>
+load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
+
 lint_test(<a href="#lint_test-aspect">aspect</a>)
 </pre>
 

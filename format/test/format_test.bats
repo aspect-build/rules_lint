@@ -10,7 +10,7 @@ bats_load_library "bats-assert"
     assert_success
 
     assert_output --partial "+ prettier --write example/eslint.config.mjs"
-    assert_output --partial "+ prettier --write example/src/file.ts example/src/subdir/test.ts example/test/no_violations.ts"
+    assert_output --partial "+ prettier --write example/src/file-dep.ts example/src/file.ts example/src/subdir/test.ts example/test/no_violations.ts"
     assert_output --partial "+ prettier --write example/src/hello.tsx"
     assert_output --partial "+ prettier --write example/src/hello.vue"
     assert_output --partial "+ prettier --write .bcr/metadata.template.json"
@@ -56,6 +56,13 @@ bats_load_library "bats-assert"
     assert_output --partial "+ prettier --write example/src/index.html"
 }
 
+@test "should run prettier on GraphQL" {
+    run bazel run //format/test:format_GraphQL_with_prettier
+    assert_success
+
+    assert_output --partial "+ prettier --write example/src/hello.graphql"
+}
+
 @test "should run prettier on SQL" {
     run bazel run //format/test:format_SQL_with_prettier
     assert_success
@@ -88,7 +95,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Java_with_java-format
     assert_success
 
-    assert_output --partial "+ java-format --replace example/src/Foo.java"
+    assert_output --partial "+ java-format --replace example/src/Bar.java example/src/Foo.java"
 }
 
 @test "should run ktfmt on Kotlin" {
@@ -102,7 +109,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Scala_with_scalafmt
     assert_success
 
-    assert_output --partial "+ scalafmt example/src/hello.scala"
+    assert_output --partial "+ scalafmt --respect-project-filters example/src/hello.scala"
 }
 
 @test "should run gofmt on Go" {

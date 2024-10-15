@@ -42,12 +42,12 @@ def _write_assert(ctx, files):
     output = None
     exit_code = None
     for f in files.to_list():
-        if f.path.endswith(".report"):
+        if f.path.endswith(".out"):
             output = f
         elif f.path.endswith(".exit_code"):
             exit_code = f
         else:
-            fail("rules_lint_report output group contains unrecognized file extension: ", f.path)
+            fail("rules_lint_human output group contains unrecognized file extension: ", f.path)
     if output and exit_code:
         return "assert_exit_code_zero '{}' '{}'".format(to_rlocation_path(ctx, exit_code), to_rlocation_path(ctx, output))
     if output:
@@ -56,7 +56,7 @@ def _write_assert(ctx, files):
 
 def _test_impl(ctx):
     bin = ctx.actions.declare_file("{}.lint_test.sh".format(ctx.label.name))
-    asserts = [_write_assert(ctx, src[OutputGroupInfo].rules_lint_report) for src in ctx.attr.srcs]
+    asserts = [_write_assert(ctx, src[OutputGroupInfo].rules_lint_human) for src in ctx.attr.srcs]
 
     ctx.actions.expand_template(
         template = ctx.file._bin,
@@ -66,7 +66,7 @@ def _test_impl(ctx):
     )
     return [DefaultInfo(
         executable = bin,
-        runfiles = ctx.runfiles([ctx.file._runfiles_lib], transitive_files = depset(transitive = [src[OutputGroupInfo].rules_lint_report for src in ctx.attr.srcs])),
+        runfiles = ctx.runfiles([ctx.file._runfiles_lib], transitive_files = depset(transitive = [src[OutputGroupInfo].rules_lint_human for src in ctx.attr.srcs])),
     )]
 
 def lint_test(aspect):

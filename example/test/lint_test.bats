@@ -20,23 +20,44 @@ EOF
 	assert_output --partial "src/unused_import.py:13:1: F401 'os' imported but unused"
 
 	# PMD
-	assert_output --partial 'src/Foo.java:9:	FinalizeOverloaded:	Finalize methods should not be overloaded'
+	echo <<"EOF" | assert_output --partial
+* file: src/Foo.java
+    src:  Foo.java:9:9
+    rule: FinalizeOverloaded
+    msg:  Finalize methods should not be overloaded
+    code: protected void finalize(int a) {}
+EOF
 
 	# ktlint
 	assert_output --partial "src/hello.kt:1:1: File name 'hello.kt' should conform PascalCase (standard:filename)"
 
 	# ESLint
-	assert_output --partial 'src/file.ts: line 2, col 7, Error - Type string trivially inferred from a string literal, remove type annotation. (@typescript-eslint/no-inferrable-types)'
+	echo <<"EOF" | assert_output --partial
+src/file.ts
+  2:7  error  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
+EOF
+	# If type declarations are missing, the following errors will be reported
+	refute_output --partial '@typescript-eslint/no-unsafe-call'
+	refute_output --partial '@typescript-eslint/no-unsafe-member-access'
 
 	# Buf
 	assert_output --partial 'src/file.proto:1:1:Import "src/unused.proto" is unused.'
 
 	# Vale
-	assert_output --partial "src/README.md:3:47:Google.We:Try to avoid using first-person plural like 'We'."
+	echo <<"EOF" | assert_output --partial
+3:47  warning  Try to avoid using              Google.We
+               first-person plural like 'We'.
+EOF
+
+	# stylelint
+	echo <<"EOF" | assert_output --partial
+src/hello.css
+  11:5  ✖  Unexpected empty block  block-no-empty
+EOF
 }
 
 @test "should produce reports" {
-	run $BATS_TEST_DIRNAME/../lint.sh //src:all
+	run $BATS_TEST_DIRNAME/../lint.sh //src:all --no@aspect_rules_lint//lint:color
 	assert_success
 	assert_lints
 

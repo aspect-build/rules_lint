@@ -14,6 +14,9 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 # --- end runfiles.bash initialization v3 ---
 
 if [[ -n "$BUILD_WORKSPACE_DIRECTORY" ]]; then
+  # Needed for the rustfmt binary wrapper in rules_rust; see
+  # https://github.com/aspect-build/rules_lint/pull/327
+  unset BUILD_WORKING_DIRECTORY
   cd $BUILD_WORKSPACE_DIRECTORY
 elif [[ -n "$TEST_WORKSPACE" ]]; then
   if [[ -n "$WORKSPACE" ]]; then
@@ -40,7 +43,7 @@ function on_exit {
       ;;
     *)
       echo >&2 "FAILED: A formatter tool exited with code $code"
-      if [ "$mode" == "check" ]; then
+      if [[ "${mode:-}" == "check" ]]; then
         echo >&2 "Try running '$FIX_CMD' to fix this."
       fi
       ;;
@@ -48,6 +51,61 @@ function on_exit {
 }
 
 trap on_exit EXIT
+
+function process_args_in_batches() {
+    local lang="$1"
+    local bin="$2"
+    local flags="$3"
+    shift 3
+    local args=("$@")
+    
+    # Uses up to ARG_MAX - 2k, or 128k, whichever is smaller, characters per
+    # command. This was derived from following the defaults from xargs
+    # https://www.gnu.org/software/findutils/manual/html_node/find_html/Limiting-Command-Size.html
+    max_batch_size=$(getconf ARG_MAX)-2048
+    max_batch_size=$((max_batch_size < 128000 ? max_batch_size : 128000))
+    
+    # Check if there's only one argument and it starts with '@'
+    # If so, read the file to get the actual files to format.
+    if [ ${#args[@]} -eq 1 ] && [[ "${args[0]}" == @* ]]; then
+        local file="${args[0]:1}"  # Strip the '@' symbol
+        if [ ! -f "$file" ]; then
+            echo "Error: File '$file' not found."
+            return 1
+        fi
+        mapfile -t args < "$file"
+        if [ ${#args[@]} -eq 0 ]; then
+            echo "Error: No arguments found in the specified file."
+            return 1
+        fi
+    fi
+
+    # If no arguments were passed, still run run-format once
+    if [ ${#args[@]} -eq 0 ]; then
+        run-format "$lang" "$bin" "$flags"
+        return
+    fi
+
+    # Format files in batches so that we do not exceed the OS limit for line
+    # length when calling subcommands
+    local current_batch_size=0
+    local current_batch=()
+    for arg in "${args[@]}"; do
+        if ((current_batch_size + ${#arg} + 1 >= max_batch_size)); then
+            # Process current batch
+            run-format "$lang" "$bin" "$flags" "${current_batch[@]}"
+            current_batch=()
+            current_batch_size=0
+        fi
+        current_batch+=("$arg")
+        ((current_batch_size += ${#arg} + 1))  # +1 for space between arguments
+    done
+    
+    # Process any remaining arguments
+    if [ -n "$current_batch" ]; then
+        run-format "$lang" "$bin" "$flags" "${current_batch[@]}"
+    fi
+}
 
 # Exports a function that is similar to 'git ls-files'
 # ls-files <language> [<file>...]
@@ -63,10 +121,12 @@ function ls-files {
     # https://github.com/github-linguist/linguist/blob/559a6426942abcae16b6d6b328147476432bf6cb/lib/linguist/languages.yml
     # using the ./mirror_linguist_languages.sh tool to transform to Bash code
     case "$language" in
+      'C') patterns=('*.c' '*.cats' '*.h' '*.idc') ;;
       'C++') patterns=('*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
       'Cuda') patterns=('*.cu' '*.cuh') ;;
       'CSS') patterns=('*.css') ;;
       'Go') patterns=('*.go') ;;
+      'GraphQL') patterns=('*.graphql' '*.gql' '*.graphqls') ;;
       'HTML') patterns=('*.html' '*.hta' '*.htm' '*.html.hl' '*.inc' '*.xht' '*.xhtml') ;;
       'JSON') patterns=('.all-contributorsrc' '.arcconfig' '.auto-changelog' '.c8rc' '.htmlhintrc' '.imgbotconfig' '.nycrc' '.tern-config' '.tern-project' '.watchmanconfig' 'Pipfile.lock' 'composer.lock' 'deno.lock' 'flake.lock' 'mcmod.info' '*.json' '*.4DForm' '*.4DProject' '*.avsc' '*.geojson' '*.gltf' '*.har' '*.ice' '*.JSON-tmLanguage' '*.jsonl' '*.mcmeta' '*.tfstate' '*.tfstate.backup' '*.topojson' '*.webapp' '*.webmanifest' '*.yy' '*.yyp') ;;
       'Java') patterns=('*.java' '*.jav' '*.jsh') ;;
@@ -157,7 +217,7 @@ function ls-files {
           fi
 
           # Check if the attribute is set
-          if [[ "$line" == *"set" ]]; then
+          if [[ "$line" == *": set" || "$line" == *": true" ]]; then
               attribute_set=true
           fi
       done <<< "$git_attributes"
@@ -201,7 +261,7 @@ function run-format {
       Go)
         # gofmt doesn't produce non-zero exit code so we must check for non-empty output
         # https://github.com/golang/go/issues/24230
-        if [ "$mode" == "check" ]; then
+        if [[ "${mode:-}" == "check" ]]; then
           GOFMT_OUT=$(mktemp)
           time {
             echo "$files" | tr \\n \\0 | xargs -0 "$bin" $args > "$GOFMT_OUT"
@@ -234,24 +294,24 @@ function run-format {
 
 # Check if our script is the main entry point, not being sourced by a test
 if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
-  bin="$(rlocation $tool)"
-  if [ ! -e "$bin" ]; then
-    echo >&2 "cannot locate binary $tool"
-    exit 1
-  fi
+    bin="$(rlocation $tool)"
+    if [ ! -e "$bin" ]; then
+        echo >&2 "cannot locate binary $tool"
+        exit 1
+    fi
 
-  run-format "$lang" "$bin" "${flags:-""}" $@
+    process_args_in_batches "$lang" "$bin" "${flags:-""}" "$@"
 
-  # Currently these aren't exposed as separate languages to the attributes of format_multirun
-  # So we format all these languages as part of "JavaScript".
-  if [[ "$lang" == "JavaScript" ]]; then
-    run-format "JSON" "$bin" "${flags:-""}" $@
-    run-format "TSX" "$bin" "${flags:-""}" $@
-    run-format "TypeScript" "$bin" "${flags:-""}" $@
-    run-format "Vue" "$bin" "${flags:-""}" $@
-  fi
-  if [[ "$lang" == "CSS" ]]; then
-    run-format "Less" "$bin" "${flags:-""}" $@
-    run-format "SCSS" "$bin" "${flags:-""}" $@
-  fi
+    # Handle additional languages for JavaScript and CSS
+    if [[ "$lang" == "JavaScript" ]]; then
+        for sublang in "JSON" "TSX" "TypeScript" "Vue"; do
+            process_args_in_batches "$sublang" "$bin" "${flags:-""}" "$@"
+        done
+    fi
+    if [[ "$lang" == "CSS" ]]; then
+        for sublang in "Less" "SCSS"; do
+            process_args_in_batches "$sublang" "$bin" "${flags:-""}" "$@"
+        done
+    fi
 fi
+

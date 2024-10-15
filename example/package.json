@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "dayjs": "^1.11.11",
     "moment": "*"
   },
   "devDependencies": {
@@ -8,6 +9,8 @@
     "eslint": "^9",
     "prettier": "^2.8.7",
     "prettier-plugin-sql": "^0.14.0",
+    "stylelint": "^16",
+    "stylelint-config-standard": "^36.0.1",
     "typescript": "4.9.5",
     "typescript-eslint": "^7.10.0"
   },

@@ -14,7 +14,7 @@ shellcheck = shellcheck_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "dummy_successful_lint_action", "filter_srcs", "patch_and_report_files", "report_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintShellCheck"
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
@@ -66,30 +66,33 @@ def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, o
 
 # buildifier: disable=function-docstring
 def _shellcheck_aspect_impl(target, ctx):
-    if ctx.rule.kind not in ["sh_binary", "sh_library"]:
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
-
     if ctx.attr._options[LintOptionsInfo].fix:
-        patch, report, exit_code, info = patch_and_report_files(_MNEMONIC, target, ctx)
-        discard_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
-        if len(files_to_lint) == 0:
-            dummy_successful_lint_action(ctx, patch, discard_exit_code)
-        else:
-            shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, patch, discard_exit_code, ["--format", "diff"])
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
     else:
-        report, exit_code, info = report_files(_MNEMONIC, target, ctx)
+        outputs, info = output_files(_MNEMONIC, target, ctx)
 
     if len(files_to_lint) == 0:
-        dummy_successful_lint_action(ctx, report, exit_code)
-    else:
-        # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
-        # So we must run a second action to populate the human-readable report.
-        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, report, exit_code)
+        noop_lint_action(ctx, outputs)
+        return [info]
+
+    color_options = ["--color"] if ctx.attr._options[LintOptionsInfo].color else []
+
+    # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
+    # So we must run an action to generate the report separately from an action that writes the human-readable report.
+    if hasattr(outputs, "patch"):
+        discard_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
+        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"])
+
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options)
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.machine.out, outputs.machine.exit_code)
+
     return [info]
 
-def lint_shellcheck_aspect(binary, config):
+def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_library", "sh_test"]):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -111,6 +114,9 @@ def lint_shellcheck_aspect(binary, config):
             "_config_file": attr.label(
                 default = config,
                 allow_single_file = True,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
             ),
         },
     )

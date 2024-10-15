@@ -16,7 +16,9 @@ prettier.prettier_binary(
     env = {"BAZEL_BINDIR": "."},
     # default log level is "log" which spams on success
     # https://prettier.io/docs/en/cli.html#--log-level
-    fixed_args = ["--log-level=warn"],
+    # NB: prettier 2 names this loglevel, in prettier 3 it's renamed log-level, see
+    # https://prettier.io/blog/2023/07/05/3.0.0.html#cli-1
+    fixed_args = ["--loglevel=warn"],
 )
 
 java_binary(
@@ -55,13 +57,15 @@ java_binary(
 
 format_multirun(
     name = "format",
+    c = "@llvm_toolchain_llvm//:bin/clang-format",
     cc = "@llvm_toolchain_llvm//:bin/clang-format",
     css = ":prettier",
     cuda = "@llvm_toolchain_llvm//:bin/clang-format",
-    go = "@aspect_rules_lint//format:gofumpt",
-    html = ":prettier",
     # You can use standard gofmt instead of stricter gofumpt:
     # go = "@go_sdk//:bin/gofmt",
+    go = "@aspect_rules_lint//format:gofumpt",
+    graphql = ":prettier",
+    html = ":prettier",
     java = ":java-format",
     javascript = ":prettier",
     jsonnet = "@aspect_rules_lint//format:jsonnetfmt",
@@ -69,7 +73,11 @@ format_multirun(
     markdown = ":prettier",
     protocol_buffer = "//tools/lint:buf",
     python = "@aspect_rules_lint//format:ruff",
-    rust = "@rules_rust//tools/rustfmt:upstream_rustfmt",
+    # Note, older rules_rust versions may need
+    # @rules_rust//tools/rustfmt:upstream_rustfmt
+    # which was later deprecated in
+    # https://github.com/bazelbuild/rules_rust/pull/2703
+    rust = "@rules_rust//tools/upstream_wrapper:rustfmt",
     scala = ":scalafmt",
     shell = "@aspect_rules_lint//format:shfmt",
     sql = ":prettier",

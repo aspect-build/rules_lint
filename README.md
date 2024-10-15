@@ -21,36 +21,38 @@ Features:
 
 New tools are being added frequently, so check this page again!
 
-| Language               | Formatter             | Linter(s)        |
-| ---------------------- | --------------------- | ---------------- |
-| C / C++                | [clang-format]        | ([#112])         |
-| Cuda                   | [clang-format]        |                  |
-| CSS, Less, Sass        | [Prettier]            |                  |
-| Go                     | [gofmt] or [gofumpt]  |                  |
-| HCL (Hashicorp Config) | [terraform] fmt       |                  |
-| HTML                   | [Prettier]            |                  |
-| JSON                   | [Prettier]            |                  |
-| Java                   | [google-java-format]  | [pmd]            |
-| JavaScript             | [Prettier]            | [ESLint]         |
-| Jsonnet                | [jsonnetfmt]          |                  |
-| Kotlin                 | [ktfmt]               | [ktlint]         |
-| Markdown               | [Prettier]            | [Vale]           |
-| Protocol Buffer        | [buf]                 | [buf lint]       |
-| Python                 | [ruff]                | [flake8], [ruff] |
-| Rust                   | [rustfmt]             |                  |
-| SQL                    | [prettier-plugin-sql] |                  |
-| Scala                  | [scalafmt]            |                  |
-| Shell                  | [shfmt]               | [shellcheck]     |
-| Starlark               | [Buildifier]          |                  |
-| Swift                  | [SwiftFormat] (1)     |                  |
-| TSX                    | [Prettier]            | [ESLint]         |
-| TypeScript             | [Prettier]            | [ESLint]         |
-| YAML                   | [yamlfmt]             |                  |
+| Language               | Formatter             | Linter(s)            |
+| ---------------------- | --------------------- | -------------------- |
+| C / C++                | [clang-format]        | [clang-tidy]         |
+| Cuda                   | [clang-format]        |                      |
+| CSS, Less, Sass        | [Prettier]            | [Stylelint]          |
+| Go                     | [gofmt] or [gofumpt]  |                      |
+| GraphQL                | [Prettier]            |                      |
+| HCL (Hashicorp Config) | [terraform] fmt       |                      |
+| HTML                   | [Prettier]            |                      |
+| JSON                   | [Prettier]            |                      |
+| Java                   | [google-java-format]  | [pmd] , [Checkstyle] |
+| JavaScript             | [Prettier]            | [ESLint]             |
+| Jsonnet                | [jsonnetfmt]          |                      |
+| Kotlin                 | [ktfmt]               | [ktlint]             |
+| Markdown               | [Prettier]            | [Vale]               |
+| Protocol Buffer        | [buf]                 | [buf lint]           |
+| Python                 | [ruff]                | [flake8], [ruff]     |
+| Rust                   | [rustfmt]             |                      |
+| SQL                    | [prettier-plugin-sql] |                      |
+| Scala                  | [scalafmt]            |                      |
+| Shell                  | [shfmt]               | [shellcheck]         |
+| Starlark               | [Buildifier]          |                      |
+| Swift                  | [SwiftFormat] (1)     |                      |
+| TSX                    | [Prettier]            | [ESLint]             |
+| TypeScript             | [Prettier]            | [ESLint]             |
+| YAML                   | [yamlfmt]             |                      |
 
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
 [flake8]: https://flake8.pycqa.org/en/latest/index.html
 [pmd]: https://docs.pmd-code.org/latest/index.html
+[checkstyle]: https://checkstyle.sourceforge.io/cmdline.html
 [buf lint]: https://buf.build/docs/lint/overview
 [eslint]: https://eslint.org/
 [swiftformat]: https://github.com/nicklockwood/SwiftFormat
@@ -68,10 +70,11 @@ New tools are being added frequently, so check this page again!
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
-[#112]: https://github.com/aspect-build/rules_lint/issues/112
+[clang-tidy]: https://clang.llvm.org/extra/clang-tidy/
 [vale]: https://vale.sh/
 [yamlfmt]: https://github.com/google/yamlfmt
 [rustfmt]: https://rust-lang.github.io/rustfmt
+[stylelint]: https://stylelint.io
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift
@@ -105,19 +108,22 @@ To format files, run the target you create when you install rules_lint.
 
 We recommend using a Git pre-commit hook to format changed files, and [Aspect Workflows] to provide the check on CI.
 
-[![asciicast](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT.svg)](https://asciinema.org/a/vGTpzD0obvhILEcSxYAVrlpqT)
-
 See [Formatting](./docs/formatting.md) for more ways to use the formatter.
+
+Demo:
+![pre-commit format](./docs/format-demo.svg)
 
 ### Lint
 
 To lint code, we recommend using the [Aspect CLI] to get the missing `lint` command, and [Aspect Workflows] to provide first-class support for "linters as code reviewers".
 
-For example, running `bazel lint //src:all` prints lint warnings to the terminal for all targets in the `//src` package:
-
-[![asciicast](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq.svg)](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq)
+For example, running `bazel lint //src:all` prints lint warnings to the terminal for all targets in the `//src` package.
+Suggested fixes from the linter tools are presented interactively.
 
 See [Linting](./docs/linting.md) for more ways to use the linter.
+
+Demo:
+![bazel lint demo](./docs/lint-fix-demo.svg)
 
 ### Ignoring files
 
