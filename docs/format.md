@@ -8,37 +8,11 @@ These are noted in the API docs below.
 Note: Under `--enable_bzlmod`, rules_lint installs multitool automatically.
 `WORKSPACE` users must install it manually; see the snippet on the releases page.
 
-Other formatter binaries may be declared in your repository.
-You can test that they work by running them directly with `bazel run`.
+Other formatter binaries may be declared in your repository, typically in `tools/format/BUILD.bazel`.
+You can test that they work by running them directly, with `bazel run -- //tools/format:some-tool`.
+Then use the label `//tools/format:some-tool` as the value of whatever language attribute in `format_multirun`.
+See the example/tools/format/BUILD file in this repo for full examples of declaring formatters.
 
-For example, to add [Prettier]:
-
-1. Add to your `BUILD.bazel` file:
-
-```starlark
-load("@npm//:prettier/package_json.bzl", prettier = "bin")
-
-prettier.prettier_binary(
-    name = "prettier",
-    # Allow the binary to be run outside bazel
-    env = {"BAZEL_BINDIR": "."},
-)
-```
-
-2. Try it with `bazel run //path/to:prettier -- --help`.
-3. Register it with `format_multirun`:
-
-```starlark
-load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
-
-format_multirun(
-    name = "format",
-    javascript = ":prettier",
-    ... more languages
-)
-```
-
-[Prettier]: https://prettier.io/
 [multitool]: https://registry.bazel.build/modules/rules_multitool
 
 <a id="languages"></a>
