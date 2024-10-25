@@ -26,7 +26,14 @@ local_path_override(
 )
 
 vale_dependencies = use_extension("@aspect_rules_lint//lint:vale.bzl", "vale_dependencies")
-use_repo(vale_dependencies, "vale_macOS_arm64")
+use_repo(
+    vale_dependencies,
+    "vale_Linux_64-bit",
+    "vale_Linux_arm64",
+    "vale_Windows_64-bit",
+    "vale_macOS_64-bit",
+    "vale_macOS_arm64",
+)
 
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
 rules_ts_ext.deps()
