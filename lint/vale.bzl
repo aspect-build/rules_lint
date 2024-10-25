@@ -203,3 +203,10 @@ def fetch_vale(tag = VALE_VERSIONS.keys()[0]):
         )
 
         fetch_styles()
+
+def _vale_dependencies_impl(_ctx):
+    fetch_vale()
+
+vale_dependencies = module_extension(
+    implementation = _vale_dependencies_impl,
+)

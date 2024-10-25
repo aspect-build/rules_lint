@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   bazel-test:
-    uses: bazel-contrib/.github/.github/workflows/bazel.yaml@1314bb5dc3bccbc26063ee0710830919bb9a0792
+    uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v7
     with:
       folders: '[".", "example"]'
       # Don't try for Windows support yet.
