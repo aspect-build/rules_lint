@@ -202,7 +202,7 @@ def fetch_vale(tag = VALE_VERSIONS.keys()[0]):
             build_file_content = """exports_files(["vale", "vale.exe"])""",
         )
 
-        fetch_styles()
+    fetch_styles()
 
 def _vale_dependencies_impl(_ctx):
     fetch_vale()
