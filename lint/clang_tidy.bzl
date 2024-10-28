@@ -371,6 +371,11 @@ def _clang_tidy_aspect_impl(target, ctx):
 
     files_to_lint = _filter_srcs(ctx.rule)
     compilation_context = target[CcInfo].compilation_context
+    if hasattr(ctx.rule.attr, "implementation_deps"):
+        compilation_context = cc_common.merge_compilation_contexts(
+            compilation_contexts = [compilation_context] +
+                [implementation_dep[CcInfo].compilation_context for implementation_dep in ctx.rule.attr.implementation_deps])
+
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
     else:
