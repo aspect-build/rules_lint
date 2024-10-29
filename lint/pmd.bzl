@@ -53,6 +53,13 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, option
     # Wire command-line options, see
     # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
     args = ctx.actions.args()
+    args.add("check")
+    args.add("--no-progress")
+
+    # https://docs.pmd-code.org/pmd-doc-7.7.0/pmd_userdocs_incremental_analysis.html
+    # is non-hermetic, and requires some thought and care before trying to use previous results.
+    # If this is actually needed, it will probably have to be run as a Persistent worker :(
+    args.add("--no-cache")
     args.add_all(options)
     args.add("--rulesets")
     args.add_joined(rulesets, join_with = ",")
@@ -62,7 +69,8 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, option
     src_args.add_all(srcs)
 
     if exit_code:
-        command = "{PMD} $@ >{stdout}; echo $? > " + exit_code.path
+        args.add_all(["--report-file", stdout.path])
+        command = "{PMD} $@; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
         # Create empty stdout file on success, as Bazel expects one
@@ -144,7 +152,7 @@ def fetch_pmd():
     http_archive(
         name = "net_sourceforge_pmd",
         build_file_content = """java_import(name = "net_sourceforge_pmd", jars = glob(["*.jar"]), visibility = ["//visibility:public"])""",
-        sha256 = "21acf96d43cb40d591cacccc1c20a66fc796eaddf69ea61812594447bac7a11d",
-        strip_prefix = "pmd-bin-6.55.0/lib",
-        url = "https://github.com/pmd/pmd/releases/download/pmd_releases/6.55.0/pmd-bin-6.55.0.zip",
+        integrity = "sha256-vov2j2wdZphL2WRak+Yxt4ocL0L18PhxkIL+rWdVOUA=",
+        strip_prefix = "pmd-bin-7.7.0/lib",
+        url = "https://github.com/pmd/pmd/releases/download/pmd_releases/7.7.0/pmd-dist-7.7.0-bin.zip",
     )
