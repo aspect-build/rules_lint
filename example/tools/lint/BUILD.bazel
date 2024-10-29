@@ -32,7 +32,11 @@ stylelint_bin.stylelint_binary(name = "stylelint")
 
 java_binary(
     name = "pmd",
-    main_class = "net.sourceforge.pmd.PMD",
+    # In PMD 6.x, this was the main class:
+    # main_class = "net.sourceforge.pmd.PMD",
+    # It changed in version 7.0
+    # https://docs.pmd-code.org/pmd-doc-7.0.0/pmd_userdocs_migrating_to_pmd7.html
+    main_class = "net.sourceforge.pmd.cli.PmdCli",
     runtime_deps = ["@net_sourceforge_pmd"],
 )
 
