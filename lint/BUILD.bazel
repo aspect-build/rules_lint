@@ -1,5 +1,4 @@
 load("@aspect_bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
-load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("//lint/private:lint_aspect.bzl", "lint_options")
@@ -101,24 +100,6 @@ lint_options(
     visibility = ["//visibility:public"],
 )
 
-js_library(
-    name = "eslint.workaround_17660",
-    srcs = ["eslint.workaround_17660.js"],
-    visibility = ["//visibility:public"],
-)
-
-js_library(
-    name = "eslint.compact-formatter",
-    srcs = ["eslint.compact-formatter.js"],
-    visibility = ["//visibility:public"],
-)
-
-js_library(
-    name = "eslint.stylish-formatter",
-    srcs = ["eslint.stylish-formatter.js"],
-    visibility = ["//visibility:public"],
-)
-
 bzl_library(
     name = "buf",
     srcs = ["buf.bzl"],
@@ -127,6 +108,24 @@ bzl_library(
         "//lint/private:lint_aspect",
         "@rules_proto//proto:defs",
     ],
+)
+
+alias(
+    name = "eslint.workaround_17660",
+    actual = "//lint/js:eslint.workaround_17660",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "eslint.compact-formatter",
+    actual = "//lint/js:eslint.compact-formatter",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "eslint.stylish-formatter",
+    actual = "//lint/js:eslint.stylish-formatter",
+    visibility = ["//visibility:public"],
 )
 
 bzl_library(
