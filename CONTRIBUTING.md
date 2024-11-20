@@ -38,9 +38,20 @@ This means that any usage of `@rules_lint` on your system will point to this fol
 
 ## Releasing
 
-1. Determine the next release version, following semver (could automate in the future from changelog)
-1. Tag the repo and push it (or create a tag in GH UI)
-1. Watch the automation run on GitHub actions
+**Easiest**: if the new version can be determined automatically from the commit history, just navigate to
+https://github.com/aspect-build/rules_lint/actions/workflows/tag.yaml
+and press the "Run workflow" button.
+
+If you need control over the next release version, for example when making a release candidate for a new major,
+then: tag the repo and push the tag, for example
+
+```sh
+% git fetch
+% git tag v1.0.0-rc0 origin/main
+% git push origin v1.0.0-rc0
+```
+
+Then watch the automation run on GitHub actions which creates the release.
 
 ## Recording a demo
 

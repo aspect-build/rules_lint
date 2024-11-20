@@ -4,6 +4,10 @@ name: Release
 on:
   # Can be triggered from the tag.yaml workflow
   workflow_call:
+    inputs:
+      tag_name:
+        required: true
+        type: string
   # Or, developers can manually push a tag from their clone
   push:
     tags:
@@ -11,7 +15,8 @@ on:
 
 jobs:
   release:
-    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v5
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@e6faaa01d320a21515f1d9cc0618e8ceb04e8fbf # https://github.com/bazel-contrib/.github/pull/19
     with:
       prerelease: false
       release_files: rules_lint-*.tar.gz
+      tag_name: ${{ inputs.tag_name }}

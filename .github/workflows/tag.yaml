@@ -3,6 +3,7 @@
 # It also runs on a schedule so we don't leave commits unreleased indefinitely
 # (avoiding users having to ping "hey could someone cut a release").
 
+name: Tag a Release
 on:
   # Allow devs to tag manually through the GitHub UI.
   # For example after landing a fix that customers are waiting for.
@@ -17,11 +18,11 @@ on:
 jobs:
   tag:
     permissions:
-      # create tag
-      contents: write
+      contents: write # allow create tag
     runs-on: ubuntu-latest
     outputs:
       new-tag: ${{ steps.ccv.outputs.new-tag }}
+      new-tag-version: ${{steps.ccv.outputs.new-tag-version}}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,4 +34,8 @@ jobs:
   release:
     needs: tag
     uses: ./.github/workflows/release.yml
+    with:
+      tag_name: ${{ needs.tag.outputs.new-tag-version }}
     if: needs.tag.outputs.new-tag == 'true'
+    permissions:
+      contents: write # allow create release
