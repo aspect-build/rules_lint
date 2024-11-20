@@ -38,7 +38,10 @@ This means that any usage of `@rules_lint` on your system will point to this fol
 
 ## Releasing
 
-**Easiest**: if the new version can be determined automatically from the commit history, just navigate to
+Releases are automated on a cron trigger.
+If you do nothing, eventually the newest commits will be released automatically. See .github/workflows/tag.yaml.
+
+To trigger a release where the new version can be determined automatically from the commit history, just navigate to
 https://github.com/aspect-build/rules_lint/actions/workflows/tag.yaml
 and press the "Run workflow" button.
 
