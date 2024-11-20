@@ -1,9 +1,10 @@
 # Cut a release whenever a new tag is pushed to the repo.
-# You should use an annotated tag, like `git tag -a v1.2.3`
-# and put the release notes into the commit message for the tag.
 name: Release
 
 on:
+  # Can be triggered from the tag.yaml workflow
+  workflow_call:
+  # Or, developers can manually push a tag from their clone
   push:
     tags:
       - "v*.*.*"
