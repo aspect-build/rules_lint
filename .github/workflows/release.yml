@@ -15,7 +15,7 @@ on:
 
 jobs:
   release:
-    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@e6faaa01d320a21515f1d9cc0618e8ceb04e8fbf # https://github.com/bazel-contrib/.github/pull/19
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@23b69a7ea7c1e36d0a92980d049ba72e6f4809f7 # https://github.com/bazel-contrib/.github/pull/19
     with:
       prerelease: false
       release_files: rules_lint-*.tar.gz
