@@ -41,8 +41,8 @@ def rules_lint_dependencies():
 def fetch_java_format():
     http_jar(
         name = "google-java-format",
-        sha256 = "33068bbbdce1099982ec1171f5e202898eb35f2919cf486141e439fc6e3a4203",
-        url = "https://github.com/google/google-java-format/releases/download/v1.17.0/google-java-format-1.17.0-all-deps.jar",
+        sha256 = "8bd949e84a6435046cf18ddfa769661eaac9da21b2d3ca46c4ba12f96637bcbb",
+        url = "https://github.com/google/google-java-format/releases/download/v1.25.0/google-java-format-1.25.0-all-deps.jar",
     )
 
 def fetch_ktfmt():
