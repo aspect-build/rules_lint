@@ -7,6 +7,7 @@ module(
 )
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.7")
+bazel_dep(name = "rules_java", version = "8.5.0")
 
 # Needed in the root because we use js_lib_helpers in our aspect impl
 # Minimum version needs 'chore: bump bazel-lib to 2.0 by @alexeagle in #1311'

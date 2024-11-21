@@ -4,6 +4,7 @@ common --enable_platform_specific_config
 # Don't depend on a JAVA_HOME pointing at a system JDK
 # see https://github.com/bazelbuild/rules_jvm_external/issues/445
 build --repo_env=JAVA_HOME=../bazel_tools/jdk
+common --java_runtime_version=remotejdk_21
 
 common --incompatible_enable_proto_toolchain_resolution
 common --@aspect_rules_ts//ts:skipLibCheck=always

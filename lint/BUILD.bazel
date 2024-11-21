@@ -173,6 +173,15 @@ bzl_library(
 )
 
 bzl_library(
+    name = "spotbugs",
+    srcs = ["spotbugs.bzl"],
+    visibility = ["//visibility:public"],
+    deps = _BAZEL_TOOLS + [
+        "//lint/private:lint_aspect",
+    ],
+)
+
+bzl_library(
     name = "ruff",
     srcs = ["ruff.bzl"],
     visibility = ["//visibility:public"],
