@@ -161,6 +161,6 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
 def fetch_checkstyle():
     http_jar(
         name = "com_puppycrawl_tools_checkstyle",
-        url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.17.0/checkstyle-10.17.0-all.jar",
-        sha256 = "51c34d738520c1389d71998a9ab0e6dabe0d7cf262149f3e01a7294496062e42",
+        url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.20.1/checkstyle-10.20.1-all.jar",
+        sha256 = "591524e5321421272c16fbb38009a91b5f3d95535fb3cb52140f7a3ac07ea9fe",
     )
