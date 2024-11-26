@@ -110,6 +110,8 @@ bzl_library(
     ],
 )
 
+# Aliases introduced in #432 for fear of breaking users.
+# TODO(2.0) remove them
 alias(
     name = "eslint.workaround_17660",
     actual = "//lint/js:eslint.workaround_17660",

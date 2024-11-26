@@ -1,7 +1,7 @@
 // Fork of 'stylish' plugin that prints relative paths.
 // This allows an editor to navigate to the location of the lint warning even though we present
 // eslint with paths underneath a bazel sandbox folder.
-// from https://github.com/eslint/eslint/blob/331cf62024b6c7ad4067c14c593f116576c3c861/lib/cli-engine/formatters/stylish.js
+// from https://raw.githubusercontent.com/eslint/eslint/refs/tags/v9.15.0/lib/cli-engine/formatters/stylish.js
 /**
  * @fileoverview Stylish reporter
  * @author Sindre Sorhus
@@ -10,7 +10,7 @@
 
 /**
  * LOCAL MODIFICATION:
- * The three eslint dependencies should be loaded from the user's node_modules tree, not from rules_lint.
+ * The eslint dependencies should be loaded from the user's node_modules tree, not from rules_lint.
  */
 
 // This script is used as a command-line flag to eslint, so the command line is "node eslint.js --format this_script.js"
@@ -25,9 +25,16 @@ if (idx < 0) {
 }
 const searchPath = eslintEntry.substring(0, idx);
 // Modify the upstream code to pass through an explicit `require.resolve` that starts from eslint
-const chalk = require(require.resolve("chalk", { paths: [searchPath] })),
-  stripAnsi = require(require.resolve("strip-ansi", { paths: [searchPath] })),
-  table = require(require.resolve("text-table", { paths: [searchPath] }));
+let table_path;
+try {
+  table_path = require.resolve("text-table", { paths: [searchPath] });
+} catch (e) {
+  table_path = require.resolve("./lib/shared/text-table", {
+    paths: [searchPath],
+  });
+}
+const table = require(table_path);
+const chalk = require(require.resolve("chalk", { paths: [searchPath] }));
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -47,7 +54,7 @@ function pluralize(word, count) {
 // Public Interface
 //------------------------------------------------------------------------------
 
-module.exports = function (results, context) {
+module.exports = function (results) {
   let output = "\n",
     errorCount = 0,
     warningCount = 0,
@@ -67,10 +74,7 @@ module.exports = function (results, context) {
     fixableErrorCount += result.fixableErrorCount;
     fixableWarningCount += result.fixableWarningCount;
 
-    // LOCAL MODIFICATION: print path relative to the working directory
-    output += `${chalk.underline(
-      require("node:path").relative(context.cwd, result.filePath)
-    )}\n`;
+    output += `${chalk.underline(result.filePath)}\n`;
 
     output += `${table(
       messages.map((message) => {
@@ -85,8 +89,8 @@ module.exports = function (results, context) {
 
         return [
           "",
-          message.line || 0,
-          message.column || 0,
+          String(message.line || 0),
+          String(message.column || 0),
           messageType,
           message.message.replace(/([^ ])\.$/u, "$1"),
           chalk.dim(message.ruleId || ""),
@@ -95,7 +99,7 @@ module.exports = function (results, context) {
       {
         align: ["", "r", "l"],
         stringLength(str) {
-          return stripAnsi(str).length;
+          return util.stripVTControlCharacters(str).length;
         },
       }
     )
