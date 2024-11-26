@@ -183,7 +183,7 @@ function ls-files {
         files=$(find "$@" "${find_args[@]}")
     fi
 
-    if [[ $disable_git_attribute_checks == true ]]; then
+    if [[ ${disable_git_attribute_checks:-} == true ]]; then
       # files should be returned newline separated to avoid a "File name too long" error
       for file in $files; do
         echo "$file"
