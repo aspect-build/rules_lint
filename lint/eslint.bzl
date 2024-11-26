@@ -274,12 +274,10 @@ def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project"
             ),
             "_compact_formatter": attr.label(
                 default = "@aspect_rules_lint//lint:eslint.compact-formatter",
-                allow_single_file = True,
                 cfg = "exec",
             ),
             "_stylish_formatter": attr.label(
                 default = "@aspect_rules_lint//lint:eslint.stylish-formatter",
-                allow_single_file = True,
                 cfg = "exec",
             ),
             "_rule_kinds": attr.string_list(

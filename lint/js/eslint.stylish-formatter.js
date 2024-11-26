@@ -25,9 +25,9 @@ if (idx < 0) {
 }
 const searchPath = eslintEntry.substring(0, idx);
 // Modify the upstream code to pass through an explicit `require.resolve` that starts from eslint
-const chalk = require(require.resolve("chalk", { paths: [searchPath] })),
-  stripAnsi = require(require.resolve("strip-ansi", { paths: [searchPath] })),
-  table = require(require.resolve("text-table", { paths: [searchPath] }));
+const chalk = require("chalk"),
+  stripAnsi = require("strip-ansi"),
+  table = require("text-table");
 
 //------------------------------------------------------------------------------
 // Helpers
