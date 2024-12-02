@@ -9,11 +9,12 @@ on:
   # For example after landing a fix that customers are waiting for.
   workflow_dispatch:
 
-  # Run every Monday at 3PM UTC (8AM PST)
-  # NB: would prefer to trigger less frequently, perhaps bi-weekly, see
-  # https://medium.com/@VeselyCodes/bi-weekly-github-actions-7bea6be7bd96
+  # Run on the 3rd and 18th of each month.
+  # This is a trade-off between making too many releases,
+  # which overwhelms BCR maintainers and over-notifies users,
+  # and releasing too infrequently which delays delivery of bugfixes and features.
   schedule:
-    - cron: "0 15 * * 1"
+    - cron: "0 15 3,18 * 1"
 
 jobs:
   tag:
