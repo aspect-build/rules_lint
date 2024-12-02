@@ -14,7 +14,7 @@ on:
   # which overwhelms BCR maintainers and over-notifies users,
   # and releasing too infrequently which delays delivery of bugfixes and features.
   schedule:
-    - cron: "0 15 3,18 * 1"
+    - cron: "0 15 3,18 * *"
 
 jobs:
   tag:
