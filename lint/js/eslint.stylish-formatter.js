@@ -74,7 +74,10 @@ module.exports = function (results) {
     fixableErrorCount += result.fixableErrorCount;
     fixableWarningCount += result.fixableWarningCount;
 
-    output += `${chalk.underline(result.filePath)}\n`;
+    // LOCAL MODIFICATION: print path relative to the working directory
+    output += `${chalk.underline(
+      require("node:path").relative(context.cwd, result.filePath)
+    )}\n`;
 
     output += `${table(
       messages.map((message) => {
