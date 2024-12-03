@@ -65,8 +65,7 @@ def _gather_inputs(ctx, srcs):
             include_transitive_types = False,
             include_npm_sources = True,
         )
-    inputs.extend(js_inputs.to_list())
-    return inputs
+    return depset(inputs, transitive = [js_inputs])
 
 def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, options = []):
     """Spawn stylelint as a Bazel action
@@ -145,7 +144,7 @@ def stylelint_fix(ctx, executable, srcs, patch, stderr, exit_code, env = {}, opt
     )
 
     ctx.actions.run(
-        inputs = _gather_inputs(ctx, srcs) + [patch_cfg],
+        inputs = depset([patch_cfg], transitive = [_gather_inputs(ctx, srcs)]),
         outputs = [patch, stderr, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
