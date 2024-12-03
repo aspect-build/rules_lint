@@ -9,7 +9,7 @@ on:
   # For example after landing a fix that customers are waiting for.
   workflow_dispatch:
 
-  # Run on the 3rd and 18th of each month.
+  # Run at 3PM UTC (8AM PST) on the 3rd and 18th of each month.
   # This is a trade-off between making too many releases,
   # which overwhelms BCR maintainers and over-notifies users,
   # and releasing too infrequently which delays delivery of bugfixes and features.
