@@ -13,6 +13,8 @@
  * The eslint dependencies should be loaded from the user's node_modules tree, not from rules_lint.
  */
 
+const util = require("node:util");
+
 // This script is used as a command-line flag to eslint, so the command line is "node eslint.js --format this_script.js"
 // That means we can grab the path of the eslint entry point, which is beneath its node modules tree.
 const eslintEntry = process.argv[1];
@@ -23,18 +25,18 @@ if (idx < 0) {
     "node_modules not found in eslint entry point " + eslintEntry
   );
 }
-const searchPath = eslintEntry.substring(0, idx);
+const options = { paths: [eslintEntry.substring(0, idx)] };
+
 // Modify the upstream code to pass through an explicit `require.resolve` that starts from eslint
+const chalk = require(require.resolve("chalk", options));
+
 let table_path;
 try {
-  table_path = require.resolve("text-table", { paths: [searchPath] });
+  table_path = require.resolve("text-table", options);
 } catch (e) {
-  table_path = require.resolve("./lib/shared/text-table", {
-    paths: [searchPath],
-  });
+  table_path = require.resolve("./lib/shared/text-table", options);
 }
 const table = require(table_path);
-const chalk = require(require.resolve("chalk", { paths: [searchPath] }));
 
 //------------------------------------------------------------------------------
 // Helpers
