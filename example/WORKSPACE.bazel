@@ -318,6 +318,10 @@ load("@aspect_rules_lint//lint:ktlint.bzl", "fetch_ktlint")
 
 fetch_ktlint()
 
+load("@aspect_rules_lint//lint:spotbugs.bzl", "fetch_spotbugs")
+
+fetch_spotbugs()
+
 ########################
 # Optional: multitool provides defaults for some tools such as yamlfmt
 # If you do not set up multitool, you must provide these tools yourself

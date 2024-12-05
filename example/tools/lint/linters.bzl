@@ -10,6 +10,7 @@ load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
+load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
 
@@ -110,3 +111,10 @@ clang_tidy_global_config = lint_clang_tidy_aspect(
     angle_includes_are_system = False,
     verbose = False,
 )
+
+spotbugs = lint_spotbugs_aspect(
+    binary = "@@spotbugs//:bin",
+    exclude_filter = "@@//:spotbugs-exclude.xml",
+)
+
+spotbugs_test = lint_test(aspect = spotbugs)

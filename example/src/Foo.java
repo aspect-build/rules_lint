@@ -4,7 +4,31 @@
 // "category/java/errorprone.xml/FinalizeOverloaded"
 // src/equals_null.java:6: FinalizeOverloaded:     Finalize methods should not be overloaded
 // Error: bazel exited with exit code: 4
+
+//spotbugs result
+//M B OS: Foo.readFile() may fail to close stream  At Foo.java:[line 18]
+//H D DLS: Dead store to $L1 in Foo.readFile()  At Foo.java:[line 18]
+//M X OBL: Foo.readFile() may fail to clean up java.io.InputStream  Obligation to clean up resource created at Foo.java:[line 18] is not discharged
 public class Foo {
-  // this is confusing and probably a bug
-  protected void finalize(int a) {}
+
+  // SpotBugs violation: Logical errors (NP_NULL_ON_SOME_PATH + DLS_DEAD_STORE)
+  public void someMethod(String str) {
+    if (str.equals("test")) { // Possible NPE if str is null
+      System.out.println("Valid string");
+    }
+
+    int a = 5;
+    a = 10; // The assignment to 5 is dead (overwritten with 10)
+    System.out.println(a);
+  }
+
+  // SpotBugs violation: Resource leak (RCN_RESOURCE_LEAK)
+  public void readFile() {
+    try {
+      java.io.FileInputStream fis = new java.io.FileInputStream("somefile.txt");
+      // FileInputStream not closed, causing resource leak
+    } catch (java.io.IOException e) {
+      e.printStackTrace();
+    }
+  }
 }
