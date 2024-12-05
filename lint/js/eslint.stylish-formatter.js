@@ -8,12 +8,52 @@
  */
 "use strict";
 
+const util = require("node:util");
+
+/**
+ * LOCAL MODIFICATION:
+ * To avoid complexity of resolving dependencies, this function vendored from
+ * https://raw.githubusercontent.com/eslint/eslint/refs/tags/v9.15.0/lib/shared/text-table.js
+ */
+function table(rows_, opts) {
+  const hsep = "  ";
+  const align = opts.align;
+  const stringLength = opts.stringLength;
+
+  const sizes = rows_.reduce((acc, row) => {
+    row.forEach((c, ix) => {
+      const n = stringLength(c);
+
+      if (!acc[ix] || n > acc[ix]) {
+        acc[ix] = n;
+      }
+    });
+    return acc;
+  }, []);
+
+  return rows_
+    .map((row) =>
+      row
+        .map((c, ix) => {
+          const n = sizes[ix] - stringLength(c) || 0;
+          const s = Array(Math.max(n + 1, 1)).join(" ");
+
+          if (align[ix] === "r") {
+            return s + c;
+          }
+
+          return c + s;
+        })
+        .join(hsep)
+        .trimEnd()
+    )
+    .join("\n");
+}
+
 /**
  * LOCAL MODIFICATION:
  * The eslint dependencies should be loaded from the user's node_modules tree, not from rules_lint.
  */
-
-const util = require("node:util");
 
 // This script is used as a command-line flag to eslint, so the command line is "node eslint.js --format this_script.js"
 // That means we can grab the path of the eslint entry point, which is beneath its node modules tree.
@@ -25,18 +65,11 @@ if (idx < 0) {
     "node_modules not found in eslint entry point " + eslintEntry
   );
 }
-const options = { paths: [eslintEntry.substring(0, idx)] };
 
 // Modify the upstream code to pass through an explicit `require.resolve` that starts from eslint
-const chalk = require(require.resolve("chalk", options));
-
-let table_path;
-try {
-  table_path = require.resolve("text-table", options);
-} catch (e) {
-  table_path = require.resolve("./lib/shared/text-table", options);
-}
-const table = require(table_path);
+const chalk = require(require.resolve("chalk", {
+  paths: [eslintEntry.substring(0, idx)],
+}));
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -56,7 +89,7 @@ function pluralize(word, count) {
 // Public Interface
 //------------------------------------------------------------------------------
 
-module.exports = function (results) {
+module.exports = function (results, context) {
   let output = "\n",
     errorCount = 0,
     warningCount = 0,
