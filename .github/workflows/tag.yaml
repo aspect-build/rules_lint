@@ -31,12 +31,12 @@ jobs:
           fetch-depth: 0
       - name: Bump tag if necessary
         id: ccv
-        uses: smlx/ccv@d3de774e9b607b079940a7a86952f44643743336 # v0.9.0
+        uses: smlx/ccv@7318e2f25a52dcd550e75384b84983973251a1f8 # v0.10.0
   release:
     needs: tag
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.tag.outputs.new-tag-version }}
-    if: needs.tag.outputs.new-tag == 'true'
+    if: needs.tag.outputs.new-tag == 'true' && needs.tag.outputs.new-tag-version-type != 'major'
     permissions:
       contents: write # allow create release
