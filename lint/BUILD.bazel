@@ -130,6 +130,12 @@ alias(
     visibility = ["//visibility:public"],
 )
 
+alias(
+    name = "stylelint.compact-formatter",
+    actual = "//lint/js:stylelint.compact-formatter",
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "eslint",
     srcs = ["eslint.bzl"],
