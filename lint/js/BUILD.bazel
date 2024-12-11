@@ -18,3 +18,9 @@ js_library(
     visibility = ["//visibility:public"],
 )
 
+js_library(
+    name = "stylelint.compact-formatter",
+    srcs = ["stylelint.compactFormatter.mjs"],
+    visibility = ["//visibility:public"],
+)
+

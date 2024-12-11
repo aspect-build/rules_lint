@@ -43,14 +43,14 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "output
 
 _MNEMONIC = "AspectRulesLintStylelint"
 
-def _gather_inputs(ctx, srcs):
+def _gather_inputs(ctx, srcs, files = []):
     inputs = copy_files_to_bin_actions(ctx, srcs)
 
     # Add the config file along with any deps it has on npm packages
     if "gather_files_from_js_providers" in dir(js_lib_helpers):
         # rules_js 1.x
         js_inputs = js_lib_helpers.gather_files_from_js_providers(
-            [ctx.attr._config_file],
+            [ctx.attr._config_file] + files,
             include_transitive_sources = True,
             include_declarations = False,
             include_npm_linked_packages = True,
@@ -58,7 +58,7 @@ def _gather_inputs(ctx, srcs):
     else:
         # rules_js 2.x
         js_inputs = js_lib_helpers.gather_files_from_js_infos(
-            [ctx.attr._config_file],
+            [ctx.attr._config_file] + files,
             include_sources = True,
             include_transitive_sources = True,
             include_types = False,
@@ -68,7 +68,7 @@ def _gather_inputs(ctx, srcs):
     inputs.extend(js_inputs.to_list())
     return inputs
 
-def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, options = []):
+def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, options = [], format = None):
     """Spawn stylelint as a Bazel action
 
     Args:
@@ -86,6 +86,7 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
                 78 - invalid configuration file
         env: environment variables for stylelint
         options: additional command-line arguments
+        format: a formatter to add as a command line argument
     """
     outputs = [stderr]
 
@@ -101,8 +102,15 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
         # Create empty file on success, as Bazel expects one
         command = "{stylelint} $@ && touch {stderr}"
 
+    file_inputs = []
+    if type(format) == "string":
+        args.add_all(["--formatter", format])
+    elif format != None:
+        args.add_all(["--custom-formatter", "../../../" + format.files.to_list()[0].path])
+        file_inputs.append(format)
+
     ctx.actions.run_shell(
-        inputs = _gather_inputs(ctx, srcs),
+        inputs = _gather_inputs(ctx, srcs, file_inputs),
         outputs = outputs,
         command = command.format(stylelint = executable._stylelint.path, stderr = stderr.path),
         arguments = [args],
@@ -181,7 +189,7 @@ def _stylelint_aspect_impl(target, ctx):
         stylelint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, options = color_options)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    stylelint_action(ctx, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code, options = ["--formatter", "compact"])
+    stylelint_action(ctx, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code, format = ctx.attr._compact_formatter)
 
     return [info]
 
@@ -215,6 +223,11 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
             "_config_file": attr.label(
                 default = config,
                 allow_files = True,
+            ),
+            "_compact_formatter": attr.label(
+                default = "@aspect_rules_lint//lint:stylelint.compact-formatter",
+                allow_single_file = True,
+                cfg = "exec",
             ),
             "_patcher": attr.label(
                 default = "@aspect_rules_lint//lint/private:patcher",
