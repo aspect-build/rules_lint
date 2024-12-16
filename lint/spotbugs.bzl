@@ -23,7 +23,7 @@ Finally, declare an aspect for it, typically in `tools/lint/linters.bzl`:
 load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
 
 spotbugs = lint_spotbugs_aspect(
-    binary = "@@spotbugs//:bin",
+    binary = "@@//tools/lint:spotbugs",,
     exclude_filter = "@@//:spotbugs-exclude.xml",
 )
 
@@ -135,21 +135,6 @@ java_import(
     name = "jar",
     jars = [
         "lib/spotbugs.jar",
-    ],
-    visibility = ["//visibility:public"],
-)
-java_binary(
-    name = "bin",
-    runtime_deps = [
-        ":jar",
-    ],
-    main_class = "edu.umd.cs.findbugs.LaunchAppropriateUI",
-    jvm_flags = [
-        "--add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
-        "--add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
-        "--add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
-        "--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
-        "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
     ],
     visibility = ["//visibility:public"],
 )

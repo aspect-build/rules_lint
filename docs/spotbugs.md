@@ -25,7 +25,7 @@ Finally, declare an aspect for it, typically in `tools/lint/linters.bzl`:
 load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
 
 spotbugs = lint_spotbugs_aspect(
-    binary = "@@spotbugs//:bin",
+    binary = "@@//tools/lint:spotbugs",
     exclude_filter = "@@//:spotbugs-exclude.xml",
 )
 

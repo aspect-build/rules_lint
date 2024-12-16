@@ -113,7 +113,7 @@ clang_tidy_global_config = lint_clang_tidy_aspect(
 )
 
 spotbugs = lint_spotbugs_aspect(
-    binary = "@@spotbugs//:bin",
+    binary = "@@//tools/lint:spotbugs",
     exclude_filter = "@@//:spotbugs-exclude.xml",
 )
 
