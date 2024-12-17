@@ -68,7 +68,7 @@ A factory function to create a linter aspect.
 <pre>
 load("@aspect_rules_lint//lint:stylelint.bzl", "stylelint_action")
 
-stylelint_action(<a href="#stylelint_action-ctx">ctx</a>, <a href="#stylelint_action-executable">executable</a>, <a href="#stylelint_action-srcs">srcs</a>, <a href="#stylelint_action-stderr">stderr</a>, <a href="#stylelint_action-exit_code">exit_code</a>, <a href="#stylelint_action-env">env</a>, <a href="#stylelint_action-options">options</a>)
+stylelint_action(<a href="#stylelint_action-ctx">ctx</a>, <a href="#stylelint_action-executable">executable</a>, <a href="#stylelint_action-srcs">srcs</a>, <a href="#stylelint_action-stderr">stderr</a>, <a href="#stylelint_action-exit_code">exit_code</a>, <a href="#stylelint_action-env">env</a>, <a href="#stylelint_action-options">options</a>, <a href="#stylelint_action-format">format</a>)
 </pre>
 
 Spawn stylelint as a Bazel action
@@ -85,6 +85,7 @@ Spawn stylelint as a Bazel action
 | <a id="stylelint_action-exit_code"></a>exit_code |  output file containing the exit code of stylelint. If None, then fail the build when stylelint exits non-zero. Exit codes may be:     1 - fatal error     2 - lint problem     64 - invalid CLI usage     78 - invalid configuration file   |  `None` |
 | <a id="stylelint_action-env"></a>env |  environment variables for stylelint   |  `{}` |
 | <a id="stylelint_action-options"></a>options |  additional command-line arguments   |  `[]` |
+| <a id="stylelint_action-format"></a>format |  a formatter to add as a command line argument   |  `None` |
 
 
 <a id="stylelint_fix"></a>
