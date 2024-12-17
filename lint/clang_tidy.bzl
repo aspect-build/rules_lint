@@ -44,10 +44,10 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "noop_lint_action", "o
 _MNEMONIC = "AspectRulesLintClangTidy"
 
 def _gather_inputs(ctx, compilation_context, srcs):
-    inputs = srcs + ctx.files._configs + compilation_context.headers.to_list()
+    inputs = srcs + ctx.files._configs
     if (any(ctx.files._global_config)):
         inputs.append(ctx.files._global_config[0])
-    return inputs
+    return depset(inputs, transitive = [compilation_context.headers])
 
 def _toolchain_env(ctx, user_flags, action_name = ACTION_NAMES.cpp_compile):
     cc_toolchain = find_cpp_toolchain(ctx)
@@ -349,7 +349,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
     )
 
     ctx.actions.run(
-        inputs = _gather_inputs(ctx, compilation_context, srcs) + [patch_cfg],
+        inputs = depset([patch_cfg], transitive = [_gather_inputs(ctx, compilation_context, srcs)]),
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],

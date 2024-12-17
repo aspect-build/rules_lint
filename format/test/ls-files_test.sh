@@ -55,7 +55,7 @@ js=$(ls-files JavaScript  gen1.js gen2.js gen3.js src.js)
     echo >&2 -e "expected ls-files to return src.js, was\n$js"
     exit 1
 }
-js=$(ls-files JavaScript src.js gen1.js gen2.js gen3.js --disable_git_attribute_checks)
+js=$(disable_git_attribute_checks=true ls-files JavaScript src.js gen1.js gen2.js gen3.js)
 expected='src.js
 gen1.js
 gen2.js
