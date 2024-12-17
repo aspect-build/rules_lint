@@ -81,8 +81,7 @@ def _gather_inputs(ctx, srcs, files):
             include_transitive_types = True,
             include_npm_sources = True,
         )
-    inputs.extend(js_inputs.to_list())
-    return inputs
+    return depset(inputs, transitive = [js_inputs])
 
 def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "stylish", env = {}):
     """Create a Bazel Action that spawns an eslint process.
@@ -184,7 +183,7 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code, format = "stylis
     )
 
     ctx.actions.run(
-        inputs = _gather_inputs(ctx, srcs, file_inputs) + [patch_cfg],
+        inputs = depset([patch_cfg], transitive = [_gather_inputs(ctx, srcs, file_inputs)]),
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
