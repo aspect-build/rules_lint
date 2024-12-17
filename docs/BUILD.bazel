@@ -33,6 +33,11 @@ stardoc_with_diff_test(
 )
 
 stardoc_with_diff_test(
+    name = "spotbugs",
+    bzl_library_target = "//lint:spotbugs",
+)
+
+stardoc_with_diff_test(
     name = "format",
     bzl_library_target = "//format:defs",
 )
