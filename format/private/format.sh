@@ -110,12 +110,6 @@ function process_args_in_batches() {
 # Exports a function that is similar to 'git ls-files'
 # ls-files <language> [<file>...]
 function ls-files {
-    disable_git_attribute_checks=false
-    if [[ "${!#}" == "--disable_git_attribute_checks" ]]; then
-      set -- "${@:1:$#-1}"
-      disable_git_attribute_checks=true
-    fi
-
     language="$1" && shift;
     # Copied file patterns from
     # https://github.com/github-linguist/linguist/blob/559a6426942abcae16b6d6b328147476432bf6cb/lib/linguist/languages.yml
@@ -189,7 +183,7 @@ function ls-files {
         files=$(find "$@" "${find_args[@]}")
     fi
 
-    if [[ $disable_git_attribute_checks == true ]]; then
+    if [[ ${disable_git_attribute_checks:-} == true ]]; then
       # files should be returned newline separated to avoid a "File name too long" error
       for file in $files; do
         echo "$file"

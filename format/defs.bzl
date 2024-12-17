@@ -24,8 +24,6 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_
         fail("Invalid mode", mode)
 
     args = []
-    if disable_git_attribute_checks:
-        args.append("--disable_git_attribute_checks")
 
     # this dict is used to create the attributes both to pass to command() (for
     # format_multirun) and to sh_test() (for format_test, so it has to toggle
@@ -41,6 +39,7 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_
             "lang": lang,
             "flags": FIX_FLAGS[toolname] if mode == "fix" else CHECK_FLAGS[toolname],
             "mode": "check" if mode == "test" else mode,
+            "disable_git_attribute_checks": "true" if disable_git_attribute_checks else "false",
         },
         "data": [tool_label],
         ("args" if mode == "test" else "arguments"): args,

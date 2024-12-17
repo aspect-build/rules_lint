@@ -1,16 +1,58 @@
 // Fork of 'stylish' plugin that prints relative paths.
 // This allows an editor to navigate to the location of the lint warning even though we present
 // eslint with paths underneath a bazel sandbox folder.
-// from https://github.com/eslint/eslint/blob/331cf62024b6c7ad4067c14c593f116576c3c861/lib/cli-engine/formatters/stylish.js
+// from https://raw.githubusercontent.com/eslint/eslint/refs/tags/v9.15.0/lib/cli-engine/formatters/stylish.js
 /**
  * @fileoverview Stylish reporter
  * @author Sindre Sorhus
  */
 "use strict";
 
+const util = require("node:util");
+
 /**
  * LOCAL MODIFICATION:
- * The three eslint dependencies should be loaded from the user's node_modules tree, not from rules_lint.
+ * To avoid complexity of resolving dependencies, this function vendored from
+ * https://raw.githubusercontent.com/eslint/eslint/refs/tags/v9.15.0/lib/shared/text-table.js
+ */
+function table(rows_, opts) {
+  const hsep = "  ";
+  const align = opts.align;
+  const stringLength = opts.stringLength;
+
+  const sizes = rows_.reduce((acc, row) => {
+    row.forEach((c, ix) => {
+      const n = stringLength(c);
+
+      if (!acc[ix] || n > acc[ix]) {
+        acc[ix] = n;
+      }
+    });
+    return acc;
+  }, []);
+
+  return rows_
+    .map((row) =>
+      row
+        .map((c, ix) => {
+          const n = sizes[ix] - stringLength(c) || 0;
+          const s = Array(Math.max(n + 1, 1)).join(" ");
+
+          if (align[ix] === "r") {
+            return s + c;
+          }
+
+          return c + s;
+        })
+        .join(hsep)
+        .trimEnd()
+    )
+    .join("\n");
+}
+
+/**
+ * LOCAL MODIFICATION:
+ * The eslint dependencies should be loaded from the user's node_modules tree, not from rules_lint.
  */
 
 // This script is used as a command-line flag to eslint, so the command line is "node eslint.js --format this_script.js"
@@ -23,11 +65,11 @@ if (idx < 0) {
     "node_modules not found in eslint entry point " + eslintEntry
   );
 }
-const searchPath = eslintEntry.substring(0, idx);
+
 // Modify the upstream code to pass through an explicit `require.resolve` that starts from eslint
-const chalk = require(require.resolve("chalk", { paths: [searchPath] })),
-  stripAnsi = require(require.resolve("strip-ansi", { paths: [searchPath] })),
-  table = require(require.resolve("text-table", { paths: [searchPath] }));
+const chalk = require(require.resolve("chalk", {
+  paths: [eslintEntry.substring(0, idx)],
+}));
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -85,8 +127,8 @@ module.exports = function (results, context) {
 
         return [
           "",
-          message.line || 0,
-          message.column || 0,
+          String(message.line || 0),
+          String(message.column || 0),
           messageType,
           message.message.replace(/([^ ])\.$/u, "$1"),
           chalk.dim(message.ruleId || ""),
@@ -95,7 +137,7 @@ module.exports = function (results, context) {
       {
         align: ["", "r", "l"],
         stringLength(str) {
-          return stripAnsi(str).length;
+          return util.stripVTControlCharacters(str).length;
         },
       }
     )
