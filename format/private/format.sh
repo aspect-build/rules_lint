@@ -248,7 +248,7 @@ function run-format {
       'Protocol Buffer')
         time {
           for file in $files; do
-            "$bin" $args $file >&2
+            "$bin" $args --path $file >&2
           done
         }
         ;;
