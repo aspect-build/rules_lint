@@ -42,6 +42,7 @@ def checkstyle_action(ctx, executable, srcs, config, data, stdout, exit_code = N
         executable: label of the the Checkstyle program
         srcs: java files to be linted
         config: label of the checkstyle.xml file
+        configs: dictionary mapping package label to their respective checkstyle.xml file
         data: labels of additional xml files such as suppressions.xml
         stdout: output file to generate
         exit_code: output file to write the exit code.
