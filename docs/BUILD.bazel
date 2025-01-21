@@ -23,6 +23,11 @@ stardoc_with_diff_test(
 )
 
 stardoc_with_diff_test(
+    name = "keep_sorted",
+    bzl_library_target = "//lint:keep_sorted",
+)
+
+stardoc_with_diff_test(
     name = "pmd",
     bzl_library_target = "//lint:pmd",
 )

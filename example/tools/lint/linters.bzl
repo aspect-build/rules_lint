@@ -13,6 +13,7 @@ load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
+load("@aspect_rules_lint//lint:keep_sorted.bzl", "lint_keep_sorted_aspect")
 
 buf = lint_buf_aspect(
     config = "@@//:buf.yaml",
@@ -118,3 +119,9 @@ spotbugs = lint_spotbugs_aspect(
 )
 
 spotbugs_test = lint_test(aspect = spotbugs)
+
+keep_sorted = lint_keep_sorted_aspect(
+    binary = "@@gazelle~~go_deps~com_github_google_keep_sorted//:keep-sorted",
+)
+
+keep_sorted_test = lint_test(aspect = keep_sorted)

@@ -116,7 +116,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Go_with_gofmt
     assert_success
 
-    assert_output --partial "+ gofmt -w example/src/hello.go"
+    assert_output --partial "+ gofmt -w example/main.go example/src/hello.go"
 }
 
 @test "should run clang-format on C++" {
