@@ -82,6 +82,15 @@ def _checkstyle_aspect_impl(target, ctx):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
+    config_file = ctx.file._config
+    if ctx.attr._configs:
+        label = str(target.label)
+        keys = sorted(ctx.attr._configs.keys(), key=len, reverse = True)
+        for key in keys:
+            if label.startswith(key):
+                config = ctx.attr._configs[key]
+                config_file = config.files.to_list()[0]
+                break
     outputs, info = output_files(_MNEMONIC, target, ctx)
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
@@ -91,7 +100,7 @@ def _checkstyle_aspect_impl(target, ctx):
         ctx,
         ctx.executable._checkstyle,
         files_to_lint,
-        ctx.file._config,
+        config_file,
         ctx.files._data,
         outputs.human.out,
         outputs.human.exit_code,
@@ -101,7 +110,7 @@ def _checkstyle_aspect_impl(target, ctx):
         ctx,
         ctx.executable._checkstyle,
         files_to_lint,
-        ctx.file._config,
+        config_file,
         ctx.files._data,
         outputs.machine.out,
         outputs.machine.exit_code,
@@ -109,7 +118,7 @@ def _checkstyle_aspect_impl(target, ctx):
     )
     return [info]
 
-def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary", "java_library"]):
+def lint_checkstyle_aspect(binary, config, configs = {}, data = [], rule_kinds = ["java_binary", "java_library"]):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -146,6 +155,12 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
                 mandatory = True,
                 doc = "Config file",
                 default = config,
+            ),
+            "_configs": attr.string_keyed_label_dict(
+                allow_empty = True,
+                allow_files = True,
+                doc = "Package and configuration files dictionary",
+                default = configs,
             ),
             "_data": attr.label_list(
                 doc = "Additional files to make available to Checkstyle such as any included XML files",
