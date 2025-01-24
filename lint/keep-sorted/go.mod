@@ -1,4 +1,4 @@
-module github.com/aspect-build/rules_lint
+module github.com/aspect-build/rules_lint/lint/keep-sorted
 
 go 1.23.5
 

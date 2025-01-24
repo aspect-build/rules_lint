@@ -79,9 +79,9 @@ go_sdk.download(
 )
 use_repo(go_sdk, "go_sdk")
 
-go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
-go_deps.from_file(go_mod = "//:go.mod")
-use_repo(go_deps, "com_github_google_keep_sorted")
+keep_sorted_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", isolate = True)
+keep_sorted_deps.from_file(go_mod = "@aspect_rules_lint//lint/keep-sorted:go.mod")
+use_repo(keep_sorted_deps, "com_github_google_keep_sorted")
 
 # Java and other JVM languages:
 # https://github.com/bazelbuild/rules_jvm_external/blob/master/examples/bzlmod/MODULE.bazel

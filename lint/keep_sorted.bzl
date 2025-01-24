@@ -2,29 +2,32 @@
 
 Typical usage:
 
-First, fetch the keep-sorted dependency via gazelle
+First, fetch the keep-sorted dependency via gazelle. We provide a convenient go.mod file.
+To keep it isolated from your other go dependencies, we recommend adding to .bazelrc:
 
-Then, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
+    common --experimental_isolated_extension_usages
 
-```starlark
-go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
-go_deps.from_file(go_mod = "//:go.mod")
-use_repo(go_deps, "com_github_google_keep_sorted")
-```
+Next add to MODULE.bazel:
+
+    keep_sorted_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", isolate = True)
+    keep_sorted_deps.from_file(go_mod = "@aspect_rules_lint//lint/keep-sorted:go.mod")
+    use_repo(keep_sorted_deps, "com_github_google_keep_sorted")
 
 Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
 
 ```starlark
 load("@aspect_rules_lint//lint:keep_sorted.bzl", "lint_keep_sorted_aspect")
 
-
 keep_sorted = lint_keep_sorted_aspect(
     binary = "@com_github_google_keep_sorted//:keep-sorted",
 )
 ```
+
+Now you can add `// keep-sorted start` / `// keep-sorted end` lines to your library sources,
+following the documentation at https://github.com/google/keep-sorted#usage.
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files")
 
 _MNEMONIC = "AspectRulesLintKeepSorted"
 
@@ -55,9 +58,9 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
     args.add_all(options)
     args.add("--mode=lint")
     args.add_all(srcs)
-    
+
     if exit_code:
-        command = "asd{keep_sorted} $@ >{stdout}; echo $? > " + exit_code.path
+        command = "{keep_sorted} $@ >{stdout}; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
         # Create empty stdout file on success, as Bazel expects one
@@ -73,9 +76,40 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
         progress_message = "Linting %{label} with KeepSorted",
     )
 
-def _keep_sorted_aspect_impl(target, ctx):
+def keep_sorted_fix(ctx, executable, srcs, patch, stdout, exit_code = None, options = []):
+    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
 
-    outputs, info = output_files(_MNEMONIC, target, ctx)
+    ctx.actions.write(
+        output = patch_cfg,
+        content = json.encode({
+            "linter": executable._keep_sorted.path,
+            "args": ["--mode=fix"] + options + [s.path for s in srcs],
+            "files_to_diff": [s.path for s in srcs],
+            "output": patch.path,
+        }),
+    )
+
+    ctx.actions.run(
+        inputs = srcs + [patch_cfg],
+        outputs = [patch, exit_code, stdout],
+        executable = executable._patcher,
+        arguments = [patch_cfg.path],
+        env = {
+            "BAZEL_BINDIR": ".",
+            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
+            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
+            "JS_BINARY__SILENT_ON_SUCCESS": "1",
+        },
+        tools = [executable._keep_sorted],
+        mnemonic = _MNEMONIC,
+        progress_message = "Fixing %{label} with KeepSorted",
+    )
+
+def _keep_sorted_aspect_impl(target, ctx):
+    if ctx.attr._options[LintOptionsInfo].fix:
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
+    else:
+        outputs, info = output_files(_MNEMONIC, target, ctx)
 
     if not hasattr(ctx.rule.attr, "srcs"):
         noop_lint_action(ctx, outputs)
@@ -88,7 +122,10 @@ def _keep_sorted_aspect_impl(target, ctx):
         return [info]
 
     color_options = ["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []
-    keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, outputs.human.out, outputs.human.exit_code, color_options)
+    if hasattr(outputs, "patch"):
+        keep_sorted_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, color_options)
+    else:
+        keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, outputs.human.out, outputs.human.exit_code, color_options)
     keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
@@ -110,6 +147,11 @@ def lint_keep_sorted_aspect(binary):
             ),
             "_keep_sorted": attr.label(
                 default = binary,
+                executable = True,
+                cfg = "exec",
+            ),
+            "_patcher": attr.label(
+                default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
                 cfg = "exec",
             ),
