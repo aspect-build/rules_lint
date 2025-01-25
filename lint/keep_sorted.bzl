@@ -77,7 +77,7 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
     )
 
 def keep_sorted_fix(ctx, executable, srcs, patch, stdout, exit_code = None, options = []):
-    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
+    patch_cfg = ctx.actions.declare_file("_{}.keep-sorted.patch_cfg".format(ctx.label.name))
 
     ctx.actions.write(
         output = patch_cfg,
