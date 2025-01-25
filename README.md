@@ -21,8 +21,12 @@ Features:
 
 New tools are being added frequently, so check this page again!
 
+Linters which are not language-specific:
+
+- [keep-sorted]
+
 | Language               | Formatter             | Linter(s)                        |
-| ---------------------- | --------------------- |----------------------------------|
+| ---------------------- | --------------------- | -------------------------------- |
 | C / C++                | [clang-format]        | [clang-tidy]                     |
 | Cuda                   | [clang-format]        |                                  |
 | CSS, Less, Sass        | [Prettier]            | [Stylelint]                      |
@@ -59,6 +63,7 @@ New tools are being added frequently, so check this page again!
 [swiftformat]: https://github.com/nicklockwood/SwiftFormat
 [terraform]: https://github.com/hashicorp/terraform
 [buf]: https://docs.buf.build/format/usage
+[keep-sorted]: https://github.com/google/keep-sorted
 [ktfmt]: https://github.com/facebook/ktfmt
 [ktlint]: https://github.com/pinterest/ktlint
 [buildifier]: https://github.com/keith/buildifier-prebuilt

@@ -1,6 +1,9 @@
 # Automatically apply --config=linux, --config=windows etc
 common --enable_platform_specific_config
 
+# Permit MODULE.bazel to use_extension("@gazelle//:extensions.bzl", "go_deps", isolate = True)
+common --experimental_isolated_extension_usages
+
 # Aspect recommended Bazel flags when using rules_java and rules_jvm_external
 
 # Pin java versions to desired language level
