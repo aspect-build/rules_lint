@@ -110,3 +110,23 @@ Attrs:
 | <a id="lint_checkstyle_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["java_binary", "java_library"]` |
 
 
+<a id="rebuild_map"></a>
+
+## rebuild_map
+
+<pre>
+load("@aspect_rules_lint//lint:checkstyle.bzl", "rebuild_map")
+
+rebuild_map(<a href="#rebuild_map-configs">configs</a>)
+</pre>
+
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="rebuild_map-configs"></a>configs |  <p align="center"> - </p>   |  none |
+
+
