@@ -149,7 +149,7 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code, env = {}):
         }),
         tools = [executable._ruff],
         mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with Ruff",
+        progress_message = "Fixing %{label} with Ruff",
     )
 
 # buildifier: disable=function-docstring

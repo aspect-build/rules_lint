@@ -162,6 +162,13 @@ bzl_library(
 )
 
 bzl_library(
+    name = "keep_sorted",
+    srcs = ["keep_sorted.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
     name = "pmd",
     srcs = ["pmd.bzl"],
     visibility = ["//visibility:public"],

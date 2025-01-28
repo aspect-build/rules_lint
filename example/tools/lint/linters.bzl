@@ -5,6 +5,7 @@ load("@aspect_rules_lint//lint:checkstyle.bzl", "lint_checkstyle_aspect")
 load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
 load("@aspect_rules_lint//lint:eslint.bzl", "lint_eslint_aspect")
 load("@aspect_rules_lint//lint:flake8.bzl", "lint_flake8_aspect")
+load("@aspect_rules_lint//lint:keep_sorted.bzl", "lint_keep_sorted_aspect")
 load("@aspect_rules_lint//lint:ktlint.bzl", "lint_ktlint_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
@@ -15,37 +16,37 @@ load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
 
 buf = lint_buf_aspect(
-    config = "@@//:buf.yaml",
+    config = Label("@//:buf.yaml"),
 )
 
 eslint = lint_eslint_aspect(
-    binary = "@@//tools/lint:eslint",
+    binary = Label("@//tools/lint:eslint"),
     # ESLint will resolve the configuration file by looking in the working directory first.
     # See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-file-resolution
     # We must also include any other config files we expect eslint to be able to locate, e.g. tsconfigs
     configs = [
-        "@@//:eslintrc",
-        "@@//src:tsconfig",
+        Label("@//:eslintrc"),
+        Label("@//src:tsconfig"),
     ],
 )
 
 eslint_test = lint_test(aspect = eslint)
 
 stylelint = lint_stylelint_aspect(
-    binary = "@@//tools/lint:stylelint",
-    config = "@@//:stylelintrc",
+    binary = Label("@//tools/lint:stylelint"),
+    config = Label("@//:stylelintrc"),
 )
 
 flake8 = lint_flake8_aspect(
-    binary = "@@//tools/lint:flake8",
-    config = "@@//:.flake8",
+    binary = Label("@//tools/lint:flake8"),
+    config = Label("@//:.flake8"),
 )
 
 flake8_test = lint_test(aspect = flake8)
 
 pmd = lint_pmd_aspect(
-    binary = "@@//tools/lint:pmd",
-    rulesets = ["@@//:pmd.xml"],
+    binary = Label("@//tools/lint:pmd"),
+    rulesets = [Label("@//:pmd.xml")],
 )
 
 pmd_test = lint_test(aspect = pmd)
@@ -65,8 +66,8 @@ checkstyle_test = lint_test(aspect = checkstyle)
 ruff = lint_ruff_aspect(
     binary = "@multitool//tools/ruff",
     configs = [
-        "@@//:.ruff.toml",
-        "@@//src/subdir:ruff.toml",
+        Label("@//:.ruff.toml"),
+        Label("@//src/subdir:ruff.toml"),
     ],
 )
 
@@ -74,21 +75,21 @@ ruff_test = lint_test(aspect = ruff)
 
 shellcheck = lint_shellcheck_aspect(
     binary = "@multitool//tools/shellcheck",
-    config = "@@//:.shellcheckrc",
+    config = Label("@//:.shellcheckrc"),
 )
 
 shellcheck_test = lint_test(aspect = shellcheck)
 
 vale = lint_vale_aspect(
-    binary = "@@//tools/lint:vale",
-    config = "@@//:.vale.ini",
-    styles = "@@//tools/lint:vale_styles",
+    binary = Label("@//tools/lint:vale"),
+    config = Label("@//:.vale.ini"),
+    styles = Label("@//tools/lint:vale_styles"),
 )
 
 ktlint = lint_ktlint_aspect(
-    binary = "@@com_github_pinterest_ktlint//file",
-    editorconfig = "@@//:.editorconfig",
-    baseline_file = "@@//:ktlint-baseline.xml",
+    binary = Label("@com_github_pinterest_ktlint//file"),
+    editorconfig = Label("@//:.editorconfig"),
+    baseline_file = Label("@//:ktlint-baseline.xml"),
 )
 
 ktlint_test = lint_test(aspect = ktlint)
@@ -117,8 +118,14 @@ clang_tidy_global_config = lint_clang_tidy_aspect(
 )
 
 spotbugs = lint_spotbugs_aspect(
-    binary = "@@//tools/lint:spotbugs",
-    exclude_filter = "@@//:spotbugs-exclude.xml",
+    binary = Label("@//tools/lint:spotbugs"),
+    exclude_filter = Label("@//:spotbugs-exclude.xml"),
 )
 
 spotbugs_test = lint_test(aspect = spotbugs)
+
+keep_sorted = lint_keep_sorted_aspect(
+    binary = Label("@com_github_google_keep_sorted//:keep-sorted"),
+)
+
+keep_sorted_test = lint_test(aspect = keep_sorted)
