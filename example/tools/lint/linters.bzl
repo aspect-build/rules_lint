@@ -54,8 +54,8 @@ checkstyle = lint_checkstyle_aspect(
     binary = "@@//tools/lint:checkstyle",
     config = "@@//:checkstyle.xml",
     configs = {
-        "@@//src": "@@//:checkstyle.xml",
-        "@@//src/subdir": "@@//:checkstyle_subdir.xml",
+        "@@//:checkstyle.xml": "@@//src,@@//test",
+        "@@//:checkstyle_subdir.xml": "@@//src/subdir",
     },
     data = ["@@//:checkstyle-suppressions.xml"],
 )

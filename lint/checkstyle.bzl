@@ -32,6 +32,13 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_l
 
 _MNEMONIC = "AspectRulesLintCheckstyle"
 
+def rebuild_map(configs):
+    directory_to_config = {}
+    for config, directories in configs.items():
+        for directory in directories.split(","):
+            directory_to_config[directory] = config
+    return directory_to_config
+
 def checkstyle_action(ctx, executable, srcs, config, data, stdout, exit_code = None, options = []):
     """Run Checkstyle as an action under Bazel.
 
@@ -84,14 +91,16 @@ def _checkstyle_aspect_impl(target, ctx):
 
     files_to_lint = filter_srcs(ctx.rule)
     config_file = ctx.file._config
+    config_maps = rebuild_map(ctx.attr._configs)
     if ctx.attr._configs:
         label = str(target.label)
-        keys = sorted(ctx.attr._configs.keys(), key=len, reverse = True)
+        keys = sorted(config_maps.keys(), key=len, reverse = True)
         for key in keys:
             if label.startswith(key):
-                config = ctx.attr._configs[key]
+                config = config_maps[key]
                 config_file = config.files.to_list()[0]
                 break
+
     outputs, info = output_files(_MNEMONIC, target, ctx)
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
@@ -157,7 +166,7 @@ def lint_checkstyle_aspect(binary, config, configs = {}, data = [], rule_kinds =
                 doc = "Config file",
                 default = config,
             ),
-            "_configs": attr.string_keyed_label_dict(
+            "_configs": attr.label_keyed_string_dict(
                 allow_empty = True,
                 allow_files = True,
                 doc = "Package and configuration files dictionary",
