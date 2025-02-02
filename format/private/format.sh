@@ -142,6 +142,7 @@ function ls-files {
       'TypeScript') patterns=('*.ts' '*.cts' '*.mts') ;;
       'Vue') patterns=('*.vue') ;;
       'YAML') patterns=('*.yml' '*.yaml' '.clang-format' '.clang-tidy' '.gemrc') ;;
+      'XML') patterns=('*.xml') ;;
 
       # Note: terraform fmt cannot handle all HCL files such as .terraform.lock
       # "Only .tf and .tfvars files can be processed with terraform fmt"

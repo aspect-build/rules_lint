@@ -51,6 +51,7 @@ Linters which are not language-specific:
 | TSX                    | [Prettier]            | [ESLint]                         |
 | TypeScript             | [Prettier]            | [ESLint]                         |
 | YAML                   | [yamlfmt]             |                                  |
+| XML                    | [@prettier/plugin-xml]|                                  |
 
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format

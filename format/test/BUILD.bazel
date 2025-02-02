@@ -57,5 +57,6 @@ format_multirun(
     swift = ":mock_swiftformat.sh",
     # TODO: this attribute should be renamed to hcl
     terraform = ":mock_terraform-fmt.sh",
+    xml = ":mock_prettier.sh",
     yaml = ":mock_yamlfmt.sh",
 )

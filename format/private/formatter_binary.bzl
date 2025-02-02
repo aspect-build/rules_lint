@@ -26,6 +26,7 @@ TOOLS = {
     "Cuda": "clang-format",
     "YAML": "yamlfmt",
     "Rust": "rustfmt",
+    "XML": "prettier",
 }
 
 # Provided to make install more convenient
