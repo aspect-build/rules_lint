@@ -81,14 +81,18 @@ Assuming you installed with the typical layout:
 
 ### Ignoring files explicitly
 
-Commonly, the underlying formatters that rules_lint invokes provide their own methods of excluding files (.prettierignore for example). At times when that is not the case, rules_lint provides its
-own escape hatch to exclude files from linting using attributes specified via [`.gitattributes` files](https://git-scm.com/docs/gitattributes).
+Commonly, the underlying formatters that rules_lint invokes provide their own methods of excluding files (.prettierignore for example).
+
+At times when that is not the case, rules_lint provides a means to exclude files from being formatted by using attributes specified via [`.gitattributes` files](https://git-scm.com/docs/gitattributes).
 
 If any of following attributes are set or have a value of `true` on a file it will be excluded:
 
-- `rules-lint-ignored=true`
 - `gitlab-generated=true`
 - `linguist-generated=true`
+- `rules-lint-ignored=true`
+
+Note that the first two attributes also have the side effect of preventing the generated files from being shown to code reviewers,
+and from being included in language stats, for GitLab and GitHub respectively. See [GitHub docs](https://docs.github.com/en/repositories/working-with-files/managing-files/customizing-how-changed-files-appear-on-github).
 
 ### Install as a pre-commit hook
 
