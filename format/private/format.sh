@@ -56,9 +56,10 @@ function process_args_in_batches() {
     local lang="$1"
     local bin="$2"
     local flags="$3"
-    shift 3
+    local extensions="$4"
+    shift 4
     local args=("$@")
-    
+
     # Uses up to ARG_MAX - 2k, or 128k, whichever is smaller, characters per
     # command. This was derived from following the defaults from xargs
     # https://www.gnu.org/software/findutils/manual/html_node/find_html/Limiting-Command-Size.html
@@ -82,7 +83,7 @@ function process_args_in_batches() {
 
     # If no arguments were passed, still run run-format once
     if [ ${#args[@]} -eq 0 ]; then
-        run-format "$lang" "$bin" "$flags"
+        run-format "$lang" "$bin" "$flags" "$extensions"
         return
     fi
 
@@ -93,7 +94,7 @@ function process_args_in_batches() {
     for arg in "${args[@]}"; do
         if ((current_batch_size + ${#arg} + 1 >= max_batch_size)); then
             # Process current batch
-            run-format "$lang" "$bin" "$flags" "${current_batch[@]}"
+            run-format "$lang" "$bin" "$flags" "$extensions" "${current_batch[@]}"
             current_batch=()
             current_batch_size=0
         fi
@@ -103,58 +104,14 @@ function process_args_in_batches() {
     
     # Process any remaining arguments
     if [ -n "$current_batch" ]; then
-        run-format "$lang" "$bin" "$flags" "${current_batch[@]}"
+        run-format "$lang" "$bin" "$flags" "$extensions" "${current_batch[@]}"
     fi
 }
 
 # Exports a function that is similar to 'git ls-files'
 # ls-files <language> [<file>...]
 function ls-files {
-    language="$1" && shift;
-    # Copied file patterns from
-    # https://github.com/github-linguist/linguist/blob/559a6426942abcae16b6d6b328147476432bf6cb/lib/linguist/languages.yml
-    # using the ./mirror_linguist_languages.sh tool to transform to Bash code
-    case "$language" in
-      'C') patterns=('*.c' '*.cats' '*.h' '*.idc') ;;
-      'C++') patterns=('*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
-      'Cuda') patterns=('*.cu' '*.cuh') ;;
-      'CSS') patterns=('*.css') ;;
-      'Go') patterns=('*.go') ;;
-      'GraphQL') patterns=('*.graphql' '*.gql' '*.graphqls') ;;
-      'HTML') patterns=('*.html' '*.hta' '*.htm' '*.html.hl' '*.inc' '*.xht' '*.xhtml') ;;
-      'JSON') patterns=('.all-contributorsrc' '.arcconfig' '.auto-changelog' '.c8rc' '.htmlhintrc' '.imgbotconfig' '.nycrc' '.tern-config' '.tern-project' '.watchmanconfig' 'Pipfile.lock' 'composer.lock' 'deno.lock' 'flake.lock' 'mcmod.info' '*.json' '*.4DForm' '*.4DProject' '*.avsc' '*.geojson' '*.gltf' '*.har' '*.ice' '*.JSON-tmLanguage' '*.jsonl' '*.mcmeta' '*.tfstate' '*.tfstate.backup' '*.topojson' '*.webapp' '*.webmanifest' '*.yy' '*.yyp') ;;
-      'Java') patterns=('*.java' '*.jav' '*.jsh') ;;
-      'JavaScript') patterns=('Jakefile' '*.js' '*._js' '*.bones' '*.cjs' '*.es' '*.es6' '*.frag' '*.gs' '*.jake' '*.javascript' '*.jsb' '*.jscad' '*.jsfl' '*.jslib' '*.jsm' '*.jspre' '*.jss' '*.jsx' '*.mjs' '*.njs' '*.pac' '*.sjs' '*.ssjs' '*.xsjs' '*.xsjslib') ;;
-      'Jsonnet') patterns=('*.jsonnet' '*.libsonnet') ;;
-      'Kotlin') patterns=('*.kt' '*.ktm' '*.kts') ;;
-      'Less') patterns=('*.less') ;;
-      'Markdown') patterns=('contents.lr' '*.md' '*.livemd' '*.markdown' '*.mdown' '*.mdwn' '*.mkd' '*.mkdn' '*.mkdown' '*.ronn' '*.scd' '*.workbook') ;;
-      'Protocol Buffer') patterns=('*.proto') ;;
-      'Python') patterns=('.gclient' 'DEPS' 'SConscript' 'SConstruct' 'wscript' '*.py' '*.cgi' '*.fcgi' '*.gyp' '*.gypi' '*.lmi' '*.py3' '*.pyde' '*.pyi' '*.pyp' '*.pyt' '*.pyw' '*.rpy' '*.spec' '*.tac' '*.wsgi' '*.xpy') ;;
-      'Rust') patterns=('*.rs' '*.rs.in') ;;
-      'SQL') patterns=('*.sql' '*.cql' '*.ddl' '*.inc' '*.mysql' '*.prc' '*.tab' '*.udf' '*.viw') ;;
-      'SCSS') patterns=('*.scss') ;;
-      'Scala') patterns=('*.scala' '*.kojo' '*.sbt' '*.sc') ;;
-      'Shell') patterns=('.bash_aliases' '.bash_functions' '.bash_history' '.bash_logout' '.bash_profile' '.bashrc' '.cshrc' '.flaskenv' '.kshrc' '.login' '.profile' '.zlogin' '.zlogout' '.zprofile' '.zshenv' '.zshrc' '9fs' 'PKGBUILD' 'bash_aliases' 'bash_logout' 'bash_profile' 'bashrc' 'cshrc' 'gradlew' 'kshrc' 'login' 'man' 'profile' 'zlogin' 'zlogout' 'zprofile' 'zshenv' 'zshrc' '*.sh' '*.bash' '*.bats' '*.cgi' '*.command' '*.fcgi' '*.ksh' '*.sh.in' '*.tmux' '*.tool' '*.trigger' '*.zsh' '*.zsh-theme') ;;
-      'Starlark') patterns=('BUCK' 'BUILD' 'BUILD.bazel' 'MODULE.bazel' 'Tiltfile' 'WORKSPACE' 'WORKSPACE.bazel' '*.bzl' '*.star') ;;
-      'Swift') patterns=('*.swift') ;;
-      'TSX') patterns=('*.tsx') ;;
-      'TypeScript') patterns=('*.ts' '*.cts' '*.mts') ;;
-      'Vue') patterns=('*.vue') ;;
-      'YAML') patterns=('*.yml' '*.yaml' '.clang-format' '.clang-tidy' '.gemrc') ;;
-
-      # Note: terraform fmt cannot handle all HCL files such as .terraform.lock
-      # "Only .tf and .tfvars files can be processed with terraform fmt"
-      # so we define a custom language here instead of 'HCL' from github-linguist definition for the language.
-      # TODO: we should probably use https://terragrunt.gruntwork.io/docs/reference/cli-options/#hclfmt instead
-      # which does support the entire HCL language FWICT
-      'Terraform') patterns=('*.tf' '*.tfvars') ;;
-
-      *)
-        echo >&2 "Internal error: unknown language $language"
-        exit 1
-        ;;
-    esac
+    patterns=("$1") && shift;
 
     if [ "$#" -eq 0 ]; then
         # When the formatter is run with no arguments, we run over "all files in the repo".
@@ -240,9 +197,10 @@ function run-format {
   local lang="$1" && shift
   local bin="$1" && shift
   local args="$1" && shift
+  local ext=($1) && shift
   local TIMEFORMAT="Formatted ${lang} in %lR"
+  local files=$(ls-files $ext $@)
 
-  local files=$(ls-files "$lang" $@)
   if [ -n "$files" ] && [ -n "$bin" ]; then
     case "$lang" in
       'Protocol Buffer')
@@ -294,17 +252,24 @@ if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
         exit 1
     fi
 
-    process_args_in_batches "$lang" "$bin" "${flags:-""}" "$@"
+    extfile="$(rlocation $extensions)"
+    if [ ! -e "$extfile" ]; then
+        echo >&2 "cannot locate config $extensions"
+        exit 1
+    fi
+
+    ext=$(jq -jr ".\"${lang}\"| join(\" \")" < $extfile)
+    process_args_in_batches "$lang" "$bin" "${flags:-""}" "$ext" "$@"
 
     # Handle additional languages for JavaScript and CSS
     if [[ "$lang" == "JavaScript" ]]; then
         for sublang in "JSON" "TSX" "TypeScript" "Vue"; do
-            process_args_in_batches "$sublang" "$bin" "${flags:-""}" "$@"
+            process_args_in_batches "$sublang" "$bin" "${flags:-""}" "$ext" "$@"
         done
     fi
     if [[ "$lang" == "CSS" ]]; then
         for sublang in "Less" "SCSS"; do
-            process_args_in_batches "$sublang" "$bin" "${flags:-""}" "$@"
+            process_args_in_batches "$sublang" "$bin" "${flags:-""}" "$ext" "$@"
         done
     fi
 fi

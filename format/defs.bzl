@@ -19,7 +19,7 @@ load("@aspect_bazel_lib//lib:utils.bzl", "propagate_common_rule_attributes", "pr
 load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
-def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks):
+def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, extensions):
     if mode not in ["check", "fix", "test"]:
         fail("Invalid mode", mode)
 
@@ -36,12 +36,13 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_
             # the apparent repository, starts with @@aspect_rules_lint~override
             "FIX_TARGET": "//{}:{}".format(native.package_name(), target_name),
             "tool": "$(rlocationpaths %s)" % tool_label,
+            "extensions": "$(rlocationpaths %s)" % extensions,
             "lang": lang,
             "flags": FIX_FLAGS[toolname] if mode == "fix" else CHECK_FLAGS[toolname],
             "mode": "check" if mode == "test" else mode,
             "disable_git_attribute_checks": "true" if disable_git_attribute_checks else "false",
         },
-        "data": [tool_label],
+        "data": [tool_label, extensions],
         ("args" if mode == "test" else "arguments"): args,
     }
 
@@ -71,7 +72,8 @@ Some languages have dialects:
     },
 )
 
-def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute_checks = False, **kwargs):
+
+def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute_checks = False, extensions = "@aspect_rules_lint//format/private:extensions.json", **kwargs):
     """Create a [multirun] binary for the given languages.
 
     Intended to be used with `bazel run` to update source files in-place.
@@ -102,7 +104,7 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
             command(
                 command = Label("@aspect_rules_lint//format/private:format"),
                 description = "Formatting {} with {}...".format(lang, toolname),
-                **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks)
+                **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, extensions)
             )
         commands.append(target_name)
 
@@ -125,7 +127,7 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
         **common_attrs
     )
 
-def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable_git_attribute_checks = False, tags = [], **kwargs):
+def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable_git_attribute_checks = False, tags = [], extensions = "@aspect_rules_lint//format/private:extensions.json", **kwargs):
     """Create test for the given formatters.
 
     Intended to be used with `bazel test` to verify files are formatted.
@@ -159,7 +161,7 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
         kwargs.pop(k)
 
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
-        attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test", disable_git_attribute_checks)
+        attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test", disable_git_attribute_checks, extensions)
         if srcs:
             attrs["data"] = [tool_label] + srcs
             attrs["args"] = ["$(location {})".format(i) for i in srcs]

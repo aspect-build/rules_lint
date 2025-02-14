@@ -59,3 +59,15 @@ format_multirun(
     terraform = ":mock_terraform-fmt.sh",
     yaml = ":mock_yamlfmt.sh",
 )
+
+#format_extensions(
+#   name = ":custom_extensions",
+#   yaml = ["*.bozo"],
+#)
+
+format_multirun(
+    name = "format_custom",
+    #TODO: point extensions to ":custom_extensions
+    extensions = ":extensions.json",
+    yaml = ":mock_yamlfmt.sh",
+)
