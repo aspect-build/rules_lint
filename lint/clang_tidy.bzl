@@ -179,7 +179,7 @@ def _is_source(file):
 # modification of filter_srcs in lint_aspect.bzl that filters out header files
 def _filter_srcs(rule):
     # some rules can return a CcInfo without having a srcs attribute
-    if not hasattr(rule.attr,"srcs"):
+    if not hasattr(rule.attr, "srcs"):
         return []
     if "lint-genfiles" in rule.attr.tags:
         return rule.files.srcs
