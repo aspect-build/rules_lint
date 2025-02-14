@@ -273,10 +273,10 @@ def _get_compiler_args(ctx, compilation_context, srcs):
         args.append("-D" + define)
     for define in compilation_context.local_defines.to_list():
         args.append("-D" + define)
-    if hasattr(ctx.rule.attr,"defines"):
+    if hasattr(ctx.rule.attr, "defines"):
         for define in ctx.rule.attr.defines:
             args.append("-D" + define)
-    if hasattr(ctx.rule.attr,"local_defines"):
+    if hasattr(ctx.rule.attr, "local_defines"):
         for define in ctx.rule.attr.local_defines:
             args.append("-D" + define)
 
