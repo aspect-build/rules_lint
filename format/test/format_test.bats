@@ -44,7 +44,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_XML_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write example/src/hello.xml"
+    assert_output --partial "+ prettier --write example/checkstyle-suppressions.xml"
 }
 
 @test "should run prettier on CSS" {
