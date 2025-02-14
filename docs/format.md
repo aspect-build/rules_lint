@@ -23,7 +23,7 @@ See the example/tools/format/BUILD file in this repo for full examples of declar
 load("@aspect_rules_lint//format:defs.bzl", "languages")
 
 languages(<a href="#languages-name">name</a>, <a href="#languages-c">c</a>, <a href="#languages-cc">cc</a>, <a href="#languages-css">css</a>, <a href="#languages-cuda">cuda</a>, <a href="#languages-go">go</a>, <a href="#languages-graphql">graphql</a>, <a href="#languages-html">html</a>, <a href="#languages-java">java</a>, <a href="#languages-javascript">javascript</a>, <a href="#languages-jsonnet">jsonnet</a>, <a href="#languages-kotlin">kotlin</a>, <a href="#languages-markdown">markdown</a>,
-          <a href="#languages-protocol_buffer">protocol_buffer</a>, <a href="#languages-python">python</a>, <a href="#languages-rust">rust</a>, <a href="#languages-scala">scala</a>, <a href="#languages-shell">shell</a>, <a href="#languages-sql">sql</a>, <a href="#languages-starlark">starlark</a>, <a href="#languages-swift">swift</a>, <a href="#languages-terraform">terraform</a>, <a href="#languages-yaml">yaml</a>)
+          <a href="#languages-protocol_buffer">protocol_buffer</a>, <a href="#languages-python">python</a>, <a href="#languages-rust">rust</a>, <a href="#languages-scala">scala</a>, <a href="#languages-shell">shell</a>, <a href="#languages-sql">sql</a>, <a href="#languages-starlark">starlark</a>, <a href="#languages-swift">swift</a>, <a href="#languages-terraform">terraform</a>, <a href="#languages-xml">xml</a>, <a href="#languages-yaml">yaml</a>)
 </pre>
 
 Language attributes that may be passed to [format_multirun](#format_multirun) or [format_test](#format_test).
@@ -65,6 +65,7 @@ Some languages have dialects:
 | <a id="languages-starlark"></a>starlark |  a `buildifier` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-swift"></a>swift |  a `swiftformat` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-terraform"></a>terraform |  a `terraform-fmt` binary, or any other tool that has a matching command-line interface. Use `@aspect_rules_lint//format:terraform` to choose the built-in tool.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
+| <a id="languages-xml"></a>xml |  a `prettier` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-yaml"></a>yaml |  a `yamlfmt` binary, or any other tool that has a matching command-line interface. Use `@aspect_rules_lint//format:yamlfmt` to choose the built-in tool.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 
 

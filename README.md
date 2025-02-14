@@ -51,6 +51,7 @@ Linters which are not language-specific:
 | TSX                    | [Prettier]            | [ESLint]                         |
 | TypeScript             | [Prettier]            | [ESLint]                         |
 | YAML                   | [yamlfmt]             |                                  |
+| XML                    | [prettier/plugin-xml] |                                  |
 
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
@@ -68,6 +69,7 @@ Linters which are not language-specific:
 [ktlint]: https://github.com/pinterest/ktlint
 [buildifier]: https://github.com/keith/buildifier-prebuilt
 [prettier-plugin-sql]: https://github.com/un-ts/prettier
+[prettier/plugin-xml]: https://github.com/prettier/plugin-xml
 [gofmt]: https://pkg.go.dev/cmd/gofmt
 [gofumpt]: https://github.com/mvdan/gofumpt
 [jsonnetfmt]: https://github.com/google/go-jsonnet
