@@ -91,6 +91,8 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
     # `ruff help check` to see available options
     args = ctx.actions.args()
     args.add("check")
+    # Honor exclusions in pyproject.toml even though we pass explicit list of files
+    args.add("--force-exclude")
     args.add_all(srcs)
 
     if exit_code:
@@ -130,7 +132,7 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code, env = {}):
         output = patch_cfg,
         content = json.encode({
             "linter": executable._ruff.path,
-            "args": ["check", "--fix"] + [s.path for s in srcs],
+            "args": ["check", "--fix", "--force-exclude"] + [s.path for s in srcs],
             "files_to_diff": [s.path for s in srcs],
             "output": patch.path,
         }),

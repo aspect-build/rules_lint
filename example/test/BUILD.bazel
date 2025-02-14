@@ -52,6 +52,11 @@ py_library(
     srcs = ["generated.py"],
 )
 
+py_library(
+    name = "excluded_py",
+    srcs = ["excluded.py"],
+)
+
 java_library(
     name = "generated_java",
     srcs = ["generated.java"],
@@ -71,6 +76,11 @@ flake8_test(
 ruff_test(
     name = "ruff_should_ignore_generated",
     srcs = [":generated_py"],
+)
+
+ruff_test(
+    name = "ruff_should_ignore_excluded",
+    srcs = ["excluded_py"],
 )
 
 pmd_test(
