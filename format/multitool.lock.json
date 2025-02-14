@@ -140,33 +140,33 @@
     "binaries": [
       {
         "kind": "archive",
-        "url": "https://github.com/google/yamlfmt/releases/download/v0.15.0/yamlfmt_0.15.0_Linux_arm64.tar.gz",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.16.0/yamlfmt_0.16.0_Linux_arm64.tar.gz",
         "file": "yamlfmt",
-        "sha256": "b8820250488579c5194e2ee8f9def65187188b43231c557d1c9644504a1b1ada",
+        "sha256": "208b9c0c4e67472e5205d3f826205b2f20da59a180b548cff02621401355bead",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/google/yamlfmt/releases/download/v0.15.0/yamlfmt_0.15.0_Linux_x86_64.tar.gz",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.16.0/yamlfmt_0.16.0_Linux_x86_64.tar.gz",
         "file": "yamlfmt",
-        "sha256": "0696f84c34ec6a104633dc5f5897e67a3e3e34caa362739d5e9c2d5c70ada109",
+        "sha256": "7819fa7c7e994d239009d30cbd58897149d7e7dd5847aedf7abd19c332298033",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/google/yamlfmt/releases/download/v0.15.0/yamlfmt_0.15.0_Darwin_arm64.tar.gz",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.16.0/yamlfmt_0.16.0_Darwin_arm64.tar.gz",
         "file": "yamlfmt",
-        "sha256": "b14e25138b02de46a83773a82a7cad5972db99fc4878952db1ce3ae8cb0a0d37",
+        "sha256": "fcffb2efdfdd27fb5bb658a8156972fda14f0864f336c181705b98eee5f6c139",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/google/yamlfmt/releases/download/v0.15.0/yamlfmt_0.15.0_Darwin_x86_64.tar.gz",
+        "url": "https://github.com/google/yamlfmt/releases/download/v0.16.0/yamlfmt_0.16.0_Darwin_x86_64.tar.gz",
         "file": "yamlfmt",
-        "sha256": "2de58a20e5ab85380acbb614dd17093ae52638a03e5a09b5c6be0a423a819831",
+        "sha256": "740d23864fffcf1865a9e0a221840baae6b5f40b8a20ad2d5e79c1b9de9eaec7",
         "os": "macos",
         "cpu": "x86_64"
       }
