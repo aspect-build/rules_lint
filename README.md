@@ -17,6 +17,10 @@ Features:
   No need to create `sh_library` targets for your shell scripts, for example.
 - Honors the same **configuration files** you use for these tools outside Bazel (e.g. in the editor)
 
+**Watch Alex's talk at BazelCon 2024:**
+
+[![rules_lint at BazelCon](https://img.youtube.com/vi/CnK-RAdfrpI/0.jpg)](https://www.youtube.com/watch?v=CnK-RAdfrpI)
+
 ## Supported tools
 
 New tools are being added frequently, so check this page again!
