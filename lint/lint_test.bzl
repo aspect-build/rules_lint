@@ -58,6 +58,9 @@ def _test_impl(ctx):
     bin = ctx.actions.declare_file("{}.lint_test.sh".format(ctx.label.name))
     asserts = [_write_assert(ctx, src[OutputGroupInfo].rules_lint_human) for src in ctx.attr.srcs]
 
+    runfiles = ctx.runfiles(transitive_files = depset(transitive = [src[OutputGroupInfo].rules_lint_human for src in ctx.attr.srcs]))
+    runfiles = runfiles.merge(ctx.attr._runfiles_lib[DefaultInfo].default_runfiles)
+
     ctx.actions.expand_template(
         template = ctx.file._bin,
         output = bin,
@@ -66,7 +69,7 @@ def _test_impl(ctx):
     )
     return [DefaultInfo(
         executable = bin,
-        runfiles = ctx.runfiles([ctx.file._runfiles_lib], transitive_files = depset(transitive = [src[OutputGroupInfo].rules_lint_human for src in ctx.attr.srcs])),
+        runfiles = runfiles,
     )]
 
 def lint_test(aspect):
@@ -75,7 +78,7 @@ def lint_test(aspect):
         attrs = {
             "srcs": attr.label_list(doc = "*_library targets", aspects = [aspect]),
             "_bin": attr.label(default = ":lint_test.sh", allow_single_file = True, executable = True, cfg = "exec"),
-            "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles", allow_single_file = True),
+            "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles"),
         },
         test = True,
     )
