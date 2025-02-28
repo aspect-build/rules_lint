@@ -5,6 +5,7 @@ with_entries(select(.key | IN(
     "Cuda",
     "Markdown",
     "Go",
+    "Gherkin",
     "GraphQL",
     "HCL",
     "HTML",

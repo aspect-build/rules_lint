@@ -95,6 +95,7 @@ format_multirun(
     visibility = ["//:__subpackages__"],
     xml = ":prettier",
     yaml = "@aspect_rules_lint//format:yamlfmt",
+    gherkin = ":prettier",
 )
 
 format_test(
