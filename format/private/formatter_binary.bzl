@@ -27,6 +27,7 @@ TOOLS = {
     "YAML": "yamlfmt",
     "Rust": "rustfmt",
     "XML": "prettier",
+    "Gherkin": "prettier",
 }
 
 # Provided to make install more convenient

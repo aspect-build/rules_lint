@@ -176,3 +176,10 @@ bats_load_library "bats-assert"
 
     assert_output --partial "+ rustfmt example/src/hello.rs"
 }
+
+@test "should run prettier on Gherkin" {
+    run bazel run //format/test:format_Gherkin_with_prettier
+    assert_success
+
+    assert_output --partial "+ prettier --write example/src/hello.feature"
+}
