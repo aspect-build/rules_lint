@@ -4,33 +4,33 @@
     "binaries": [
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.9.7/ruff-aarch64-unknown-linux-musl.tar.gz",
+        "url": "https://github.com/astral-sh/ruff/releases/download/0.9.9/ruff-aarch64-unknown-linux-musl.tar.gz",
         "file": "ruff-aarch64-unknown-linux-musl/ruff",
-        "sha256": "b94ad94bc0cf14a12a725fcf2383ed047b537068f4b33bf0815e8baf35e6ec5c",
+        "sha256": "df49a2ab1b62b6992aaeebdf590751f9c6536eefa3d149a1e6dd454b7d3b5681",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.9.7/ruff-x86_64-unknown-linux-musl.tar.gz",
+        "url": "https://github.com/astral-sh/ruff/releases/download/0.9.9/ruff-x86_64-unknown-linux-musl.tar.gz",
         "file": "ruff-x86_64-unknown-linux-musl/ruff",
-        "sha256": "f0b7c7a5ae446730ac111904a504cb96789cc1c82b9966b55bedd88a6d3ec077",
+        "sha256": "a29c014960f68045fd5e52df20889be801ad92eda0961c4aede191a6d01dbee9",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.9.7/ruff-aarch64-apple-darwin.tar.gz",
+        "url": "https://github.com/astral-sh/ruff/releases/download/0.9.9/ruff-aarch64-apple-darwin.tar.gz",
         "file": "ruff-aarch64-apple-darwin/ruff",
-        "sha256": "f14437e71399e14302bdf5ce910e3df9abc9a223fe0ff5d6b02eb083c39fa30b",
+        "sha256": "b4fc98b638b903e7d5aa6ac245c955077e672b6b2072b9a5249c15ff0a9052de",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.9.7/ruff-x86_64-apple-darwin.tar.gz",
+        "url": "https://github.com/astral-sh/ruff/releases/download/0.9.9/ruff-x86_64-apple-darwin.tar.gz",
         "file": "ruff-x86_64-apple-darwin/ruff",
-        "sha256": "2a0fd12cd66d20a882ca970159ef361d5f397b938a5ab9d7619dec0f15152f53",
+        "sha256": "518e891bc5f4af795fe9a49f00bc9db9b8258e0d73d452eee8ada15471a2ce95",
         "os": "macos",
         "cpu": "x86_64"
       }
