@@ -3,7 +3,12 @@
  */
 const config = {
   tabWidth: 2,
-  plugins: [require("prettier-plugin-sql"), require("@prettier/plugin-xml")],
+  printWidth: 80,
+  plugins: [
+    require("prettier-plugin-sql"),
+    require("@prettier/plugin-xml"),
+    require("prettier-plugin-gherkin"),
+  ],
 };
 
 module.exports = config;
