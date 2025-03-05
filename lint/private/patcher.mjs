@@ -17,6 +17,17 @@ function debug(...kwargs) {
   }
 }
 
+async function realPath(p) {
+  try {
+    const target = await fs.promises.readlink(p);
+    return path.resolve(path.dirname(p), target);
+  } catch (e) {
+    debug(e);
+    // if readlink fails, returns p
+    return p;
+  }
+}
+
 // assumes there are no recursive symlinks
 async function sync(src, dst, subdir, filesToDiff) {
   const files = (await fs.promises.readdir(path.join(src, subdir))).map((f) =>
@@ -87,7 +98,12 @@ async function main(args, sandbox) {
   for (const f of config.files_to_diff) {
     const origF = path.join(process.cwd(), sourcePrefix, f);
     const newF = path.join(sandbox, sourcePrefix, f);
-    debug(`diffing ${origF} to ${newF}`);
+    // NB: git diff does't work with symlinks
+
+    const resolvedOrigF = await realPath(origF);
+    const resolvedNewF = await realPath(newF);
+
+    debug(`diffing ${resolvedOrigF} to ${resolvedNewF}`);
     // TODO: don't rely on the system diff, it may not be installed i.e. on a minimal CI machine image.
     // Likely replacement:
     // https://github.com/google/diff-match-patch/wiki/Language:-JavaScript
@@ -96,14 +112,24 @@ async function main(args, sandbox) {
     // be packaged up.
     // NB: use a/ and b/ prefixes, intended so the result is applied with 'patch -p1'
     const results = childProcess.spawnSync(
-      "diff",
-      [`--label=a/${f}`, `--label=b/${f}`, "--unified", origF, newF],
+      "git",
+      ["diff", "--no-index", resolvedOrigF, resolvedNewF ],
       {
         encoding: "utf8",
       }
     );
     debug(results.stdout);
-    diffOut.write(results.stdout);
+
+    let stdout = results.stdout;
+    // NB. Strip the lines like:
+    // diff --git asrc/Bar.java bsrc/Bar.java
+    // index db05cb3..e387b3a 100644
+    const stdoutLines = stdout.split("\n");
+    stdout = stdoutLines.slice(2).join("\n");
+    stdout = stdout.replace(resolvedOrigF, `/${f}`);
+    stdout = stdout.replace(resolvedNewF, `/${f}`);
+
+    diffOut.write(stdout);
     if (results.error) {
       console.error(results.error);
     }
