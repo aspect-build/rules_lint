@@ -14,7 +14,7 @@ public class Foo {
 
   // SpotBugs violation: Logical errors (NP_NULL_ON_SOME_PATH + DLS_DEAD_STORE)
   public void someMethod(String str) {
-    if (str.equals("test")) { // Possible NPE if str is null
+    if (str != null && str.equals("test")) { // Added null check to avoid NPE
       System.out.println("Valid string");
     }
 
@@ -22,12 +22,14 @@ public class Foo {
     a = 10; // The assignment to 5 is dead (overwritten with 10)
     System.out.println(a);
   }
+  // SpotBugs violation: Unused field (URF_UNREAD_FIELD)
+  private int unusedField;
 
   // SpotBugs violation: Resource leak (RCN_RESOURCE_LEAK)
   public void readFile() {
+    FileReaderUtil fileReaderUtil = new FileReaderUtil();
     try {
-      java.io.FileInputStream fis = new java.io.FileInputStream("somefile.txt");
-      // FileInputStream not closed, causing resource leak
+      fileReaderUtil.readFile("somefile.txt");
     } catch (java.io.IOException e) {
       e.printStackTrace();
     }

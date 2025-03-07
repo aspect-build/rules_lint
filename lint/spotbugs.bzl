@@ -30,12 +30,12 @@ spotbugs = lint_spotbugs_aspect(
 ```
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_jar")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintCSpotbugs"
 
-def spotbugs_action(ctx, executable, srcs, exclude_filter, stdout, exit_code = None, options = []):
+def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_code = None, options = []):
     """Run Spotbugs as an action under Bazel.
 
     Based on https://spotbugs.readthedocs.io/en/latest/index.html
@@ -51,6 +51,7 @@ def spotbugs_action(ctx, executable, srcs, exclude_filter, stdout, exit_code = N
         options: additional command-line options, see https://spotbugs.readthedocs.io/en/latest/running.html#command-line-options
     """
     inputs = srcs + [exclude_filter]
+    deps = target[JavaInfo].transitive_compile_time_jars
     outputs = [stdout]
     args = ctx.actions.args()
     args.add_all(options)
@@ -60,6 +61,8 @@ def spotbugs_action(ctx, executable, srcs, exclude_filter, stdout, exit_code = N
 
     src_args = ctx.actions.args()
     src_args.add_all(srcs)
+    classpath_paths = [jar.path for jar in deps.to_list()]
+    args.add_all(["-auxclasspath", ":".join(classpath_paths)])
     args.add_all(["-exclude", exclude_filter.path])
 
     if exit_code:
@@ -69,7 +72,7 @@ def spotbugs_action(ctx, executable, srcs, exclude_filter, stdout, exit_code = N
         # Create empty stdout file on success, as Bazel expects one
         command = "{SPOTBUGS} $@ && touch {stdout}"
     ctx.actions.run_shell(
-        inputs = inputs,
+        inputs = depset(inputs, transitive = [deps]),
         outputs = outputs,
         command = command.format(SPOTBUGS = executable.path, stdout = stdout.path),
         arguments = [args, src_args],
@@ -82,28 +85,25 @@ def spotbugs_action(ctx, executable, srcs, exclude_filter, stdout, exit_code = N
 def _spotbugs_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
-
-    print("Print target %s", target.label)
-    print("JavaInfo %s", target[JavaInfo])
-    print("OutputGroupInfo %s", target[OutputGroupInfo])
-
+    srcs = ctx.rule.attr.srcs
+    if len(srcs) == 0:
+        return []
     files_to_lint = [jar.class_jar for jar in target[JavaInfo].outputs.jars]
-    print("Files to lint %s", files_to_lint)
     outputs, info = output_files(_MNEMONIC, target, ctx)
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
         return [info]
     format_options = []  # to define
-    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, ctx.file._exclude_filter, outputs.human.out, outputs.human.exit_code, format_options)
-    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, ctx.file._exclude_filter, outputs.machine.out, outputs.machine.exit_code, format_options)
+    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.human.out, outputs.human.exit_code, format_options)
+    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.machine.out, outputs.machine.exit_code, format_options)
     return [info]
 
-def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "java_binary"]):
+def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "java_binary", "java_test"]):
     return aspect(
         implementation = _spotbugs_aspect_impl,
         # Edges we need to walk up the graph from the selected targets.
         # Needed for linters that need semantic information like transitive type declarations.
-        attr_aspects = ["deps"],
+        # attr_aspects = ["deps"],
         attrs = {
             "_options": attr.label(
                 default = "//lint:options",
