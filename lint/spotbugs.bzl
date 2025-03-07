@@ -44,6 +44,7 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
         ctx: Bazel Rule or Aspect evaluation context
         executable: label of the the Spotbugs program
         srcs: jar to be linted
+        target: target to be linted
         exclude_filter: label of the spotbugs-exclude.xml file
         stdout: output file to generate
         exit_code: output file to write the exit code.
@@ -61,8 +62,11 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
 
     src_args = ctx.actions.args()
     src_args.add_all(srcs)
+
     classpath_paths = [jar.path for jar in deps.to_list()]
-    args.add_all(["-auxclasspath", ":".join(classpath_paths)])
+    if len(classpath_paths) > 0:
+        args.add_all(["-auxclasspath", ":".join(classpath_paths)])
+    
     args.add_all(["-exclude", exclude_filter.path])
 
     if exit_code:
