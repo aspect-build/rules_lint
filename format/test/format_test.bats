@@ -102,7 +102,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Java_with_java-format
     assert_success
 
-    assert_output --partial "+ java-format --replace example/src/Bar.java example/src/Foo.java"
+    assert_output --partial "+ java-format --replace example/src/Bar.java example/src/FileReaderUtil.java example/src/Foo.java"
 }
 
 @test "should run ktfmt on Kotlin" {

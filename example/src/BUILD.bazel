@@ -69,6 +69,12 @@ py_library(
 java_library(
     name = "foo",
     srcs = ["Foo.java"],
+    deps = [":FooUtils"],
+)
+
+java_library(
+    name = "FooUtils",
+    srcs = ["FileReaderUtil.java"],
 )
 
 java_library(
