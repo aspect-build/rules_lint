@@ -14,7 +14,7 @@ public class Foo {
 
   // SpotBugs violation: Logical errors (NP_NULL_ON_SOME_PATH + DLS_DEAD_STORE)
   public void someMethod(String str) {
-    if (str != null && str.equals("test")) { // Added null check to avoid NPE
+    if (str.equals("test")) { // Possible NPE if str is null
       System.out.println("Valid string");
     }
 
