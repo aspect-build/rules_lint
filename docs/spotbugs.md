@@ -64,7 +64,7 @@ lint_spotbugs_aspect(<a href="#lint_spotbugs_aspect-binary">binary</a>, <a href=
 | :------------- | :------------- | :------------- |
 | <a id="lint_spotbugs_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_spotbugs_aspect-exclude_filter"></a>exclude_filter |  <p align="center"> - </p>   |  none |
-| <a id="lint_spotbugs_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["java_library", "java_binary"]` |
+| <a id="lint_spotbugs_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["java_library", "java_binary", "java_test"]` |
 
 
 <a id="spotbugs_action"></a>
@@ -74,7 +74,7 @@ lint_spotbugs_aspect(<a href="#lint_spotbugs_aspect-binary">binary</a>, <a href=
 <pre>
 load("@aspect_rules_lint//lint:spotbugs.bzl", "spotbugs_action")
 
-spotbugs_action(<a href="#spotbugs_action-ctx">ctx</a>, <a href="#spotbugs_action-executable">executable</a>, <a href="#spotbugs_action-srcs">srcs</a>, <a href="#spotbugs_action-exclude_filter">exclude_filter</a>, <a href="#spotbugs_action-stdout">stdout</a>, <a href="#spotbugs_action-exit_code">exit_code</a>, <a href="#spotbugs_action-options">options</a>)
+spotbugs_action(<a href="#spotbugs_action-ctx">ctx</a>, <a href="#spotbugs_action-executable">executable</a>, <a href="#spotbugs_action-srcs">srcs</a>, <a href="#spotbugs_action-target">target</a>, <a href="#spotbugs_action-exclude_filter">exclude_filter</a>, <a href="#spotbugs_action-stdout">stdout</a>, <a href="#spotbugs_action-exit_code">exit_code</a>, <a href="#spotbugs_action-options">options</a>)
 </pre>
 
 Run Spotbugs as an action under Bazel.
@@ -90,6 +90,7 @@ Based on https://spotbugs.readthedocs.io/en/latest/index.html
 | <a id="spotbugs_action-ctx"></a>ctx |  Bazel Rule or Aspect evaluation context   |  none |
 | <a id="spotbugs_action-executable"></a>executable |  label of the the Spotbugs program   |  none |
 | <a id="spotbugs_action-srcs"></a>srcs |  jar to be linted   |  none |
+| <a id="spotbugs_action-target"></a>target |  target to be linted   |  none |
 | <a id="spotbugs_action-exclude_filter"></a>exclude_filter |  label of the spotbugs-exclude.xml file   |  none |
 | <a id="spotbugs_action-stdout"></a>stdout |  output file to generate   |  none |
 | <a id="spotbugs_action-exit_code"></a>exit_code |  output file to write the exit code. If None, then fail the build when Spotbugs exits non-zero.   |  `None` |
