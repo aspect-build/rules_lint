@@ -22,6 +22,7 @@ public class Foo {
     a = 10; // The assignment to 5 is dead (overwritten with 10)
     System.out.println(a);
   }
+
   // SpotBugs violation: Unused field (URF_UNREAD_FIELD)
   private int unusedField;
 
