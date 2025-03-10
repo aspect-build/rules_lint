@@ -23,11 +23,14 @@ public class Foo {
     System.out.println(a);
   }
 
+  // SpotBugs violation: Unused field (URF_UNREAD_FIELD)
+  private int unusedField;
+
   // SpotBugs violation: Resource leak (RCN_RESOURCE_LEAK)
   public void readFile() {
+    FileReaderUtil fileReaderUtil = new FileReaderUtil();
     try {
-      java.io.FileInputStream fis = new java.io.FileInputStream("somefile.txt");
-      // FileInputStream not closed, causing resource leak
+      fileReaderUtil.readFile("somefile.txt");
     } catch (java.io.IOException e) {
       e.printStackTrace();
     }
