@@ -15,7 +15,11 @@ bzl_library(
 
 js_binary(
     name = "patcher",
+    data = ["@rules_diff//diff/toolchain/diff:resolved"],
     entry_point = "patcher.mjs",
+    env = {
+        "DIFF_BIN": "$(rootpath @rules_diff//diff/toolchain/diff:resolved)",
+    },
     log_level = select({
         "@aspect_rules_lint//lint:debug.enabled": "debug",
         "//conditions:default": "error",
