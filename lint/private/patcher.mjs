@@ -83,10 +83,9 @@ async function main(args, sandbox) {
   }
 
   const diffOut = fs.createWriteStream(config.output);
-  const diffBin = path.join(
-    process.env["JS_BINARY__RUNFILES"],
-    process.env["DIFF_BIN"]
-  );
+  const diffBin = process.env["DIFF_BIN"]
+    ? path.join(process.env["JS_BINARY__RUNFILES"], process.env["DIFF_BIN"])
+    : "diff";
 
   for (const f of config.files_to_diff) {
     const origF = path.join(process.cwd(), sourcePrefix, f);

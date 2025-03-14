@@ -334,3 +334,10 @@ multitool(
         "@aspect_rules_lint//lint:multitool.lock.json",
     ],
 )
+
+http_archive(
+    name = "rules_diff",
+    integrity = "sha256-44r/+iFWzPOOMlWHR4ExLVmGU99Wlkiho9JxkadUK3Q=",
+    strip_prefix = "rules_diff-v1.0.0",
+    url = "https://gitlab.arm.com/bazel/rules_diff/-/releases/v1.0.0/downloads/src.tar.gz",
+)
