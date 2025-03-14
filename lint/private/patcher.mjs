@@ -83,6 +83,10 @@ async function main(args, sandbox) {
   }
 
   const diffOut = fs.createWriteStream(config.output);
+  const diffBin = path.join(
+    process.env["JS_BINARY__RUNFILES"],
+    process.env["DIFF_BIN"]
+  );
 
   for (const f of config.files_to_diff) {
     const origF = path.join(process.cwd(), sourcePrefix, f);
@@ -90,8 +94,8 @@ async function main(args, sandbox) {
     debug(`diffing ${origF} to ${newF}`);
     // NB: use a/ and b/ prefixes, intended so the result is applied with 'patch -p1'
     const results = childProcess.spawnSync(
-      // Note: not using runfiles library for lookup
-      path.join(process.env["JS_BINARY__RUNFILES"], process.env["DIFF_BIN"]),
+      // Note: not using @bazel/runfiles library for lookup because it's a pain to ship dependencies
+      diffBin,
       [`--label=a/${f}`, `--label=b/${f}`, "--unified", origF, newF],
       {
         encoding: "utf8",
