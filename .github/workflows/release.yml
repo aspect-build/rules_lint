@@ -21,8 +21,8 @@ jobs:
       release_files: rules_lint-*.tar.gz
       tag_name: ${{ inputs.tag_name }}
     permissions:
-      #id-token: write # Needed to attest provenance
-      #attestations: write # Needed to attest provenance
+      id-token: write # Needed to attest provenance
+      attestations: write # Needed to attest provenance
       #contents: write # Needed to upload release files
   publish:
     name: Publish to BCR
