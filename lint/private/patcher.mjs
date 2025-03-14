@@ -83,20 +83,18 @@ async function main(args, sandbox) {
   }
 
   const diffOut = fs.createWriteStream(config.output);
+  const diffBin = process.env["DIFF_BIN"]
+    ? path.join(process.env["JS_BINARY__RUNFILES"], process.env["DIFF_BIN"])
+    : "diff";
 
   for (const f of config.files_to_diff) {
     const origF = path.join(process.cwd(), sourcePrefix, f);
     const newF = path.join(sandbox, sourcePrefix, f);
     debug(`diffing ${origF} to ${newF}`);
-    // TODO: don't rely on the system diff, it may not be installed i.e. on a minimal CI machine image.
-    // Likely replacement:
-    // https://github.com/google/diff-match-patch/wiki/Language:-JavaScript
-    // Then we should bundle up this app so the dependency doesn't appear to users, maybe with
-    // vercel/pkg like we do for the Rosetta binary in Silo - then even the nodejs interpreter can
-    // be packaged up.
     // NB: use a/ and b/ prefixes, intended so the result is applied with 'patch -p1'
     const results = childProcess.spawnSync(
-      "diff",
+      // Note: not using @bazel/runfiles library for lookup because it's a pain to ship dependencies
+      diffBin,
       [`--label=a/${f}`, `--label=b/${f}`, "--unified", origF, newF],
       {
         encoding: "utf8",
