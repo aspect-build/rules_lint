@@ -8,6 +8,13 @@ on:
       tag_name:
         required: true
         type: string
+  # In case of problems, let release engineers retry by manually dispatching
+  # the workflow from the GitHub UI
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        required: true
+        type: string
   # Or, developers can manually push a tag from their clone
   push:
     tags:
@@ -23,7 +30,6 @@ jobs:
     permissions:
       id-token: write # Needed to attest provenance
       attestations: write # Needed to attest provenance
-      #contents: write # Needed to upload release files
   publish:
     name: Publish to BCR
     needs: release
