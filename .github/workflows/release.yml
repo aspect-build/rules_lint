@@ -30,6 +30,7 @@ jobs:
     permissions:
       id-token: write # Needed to attest provenance
       attestations: write # Needed to attest provenance
+      contents: write # Needed to create release
   publish:
     name: Publish to BCR
     needs: release
