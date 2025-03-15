@@ -26,5 +26,6 @@ jobs:
       registry_fork: aspect-build/bazel-central-registry
     permissions:
       contents: write
+      id-token: write
     secrets:
       publish_token: ${{ secrets.PUBLISH_TOKEN }}
