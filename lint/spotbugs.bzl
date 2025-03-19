@@ -68,6 +68,7 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
         args.add_all(["-auxclasspath", ":".join(classpath_paths)])
     
     args.add_all(["-exclude", exclude_filter.path])
+    args.add_all(["-exitcode"])
 
     if exit_code:
         command = "{SPOTBUGS} $@ >{stdout}; echo $? > " + exit_code.path
