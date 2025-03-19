@@ -1,3 +1,6 @@
+# See https://github.com/bazel-contrib/publish-to-bcr
+name: Publish to BCR
+
 on:
   # Run the publish workflow after a successful release
   # Can be triggered from the release.yaml workflow
@@ -16,12 +19,14 @@ on:
 
 jobs:
   publish:
-    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@165f8b872b32a54bcc3c77156db4a74f54a51986 # 2025 March 14
+    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v0.0.1 # 2025 March 15
     with:
       tag_name: ${{ inputs.tag_name }}
       # GitHub repository which is a fork of the upstream where the Pull Request will be opened.
       registry_fork: aspect-build/bazel-central-registry
     permissions:
+      attestations: write
       contents: write
+      id-token: write
     secrets:
       publish_token: ${{ secrets.PUBLISH_TOKEN }}

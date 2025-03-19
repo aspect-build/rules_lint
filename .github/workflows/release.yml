@@ -30,9 +30,11 @@ jobs:
     permissions:
       id-token: write # Needed to attest provenance
       attestations: write # Needed to attest provenance
+      contents: write # Needed to create release
   publish:
-    name: Publish to BCR
     needs: release
     uses: ./.github/workflows/publish.yaml
     with:
       tag_name: ${{ inputs.tag_name }}
+    permissions:
+      contents: write # allow appending new attestation files to the release
