@@ -33,7 +33,7 @@ spotbugs = lint_spotbugs_aspect(
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
-_MNEMONIC = "AspectRulesLintCSpotbugs"
+_MNEMONIC = "AspectRulesLintSpotbugs"
 
 def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_code = None, options = []):
     """Run Spotbugs as an action under Bazel.
