@@ -50,7 +50,7 @@ CHECK_FLAGS = {
     "java-format": "--set-exit-if-changed --dry-run",
     "ktfmt": "--set-exit-if-changed --dry-run",
     "gofmt": "-l",
-    "buf": "format -d --exit-code",
+    "buf": "format -d --exit-code --disable-symlinks",
     "terraform-fmt": "fmt -check -diff",
     "jsonnetfmt": "--test",
     "scalafmt": "--test --respect-project-filters",
@@ -73,7 +73,7 @@ FIX_FLAGS = {
     "java-format": "--replace",
     "ktfmt": "",
     "gofmt": "-w",
-    "buf": "format -w",
+    "buf": "format --write --disable-symlinks",
     "terraform-fmt": "fmt",
     "jsonnetfmt": "--in-place",
     # Force exclusions in the configuration file to be honored even when file paths are supplied
