@@ -159,8 +159,8 @@ bats_load_library "bats-assert"
     assert_success
 
     # Buf only formats one file at a time
-    assert_output --partial "+ buf format -w --path example/src/file.proto"
-    assert_output --partial "+ buf format -w --path example/src/unused.proto"
+    assert_output --partial "+ buf format --write --disable-symlinks --path example/src/file.proto"
+    assert_output --partial "+ buf format --write --disable-symlinks --path example/src/unused.proto"
 }
 
 @test "should run yamlfmt on YAML" {
