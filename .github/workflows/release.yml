@@ -20,21 +20,20 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  id-token: write # Needed to attest provenance
+  attestations: write # Needed to attest provenance
+  contents: write # Needed to create release
+
 jobs:
   release:
-    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.1 # 2025-03-17
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.1.0 # 2025-03-17
     with:
       prerelease: false
       release_files: rules_lint-*.tar.gz
       tag_name: ${{ inputs.tag_name }}
-    permissions:
-      id-token: write # Needed to attest provenance
-      attestations: write # Needed to attest provenance
-      contents: write # Needed to create release
   publish:
     needs: release
     uses: ./.github/workflows/publish.yaml
     with:
       tag_name: ${{ inputs.tag_name }}
-    permissions:
-      contents: write # allow appending new attestation files to the release
