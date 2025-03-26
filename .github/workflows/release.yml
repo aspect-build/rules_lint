@@ -37,3 +37,5 @@ jobs:
     uses: ./.github/workflows/publish.yaml
     with:
       tag_name: ${{ inputs.tag_name }}
+    secrets:
+      publish_token: ${{ secrets.PUBLISH_TOKEN }}
