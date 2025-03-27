@@ -20,7 +20,7 @@ jobs:
   bazel-test:
     uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v6
     with:
-      folders: '[".", "example"]'
+      folders: '[".", "docs", "example"]'
       # Don't try for Windows support yet.
       exclude_windows: true
       # Root module is bzlmod-only and uses newer stardoc that requires Bazel 7.
@@ -28,7 +28,8 @@ jobs:
       exclude: |
         [
           {"bzlmodEnabled": false, "folder": "."},
-          {"bazelversion": "6.4.0"}
+          {"bzlmodEnabled": false, "folder": "docs"},
+          {"bazelversion": "6.4.0"},
         ]
 
   integration-test:
