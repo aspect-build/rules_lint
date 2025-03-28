@@ -73,6 +73,18 @@ css=$(ls-files CSS)
     exit 1
 }
 
+# should not fail when folder name contains spaces
+mkdir -p "complex-structure/folder with space"
+touch "complex-structure/folder with space/src.go"
+go=$(ls-files Go)
+expected='complex-structure/folder with space/src.go
+more.go
+src.go'
+[[ "$go" == "$expected" ]] || {
+    echo >&2 -e "expected ls-files to return complex-structure/folder with space/src.go more.go src.go, was\n$go"
+    exit 1
+}
+
 # patterns should match filenames
 go=$(ls-files Go src.go)
 [[ "$go" == "src.go" ]] || {
