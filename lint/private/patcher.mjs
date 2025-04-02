@@ -81,8 +81,9 @@ async function main(args, sandbox) {
     console.error(ret.error);
     process.exit(1);
   }
+  
 
-  const diffOut = fs.createWriteStream(config.output);
+  const diffOut = fs.openSync(config.output, "w");
   const diffBin = process.env["DIFF_BIN"]
     ? path.join(process.env["JS_BINARY__RUNFILES"], process.env["DIFF_BIN"])
     : "diff";
@@ -101,7 +102,7 @@ async function main(args, sandbox) {
       }
     );
     debug(results.stdout);
-    diffOut.write(results.stdout);
+    fs.writeSync(diffOut, results.stdout);
     if (results.error) {
       console.error(results.error);
     }
