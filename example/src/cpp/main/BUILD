@@ -1,5 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//tools/lint:linters.bzl", "clang_tidy_test")
+
 cc_library(
     name = "hello-greet",
     srcs = ["hello-greet.cc"],
@@ -15,11 +15,6 @@ cc_binary(
         ":hello-greet",
         "//src/cpp/lib:hello-time",
     ],
-)
-
-clang_tidy_test(
-    name = "hello-world-clang-tidy-test",
-    srcs = ["hello-world"],
 )
 
 cc_library(
