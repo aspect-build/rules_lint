@@ -39,4 +39,6 @@ jobs:
       tag_name: ${{ needs.tag.outputs.new-tag-version }}
     if: needs.tag.outputs.new-tag == 'true' && needs.tag.outputs.new-tag-version-type != 'major'
     permissions:
-      contents: write # allow create release
+      contents: write
+      attestations: write
+      id-token: write
