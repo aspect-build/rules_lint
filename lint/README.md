@@ -65,7 +65,7 @@ step 1.
 ## Step 3: docs
 
 Add a rule in the `docs/` folder matching the existing ones, so that the API docs are auto-generated.
-Run `bazel run docs:update` to create the Markdown file.
+Run `cd docs; bazel run update` to create the Markdown file.
 
 Also add your new linter to the README.
 

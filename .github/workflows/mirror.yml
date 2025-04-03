@@ -16,7 +16,8 @@ jobs:
         run: |
           ./lint/mirror_ruff.sh
           npx @bazel/buildifier lint/ruff_versions.bzl
-          bazel run docs:update
+          cd docs
+          bazel run update
       - name: Download and Extract Latest Multitool
         run: wget -O- https://github.com/theoremlp/multitool/releases/download/v0.4.0/multitool-x86_64-unknown-linux-gnu.tar.xz | tar --strip-components=1 -xJf -
       - name: Find Updates and Render Lockfile
