@@ -1,0 +1,40 @@
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary", "js_test")
+
+js_library(
+    name = "diagnostic-formatter",
+    srcs = ["rust.diagnostic-formatter.js"],
+)
+
+js_binary(
+    name = "cli",
+    data = [":diagnostic-formatter"],
+    entry_point = "rust.cli.js",
+)
+
+js_run_binary(
+    name = "got.patch",
+    testonly = True,
+    srcs = [
+        "testdata/clippy.out",
+    ],
+    outs = ["got.patch.out"],
+    args = [
+        "patch",
+        "$(rootpath testdata/clippy.out)",
+        "$(rootpath got.patch.out)",
+    ],
+    tool = ":cli",
+)
+
+js_test(
+    name = "test",
+    data = [
+        "testdata/clippy-sarif.out",
+        ":got.patch",
+    ],
+    entry_point = "rust.diagnostic-formatter.test.js",
+    env = {
+        "WANT": "$(rootpath testdata/clippy-sarif.out)",
+        "GOT": "$(rootpath :got.patch)",
+    },
+)
