@@ -1,0 +1,226 @@
+{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main.rs"
+                },
+                "region": {
+                  "byteLength": 20,
+                  "byteOffset": 50,
+                  "endColumn": 23,
+                  "endLine": 3,
+                  "startColumn": 3,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "this `if` branch is empty"
+          },
+          "relatedLocations": [
+            {
+              "message": {
+                "text": "you can remove it \"vec.len() <= 0;\""
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main.rs"
+                },
+                "region": {
+                  "byteLength": 20,
+                  "byteOffset": 50,
+                  "endColumn": 23,
+                  "endLine": 3,
+                  "startColumn": 3,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "ruleId": "clippy::needless_if",
+          "ruleIndex": 0
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main.rs"
+                },
+                "region": {
+                  "byteLength": 14,
+                  "byteOffset": 53,
+                  "endColumn": 20,
+                  "endLine": 3,
+                  "startColumn": 6,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "this comparison involving the minimum or maximum element for this type contains a case that is always true or always false"
+          },
+          "relatedLocations": [],
+          "ruleId": "clippy::absurd_extreme_comparisons",
+          "ruleIndex": 1
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main.rs"
+                },
+                "region": {
+                  "byteLength": 14,
+                  "byteOffset": 76,
+                  "endColumn": 20,
+                  "endLine": 4,
+                  "startColumn": 6,
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "this comparison involving the minimum or maximum element for this type contains a case that is always true or always false"
+          },
+          "relatedLocations": [],
+          "ruleId": "clippy::absurd_extreme_comparisons",
+          "ruleIndex": 1
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main.rs"
+                },
+                "region": {
+                  "byteLength": 20,
+                  "byteOffset": 50,
+                  "endColumn": 23,
+                  "endLine": 3,
+                  "startColumn": 3,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "this `if` branch is empty"
+          },
+          "relatedLocations": [
+            {
+              "message": {
+                "text": "you can remove it \"vec.len() <= 0;\""
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main.rs"
+                },
+                "region": {
+                  "byteLength": 20,
+                  "byteOffset": 50,
+                  "endColumn": 23,
+                  "endLine": 3,
+                  "startColumn": 3,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "ruleId": "clippy::needless_if",
+          "ruleIndex": 0
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main.rs"
+                },
+                "region": {
+                  "byteLength": 14,
+                  "byteOffset": 53,
+                  "endColumn": 20,
+                  "endLine": 3,
+                  "startColumn": 6,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "this comparison involving the minimum or maximum element for this type contains a case that is always true or always false"
+          },
+          "relatedLocations": [],
+          "ruleId": "clippy::absurd_extreme_comparisons",
+          "ruleIndex": 1
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main.rs"
+                },
+                "region": {
+                  "byteLength": 14,
+                  "byteOffset": 76,
+                  "endColumn": 20,
+                  "endLine": 4,
+                  "startColumn": 6,
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "this comparison involving the minimum or maximum element for this type contains a case that is always true or always false"
+          },
+          "relatedLocations": [],
+          "ruleId": "clippy::absurd_extreme_comparisons",
+          "ruleIndex": 1
+        }
+      ],
+      "tool": {
+        "driver": {
+          "informationUri": "https://rust-lang.github.io/rust-clippy/",
+          "name": "clippy",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_if\n`#[warn(clippy::needless_if)]` on by default\n"
+              },
+              "helpUri": "https://rust-lang.github.io/rust-clippy/master/index.html#needless_if",
+              "id": "clippy::needless_if"
+            },
+            {
+              "fullDescription": {
+                "text": "because `0` is the minimum value for this type, the case where the two sides are not equal never occurs, consider using `vec.len() == 0` instead\nfor further information visit https://rust-lang.github.io/rust-clippy/master/index.html#absurd_extreme_comparisons\n`#[deny(clippy::absurd_extreme_comparisons)]` on by default\n"
+              },
+              "id": "clippy::absurd_extreme_comparisons",
+              "helpUri": "https://rust-lang.github.io/rust-clippy/master/index.html#absurd_extreme_comparisons"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}
