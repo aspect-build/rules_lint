@@ -1,0 +1,6 @@
+# build without the bytes
+common --remote_download_outputs=minimal
+common --nobuild_runfile_links
+
+# Allows tests to run bazelisk-in-bazel, since this is the cache folder used
+common --test_env=XDG_CACHE_HOME
