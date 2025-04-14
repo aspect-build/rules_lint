@@ -3,7 +3,7 @@
 workspaces:
   - .
   - docs
-  - examples
+  - example
 tasks:
   - test:
 notifications:
