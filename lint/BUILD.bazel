@@ -6,7 +6,7 @@ load("//lint/private:lint_aspect.bzl", "lint_options")
 exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
 
 # Used as a default for vale_aspect#styles
-filegroup(
+filegroupxx(
     name = "empty_styles",
     srcs = [],
     visibility = ["//visibility:public"],
