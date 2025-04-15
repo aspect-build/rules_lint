@@ -1,10 +1,21 @@
 # See https://docs.aspect.build/v/workflows/config
 ---
 workspaces:
-  - .
-  - docs
+  - .:
+      tasks:
+        - test:
+  - docs:
+      tasks:
+        - test:
   - example
+
 tasks:
   - test:
+  - test:
+      name: "Test (WORKSPACE)"
+      bazel:
+        flags:
+          - --noenable_bzlmod
+          - --enable_workspace
 notifications:
   github: {}
