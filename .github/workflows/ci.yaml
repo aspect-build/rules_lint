@@ -17,6 +17,18 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
+  bazel-test:
+    uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v6
+    with:
+      folders: '["example"]'
+      # Don't try for Windows support yet.
+      exclude_windows: true
+      exclude: |
+        [
+          {"bzlmodEnabled": true, "bazelversion": "7.4.0"},
+          {"bazelversion": "6.4.0"}
+        ]
+
   integration-test:
     runs-on: ubuntu-latest
     steps:
