@@ -3,13 +3,14 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("//lint/private:lint_aspect.bzl", "lint_options")
 
+package(default_visibility = ["//visibility:public"])
+
 exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
 
 # Used as a default for vale_aspect#styles
 filegroup(
     name = "empty_styles",
     srcs = [],
-    visibility = ["//visibility:public"],
 )
 
 _BAZEL_TOOLS = [
@@ -25,6 +26,7 @@ config_setting(
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
     ],
+    visibility = ["//visibility:private"],
 )
 
 config_setting(
@@ -33,12 +35,12 @@ config_setting(
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
     ],
+    visibility = ["//visibility:private"],
 )
 
 bool_flag(
     name = "debug",
     build_setting_default = False,
-    visibility = ["//visibility:public"],
 )
 
 config_setting(
@@ -49,7 +51,6 @@ config_setting(
 bool_flag(
     name = "fail_on_violation",
     build_setting_default = False,
-    visibility = ["//visibility:public"],
 )
 
 config_setting(
@@ -60,7 +61,6 @@ config_setting(
 bool_flag(
     name = "fix",
     build_setting_default = False,
-    visibility = ["//visibility:public"],
 )
 
 config_setting(
@@ -71,7 +71,6 @@ config_setting(
 bool_flag(
     name = "color",
     build_setting_default = True,
-    visibility = ["//visibility:public"],
 )
 
 config_setting(
@@ -97,13 +96,11 @@ lint_options(
         ":fix.enabled": True,
         "//conditions:default": False,
     }),
-    visibility = ["//visibility:public"],
 )
 
 bzl_library(
     name = "buf",
     srcs = ["buf.bzl"],
-    visibility = ["//visibility:public"],
     deps = [
         "//lint/private:lint_aspect",
         "@rules_proto//proto:defs",
@@ -115,31 +112,26 @@ bzl_library(
 alias(
     name = "eslint.workaround_17660",
     actual = "//lint/js:eslint.workaround_17660",
-    visibility = ["//visibility:public"],
 )
 
 alias(
     name = "eslint.compact-formatter",
     actual = "//lint/js:eslint.compact-formatter",
-    visibility = ["//visibility:public"],
 )
 
 alias(
     name = "eslint.stylish-formatter",
     actual = "//lint/js:eslint.stylish-formatter",
-    visibility = ["//visibility:public"],
 )
 
 alias(
     name = "stylelint.compact-formatter",
     actual = "//lint/js:stylelint.compact-formatter",
-    visibility = ["//visibility:public"],
 )
 
 bzl_library(
     name = "eslint",
     srcs = ["eslint.bzl"],
-    visibility = ["//visibility:public"],
     deps = [
         "//lint/private:lint_aspect",
         "@aspect_bazel_lib//lib:copy_to_bin",
@@ -150,28 +142,24 @@ bzl_library(
 bzl_library(
     name = "lint_test",
     srcs = ["lint_test.bzl"],  # keep
-    visibility = ["//visibility:public"],
     deps = ["@aspect_bazel_lib//lib:paths"],
 )
 
 bzl_library(
     name = "flake8",
     srcs = ["flake8.bzl"],
-    visibility = ["//visibility:public"],
     deps = ["//lint/private:lint_aspect"],
 )
 
 bzl_library(
     name = "keep_sorted",
     srcs = ["keep_sorted.bzl"],
-    visibility = ["//visibility:public"],
     deps = ["//lint/private:lint_aspect"],
 )
 
 bzl_library(
     name = "pmd",
     srcs = ["pmd.bzl"],
-    visibility = ["//visibility:public"],
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
     ],
@@ -180,7 +168,6 @@ bzl_library(
 bzl_library(
     name = "checkstyle",
     srcs = ["checkstyle.bzl"],
-    visibility = ["//visibility:public"],
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
     ],
@@ -189,7 +176,6 @@ bzl_library(
 bzl_library(
     name = "spotbugs",
     srcs = ["spotbugs.bzl"],
-    visibility = ["//visibility:public"],
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
     ],
@@ -198,7 +184,6 @@ bzl_library(
 bzl_library(
     name = "ruff",
     srcs = ["ruff.bzl"],
-    visibility = ["//visibility:public"],
     deps = _BAZEL_TOOLS + [
         ":ruff_versions",
         "//lint/private:lint_aspect",
@@ -209,14 +194,12 @@ bzl_library(
 bzl_library(
     name = "shellcheck",
     srcs = ["shellcheck.bzl"],
-    visibility = ["//visibility:public"],
     deps = ["//lint/private:lint_aspect"],
 )
 
 bzl_library(
     name = "stylelint",
     srcs = ["stylelint.bzl"],
-    visibility = ["//visibility:public"],
     deps = [
         "//lint/private:lint_aspect",
         "@aspect_bazel_lib//lib:copy_to_bin",
@@ -227,13 +210,11 @@ bzl_library(
 bzl_library(
     name = "ruff_versions",
     srcs = ["ruff_versions.bzl"],
-    visibility = ["//visibility:public"],
 )
 
 bzl_library(
     name = "vale",
     srcs = ["vale.bzl"],
-    visibility = ["//visibility:public"],
     deps = _BAZEL_TOOLS + [
         ":vale_library",
         ":vale_versions",
@@ -244,19 +225,16 @@ bzl_library(
 bzl_library(
     name = "vale_versions",
     srcs = ["vale_versions.bzl"],
-    visibility = ["//visibility:public"],
 )
 
 bzl_library(
     name = "vale_library",
     srcs = ["vale_library.bzl"],
-    visibility = ["//visibility:public"],
 )
 
 bzl_library(
     name = "ktlint",
     srcs = ["ktlint.bzl"],
-    visibility = ["//visibility:public"],
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
         "@bazel_skylib//lib:dicts",
@@ -266,7 +244,6 @@ bzl_library(
 bzl_library(
     name = "clang_tidy",
     srcs = ["clang_tidy.bzl"],
-    visibility = ["//visibility:public"],
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
         "@bazel_skylib//lib:dicts",
@@ -278,5 +255,4 @@ bzl_library(
 sh_binary(
     name = "clang_tidy_wrapper",
     srcs = ["clang_tidy_wrapper.bash"],
-    visibility = ["//visibility:public"],
 )
