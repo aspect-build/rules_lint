@@ -108,7 +108,7 @@ async function main(args, sandbox) {
     }
   }
 
-  diffOut.close();
+  fs.closeSync(diffOut);
 
   return ret.status;
 }
