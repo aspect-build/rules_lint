@@ -6,5 +6,11 @@ workspaces:
   - example
 tasks:
   - test:
+  - test:
+      name: "Test (WORKSPACE)"
+      bazel:
+        flags:
+          - --noenable_bzlmod
+          - --enable_workspace
 notifications:
   github: {}
