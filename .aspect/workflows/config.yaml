@@ -1,10 +1,24 @@
 # See https://docs.aspect.build/v/workflows/config
 ---
 workspaces:
-  - .
-  - docs
+  - .:
+      tasks:
+        - bzlmod-false:
+            without: true
+  - docs:
+      tasks:
+        - bzlmod-false:
+            without: true
   - example
+
 tasks:
   - test:
+  - test:
+      name: "Test (WORKSPACE)"
+      id: bzlmod-false
+      bazel:
+        flags:
+          - --noenable_bzlmod
+          - --enable_workspace
 notifications:
   github: {}
