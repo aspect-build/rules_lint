@@ -3,16 +3,19 @@
 workspaces:
   - .:
       tasks:
-        - test:
+        - workspace:
+            without: true
   - docs:
       tasks:
-        - test:
+        - workspace:
+            without: true
   - example
 
 tasks:
   - test:
   - test:
       name: "Test (WORKSPACE)"
+      id: workspace
       bazel:
         flags:
           - --noenable_bzlmod
