@@ -3,11 +3,11 @@
 workspaces:
   - .:
       tasks:
-        - workspace:
+        - bzlmod-false:
             without: true
   - docs:
       tasks:
-        - workspace:
+        - bzlmod-false:
             without: true
   - example
 
@@ -15,7 +15,7 @@ tasks:
   - test:
   - test:
       name: "Test (WORKSPACE)"
-      id: workspace
+      id: bzlmod-false
       bazel:
         flags:
           - --noenable_bzlmod
