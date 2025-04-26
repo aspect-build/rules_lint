@@ -161,8 +161,12 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
     for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
         attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test", disable_git_attribute_checks)
         if srcs:
-            attrs["data"] = [tool_label] + srcs
-            attrs["args"] = ["$(location {})".format(i) for i in srcs]
+            native.filegroup(
+                name = name + "_srcs",
+                srcs = srcs,
+            )
+            attrs["data"] = [tool_label, name + "_srcs"]
+            attrs["args"] = ["$(locations {})".format(name + "_srcs")]
         else:
             attrs["data"] = [tool_label, workspace]
             attrs["env"]["WORKSPACE"] = "$(location {})".format(workspace)
