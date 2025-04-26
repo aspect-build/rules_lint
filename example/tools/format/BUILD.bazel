@@ -122,3 +122,11 @@ format_test(
     # swift = ":swiftformat",
     workspace = "//:.shellcheckrc",  # A file in the workspace root, where the no_sandbox mode will run the formatter
 )
+
+format_test(
+    name = "format_js_test",
+    srcs = [
+        "(special_char)/[square]/hello.ts",
+    ],
+    javascript = ":prettier",
+)
