@@ -12,6 +12,7 @@ workspaces:
   - example
 
 tasks:
+  - lint:
   - test:
   - test:
       name: "Test (WORKSPACE)"
