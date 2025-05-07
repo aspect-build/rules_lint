@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { Greeter } from "./file-dep";
 
 // this is a linting violation, and is auto-fixed under `--fix`
-const a: string = "ab";
+const a = "ab";
 console.log(a);
 
 // linting violation; not auto-fixable
