@@ -17,8 +17,8 @@ github.com/onsi/ginkgo/v2 v2.23.3 h1:edHxnszytJ4lD9D5Jjc4tiDkPBZ3siDeJJkUZJJVkp0
 github.com/onsi/ginkgo/v2 v2.23.3/go.mod h1:zXTP6xIp3U8aVuXN8ENK9IXRaTjFnpVB9mGmaSRvxnM=
 github.com/onsi/gomega v1.37.0 h1:CdEG8g0S133B4OswTDC/5XPSzE1OeP29QOioj2PID2Y=
 github.com/onsi/gomega v1.37.0/go.mod h1:8D9+Txp43QWKhM24yyOBEdpkzN8FvJyAwecBgsU4KU0=
-github.com/reviewdog/errorformat v0.0.0-20240608101709-1d3280ed6bd4 h1:wFzV+/KigR9v01F8+cK/QyaMg6NgyfOOZaSquborhpY=
-github.com/reviewdog/errorformat v0.0.0-20240608101709-1d3280ed6bd4/go.mod h1:AqhrP0G7F9YRROF10JQwdd4cNO8bdm6bY6KzcOc3Cp8=
+github.com/reviewdog/errorformat v0.0.0-20250320004447-223c26dbe212 h1:vln3OhpVhkYTVwvdVKSqnJ80IGZyc9M7tIesYpfm/UQ=
+github.com/reviewdog/errorformat v0.0.0-20250320004447-223c26dbe212/go.mod h1:AqhrP0G7F9YRROF10JQwdd4cNO8bdm6bY6KzcOc3Cp8=
 github.com/reviewdog/reviewdog v0.17.4 h1:TmALdYHnU57HKfDbWbbUO9xqsqxQz6JDkY/cEpbphRw=
 github.com/reviewdog/reviewdog v0.17.4/go.mod h1:qwiKe7F3eAJ6r5kXxIEWQPUBWv7xuRihnIWglcNUt9Q=
 golang.org/x/net v0.37.0 h1:1zLorHbz+LYj7MQlSf1+2tPIIgibq2eL5xkrGk6f+2c=

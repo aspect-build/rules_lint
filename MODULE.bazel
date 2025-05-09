@@ -30,6 +30,43 @@ multitool.hub(lockfile = "//format:multitool.lock.json")
 multitool.hub(lockfile = "//lint:multitool.lock.json")
 use_repo(multitool, "multitool")
 
-# NB: this is a pre-release dependency only.
-# This line is commented out when publishing to BCR, since releases use pre-built tools
-include("//lint/sarif:go.MODULE.bazel")
+####### Dev dependencies ########
+
+# To allow /tools to be built from source
+# NOTE: when publishing to BCR, we patch this to be dev_dependency, as we publish pre-built binaries
+# along with our releases.
+bazel_dep(
+    name = "toolchains_protoc",
+    version = "0.4.1",
+    # In released versions: dev_dependency = True
+)
+bazel_dep(
+    name = "gazelle",
+    version = "0.43.0",
+    # In released versions: dev_dependency = True
+)
+bazel_dep(
+    name = "rules_go",
+    version = "0.54.0",
+    # In released versions: dev_dependency = True
+)
+
+go_sdk = use_extension(
+    "@rules_go//go:extensions.bzl",
+    "go_sdk",
+    # In released versions: dev_dependency = True
+)
+go_sdk.download(version = "1.23.9")
+
+go_deps = use_extension(
+    "@gazelle//:extensions.bzl",
+    "go_deps",
+    # In released versions: dev_dependency = True
+)
+go_deps.from_file(go_mod = "//:go.mod")
+use_repo(
+    go_deps,
+    "com_github_onsi_gomega",
+    "com_github_reviewdog_errorformat",
+    "com_github_reviewdog_reviewdog",
+)
