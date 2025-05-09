@@ -33,36 +33,36 @@ use_repo(multitool, "multitool")
 ####### Dev dependencies ########
 
 # To allow /tools to be built from source
-# NOTE: when publishing to BCR, we patch this to be False, as we publish pre-built binaries with our releases.
-IS_PRERELEASE = False
+# NOTE: when publishing to BCR, we patch this to be True, as we publish pre-built binaries with our releases.
+IS_RELEASE = False
 
 bazel_dep(
     name = "toolchains_protoc",
     version = "0.4.1",
-    dev_dependency = IS_PRERELEASE,
+    dev_dependency = IS_RELEASE,
 )
 bazel_dep(
     name = "gazelle",
     version = "0.43.0",
-    dev_dependency = IS_PRERELEASE,
+    dev_dependency = IS_RELEASE,
 )
 bazel_dep(
     name = "rules_go",
     version = "0.54.0",
-    dev_dependency = IS_PRERELEASE,
+    dev_dependency = IS_RELEASE,
 )
 
 go_sdk = use_extension(
     "@rules_go//go:extensions.bzl",
     "go_sdk",
-    dev_dependency = IS_PRERELEASE,
+    dev_dependency = IS_RELEASE,
 )
 go_sdk.download(version = "1.23.9")
 
 go_deps = use_extension(
     "@gazelle//:extensions.bzl",
     "go_deps",
-    dev_dependency = IS_PRERELEASE,
+    dev_dependency = IS_RELEASE,
 )
 go_deps.from_file(go_mod = "//:go.mod")
 use_repo(
