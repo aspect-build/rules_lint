@@ -107,7 +107,7 @@ function assert_physical_artifact_location_uri() {
 
 @test "should get SARIF output from pmd" {
     run_lint pmd foo
-    REPORT_FILE=bazel-bin/src/foo.AspectRulesLintPmd.report
+    REPORT_FILE=bazel-bin/src/foo.AspectRulesLintPMD.report
     assert_driver_name "PMD"
     # FIXME: report isn't finding any files??
     # assert_physical_artifact_location_uri "src/Hello.java"
