@@ -118,11 +118,6 @@ def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_librar
                 executable = True,
                 cfg = "exec",
             ),
-            "_sarif": attr.label(
-                default = Label("@aspect_rules_lint//tools/sarif/cmd/sarif"),
-                executable = True,
-                cfg = "exec",
-            ),
             "_config_file": attr.label(
                 default = config,
                 allow_single_file = True,
@@ -131,4 +126,5 @@ def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_librar
                 default = rule_kinds,
             ),
         },
+        toolchains = ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
     )

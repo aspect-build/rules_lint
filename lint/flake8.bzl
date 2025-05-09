@@ -124,11 +124,6 @@ def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"])
                 executable = True,
                 cfg = "exec",
             ),
-            "_sarif": attr.label(
-                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
-                executable = True,
-                cfg = "exec",
-            ),
             "_config_file": attr.label(
                 default = config,
                 allow_single_file = True,
@@ -137,4 +132,5 @@ def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"])
                 default = rule_kinds,
             ),
         },
+        toolchains = ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
     )

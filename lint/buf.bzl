@@ -124,14 +124,13 @@ def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
                 default = config,
                 allow_single_file = True,
             ),
-            "_sarif": attr.label(
-                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
-                executable = True,
-                cfg = "exec",
-            ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
         },
-        toolchains = [toolchain, "@rules_proto//proto:toolchain_type"],
+        toolchains = [
+            toolchain,
+            "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type",
+            "@rules_proto//proto:toolchain_type",
+        ],
     )

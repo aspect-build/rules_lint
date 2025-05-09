@@ -237,11 +237,6 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
                 executable = True,
                 cfg = "exec",
             ),
-            "_sarif": attr.label(
-                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
-                executable = True,
-                cfg = "exec",
-            ),
             "_filegroup_tags": attr.string_list(
                 default = filegroup_tags,
             ),
@@ -249,5 +244,5 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
                 default = rule_kinds,
             ),
         },
-        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS,
+        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
     )

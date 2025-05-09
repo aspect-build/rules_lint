@@ -183,5 +183,6 @@ def parse_to_sarif_action(ctx, mnemonic, raw_machine_report, sarif_out):
         arguments = [args],
         mnemonic = "AspectRulesLintParseToSarif",
         progress_message = "Parsing machine-readable report to SARIF for %{label}",
-        executable = ctx.executable._sarif,
+        executable = ctx.toolchains["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"].sarif_parser_info.bin,
+        toolchain = "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type",
     )

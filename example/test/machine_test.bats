@@ -17,19 +17,19 @@ teardown() {
   fi
 }
 
-function run_lint() {
+run_lint() {
     linter=$1
     target=$2
     run bazel build "--aspects=//tools/lint:linters.bzl%$linter" --output_groups=rules_lint_machine "//src:$target"
     assert_success
 }
 
-function assert_driver_name() {
+assert_driver_name() {
     run jq --raw-output "$SARIF_TOOL_DRIVER_NAME_FILTER" $REPORT_FILE
     assert_output "$1"
 }
 
-function assert_physical_artifact_location_uri() {
+assert_physical_artifact_location_uri() {
     run jq --raw-output "$PHYSICAL_ARTIFACT_LOCATION_URI_FILTER" $REPORT_FILE
     assert_output "$1"
 }
@@ -55,15 +55,6 @@ function assert_physical_artifact_location_uri() {
     assert_physical_artifact_location_uri "src/file.ts"
 }
 
-# TODO: spotbugs is not working yet.
-# It doesn't seem to print source locations (perhaps because it only works from bytecode)
-# It's the same problem I solved by starting Error Prone!!
-# @test "should get SARIF output from spotbugs" {
-#     run_lint spotbugs foo
-# 	run jq '.runs[].tool.driver.name' bazel-bin/src/foo.AspectRulesLintSpotbugs.report
-#     assert_output "spotbugs"
-# }
-
 @test "should get SARIF output from stylelint" {
     run_lint stylelint css
     REPORT_FILE=bazel-bin/src/css.AspectRulesLintStylelint.report
@@ -81,7 +72,7 @@ function assert_physical_artifact_location_uri() {
 @test "should get SARIF output from clang_tidy" {
     run_lint clang_tidy hello_cc
     REPORT_FILE=bazel-bin/src/hello_cc.AspectRulesLintClangTidy.report
-    assert_driver_name "clang_tidy"
+    assert_driver_name "ClangTidy"
     assert_physical_artifact_location_uri "src/hello.cpp"
 }
 
@@ -92,18 +83,6 @@ function assert_physical_artifact_location_uri() {
     # FIXME: report doesn't find the files
     # assert_physical_artifact_location_uri "src/unused.proto"
 }
-
-# @test "should get SARIF output from keep_sorted" {
-#     run_lint keep_sorted keep_sorted
-#     run jq '.runs[].tool.driver.name' bazel-bin/src/keep_sorted.AspectRulesLintKeepSorted.report
-#     assert_output "keep_sorted"
-# }
-
-# @test "should get SARIF output from ktlint" {
-#     run_lint ktlint hello_kt
-#     run jq '.runs[].tool.driver.name' bazel-bin/src/hello_kt.AspectRulesLintKtlint.report
-#     assert_output "ktlint"
-# }
 
 @test "should get SARIF output from pmd" {
     run_lint pmd foo
@@ -119,3 +98,17 @@ function assert_physical_artifact_location_uri() {
     assert_driver_name "Flake8"
     assert_physical_artifact_location_uri "src/unused_import.py"
 }
+
+# TODO: spotbugs is not working yet.
+# It doesn't seem to print source locations (perhaps because it only works from bytecode)
+# It's the same problem I solved by starting Error Prone!!
+# @test "should get SARIF output from spotbugs" {
+#     run_lint spotbugs foo
+# }
+# TODO: add sarif parsers for keep_sorted and ktlint
+# @test "should get SARIF output from keep_sorted" {
+#     run_lint keep_sorted keep_sorted
+# }
+# @test "should get SARIF output from ktlint" {
+#     run_lint ktlint hello_kt
+# }

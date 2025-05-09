@@ -162,11 +162,6 @@ def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule
                 executable = True,
                 cfg = "exec",
             ),
-            "_sarif": attr.label(
-                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
-                executable = True,
-                cfg = "exec",
-            ),
             "_config": attr.label(
                 allow_single_file = True,
                 mandatory = True,
@@ -183,6 +178,7 @@ def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule
                 default = rule_kinds,
             ),
         },
+        toolchains = ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
     )
 
 def fetch_vale(tag = VALE_VERSIONS.keys()[0]):

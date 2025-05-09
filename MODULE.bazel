@@ -30,6 +30,12 @@ multitool.hub(lockfile = "//format:multitool.lock.json")
 multitool.hub(lockfile = "//lint:multitool.lock.json")
 use_repo(multitool, "multitool")
 
+rules_lint_toolchains = use_extension("@aspect_rules_lint//lint:extensions.bzl", "toolchains")
+rules_lint_toolchains.sarif_parser()
+use_repo(rules_lint_toolchains, "sarif_parser_toolchains")
+
+register_toolchains("@sarif_parser_toolchains//:all")
+
 ####### Dev dependencies ########
 
 # To allow /tools to be built from source

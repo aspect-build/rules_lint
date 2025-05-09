@@ -214,11 +214,6 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
                 executable = True,
                 cfg = "exec",
             ),
-            "_sarif": attr.label(
-                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
-                executable = True,
-                cfg = "exec",
-            ),
             "_patcher": attr.label(
                 default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
@@ -232,6 +227,7 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
                 default = rule_kinds,
             ),
         },
+        toolchains = ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
     )
 
 def _ruff_workaround_20269_impl(rctx):

@@ -273,11 +273,6 @@ def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project"
                 executable = True,
                 cfg = "exec",
             ),
-            "_sarif": attr.label(
-                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
-                executable = True,
-                cfg = "exec",
-            ),
             "_workaround_17660": attr.label(
                 default = "@aspect_rules_lint//lint:eslint.workaround_17660",
                 allow_single_file = True,
@@ -297,5 +292,5 @@ def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project"
                 default = rule_kinds,
             ),
         },
-        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS,
+        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
     )

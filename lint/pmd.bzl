@@ -138,11 +138,6 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
                 executable = True,
                 cfg = "exec",
             ),
-            "_sarif": attr.label(
-                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
-                executable = True,
-                cfg = "exec",
-            ),
             "_rulesets": attr.label_list(
                 allow_files = True,
                 mandatory = True,
@@ -154,6 +149,7 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
                 default = rule_kinds,
             ),
         },
+        toolchains = ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
     )
 
 def fetch_pmd():

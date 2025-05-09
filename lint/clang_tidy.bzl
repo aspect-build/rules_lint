@@ -478,11 +478,6 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
                 executable = True,
                 cfg = "exec",
             ),
-            "_sarif": attr.label(
-                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
-                executable = True,
-                cfg = "exec",
-            ),
             "_patcher": attr.label(
                 default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
@@ -490,6 +485,9 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
             ),
             "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
         },
-        toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+        toolchains = [
+            "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type",
+            "@bazel_tools//tools/cpp:toolchain_type",
+        ],
         fragments = ["cpp"],
     )
