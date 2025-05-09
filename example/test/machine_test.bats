@@ -25,12 +25,12 @@ function run_lint() {
 }
 
 function assert_driver_name() {
-    run jq --raw-output $SARIF_TOOL_DRIVER_NAME_FILTER $REPORT_FILE
+    run jq --raw-output "$SARIF_TOOL_DRIVER_NAME_FILTER" $REPORT_FILE
     assert_output "$1"
 }
 
 function assert_physical_artifact_location_uri() {
-    run jq --raw-output $PHYSICAL_ARTIFACT_LOCATION_URI_FILTER $REPORT_FILE
+    run jq --raw-output "$PHYSICAL_ARTIFACT_LOCATION_URI_FILTER" $REPORT_FILE
     assert_output "$1"
 }
 
@@ -44,7 +44,7 @@ function assert_physical_artifact_location_uri() {
 @test "should get SARIF output from ruff" {
     run_lint ruff unused_import
     REPORT_FILE=bazel-bin/src/unused_import.AspectRulesLintRuff.report
-    assert_driver_name "ruff"
+    assert_driver_name "Ruff"
     assert_physical_artifact_location_uri "src/unused_import.py"
 }
 
