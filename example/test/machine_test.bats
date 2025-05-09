@@ -11,15 +11,25 @@ function run_lint() {
 
 @test "should get SARIF output from ruff" {
     run_lint ruff unused_import
-	run jq '.runs[].tool.driver.name' bazel-bin/src/unused_import.AspectRulesLintRuff.report
-    assert_output "ruff"
+	run jq --raw-output '.runs[].tool.driver.name' bazel-bin/src/unused_import.AspectRulesLintRuff.report
+    if ! assert_output "ruff"; then
+        echo "----- actual report content -----"
+        cat bazel-bin/src/unused_import.AspectRulesLintRuff.report
+        echo "---------------------"
+        false  # Mark the test as failed
+    fi
 }
 
-# @test "should get SARIF output from shellcheck" {
-# 	run_lint shellcheck hello_shell
-# 	run jq '.runs[].tool.driver.name' bazel-bin/src/hello_shell.AspectRulesLintShellcheck.report
-#     assert_output "shellcheck"
-# }
+@test "should get SARIF output from shellcheck" {
+	run_lint shellcheck hello_shell
+	run jq --raw-output '.runs[].tool.driver.name' bazel-bin/src/hello_shell.AspectRulesLintShellcheck.report
+    if ! assert_output "shellcheck"; then
+        echo "----- actual report content -----"
+        cat bazel-bin/src/hello_shell.AspectRulesLintShellcheck.report
+        echo "---------------------"
+        false  # Mark the test as failed
+    fi
+}
 
 # @test "should get SARIF output from ESLint" {
 #     run_lint eslint ts_typings
