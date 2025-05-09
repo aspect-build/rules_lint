@@ -91,7 +91,11 @@ def _shellcheck_aspect_impl(target, ctx):
     shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options + config_options)
     raw_machine_report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, config_options)
-    parse_to_sarif_action(ctx, "AspectRulesLintShellCheck", raw_machine_report, outputs.machine.out)
+
+    # Shellcheck does not have a SARIF output format built-in.
+    # We could use https://crates.io/crates/shellcheck-sarif but don't want to introduce a Rust dependency.
+    # So we use our Go tool sarif.go to translate the raw machine-readable report to SARIF.
+    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     return [info]
 
