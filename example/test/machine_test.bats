@@ -1,6 +1,19 @@
 # Test machine-readable output groups
+# NB: there are also tests in the Go code to assert that each language parser does the right thing.
 bats_load_library "bats-support"
 bats_load_library "bats-assert"
+
+# This variable will be set by each test
+REPORT_FILE=""
+
+teardown() {
+  if [[ "$status" -ne 0 && -n "$REPORT_FILE" && -f "$REPORT_FILE" ]]; then
+    echo
+    echo "-- actual report content --"
+    cat "$REPORT_FILE"
+    echo "--"
+  fi
+}
 
 function run_lint() {
     linter=$1
@@ -9,26 +22,22 @@ function run_lint() {
     assert_success
 }
 
-@test "should get SARIF output from ruff" {
-    run_lint ruff unused_import
-	run jq --raw-output '.runs[].tool.driver.name' bazel-bin/src/unused_import.AspectRulesLintRuff.report
-    if ! assert_output "Ruff123"; then
-        echo "-- actual report content --"
-        cat bazel-bin/src/unused_import.AspectRulesLintRuff.report
-        echo "--"
-        false  # Mark the test as failed
-    fi
-}
-
 @test "should get SARIF output from shellcheck" {
 	run_lint shellcheck hello_shell
-	run jq --raw-output '.runs[].tool.driver.name' bazel-bin/src/hello_shell.AspectRulesLintShellCheck.report
-    if ! assert_output "ShellCheck"; then
-        echo "-- actual report content --"
-        cat bazel-bin/src/hello_shell.AspectRulesLintShellCheck.report
-        echo "--"
-        false  # Mark the test as failed
-    fi
+    REPORT_FILE=bazel-bin/src/hello_shell.AspectRulesLintShellCheck.report
+	run jq --raw-output '.runs[].tool.driver.name' $REPORT_FILE
+    assert_output "ShellCheck"
+    run jq --raw-output '.runs[].results | map(.locations | map(.physicalLocation.artifactLocation.uri)) | flatten | unique[]' $REPORT_FILE
+    assert_output "src/hello.sh"
+}
+
+@test "should get SARIF output from ruff" {
+    run_lint ruff unused_import
+    REPORT_FILE=bazel-bin/src/unused_import.AspectRulesLintRuff.report
+	run jq --raw-output '.runs[].tool.driver.name' $REPORT_FILE
+    assert_output "Ruff"
+    run jq --raw-output '.runs[].results | map(.locations | map(.physicalLocation.artifactLocation.uri)) | flatten | unique[]' $REPORT_FILE
+    assert_output "src/unused_import.py"
 }
 
 # @test "should get SARIF output from ESLint" {

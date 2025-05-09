@@ -42,6 +42,7 @@
 
  func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonString string, err error) {
 	 regex := regexp.MustCompile(`^{\s+"\$schema":.+sarif`)
+	 // If it's already in SARIF format, just return it
 	 if regex.Match([]byte(report)) {
 		 return report, nil
 	 }
@@ -55,7 +56,6 @@
  
 	 // NB: Switch is on the MNEMONIC declared in rules_lint
 	 // Helpful link for building custom fm strings: https://vimdoc.sourceforge.net/htmldoc/quickfix.html#errorformat
-	 // When updating this list, also update the docs here: https://docs.aspect.build/workflows/features/lint#linting
 	 switch mnemonic {
 	 case "AspectRulesLintESLint":
 		 fm = fmts.DefinedFmts()["eslint-compact"].Errorformat

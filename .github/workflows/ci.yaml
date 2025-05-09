@@ -17,13 +17,24 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
-  integration-test:
+  bcr:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # See https://github.com/bazel-contrib/publish-to-bcr#including-patches
       - name: Verify bcr patches
         run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
+
+  integration-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        folder:
+          - example
+          - format
+    steps:
+      - uses: actions/checkout@v4
+      # See https://github.com/bazel-contrib/publish-to-bcr#including-patches
       - name: Setup bats
         uses: mig4/setup-bats@v1
         with:
@@ -35,9 +46,6 @@ jobs:
           support-version: "0.3.0"
           assert-path: /usr/lib/bats/bats-assert
           assert-version: "2.1.0"
-      - name: "Integration test: example"
-        working-directory: example
-        run: bats ./test
-      - name: "Integration test: format"
-        working-directory: format
+      - name: "Integration test: ${{ matrix.folder }}"
+        working-directory: ${{ matrix.folder }}
         run: bats ./test
