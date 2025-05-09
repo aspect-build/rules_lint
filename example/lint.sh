@@ -49,7 +49,7 @@ args+=(
 	# Required for the buf allow_comment_ignores option to work properly
 	# See https://github.com/bufbuild/rules_buf/issues/64#issuecomment-2125324929
 	"--experimental_proto_descriptor_sets_include_source_info"
-	"--output_groups=rules_lint_human"
+	"--output_groups=rules_lint_machine"
 	"--remote_download_regex='.*AspectRulesLint.*'"
 )
 

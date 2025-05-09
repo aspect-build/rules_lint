@@ -91,6 +91,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
     # `ruff help check` to see available options
     args = ctx.actions.args()
     args.add("check")
+
     # Honor exclusions in pyproject.toml even though we pass explicit list of files
     args.add("--force-exclude")
     args.add_all(srcs)
@@ -178,7 +179,7 @@ def _ruff_aspect_impl(target, ctx):
         ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.out, outputs.human.exit_code, env = color_env)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.machine.out, outputs.machine.exit_code)
+    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.machine.out, outputs.machine.exit_code, {"RUFF_OUTPUT_FORMAT": "sarif"})
 
     return [info]
 
