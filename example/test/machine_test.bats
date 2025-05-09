@@ -78,17 +78,20 @@ function assert_physical_artifact_location_uri() {
     assert_physical_artifact_location_uri "src/README.md"
 }
 
-# @test "should get SARIF output from clang_tidy" {
-#     run_lint clang_tidy hello_cc
-# 	run jq '.runs[].tool.driver.name' bazel-bin/src/cc.AspectRulesLintClangTidy.report
-#     assert_output "clang_tidy"
-# }
+@test "should get SARIF output from clang_tidy" {
+    run_lint clang_tidy hello_cc
+    REPORT_FILE=bazel-bin/src/hello_cc.AspectRulesLintClangTidy.report
+    assert_driver_name "clang_tidy"
+    assert_physical_artifact_location_uri "src/hello.cpp"
+}
 
-# @test "should get SARIF output from buf" {
-#     run_lint buf proto
-#     run jq '.runs[].tool.driver.name' bazel-bin/src/unused.AspectRulesLintBuf.report
-#     assert_output "buf"
-# }
+@test "should get SARIF output from buf" {
+    run_lint buf unused
+    REPORT_FILE=bazel-bin/src/unused.AspectRulesLintBuf.report
+    assert_driver_name "Buf"
+    # FIXME: report doesn't find the files
+    # assert_physical_artifact_location_uri "src/unused.proto"
+}
 
 # @test "should get SARIF output from keep_sorted" {
 #     run_lint keep_sorted keep_sorted
@@ -102,11 +105,13 @@ function assert_physical_artifact_location_uri() {
 #     assert_output "ktlint"
 # }
 
-# @test "should get SARIF output from pmd" {
-#     run_lint pmd foo
-#     run jq '.runs[].tool.driver.name' bazel-bin/src/foo.AspectRulesLintPmd.report
-#     assert_output "pmd"
-# }
+@test "should get SARIF output from pmd" {
+    run_lint pmd foo
+    REPORT_FILE=bazel-bin/src/foo.AspectRulesLintPmd.report
+    assert_driver_name "PMD"
+    # FIXME: report isn't finding any files??
+    # assert_physical_artifact_location_uri "src/Hello.java"
+}
 
 @test "should get SARIF output from flake8" {
     run_lint flake8 unused_import

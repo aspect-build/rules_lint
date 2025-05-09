@@ -28,9 +28,10 @@ pmd = pmd_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintPMD"
+_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, options = []):
     """Run PMD as an action under Bazel.
@@ -100,7 +101,9 @@ def _pmd_aspect_impl(target, ctx):
     # https://github.com/pmd/pmd/blob/master/docs/pages/pmd/userdocs/pmd_report_formats.md
     format_options = ["--format", "textcolor" if ctx.attr._options[LintOptionsInfo].color else "text"]
     pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code, format_options)
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.machine.out, outputs.machine.exit_code)
+    raw_machine_report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, raw_machine_report, outputs.machine.exit_code)
+    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
 def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"]):
@@ -132,6 +135,11 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
             ),
             "_pmd": attr.label(
                 default = binary,
+                executable = True,
+                cfg = "exec",
+            ),
+            "_sarif": attr.label(
+                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
                 executable = True,
                 cfg = "exec",
             ),
