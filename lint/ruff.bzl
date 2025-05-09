@@ -215,7 +215,7 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
                 cfg = "exec",
             ),
             "_sarif": attr.label(
-                default = Label("@aspect_rules_lint//tools/sarif/cmd/sarif"),
+                default = "@aspect_rules_lint//tools/sarif/cmd/sarif",
                 executable = True,
                 cfg = "exec",
             ),

@@ -24,29 +24,36 @@ function run_lint() {
     assert_success
 }
 
+function assert_driver_name() {
+    run jq --raw-output $SARIF_TOOL_DRIVER_NAME_FILTER $REPORT_FILE
+    assert_output "$1"
+}
+
+function assert_physical_artifact_location_uri() {
+    run jq --raw-output $PHYSICAL_ARTIFACT_LOCATION_URI_FILTER $REPORT_FILE
+    assert_output "$1"
+}
+
 @test "should get SARIF output from shellcheck" {
 	run_lint shellcheck hello_shell
     REPORT_FILE=bazel-bin/src/hello_shell.AspectRulesLintShellCheck.report
-	run jq --raw-output $SARIF_TOOL_DRIVER_NAME_FILTER $REPORT_FILE
-    assert_output "ShellCheck"
-    run jq --raw-output $PHYSICAL_ARTIFACT_LOCATION_URI_FILTER $REPORT_FILE
-    assert_output "src/hello.sh"
+    assert_driver_name "ShellCheck"
+    assert_physical_artifact_location_uri "src/hello.sh"
 }
 
 @test "should get SARIF output from ruff" {
     run_lint ruff unused_import
     REPORT_FILE=bazel-bin/src/unused_import.AspectRulesLintRuff.report
-	run jq --raw-output $SARIF_TOOL_DRIVER_NAME_FILTER $REPORT_FILE
-    assert_output "ruff"
-    run jq --raw-output $PHYSICAL_ARTIFACT_LOCATION_URI_FILTER $REPORT_FILE
-    assert_output "src/unused_import.py"
+    assert_driver_name "ruff"
+    assert_physical_artifact_location_uri "src/unused_import.py"
 }
 
-# @test "should get SARIF output from ESLint" {
-#     run_lint eslint ts_typings
-# 	run jq '.runs[].tool.driver.name' bazel-bin/src/ts_typings.AspectRulesLintESLint.report
-#     assert_output "eslint"
-# }
+@test "should get SARIF output from ESLint" {
+    run_lint eslint ts_typings
+    REPORT_FILE=bazel-bin/src/ts_typings.AspectRulesLintESLint.report
+    assert_driver_name "ESLint"
+    assert_physical_artifact_location_uri "src/file.ts"
+}
 
 # @test "should get SARIF output from spotbugs" {
 #     run_lint spotbugs foo
