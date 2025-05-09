@@ -55,23 +55,28 @@ function assert_physical_artifact_location_uri() {
     assert_physical_artifact_location_uri "src/file.ts"
 }
 
+# TODO: spotbugs is not working yet.
+# It doesn't seem to print source locations (perhaps because it only works from bytecode)
+# It's the same problem I solved by starting Error Prone!!
 # @test "should get SARIF output from spotbugs" {
 #     run_lint spotbugs foo
 # 	run jq '.runs[].tool.driver.name' bazel-bin/src/foo.AspectRulesLintSpotbugs.report
 #     assert_output "spotbugs"
 # }
 
-# @test "should get SARIF output from stylelint" {
-#     run_lint stylelint css
-# 	run jq '.runs[].tool.driver.name' bazel-bin/src/css.AspectRulesLintStylelint.report
-#     assert_output "stylelint"
-# }
+@test "should get SARIF output from stylelint" {
+    run_lint stylelint css
+    REPORT_FILE=bazel-bin/src/css.AspectRulesLintStylelint.report
+    assert_driver_name "Stylelint"
+    assert_physical_artifact_location_uri "src/hello.css"
+}
 
-# @test "should get SARIF output from vale" {
-#     run_lint vale md
-# 	run jq '.runs[].tool.driver.name' bazel-bin/src/md.AspectRulesLintVale.report
-#     assert_output "vale"
-# }
+@test "should get SARIF output from vale" {
+    run_lint vale md
+    REPORT_FILE=bazel-bin/src/md.AspectRulesLintVale.report
+    assert_driver_name "Vale"
+    assert_physical_artifact_location_uri "src/README.md"
+}
 
 # @test "should get SARIF output from clang_tidy" {
 #     run_lint clang_tidy hello_cc
@@ -103,8 +108,9 @@ function assert_physical_artifact_location_uri() {
 #     assert_output "pmd"
 # }
 
-# @test "should get SARIF output from flake8" {
-#     run_lint flake8 unused_import
-#     run jq '.runs[].tool.driver.name' bazel-bin/src/unused_import.AspectRulesLintFlake8.report
-#     assert_output "flake8"
-# }
+@test "should get SARIF output from flake8" {
+    run_lint flake8 unused_import
+    REPORT_FILE=bazel-bin/src/unused_import.AspectRulesLintFlake8.report
+    assert_driver_name "Flake8"
+    assert_physical_artifact_location_uri "src/unused_import.py"
+}
