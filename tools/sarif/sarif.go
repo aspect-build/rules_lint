@@ -64,6 +64,12 @@
 	 case "AspectRulesLintPMD":
 		 // TODO: upstream to https://github.com/reviewdog/errorformat/issues/62
 		 fm = []string{`%f:%l:\\t%m`}
+	 case "AspectRulesLintRuff":
+		fm = []string{
+			`%f:%l:%c: %t%n %m`,
+			`%-GFound %n error%.%#`,
+			`%-G[*] %n fixable%.%#`,
+		}
 	 case "AspectRulesLintBuf":
 		 fm = []string{
 			 `--buf-plugin_out: %f:%l:%c:%m`,

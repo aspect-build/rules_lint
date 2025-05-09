@@ -35,7 +35,7 @@ function run_lint() {
     run_lint ruff unused_import
     REPORT_FILE=bazel-bin/src/unused_import.AspectRulesLintRuff.report
 	run jq --raw-output '.runs[].tool.driver.name' $REPORT_FILE
-    assert_output "Ruff"
+    assert_output "ruff"
     run jq --raw-output '.runs[].results | map(.locations | map(.physicalLocation.artifactLocation.uri)) | flatten | unique[]' $REPORT_FILE
     assert_output "src/unused_import.py"
 }
