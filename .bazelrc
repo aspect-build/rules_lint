@@ -8,6 +8,7 @@
 common --check_direct_dependencies=off
 
 # Don't build protoc from the cc_binary, it's slow and spammy when cache miss
+common --incompatible_enable_proto_toolchain_resolution
 common --per_file_copt=external/.*protobuf.*@--PROTOBUF_WAS_NOT_SUPPOSED_TO_BE_BUILT
 common --host_per_file_copt=external/.*protobuf.*@--PROTOBUF_WAS_NOT_SUPPOSED_TO_BE_BUILT
 

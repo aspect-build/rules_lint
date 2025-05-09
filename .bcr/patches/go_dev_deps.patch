@@ -1,0 +1,40 @@
+diff --git a/MODULE.bazel b/MODULE.bazel
+index 0d84006..e47e39a 100644
+--- a/MODULE.bazel
++++ b/MODULE.bazel
+@@ -38,30 +38,30 @@ use_repo(multitool, "multitool")
+ bazel_dep(
+     name = "toolchains_protoc",
+     version = "0.4.1",
+-    # In released versions: dev_dependency = True
++    dev_dependency = True
+ )
+ bazel_dep(
+     name = "gazelle",
+     version = "0.43.0",
+-    # In released versions: dev_dependency = True
++    dev_dependency = True
+ )
+ bazel_dep(
+     name = "rules_go",
+     version = "0.54.0",
+-    # In released versions: dev_dependency = True
++    dev_dependency = True
+ )
+ 
+ go_sdk = use_extension(
+     "@rules_go//go:extensions.bzl",
+     "go_sdk",
+-    # In released versions: dev_dependency = True
++    dev_dependency = True
+ )
+ go_sdk.download(version = "1.23.9")
+ 
+ go_deps = use_extension(
+     "@gazelle//:extensions.bzl",
+     "go_deps",
+-    # In released versions: dev_dependency = True
++    dev_dependency = True
+ )
+ go_deps.from_file(go_mod = "//:go.mod")
+ use_repo(
