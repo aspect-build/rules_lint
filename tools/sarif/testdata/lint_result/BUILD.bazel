@@ -1,5 +1,5 @@
 filegroup(
     name = "lint_result",
     srcs = glob(["*.txt"]),
-    visibility = ["//lint/sarif:__pkg__"],
+    visibility = ["//tools/sarif:__pkg__"],
 )

@@ -21,6 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # See https://github.com/bazel-contrib/publish-to-bcr#including-patches
+      - name: Verify bcr patches
+        run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
       - name: Setup bats
         uses: mig4/setup-bats@v1
         with:

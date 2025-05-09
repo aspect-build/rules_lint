@@ -5,7 +5,7 @@ go_library(
     srcs = [
         "sarif.go",
     ],
-    importpath = "github.com/aspect-build/rules_lint/lint/sarif",
+    importpath = "github.com/aspect-build/rules_lint/tools/sarif",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_reviewdog_errorformat//:errorformat",
@@ -22,7 +22,7 @@ go_test(
         "statics_test.go",
     ],
     embed = [":sarif"],
-    embedsrcs = ["//lint/sarif/testdata/lint_result"],  # keep
+    embedsrcs = ["//tools/sarif/testdata/lint_result"],  # keep
     deps = [
         "@com_github_onsi_gomega//:gomega",
     ],
