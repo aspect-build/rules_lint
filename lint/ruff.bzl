@@ -52,10 +52,11 @@ ruff = lint_ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
+_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}):
     """Run ruff as an action under Bazel.
@@ -210,6 +211,11 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
             "_ruff": attr.label(
                 default = binary,
                 allow_files = True,
+                executable = True,
+                cfg = "exec",
+            ),
+            "_sarif": attr.label(
+                default = Label("@aspect_rules_lint//tools/sarif/cmd/sarif"),
                 executable = True,
                 cfg = "exec",
             ),

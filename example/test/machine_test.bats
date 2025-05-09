@@ -5,6 +5,8 @@ bats_load_library "bats-assert"
 
 # This variable will be set by each test
 REPORT_FILE=""
+SARIF_TOOL_DRIVER_NAME_FILTER='.runs[].tool.driver.name' 
+PHYSICAL_ARTIFACT_LOCATION_URI_FILTER='.runs[].results | map(.locations | map(.physicalLocation.artifactLocation.uri)) | flatten | unique[]'
 
 teardown() {
   if [[ "$status" -ne 0 && -n "$REPORT_FILE" && -f "$REPORT_FILE" ]]; then
@@ -25,18 +27,18 @@ function run_lint() {
 @test "should get SARIF output from shellcheck" {
 	run_lint shellcheck hello_shell
     REPORT_FILE=bazel-bin/src/hello_shell.AspectRulesLintShellCheck.report
-	run jq --raw-output '.runs[].tool.driver.name' $REPORT_FILE
+	run jq --raw-output $SARIF_TOOL_DRIVER_NAME_FILTER $REPORT_FILE
     assert_output "ShellCheck"
-    run jq --raw-output '.runs[].results | map(.locations | map(.physicalLocation.artifactLocation.uri)) | flatten | unique[]' $REPORT_FILE
+    run jq --raw-output $PHYSICAL_ARTIFACT_LOCATION_URI_FILTER $REPORT_FILE
     assert_output "src/hello.sh"
 }
 
 @test "should get SARIF output from ruff" {
     run_lint ruff unused_import
     REPORT_FILE=bazel-bin/src/unused_import.AspectRulesLintRuff.report
-	run jq --raw-output '.runs[].tool.driver.name' $REPORT_FILE
+	run jq --raw-output $SARIF_TOOL_DRIVER_NAME_FILTER $REPORT_FILE
     assert_output "ruff"
-    run jq --raw-output '.runs[].results | map(.locations | map(.physicalLocation.artifactLocation.uri)) | flatten | unique[]' $REPORT_FILE
+    run jq --raw-output $PHYSICAL_ARTIFACT_LOCATION_URI_FILTER $REPORT_FILE
     assert_output "src/unused_import.py"
 }
 
