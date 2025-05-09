@@ -40,7 +40,7 @@
 	return strings.Replace(mnemonic, "AspectRulesLint", "", 1)
 }
 
- func toSarifJsonString(label string, mnemonic string, report string) (sarifJsonString string, err error) {
+ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonString string, err error) {
 	 regex := regexp.MustCompile(`^{\s+"\$schema":.+sarif`)
 	 if regex.Match([]byte(report)) {
 		 return report, nil

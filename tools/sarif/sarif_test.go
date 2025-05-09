@@ -33,7 +33,7 @@
 			 io.Copy(stdOut, stdOutReader)
 		 }()
  
-		 sarifJsonString, _ := toSarifJsonString("//speller/announce:announce", "AspectRulesLintClangTidy", clang_tidy_output)
+		 sarifJsonString, _ := ToSarifJsonString("//speller/announce:announce", "AspectRulesLintClangTidy", clang_tidy_output)
 		 sarifJson, _ := toSarifJson(sarifJsonString)
  
 		 stdOutWriter.Close()

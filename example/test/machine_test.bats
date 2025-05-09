@@ -22,10 +22,10 @@ function run_lint() {
 
 @test "should get SARIF output from shellcheck" {
 	run_lint shellcheck hello_shell
-	run jq --raw-output '.runs[].tool.driver.name' bazel-bin/src/hello_shell.AspectRulesLintShellcheck.report
+	run jq --raw-output '.runs[].tool.driver.name' bazel-bin/src/hello_shell.AspectRulesLintShellCheck.report
     if ! assert_output "shellcheck"; then
         echo "----- actual report content -----"
-        cat bazel-bin/src/hello_shell.AspectRulesLintShellcheck.report
+        cat bazel-bin/src/hello_shell.AspectRulesLintShellCheck.report
         echo "---------------------"
         false  # Mark the test as failed
     fi
