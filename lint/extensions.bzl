@@ -1,5 +1,7 @@
 "Module extensions for use with bzlmod"
 
+# buildifier: disable=bzl-visibility
+load("@aspect_bazel_lib//lib/private:extension_utils.bzl", "extension_utils")
 load("@bazel_features//:features.bzl", "bazel_features")
 load(
     "//tools/toolchains:register.bzl",
@@ -8,9 +10,13 @@ load(
 )
 
 def _toolchains_extension_impl(mctx):
-    for mod in mctx.modules:
-        for sarif_parser in mod.tags.sarif_parser:
-            register_sarif_parser_toolchains(sarif_parser.name, register = False)
+    extension_utils.toolchain_repos_bfs(
+        mctx = mctx,
+        get_tag_fn = lambda tags: tags.sarif_parser,
+        toolchain_name = "sarif_parser",
+        toolchain_repos_fn = lambda name, version: register_sarif_parser_toolchains(name = name, register = False),
+        get_version_fn = lambda attr: None,
+    )
 
     if bazel_features.external_deps.extension_metadata_has_reproducible:
         return mctx.extension_metadata(reproducible = True)

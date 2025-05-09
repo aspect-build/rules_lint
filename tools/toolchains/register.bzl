@@ -21,7 +21,7 @@ def register_sarif_parser_toolchains(name = DEFAULT_SARIF_PARSER_REPOSITORY, reg
             toolchain_type = "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type",
             toolchain_rule_load_from = "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain.bzl",
             toolchain_rule = "sarif_parser_toolchain",
-            binary = "@aspect_rules_lint//tools/sarif:sarif",
+            binary = "@aspect_rules_lint//tools/sarif/cmd/sarif",
         )
         if register:
             native.register_toolchains("@%s_toolchains//:toolchain" % name)
