@@ -161,3 +161,27 @@ def noop_lint_action(ctx, outputs):
         outputs = outs,
         command = " && ".join(commands),
     )
+
+def parse_to_sarif_action(ctx, mnemonic, raw_machine_report, sarif_out):
+    """Translate a machine-readable report to SARIF format by running our Go tool sarif.go.
+
+    Args:
+        ctx: Bazel Rule or Aspect evaluation context
+        mnemonic: the mnemonic identifier for the linter being used
+        raw_machine_report: the raw machine-readable report
+        sarif_out: the SARIF output file
+    """
+    args = ctx.actions.args()
+    args.add("-in", raw_machine_report.path)
+    args.add("-out", sarif_out.path)
+    args.add("-label", ctx.label.name)
+    args.add("-mnemonic", mnemonic)
+
+    ctx.actions.run(
+        inputs = [raw_machine_report],
+        outputs = [sarif_out],
+        arguments = [args],
+        mnemonic = "AspectRulesLintParseToSarif",
+        progress_message = "Parsing machine-readable report to SARIF for %{label}",
+        executable = ctx.executable._sarif,
+    )
