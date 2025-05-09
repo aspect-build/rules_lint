@@ -1,40 +1,8 @@
-diff --git a/MODULE.bazel b/MODULE.bazel
-index 0d84006..e47e39a 100644
 --- a/MODULE.bazel
 +++ b/MODULE.bazel
-@@ -38,30 +38,30 @@ use_repo(multitool, "multitool")
- bazel_dep(
-     name = "toolchains_protoc",
-     version = "0.4.1",
--    # In released versions: dev_dependency = True
-+    dev_dependency = True
- )
- bazel_dep(
-     name = "gazelle",
-     version = "0.43.0",
--    # In released versions: dev_dependency = True
-+    dev_dependency = True
- )
- bazel_dep(
-     name = "rules_go",
-     version = "0.54.0",
--    # In released versions: dev_dependency = True
-+    dev_dependency = True
- )
+@@ -32,4 +32,4 @@ multitool.hub(lockfile = "//format:multitool.lock.json")
  
- go_sdk = use_extension(
-     "@rules_go//go:extensions.bzl",
-     "go_sdk",
--    # In released versions: dev_dependency = True
-+    dev_dependency = True
- )
- go_sdk.download(version = "1.23.9")
- 
- go_deps = use_extension(
-     "@gazelle//:extensions.bzl",
-     "go_deps",
--    # In released versions: dev_dependency = True
-+    dev_dependency = True
- )
- go_deps.from_file(go_mod = "//:go.mod")
- use_repo(
+ # NB: this is a pre-release dependency only.
+ # This line is commented out when publishing to BCR, since releases use pre-built tools
+-include("//lint/sarif:go.MODULE.bazel")
++# include("//lint/sarif:go.MODULE.bazel")
