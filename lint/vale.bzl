@@ -64,12 +64,11 @@ vale = vale_aspect(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "output_files", "parse_to_sarif_action", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "output_files", "parse_to_sarif_action", "should_visit")
 load(":vale_library.bzl", "fetch_styles")
 load(":vale_versions.bzl", "VALE_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintVale"
-_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None, output = "CLI", env = {}):
     """Run Vale as an action under Bazel.
@@ -139,7 +138,7 @@ def _vale_aspect_impl(target, ctx):
         if not styles.is_directory:
             fail("Styles should be a directory containing installed styles")
     vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.out, outputs.human.exit_code, env = color_env)
-    raw_machine_report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, raw_machine_report, outputs.machine.exit_code, output = "line")
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]

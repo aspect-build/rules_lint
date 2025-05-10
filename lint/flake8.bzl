@@ -26,10 +26,9 @@ flake8 = lint_flake8_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintFlake8"
-_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
     """Run flake8 as an action under Bazel.
@@ -89,7 +88,7 @@ def _flake8_aspect_impl(target, ctx):
 
     color_options = ["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []
     flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options)
-    raw_machine_report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]

@@ -14,10 +14,9 @@ buf = buf_lint_aspect(
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "output_files", "parse_to_sarif_action", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintBuf"
-_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 def _short_path(file, _):
     return file.path
@@ -96,7 +95,7 @@ def _buf_lint_aspect_impl(target, ctx):
 
     # TODO(alex): there should be a reason to run the buf action again rather than just copy the files
     buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code)
-    raw_machine_report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     buf_lint_action(ctx, buf, protoc, target, raw_machine_report, outputs.machine.exit_code)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]

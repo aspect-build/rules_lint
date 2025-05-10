@@ -39,10 +39,9 @@ clang_tidy = lint_clang_tidy_aspect(
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
-_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 _DISABLED_FEATURES = [
     "layering_check",
 ]
@@ -405,7 +404,7 @@ def _clang_tidy_aspect_impl(target, ctx):
         clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    raw_machine_report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]

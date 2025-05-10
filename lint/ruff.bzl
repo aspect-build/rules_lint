@@ -52,11 +52,10 @@ ruff = lint_ruff_aspect(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
-_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}):
     """Run ruff as an action under Bazel.
@@ -180,7 +179,7 @@ def _ruff_aspect_impl(target, ctx):
         ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.out, outputs.human.exit_code, env = color_env)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    raw_machine_report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, raw_machine_report, outputs.machine.exit_code)
 
     # Ideally we'd just use {"RUFF_OUTPUT_FORMAT": "sarif"} however it prints absolute paths; see https://github.com/astral-sh/ruff/issues/14985

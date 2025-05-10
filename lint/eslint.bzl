@@ -55,10 +55,9 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintESLint"
-_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 def _gather_inputs(ctx, srcs, files):
     inputs = copy_files_to_bin_actions(ctx, srcs)
@@ -225,7 +224,7 @@ def _eslint_aspect_impl(target, ctx):
         eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, format = ctx.attr._stylish_formatter, env = color_env)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    raw_machine_report = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     eslint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, format = ctx.attr._compact_formatter)
 
     # We could probably use https://www.npmjs.com/package/@microsoft/eslint-formatter-sarif instead.

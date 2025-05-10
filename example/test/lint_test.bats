@@ -64,7 +64,7 @@ EOF
 	run $BATS_TEST_DIRNAME/../lint.sh --fix --dry-run //src:all
 	assert_success
 
-	# Check that we created a 'patch -p1' for  t file that fixes the ESLint violation
+	# Check that we created a 'patch -p1' format file that fixes the ESLint violation
 	run cat bazel-bin/src/ts.AspectRulesLintESLint.patch
 	assert_success
 	echo <<"EOF" | assert_output --partial
