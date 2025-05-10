@@ -10,6 +10,9 @@ PREFIX="rules_lint-${TAG:1}"
 ARCHIVE="rules_lint-$TAG.tar.gz"
 ARCHIVE_TMP=$(mktemp)
 
+# NB: configuration for 'git archive' is in /.gitattributes
+git archive --format=tar --prefix=${PREFIX}/ ${TAG} >$ARCHIVE_TMP
+
 ############
 # Patch up the archive to have integrity hashes for built binaries that we downloaded in the GHA workflow.
 # Now that we've run `git archive` we are free to pollute the working directory.
