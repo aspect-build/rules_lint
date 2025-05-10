@@ -64,7 +64,7 @@ vale = vale_aspect(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "output_files", "parse_to_sarif_action", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "output_files", "parse_to_sarif_action", "should_visit")
 load(":vale_library.bzl", "fetch_styles")
 load(":vale_versions.bzl", "VALE_VERSIONS")
 
@@ -178,7 +178,7 @@ def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule
                 default = rule_kinds,
             ),
         },
-        toolchains = ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
+        toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
     )
 
 def fetch_vale(tag = VALE_VERSIONS.keys()[0]):

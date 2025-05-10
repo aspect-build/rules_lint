@@ -283,10 +283,6 @@ rules_rust_dependencies()
 
 rust_register_toolchains()
 
-load("@aspect_rules_lint//tools/toolchains:register.bzl", "register_sarif_parser_toolchains")
-
-register_sarif_parser_toolchains(name = "sarif_parser")
-
 #---SNIP--- Below here is re-used in the workspace snippet published on releases
 
 load(

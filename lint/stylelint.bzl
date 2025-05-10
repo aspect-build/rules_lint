@@ -39,7 +39,7 @@ Finally, register the aspect with your linting workflow, such as in `.aspect/cli
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "filter_srcs", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintStylelint"
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
@@ -244,5 +244,5 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
                 default = rule_kinds,
             ),
         },
-        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
+        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
     )

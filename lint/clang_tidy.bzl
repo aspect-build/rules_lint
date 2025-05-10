@@ -39,7 +39,7 @@ clang_tidy = lint_clang_tidy_aspect(
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
@@ -486,7 +486,7 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
             "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
         },
         toolchains = [
-            "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type",
+            OPTIONAL_SARIF_PARSER_TOOLCHAIN,
             "@bazel_tools//tools/cpp:toolchain_type",
         ],
         fragments = ["cpp"],

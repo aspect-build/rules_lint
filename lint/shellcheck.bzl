@@ -14,7 +14,7 @@ shellcheck = shellcheck_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintShellCheck"
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
@@ -126,5 +126,5 @@ def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_librar
                 default = rule_kinds,
             ),
         },
-        toolchains = ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
+        toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
     )

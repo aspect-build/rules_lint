@@ -26,7 +26,7 @@ flake8 = lint_flake8_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintFlake8"
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
@@ -132,5 +132,5 @@ def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"])
                 default = rule_kinds,
             ),
         },
-        toolchains = ["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"],
+        toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
     )

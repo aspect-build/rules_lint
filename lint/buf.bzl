@@ -14,7 +14,7 @@ buf = buf_lint_aspect(
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "output_files", "parse_to_sarif_action", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintBuf"
 _OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
@@ -130,7 +130,7 @@ def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
         },
         toolchains = [
             toolchain,
-            "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type",
+            OPTIONAL_SARIF_PARSER_TOOLCHAIN,
             "@rules_proto//proto:toolchain_type",
         ],
     )
