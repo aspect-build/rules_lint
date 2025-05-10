@@ -39,7 +39,7 @@ clang_tidy = lint_clang_tidy_aspect(
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "noop_lint_action", "output_files", "patch_and_output_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 _DISABLED_FEATURES = [
@@ -386,7 +386,8 @@ def _clang_tidy_aspect_impl(target, ctx):
     if hasattr(ctx.rule.attr, "implementation_deps"):
         compilation_context = cc_common.merge_compilation_contexts(
             compilation_contexts = [compilation_context] +
-                [implementation_dep[CcInfo].compilation_context for implementation_dep in ctx.rule.attr.implementation_deps])
+                                   [implementation_dep[CcInfo].compilation_context for implementation_dep in ctx.rule.attr.implementation_deps],
+        )
 
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
@@ -403,7 +404,9 @@ def _clang_tidy_aspect_impl(target, ctx):
         clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code)
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code)
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code)
+    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
 def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):
@@ -481,6 +484,9 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
             ),
             "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
         },
-        toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+        toolchains = [
+            OPTIONAL_SARIF_PARSER_TOOLCHAIN,
+            "@bazel_tools//tools/cpp:toolchain_type",
+        ],
         fragments = ["cpp"],
     )

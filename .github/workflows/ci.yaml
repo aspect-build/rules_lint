@@ -17,6 +17,12 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
+  bcr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify bcr patches
+        run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
   integration-test:
     runs-on: ubuntu-latest
     steps:

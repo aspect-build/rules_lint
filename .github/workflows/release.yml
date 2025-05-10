@@ -26,11 +26,34 @@ permissions:
   contents: write # Needed to create release
 
 jobs:
+  build:
+    # Go cross-compilation works from linux -> any platform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Go Binaries
+        env:
+          # NB: this variable is read by tools/release/copy_release_artifacts.sh
+          # and must match the path in release_prep.sh under RELEASED_BINARY_INTEGRITY
+          DEST: binaries
+        run: |
+          rm -rf ${{ env.DEST }}
+          mkdir -p ${{ env.DEST }}
+          bazel --bazelrc=.github/workflows/ci.bazelrc \
+            run --config=release //tools/release:copy_release_artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: go-binaries
+          path: binaries/
+          retention-days: 1
+
   release:
-    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.1.0 # 2025-03-17
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.2.2
     with:
       prerelease: false
-      release_files: rules_lint-*.tar.gz
+      release_files: |
+        go-binaries/*
+        rules_lint-*.tar.gz
       tag_name: ${{ inputs.tag_name || github.ref_name }}
   publish:
     needs: release

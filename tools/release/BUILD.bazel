@@ -1,0 +1,15 @@
+load(":release.bzl", "multi_platform_go_binaries")
+
+multi_platform_go_binaries(
+    name = "sarif_parser",
+    embed = ["//tools/sarif/cmd/sarif:sarif_lib"],
+    tags = ["manual"],
+)
+
+sh_binary(
+    name = "copy_release_artifacts",
+    srcs = ["copy_release_artifacts.sh"],
+    args = ["$(rlocationpaths //tools/release:sarif_parser)"],
+    data = ["//tools/release:sarif_parser"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)

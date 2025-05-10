@@ -69,6 +69,10 @@ Run `cd docs; bazel run update` to create the Markdown file.
 
 Also add your new linter to the README.
 
-## Step 4: Send the PR!
+## Step 4: tests
+
+Add integration tests under the example/test folder. It should cover both the human-readable and machine-readable output groups.
+
+## Step 5: Send the PR!
 
 We'd love to make your linter available to everyone.
