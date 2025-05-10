@@ -16,15 +16,16 @@ def register_sarif_parser_toolchains(name = DEFAULT_SARIF_PARSER_REPOSITORY, reg
             Should be True for WORKSPACE users, but false when used under bzlmod extension
     """
     if IS_PRERELEASE:
-        source_toolchains_repo(
-            name = "%s_toolchains" % name,
-            toolchain_type = "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type",
-            toolchain_rule_load_from = "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain.bzl",
-            toolchain_rule = "sarif_parser_toolchain",
-            binary = "@aspect_rules_lint//tools/sarif/cmd/sarif",
-        )
-        if register:
-            native.register_toolchains("@%s_toolchains//:toolchain" % name)
+        # Bzlmod users only: build the sarif_parser tools from source when using non-release version
+        # For WORKSPACE it's too difficult to setup all our transitive go_repository deps
+        if not register:
+            source_toolchains_repo(
+                name = "%s_toolchains" % name,
+                toolchain_type = "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type",
+                toolchain_rule_load_from = "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain.bzl",
+                toolchain_rule = "sarif_parser_toolchain",
+                binary = "@aspect_rules_lint//tools/sarif/cmd/sarif",
+            )
         return
 
     for [platform, _] in SARIF_PARSER_PLATFORMS.items():
