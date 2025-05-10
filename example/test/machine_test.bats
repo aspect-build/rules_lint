@@ -78,11 +78,10 @@ assert_physical_artifact_location_uri() {
 }
 
 @test "should get SARIF output from buf" {
-    run_lint buf unused
-    REPORT_FILE=bazel-bin/src/unused.AspectRulesLintBuf.report
+    run_lint buf foo_proto
+    REPORT_FILE=bazel-bin/src/foo_proto.AspectRulesLintBuf.report
     assert_driver_name "Buf"
-    # FIXME: report doesn't find the files
-    # assert_physical_artifact_location_uri "src/unused.proto"
+    assert_physical_artifact_location_uri "src/file.proto"
 }
 
 @test "should get SARIF output from pmd" {

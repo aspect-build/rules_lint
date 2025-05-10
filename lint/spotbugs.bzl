@@ -133,6 +133,7 @@ def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "
 def fetch_spotbugs():
     http_archive(
         name = "spotbugs",
+        integrity = "sha256-Z83FLM6xfq45T4/DZg8hZZzzVJCPgY5NH0Wmk1wuRCU=",
         urls = ["https://github.com/spotbugs/spotbugs/releases/download/4.8.6/spotbugs-4.8.6.zip"],
         strip_prefix = "spotbugs-4.8.6",
         build_file_content = """
