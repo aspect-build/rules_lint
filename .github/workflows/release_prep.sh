@@ -19,7 +19,7 @@ tar --file $ARCHIVE_TMP --delete ${PREFIX}/tools/integrity.bzl
 
 mkdir -p ${PREFIX}/tools
 cat >${PREFIX}/tools/integrity.bzl <<EOF
-"Generated during release by release_prep.sh, using integrity.jq"
+"Generated during release by release_prep.sh"
 
 RELEASED_BINARY_INTEGRITY = $(
   jq \
