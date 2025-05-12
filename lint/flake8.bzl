@@ -26,7 +26,7 @@ flake8 = lint_flake8_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintFlake8"
 
@@ -88,7 +88,9 @@ def _flake8_aspect_impl(target, ctx):
 
     color_options = ["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []
     flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options)
-    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.machine.out, outputs.machine.exit_code)
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code)
+    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
 def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"]):
@@ -129,4 +131,5 @@ def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"])
                 default = rule_kinds,
             ),
         },
+        toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
     )

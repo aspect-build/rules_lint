@@ -8,7 +8,37 @@ TAG=$1
 # The prefix is chosen to match what GitHub generates for source archives
 PREFIX="rules_lint-${TAG:1}"
 ARCHIVE="rules_lint-$TAG.tar.gz"
-git archive --format=tar --prefix=${PREFIX}/ ${TAG} | gzip > $ARCHIVE
+ARCHIVE_TMP=$(mktemp)
+
+# NB: configuration for 'git archive' is in /.gitattributes
+git archive --format=tar --prefix=${PREFIX}/ ${TAG} >$ARCHIVE_TMP
+
+############
+# Patch up the archive to have integrity hashes for built binaries that we downloaded in the GHA workflow.
+# Now that we've run `git archive` we are free to pollute the working directory.
+
+# Delete the placeholder file
+tar --file $ARCHIVE_TMP --delete ${PREFIX}/tools/integrity.bzl
+
+mkdir -p ${PREFIX}/tools
+cat >${PREFIX}/tools/integrity.bzl <<EOF
+"Generated during release by release_prep.sh"
+
+RELEASED_BINARY_INTEGRITY = $(
+  jq \
+    --from-file .github/workflows/integrity.jq \
+    --slurp \
+    --raw-input go-binaries/*.sha256
+)
+EOF
+
+# Append that generated file back into the archive
+tar --file $ARCHIVE_TMP --append ${PREFIX}/tools/integrity.bzl
+
+# END patch up the archive
+############
+
+gzip <$ARCHIVE_TMP >$ARCHIVE
 SHA=$(shasum -a 256 $ARCHIVE | awk '{print $1}')
 
 cat << EOF

@@ -14,10 +14,9 @@ shellcheck = shellcheck_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintShellCheck"
-_OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
 def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
     """Run shellcheck as an action under Bazel.
@@ -85,11 +84,17 @@ def _shellcheck_aspect_impl(target, ctx):
     # shellcheck does not have a --fix mode that applies fixes for some violations while reporting others.
     # So we must run an action to generate the report separately from an action that writes the human-readable report.
     if hasattr(outputs, "patch"):
-        discard_exit_code = ctx.actions.declare_file(_OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
+        discard_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
         shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"])
 
     shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options + config_options)
-    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.machine.out, outputs.machine.exit_code, config_options)
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, config_options)
+
+    # Shellcheck does not have a SARIF output format built-in.
+    # We could use https://crates.io/crates/shellcheck-sarif but don't want to introduce a Rust dependency.
+    # So we use our Go tool sarif.go to translate the raw machine-readable report to SARIF.
+    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     return [info]
 
@@ -120,4 +125,5 @@ def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_librar
                 default = rule_kinds,
             ),
         },
+        toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
     )

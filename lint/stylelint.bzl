@@ -39,7 +39,7 @@ Finally, register the aspect with your linting workflow, such as in `.aspect/cli
 
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintStylelint"
 
@@ -74,7 +74,6 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
         ctx: an action context OR aspect context
         executable: struct with an _stylelint field
         srcs: list of file objects to lint
-        config: js_library representing the config file (and its dependencies)
         stderr: output file containing the stderr or --output-file of stylelint
         exit_code: output file containing the exit code of stylelint.
             If None, then fail the build when stylelint exits non-zero.
@@ -128,7 +127,6 @@ def stylelint_fix(ctx, executable, srcs, patch, stderr, exit_code, env = {}, opt
         ctx: an action context OR aspect context
         executable: struct with a _stylelint field
         srcs: list of file objects to lint
-        config: js_library representing the config file (and its dependencies)
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
         stderr: output file containing the stderr or --output-file of stylelint
         exit_code: output file containing the exit code of stylelint
@@ -187,8 +185,13 @@ def _stylelint_aspect_impl(target, ctx):
     else:
         stylelint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, options = color_options)
 
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    stylelint_action(ctx, ctx.executable, files_to_lint, outputs.machine.out, outputs.machine.exit_code, format = ctx.attr._compact_formatter)
+    stylelint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, format = ctx.attr._compact_formatter)
+
+    # We could probably use https://www.npmjs.com/package/stylelint-sarif-formatter instead.
+    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     return [info]
 
@@ -240,5 +243,5 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
                 default = rule_kinds,
             ),
         },
-        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS,
+        toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
     )

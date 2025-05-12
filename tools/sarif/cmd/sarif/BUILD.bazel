@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "sarif_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/aspect-build/rules_lint/tools/sarif/cmd/sarif",
+    visibility = ["//visibility:public"],
+    deps = ["//tools/sarif"],
+)
+
+go_binary(
+    name = "sarif",
+    embed = [":sarif_lib"],
+    visibility = ["//visibility:public"],
+)
