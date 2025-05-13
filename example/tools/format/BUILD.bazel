@@ -126,8 +126,8 @@ format_test(
 format_test(
     name = "format_js_test",
     srcs = [
-        "(special_char)/[square]/hello.ts",
         "(special_char)/[square]/hello.md",
+        "(special_char)/[square]/hello.ts",
     ],
     javascript = ":prettier",
     markdown = ":prettier",
