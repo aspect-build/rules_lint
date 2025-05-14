@@ -1,5 +1,5 @@
-docs/*.md          linguist-generated=true
-docs/linting.md    linguist-generated=false
+docs/*.md linguist-generated=true
+docs/linting.md linguist-generated=false
 docs/formatting.md linguist-generated=false
 
 #################################
@@ -8,5 +8,4 @@ docs/formatting.md linguist-generated=false
 #################################
 
 # Substitution for the _VERSION_PRIVATE placeholder
-MODULE.bazel      export-subst
 tools/version.bzl export-subst
