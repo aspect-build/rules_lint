@@ -39,11 +39,8 @@ register_toolchains("@sarif_parser_toolchains//:all")
 ####### Dev dependencies ########
 
 # To allow /tools to be built from source
-# NB: this is stamped by git archive, see .gitattributes
-_VERSION_PRIVATE = "$Format:%(describe:tags=true)$"
-
-# If the version is like v1.2.3 but NOT like v2.0.3-7-g57bfe2c1, then there are pre-built binaries
-IS_RELEASE = _VERSION_PRIVATE.startswith("v") and _VERSION_PRIVATE.find("g") < 0
+# NOTE: when publishing to BCR, we patch this to be True, as we publish pre-built binaries with our releases.
+IS_RELEASE = False
 
 bazel_dep(
     name = "toolchains_protoc",
