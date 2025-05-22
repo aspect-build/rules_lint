@@ -67,7 +67,7 @@ lint:
 
 If you don't use [Aspect CLI], you can use vanilla Bazel with some wrapper like a shell script that runs the linter aspects over the requested targets.
 
-See the `example/lint.sh` file as an example, and pay attention to the comments at the top about fitting it into your repo.
+See the [example/lint.sh](/example/lint.sh) file as an example, and pay attention to the comments at the top about fitting it into your repo.
 
 [![asciicast](https://asciinema.org/a/gUUuQTCGIu85YMl6zz2GJIgD8.svg)](https://asciinema.org/a/gUUuQTCGIu85YMl6zz2GJIgD8)
 
@@ -78,11 +78,16 @@ This is the same flag many linters support.
 
 ### 4. Errors during `bazel build`
 
-Add `--@aspect_rules_lint//lint:fail_on_violation` to the command-line or to your `.bazelrc` file
-to cause all linter aspects to honor the exit code of the lint tool.
+Add at least the following to the command-line or to your `.bazelrc` file to cause all linter aspects to honor the exit code of the lint tool:
+
+```
+--aspects=//tools/lint:linters.bzl%eslint  # replace with your linter
+--output_groups=rules_lint_human
+--@aspect_rules_lint//lint:fail_on_violation
+```
 
 This makes the build fail when any lint violations are present.
-You may wish to use the `--keep_going` flag to continue linting even after the first failure.
+You may wish to use the `--keep_going` flag to continue linting even after the first failure. See [example/lint.sh](/example/lint.sh) for more available flags.
 
 ### 5. Failures during `bazel test`
 
