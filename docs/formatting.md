@@ -46,6 +46,8 @@ format_multirun(
 )
 ```
 
+File discovery for each language is based on file extension - files with no extension will not be formatted.
+
 ## Usage
 
 ### Configuring formatters
