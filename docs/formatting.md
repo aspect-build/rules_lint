@@ -47,6 +47,7 @@ format_multirun(
 ```
 
 File discovery for each language is based on file extension - files with no extension will not be formatted.
+Shebang-based discovery might be added in future, see [here](https://github.com/aspect-build/rules_lint/issues/549).
 
 ## Usage
 
