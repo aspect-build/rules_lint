@@ -2,8 +2,8 @@
 
 Produce a multi-formatter that aggregates formatter tools.
 
-Some formatter tools may be installed by [multitool].
-These are noted in the API docs below.
+Some formatter tools are built-in to rules_lint and may be installed by [multitool].
+These are noted in the attributes for each language in 'languages' below.
 
 Note: Under `--enable_bzlmod`, rules_lint installs multitool automatically.
 `WORKSPACE` users must install it manually; see the snippet on the releases page.
@@ -59,7 +59,7 @@ Some languages have dialects:
 | <a id="languages-kotlin"></a>kotlin |  a `ktfmt` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-markdown"></a>markdown |  a `prettier` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-protocol_buffer"></a>protocol_buffer |  a `buf` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
-| <a id="languages-python"></a>python |  a `ruff` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
+| <a id="languages-python"></a>python |  a `ruff` binary, or any other tool that has a matching command-line interface. Use `@aspect_rules_lint//format:ruff` to choose the built-in tool.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-rust"></a>rust |  a `rustfmt` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-scala"></a>scala |  a `scalafmt` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-shell"></a>shell |  a `shfmt` binary, or any other tool that has a matching command-line interface. Use `@aspect_rules_lint//format:shfmt` to choose the built-in tool.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |

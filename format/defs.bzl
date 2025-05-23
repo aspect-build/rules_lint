@@ -1,7 +1,7 @@
 """Produce a multi-formatter that aggregates formatter tools.
 
-Some formatter tools may be installed by [multitool].
-These are noted in the API docs below.
+Some formatter tools are built-in to rules_lint and may be installed by [multitool].
+These are noted in the attributes for each language in 'languages' below.
 
 Note: Under `--enable_bzlmod`, rules_lint installs multitool automatically.
 `WORKSPACE` users must install it manually; see the snippet on the releases page.
