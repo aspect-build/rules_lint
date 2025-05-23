@@ -25,15 +25,15 @@ report_test(
 )
 
 machine_ruff_report(
-    name = "machine_ruff_filegroup_report",
-    src = "//src:unused_import_filegroup",
+    name = "machine_ruff_pyi_report",
+    src = "//src:unused_import_pyi",
 )
 
 report_test(
-    name = "ruff_filegroup_machine_output_test",
+    name = "ruff_pyi_machine_output_test",
     expected_tool = "Ruff",
-    expected_uri = "src/unused_import.py",
-    report = "machine_ruff_filegroup_report",
+    expected_uri = "src/unused_import.pyi",
+    report = "machine_ruff_pyi_report",
 )
 
 machine_shellcheck_report(

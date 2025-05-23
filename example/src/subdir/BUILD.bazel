@@ -9,8 +9,8 @@ py_library(
 )
 
 filegroup(
-    name = "unused_import_filegroup",
-    srcs = ["unused_import.py"],
+    name = "unused_import_pyi",
+    srcs = ["unused_import.pyi"],
     tags = ["python"],
 )
 

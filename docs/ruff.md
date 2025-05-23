@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-API for declaring a Ruff lint aspect that visits py_library rules and filegroups tagged 'python'.
+API for declaring a Ruff lint aspect that visits py_library rules.
 
 Typical usage:
 
@@ -89,7 +89,7 @@ Attrs:
     binary: a ruff executable
     configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
     rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
-    filegroup_tags: filegroups tagged with these tags will be visited by the aspect
+    filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
 
 **PARAMETERS**
 

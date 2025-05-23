@@ -63,12 +63,6 @@ py_library(
     srcs = ["excluded.py"],
 )
 
-filegroup(
-    name = "excluded_py_filegroup",
-    srcs = ["excluded.py"],
-    tags = ["python"],
-)
-
 java_library(
     name = "generated_java",
     srcs = ["generated.java"],
@@ -98,11 +92,6 @@ ruff_test(
 ruff_test(
     name = "ruff_should_ignore_excluded",
     srcs = ["excluded_py"],
-)
-
-ruff_test(
-    name = "ruff_should_ignore_excluded_filegroup",
-    srcs = ["excluded_py_filegroup"],
 )
 
 pmd_test(

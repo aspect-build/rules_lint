@@ -1,4 +1,4 @@
-"""API for declaring a Ruff lint aspect that visits py_library rules and filegroups tagged 'python'.
+"""API for declaring a Ruff lint aspect that visits py_library rules.
 
 Typical usage:
 
@@ -194,7 +194,7 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
         binary: a ruff executable
         configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
-        filegroup_tags: filegroups tagged with these tags will be visited by the aspect
+        filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
     """
 
     # syntax-sugar: allow a single config file in addition to a list
