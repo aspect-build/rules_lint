@@ -80,7 +80,7 @@ Allows the user to select a particular ruff version, rather than get whatever is
 <pre>
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
 
-lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_ruff_aspect-configs">configs</a>, <a href="#lint_ruff_aspect-rule_kinds">rule_kinds</a>)
+lint_ruff_aspect(<a href="#lint_ruff_aspect-binary">binary</a>, <a href="#lint_ruff_aspect-configs">configs</a>, <a href="#lint_ruff_aspect-rule_kinds">rule_kinds</a>, <a href="#lint_ruff_aspect-filegroup_tags">filegroup_tags</a>)
 </pre>
 
 A factory function to create a linter aspect.
@@ -89,6 +89,7 @@ Attrs:
     binary: a ruff executable
     configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
     rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
+    filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
 
 **PARAMETERS**
 
@@ -98,6 +99,7 @@ Attrs:
 | <a id="lint_ruff_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_ruff_aspect-configs"></a>configs |  <p align="center"> - </p>   |  none |
 | <a id="lint_ruff_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["py_binary", "py_library", "py_test"]` |
+| <a id="lint_ruff_aspect-filegroup_tags"></a>filegroup_tags |  <p align="center"> - </p>   |  `["python", "lint-with-ruff"]` |
 
 
 <a id="ruff_action"></a>

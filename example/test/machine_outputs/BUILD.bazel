@@ -24,6 +24,18 @@ report_test(
     report = "machine_ruff_report",
 )
 
+machine_ruff_report(
+    name = "machine_ruff_pyi_report",
+    src = "//src:unused_import_pyi",
+)
+
+report_test(
+    name = "ruff_pyi_machine_output_test",
+    expected_tool = "Ruff",
+    expected_uri = "src/unused_import.pyi",
+    report = "machine_ruff_pyi_report",
+)
+
 machine_shellcheck_report(
     name = "machine_shellcheck_report",
     src = "//src:hello_shell",

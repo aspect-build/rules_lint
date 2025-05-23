@@ -66,6 +66,12 @@ py_library(
     srcs = ["unused_import.py"],
 )
 
+filegroup(
+    name = "unused_import_pyi",
+    srcs = ["unused_import.pyi"],
+    tags = ["python"],
+)
+
 java_library(
     name = "foo",
     srcs = ["Foo.java"],

@@ -52,6 +52,12 @@ py_library(
     srcs = ["generated.py"],
 )
 
+filegroup(
+    name = "generated_py_filegroup",
+    srcs = ["generated.py"],
+    tags = ["lint-with-ruff"],
+)
+
 py_library(
     name = "excluded_py",
     srcs = ["excluded.py"],
@@ -76,6 +82,11 @@ flake8_test(
 ruff_test(
     name = "ruff_should_ignore_generated",
     srcs = [":generated_py"],
+)
+
+ruff_test(
+    name = "ruff_should_ignore_generated_filegroup",
+    srcs = [":generated_py_filegroup"],
 )
 
 ruff_test(

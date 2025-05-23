@@ -8,6 +8,12 @@ py_library(
     srcs = ["unused_import.py"],
 )
 
+filegroup(
+    name = "unused_import_pyi",
+    srcs = ["unused_import.pyi"],
+    tags = ["python"],
+)
+
 js_library(
     name = "eslint-override",
     srcs = ["index.js"],
