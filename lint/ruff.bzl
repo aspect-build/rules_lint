@@ -14,11 +14,11 @@ use_repo(multitool, "multitool")
 Then create the linter aspect, typically in `tools/lint/linters.bzl`:
 
 ```starlark
-load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
+load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
 
-ruff = ruff_aspect(
+ruff = lint_ruff_aspect(
     binary = "@multitool//tools/ruff",
-    configs = "@@//:.ruff.toml",
+    configs = ["@@//:.ruff.toml"],
 )
 ```
 

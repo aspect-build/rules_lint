@@ -14,9 +14,9 @@ use_repo(multitool, "multitool")
 Then create the linter aspect, typically in `tools/lint/linters.bzl`:
 
 ```starlark
-load("@aspect_rules_lint//lint:shellcheck.bzl", "shellcheck_aspect")
+load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 
-shellcheck = shellcheck_aspect(
+shellcheck = lint_shellcheck_aspect(
     binary = "@multitool//tools/shellcheck",
     config = "@@//:.shellcheckrc",
 )
