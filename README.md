@@ -181,5 +181,9 @@ We consider type-checkers as a build tool, not as a linter. This is for a few re
   execution. rules_lint currently runs linters on every node in the dependency graph, including any
   whose dependencies have lint warnings.
 
+Rulesets for type-checkers:
+
+- Python: [rules_mypy](https://github.com/theoremlp/rules_mypy)
+
 [aspect workflows]: https://docs.aspect.build/workflows
 [aspect cli]: https://docs.aspect.build/cli
