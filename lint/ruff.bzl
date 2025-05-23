@@ -1,4 +1,4 @@
-"""API for declaring a Ruff lint aspect that visits py_library rules.
+"""API for declaring a Ruff lint aspect that visits py_library rules and filegroups tagged 'python'.
 
 Typical usage:
 
@@ -157,7 +157,7 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code, env = {}):
 
 # buildifier: disable=function-docstring
 def _ruff_aspect_impl(target, ctx):
-    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
@@ -187,13 +187,14 @@ def _ruff_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"]):
+def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ruff"]):
     """A factory function to create a linter aspect.
 
     Attrs:
         binary: a ruff executable
         configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
+        filegroup_tags: filegroups tagged with these tags will be visited by the aspect
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -221,6 +222,9 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
             "_config_files": attr.label_list(
                 default = configs,
                 allow_files = True,
+            ),
+            "_filegroup_tags": attr.string_list(
+                default = filegroup_tags,
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,

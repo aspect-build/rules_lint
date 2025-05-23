@@ -52,9 +52,21 @@ py_library(
     srcs = ["generated.py"],
 )
 
+filegroup(
+    name = "generated_py_filegroup",
+    srcs = ["generated.py"],
+    tags = ["lint-with-ruff"],
+)
+
 py_library(
     name = "excluded_py",
     srcs = ["excluded.py"],
+)
+
+filegroup(
+    name = "excluded_py_filegroup",
+    srcs = ["excluded.py"],
+    tags = ["python"],
 )
 
 java_library(
@@ -79,8 +91,18 @@ ruff_test(
 )
 
 ruff_test(
+    name = "ruff_should_ignore_generated_filegroup",
+    srcs = [":generated_py_filegroup"],
+)
+
+ruff_test(
     name = "ruff_should_ignore_excluded",
     srcs = ["excluded_py"],
+)
+
+ruff_test(
+    name = "ruff_should_ignore_excluded_filegroup",
+    srcs = ["excluded_py_filegroup"],
 )
 
 pmd_test(
