@@ -1,13 +1,24 @@
-"""API for declaring a Ruff lint aspect that visits py_library rules.
+"""API for declaring a Ruff lint aspect that visits py_{binary|library|test} rules.
 
 Typical usage:
 
-```
-load("@aspect_rules_lint//lint:ruff.bzl", "ruff_aspect")
+Ruff is provided as a built-in tool by rules_lint. To use the built-in version, first add a dependency on rules_multitool to MODULE.bazel:
 
-ruff = ruff_aspect(
+```starlark
+bazel_dep(name = "rules_multitool", version = <desired version>)
+
+multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitool")
+use_repo(multitool, "multitool")
+```
+
+Then create the linter aspect, typically in `tools/lint/linters.bzl`:
+
+```starlark
+load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
+
+ruff = lint_ruff_aspect(
     binary = "@multitool//tools/ruff",
-    configs = "@@//:.ruff.toml",
+    configs = [Label("//:.ruff.toml")],
 )
 ```
 
