@@ -93,6 +93,8 @@ def output_files(mnemonic, target, ctx):
         # Legacy name used by existing callers.
         # TODO(2.0): remove
         rules_lint_report = depset(machine_outputs),
+        # Always cause the action to execute, even if the output isn't requested
+        _validation = depset([human_out]),
     )
 
 def patch_file(mnemonic, target, ctx):
