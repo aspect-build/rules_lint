@@ -15,8 +15,12 @@ This `linters.bzl` should contain linter aspect declarations.
 
 See the [example linters.bzl](/example/tools/lint/linters.bzl) for a complete install example.
 See the `docs/` folder for API docs of the "aspect factory functions" that declare your linters.
+Some linter tools are built-in to rules_lint and may be installed by [multitool].
+The aspect factory function docs in the `docs/` folder describe when these are available and how to use them.
 
 Finally, register those linter aspects in the lint runner. See details below.
+
+[multitool]: https://registry.bazel.build/modules/rules_multitool
 
 ## Usage
 
