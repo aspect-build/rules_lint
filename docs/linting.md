@@ -82,7 +82,6 @@ Add at least the following to the command-line or to your `.bazelrc` file to cau
 
 ```
 --aspects=//tools/lint:linters.bzl%eslint  # replace with your linter
---output_groups=rules_lint_human
 --@aspect_rules_lint//lint:fail_on_violation
 ```
 

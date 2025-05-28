@@ -42,14 +42,10 @@ fi
 
 # NB: perhaps --remote_download_toplevel is needed as well with remote execution?
 args+=(
-	# Allow lints of code that fails some validation action
-	# See https://github.com/aspect-build/rules_ts/pull/574#issuecomment-2073632879
-	"--norun_validations"
 	"--build_event_json_file=$buildevents"
 	# Required for the buf allow_comment_ignores option to work properly
 	# See https://github.com/bufbuild/rules_buf/issues/64#issuecomment-2125324929
 	"--experimental_proto_descriptor_sets_include_source_info"
-	"--output_groups=rules_lint_human"
 	"--remote_download_regex='.*AspectRulesLint.*'"
 )
 
@@ -60,6 +56,12 @@ if [ $1 == "--fail-on-violation" ]; then
 		"--keep_going"
 	)
 	shift
+else
+	args+=(
+		# Allow lints of code that fails some validation action
+		# See https://github.com/aspect-build/rules_ts/pull/574#issuecomment-2073632879
+		"--norun_validations"
+	)
 fi
 
 # Allow a `--fix` option on the command-line.
@@ -70,6 +72,7 @@ if [ $1 == "--fix" ]; then
 	fix="patch"
 	args+=(
 		"--@aspect_rules_lint//lint:fix"
+		# Trigger the fixer actions to run by requesting the patch outputs
 		"--output_groups=rules_lint_patch"
 	)
 	shift
