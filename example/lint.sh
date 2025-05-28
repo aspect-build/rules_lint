@@ -61,6 +61,8 @@ else
 		# Allow lints of code that fails some validation action
 		# See https://github.com/aspect-build/rules_ts/pull/574#issuecomment-2073632879
 		"--norun_validations"
+		# Without validation actions, the linters won't run unless we request their output
+		"--output_groups=rules_lint_human"
 	)
 fi
 
