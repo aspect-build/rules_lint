@@ -16,14 +16,14 @@ http_file(
 Then, create the linter aspect, typically in `tools/lint/linters.bzl`:
 
 ```starlark
-load("@aspect_rules_lint//lint:ktlint.bzl", "ktlint_aspect")
+load("@aspect_rules_lint//lint:ktlint.bzl", "lint_ktlint_aspect")
 
-ktlint = ktlint_aspect(
-    binary = "@@com_github_pinterest_ktlint//file",
+ktlint = lint_ktlint_aspect(
+    binary = Label("@com_github_pinterest_ktlint//file"),
     # rules can be enabled/disabled from with this file
-    editorconfig = "@@//:.editorconfig",
+    editorconfig = Label("//:.editorconfig"),
     # a baseline file with exceptions for violations
-    baseline_file = "@@//:.ktlint-baseline.xml",
+    baseline_file = Label("//:.ktlint-baseline.xml"),
 )
 ```
 
@@ -36,14 +36,14 @@ java_binary(
     ...
 )
 
-ktlint = ktlint_aspect(
-    binary = "@@com_github_pinterest_ktlint//file",
+ktlint = lint_ktlint_aspect(
+    binary = Label("@com_github_pinterest_ktlint//file"),
     # rules can be enabled/disabled from with this file
-    editorconfig = "@@//:.editorconfig",
+    editorconfig = Label("//:.editorconfig"),
     # a baseline file with exceptions for violations
-    baseline_file = "@@//:.ktlint-baseline.xml",
+    baseline_file = Label("//:.ktlint-baseline.xml"),
     # Run your custom ktlint ruleset on top of standard rules
-    ruleset_jar = "@@//:my_ktlint_custom_ruleset_deploy.jar",
+    ruleset_jar = Label("//:my_ktlint_custom_ruleset_deploy.jar"),
 )
 ```
 

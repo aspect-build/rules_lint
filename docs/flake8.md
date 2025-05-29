@@ -22,8 +22,8 @@ Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
 load("@aspect_rules_lint//lint:flake8.bzl", "lint_flake8_aspect")
 
 flake8 = lint_flake8_aspect(
-    binary = "@@//tools/lint:flake8",
-    config = "@@//:.flake8",
+    binary = Label("//tools/lint:flake8"),
+    config = Label("//:.flake8"),
 )
 ```
 

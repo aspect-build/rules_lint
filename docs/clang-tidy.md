@@ -33,8 +33,8 @@ Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
 load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
 
 clang_tidy = lint_clang_tidy_aspect(
-    binary = "@@//path/to:clang-tidy",
-    configs = "@@//path/to:.clang-tidy",
+    binary = Label("//path/to:clang-tidy"),
+    configs = [Label("//path/to:.clang-tidy")],
 )
 ```
 

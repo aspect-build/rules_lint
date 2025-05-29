@@ -21,7 +21,7 @@ Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
 load("@aspect_rules_lint//lint:keep_sorted.bzl", "lint_keep_sorted_aspect")
 
 keep_sorted = lint_keep_sorted_aspect(
-    binary = "@com_github_google_keep_sorted//:keep-sorted",
+    binary = Label("@com_github_google_keep_sorted//:keep-sorted"),
 )
 ```
 

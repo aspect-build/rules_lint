@@ -19,11 +19,11 @@ Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
 load("@aspect_rules_lint//lint:eslint.bzl", "lint_eslint_aspect")
 
 eslint = lint_eslint_aspect(
-    binary = "@@//tools/lint:eslint",
+    binary = Label("//tools/lint:eslint"),
     # We trust that eslint will locate the correct configuration file for a given source file.
     # See https://eslint.org/docs/latest/use/configure/configuration-files#cascading-and-hierarchy
     configs = [
-        "@@//:eslintrc",
+        Label("//:eslintrc"),
         ...
     ],
 )
