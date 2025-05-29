@@ -31,8 +31,8 @@ Then declare the linter aspect, typically in `tools/lint/linters.bzl`:
 ```starlark
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
 stylelint = lint_stylelint_aspect(
-    binary = "@@//tools/lint:stylelint",
-    config = "@@//:stylelintrc",
+    binary = Label("//tools/lint:stylelint"),
+    config = Label("//:stylelintrc"),
 )
 ```
 

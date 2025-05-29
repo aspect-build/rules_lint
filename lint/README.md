@@ -55,7 +55,7 @@ Add these three things:
    The simple lint.sh also relies on the report output filenames containing `AspectRulesLint`, which comes from
    the convention that `AspectRulesLint` is the prefix for all rules_lint linter action mnemonics.
 
-3. A `my_linter_aspect` factory function. This is a higher-order function that returns an aspect.
+3. A `lint_my_linter_aspect` factory function. This is a higher-order function that returns an aspect.
    This pattern allows us to capture arguments like labels and toolchains which aren't legal
    in public aspect attributes.
 

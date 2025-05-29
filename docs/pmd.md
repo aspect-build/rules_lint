@@ -20,11 +20,11 @@ java_binary(
 Finally, declare an aspect for it, typically in `tools/lint/linters.bzl`:
 
 ```starlark
-load("@aspect_rules_lint//lint:pmd.bzl", "pmd_aspect")
+load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
 
-pmd = pmd_aspect(
-    binary = "@@//tools/lint:pmd",
-    rulesets = ["@@//:pmd.xml"],
+pmd = lint_pmd_aspect(
+    binary = Label("//tools/lint:pmd"),
+    rulesets = [Label("//:pmd.xml")],
 )
 ```
 

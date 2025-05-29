@@ -11,18 +11,18 @@ Next, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
 java_binary(
     name = "checkstyle",
     main_class = "com.puppycrawl.tools.checkstyle.Main",
-    runtime_deps = ["@com_puppycrawl_tools_checkstyle"],
+    runtime_deps = ["@com_puppycrawl_tools_checkstyle//jar"],
 )
 ```
 
 Finally, declare an aspect for it, typically in `tools/lint/linters.bzl`:
 
 ```starlark
-load("@aspect_rules_lint//lint:checkstyle.bzl", "checkstyle_aspect")
+load("@aspect_rules_lint//lint:checkstyle.bzl", "lint_checkstyle_aspect")
 
-checkstyle = checkstyle_aspect(
-    binary = "@@//tools/lint:checkstyle",
-    config = ["@@//:checkstyle.xml"],
+checkstyle = lint_checkstyle_aspect(
+    binary = Label("//tools/lint:checkstyle"),
+    config = Label("//:checkstyle.xml"),
 )
 ```
 """

@@ -10,11 +10,11 @@ For example, with `flake8`:
 
 ```starlark
 load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
-load("@aspect_rules_lint//lint:flake8.bzl", "flake8_aspect")
+load("@aspect_rules_lint//lint:flake8.bzl", "lint_flake8_aspect")
 
-flake8 = flake8_aspect(
-    binary = "@@//:flake8",
-    config = "@@//:.flake8",
+flake8 = lint_flake8_aspect(
+    binary = Label("//:flake8"),
+    config = Label("//:.flake8"),
 )
 
 flake8_test = lint_test(aspect = flake8)
