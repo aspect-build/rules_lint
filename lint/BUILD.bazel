@@ -7,6 +7,17 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
 
+# Aliases for the built-in linters
+alias(
+    name = "ruff_bin",
+    actual = "@multitool//tools/ruff",
+)
+
+alias(
+    name = "shellcheck_bin",
+    actual = "@multitool//tools/shellcheck",
+)
+
 # Used as a default for vale_aspect#styles
 filegroup(
     name = "empty_styles",
