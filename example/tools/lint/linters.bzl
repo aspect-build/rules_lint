@@ -60,7 +60,7 @@ checkstyle = lint_checkstyle_aspect(
 checkstyle_test = lint_test(aspect = checkstyle)
 
 ruff = lint_ruff_aspect(
-    binary = "@multitool//tools/ruff",
+    binary = Label("@aspect_rules_lint//lint:ruff_bin"),
     configs = [
         Label("@//:.ruff.toml"),
         Label("@//src/subdir:ruff.toml"),
@@ -70,7 +70,7 @@ ruff = lint_ruff_aspect(
 ruff_test = lint_test(aspect = ruff)
 
 shellcheck = lint_shellcheck_aspect(
-    binary = "@multitool//tools/shellcheck",
+    binary = Label("@aspect_rules_lint//lint:shellcheck_bin"),
     config = Label("@//:.shellcheckrc"),
 )
 
