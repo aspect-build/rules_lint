@@ -13,6 +13,7 @@ TOOLS = {
     "Starlark": "buildifier",
     "Jsonnet": "jsonnetfmt",
     "Terraform": "terraform-fmt",
+    "TOML": "taplo",
     "Kotlin": "ktfmt",
     "Java": "java-format",
     "Scala": "scalafmt",
@@ -51,6 +52,7 @@ CHECK_FLAGS = {
     "ktfmt": "--set-exit-if-changed --dry-run",
     "gofmt": "-l",
     "buf": "format -d --exit-code --disable-symlinks",
+    "taplo": "format --check --diff",
     "terraform-fmt": "fmt -check -diff",
     "jsonnetfmt": "--test",
     "scalafmt": "--test --respect-project-filters",
@@ -74,6 +76,7 @@ FIX_FLAGS = {
     "ktfmt": "",
     "gofmt": "-w",
     "buf": "format --write --disable-symlinks",
+    "taplo": "format",
     "terraform-fmt": "fmt",
     "jsonnetfmt": "--in-place",
     # Force exclusions in the configuration file to be honored even when file paths are supplied

@@ -23,6 +23,7 @@ with_entries(select(.key | IN(
     "SQL",
     "Starlark",
     "Swift",
+    "TOML",
     "TSX",
     "TypeScript"
 )))

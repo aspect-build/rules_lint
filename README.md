@@ -53,6 +53,7 @@ Linters which are not language-specific:
 | Shell                  | [shfmt]                   | [shellcheck]                     |
 | Starlark               | [Buildifier]              |                                  |
 | Swift                  | [SwiftFormat] (1)         |                                  |
+| TOML                   | [taplo]                   |                                  |
 | TSX                    | [Prettier]                | [ESLint]                         |
 | TypeScript             | [Prettier]                | [ESLint]                         |
 | YAML                   | [yamlfmt]                 |                                  |
@@ -83,6 +84,7 @@ Linters which are not language-specific:
 [ruff]: https://docs.astral.sh/ruff/
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
+[taplo] : https://taplo.tamasfe.dev/
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 [clang-tidy]: https://clang.llvm.org/extra/clang-tidy/
 [vale]: https://vale.sh/
