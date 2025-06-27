@@ -1,5 +1,7 @@
 "Bazel dependencies"
 
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
 bazel_dep(name = "aspect_rules_lint", version = "0.0.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.7")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0")
@@ -25,6 +27,14 @@ bazel_dep(name = "gazelle", version = "0.41.0")
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "..",
+)
+
+http_file(
+    name = "taplo",
+    sha256 = "8fe196b894ccf9072f98d4e1013a180306e17d244830b03986ee5e8eabeb6156",
+    urls = [
+        "https://github.com/tamasfe/taplo/releases/download/0.10.0/taplo-linux-x86_64.gz",
+    ],
 )
 
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")

@@ -4,6 +4,7 @@ This is in its own package because it has so many loading-time symbols,
 we don't want to trigger eager fetches of these for builds that don't want to run format.
 """
 
+load("@aspect_bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@aspect_rules_lint//format:defs.bzl", "format_multirun", "format_test")
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 load("@rules_java//java:defs.bzl", "java_binary")
@@ -63,6 +64,26 @@ java_binary(
     runtime_deps = ["@maven//:org_scalameta_scalafmt_cli_2_13"],
 )
 
+genrule(
+    name = "taplo",
+    srcs = ["@taplo//file"],
+    outs = ["taplo_bin"],
+    cmd = "gunzip -c $< > $@",
+    executable = True,
+)
+
+expand_template(
+    name = "taplo_wrapper",
+    out = "taplo_wrapper.sh",
+    data = [":taplo_bin"],
+    is_executable = True,
+    substitutions = {"{taplo_bin}": "$(execpath :taplo_bin)"},
+    template = [
+        "#!/bin/sh",
+        'exec env RUST_LOG=warn "./{taplo_bin}" "$@"',
+    ],
+)
+
 format_multirun(
     name = "format",
     c = "@llvm_toolchain_llvm//:bin/clang-format",
@@ -93,6 +114,7 @@ format_multirun(
     starlark = "@buildifier_prebuilt//:buildifier",
     swift = ":swiftformat",
     terraform = "@aspect_rules_lint//format:terraform",
+    toml = ":taplo_wrapper",
     visibility = ["//:__subpackages__"],
     xml = ":prettier",
     yaml = "@aspect_rules_lint//format:yamlfmt",
