@@ -152,6 +152,7 @@ function ls-files {
       # TODO: we should probably use https://terragrunt.gruntwork.io/docs/reference/cli-options/#hclfmt instead
       # which does support the entire HCL language FWICT
       'Terraform') patterns=('*.tf' '*.tfvars') ;;
+      'TOML') patterns=('*.toml') ;;
 
       *)
         echo >&2 "Internal error: unknown language $language"

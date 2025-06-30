@@ -25,6 +25,12 @@ filegroup(
     tags = ["markdown"],
 )
 
+filegroup(
+    name = "toml",
+    srcs = ["hello.toml"],
+    tags = ["toml"],
+)
+
 ts_project(
     name = "ts_dep",
     srcs = ["file-dep.ts"],
