@@ -51,11 +51,17 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
             If None, then fail the build when Spotbugs exits non-zero.
         options: additional command-line options, see https://spotbugs.readthedocs.io/en/latest/running.html#command-line-options
     """
-    inputs = srcs + [exclude_filter]
     deps = target[JavaInfo].transitive_compile_time_jars
     outputs = [stdout]
     args = ctx.actions.args()
     args.add_all(options)
+
+    # For java_binary targets, include their runtime dependencies
+    all_runtime_jars = []
+    if hasattr(ctx.rule.attr, "deps"):
+        for dep in ctx.rule.attr.deps:
+            if (JavaInfo in dep):
+                all_runtime_jars += dep[JavaInfo].transitive_compile_time_jars.to_list()
 
     if exclude_filter:
         args.add_all(["-exclude", exclude_filter.path])
@@ -63,11 +69,12 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
     src_args = ctx.actions.args()
     src_args.add_all(srcs)
 
-    classpath_paths = [jar.path for jar in deps.to_list()]
+    # Combine target's transitive runtime jars with dependency runtime jars
+    all_classpath_jars = deps.to_list() + all_runtime_jars
+    classpath_paths = [jar.path for jar in all_classpath_jars]
     if len(classpath_paths) > 0:
         args.add_all(["-auxclasspath", ":".join(classpath_paths)])
 
-    args.add_all(["-exclude", exclude_filter.path])
     args.add_all(["-exitcode"])
 
     if exit_code:
@@ -76,8 +83,11 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
     else:
         # Create empty stdout file on success, as Bazel expects one
         command = "{SPOTBUGS} $@ && touch {stdout}"
+
+    # Include both the source jars and all runtime dependencies as inputs
+    all_inputs = srcs + [exclude_filter] + all_runtime_jars
     ctx.actions.run_shell(
-        inputs = depset(inputs, transitive = [deps]),
+        inputs = depset(all_inputs, transitive = [deps]),
         outputs = outputs,
         command = command.format(SPOTBUGS = executable.path, stdout = stdout.path),
         arguments = [args, src_args],
