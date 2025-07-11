@@ -8,6 +8,9 @@ on:
       tag_name:
         required: true
         type: string
+    secrets:
+      BCR_PUBLISH_TOKEN:
+        required: true
   # In case of problems, let release engineers retry by manually dispatching
   # the workflow from the GitHub UI
   workflow_dispatch:
@@ -62,4 +65,4 @@ jobs:
     with:
       tag_name: ${{ inputs.tag_name || github.ref_name }}
     secrets:
-      publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}
+      BCR_PUBLISH_TOKEN: ${{ secrets.BCR_PUBLISH_TOKEN }}

@@ -10,7 +10,7 @@ on:
         required: true
         type: string
     secrets:
-      publish_token:
+      BCR_PUBLISH_TOKEN:
         required: true
   # In case of problems, let release engineers retry by manually dispatching
   # the workflow from the GitHub UI
@@ -33,4 +33,4 @@ jobs:
       contents: write
       id-token: write
     secrets:
-      publish_token: ${{ secrets.publish_token || secrets.BCR_PUBLISH_TOKEN }}
+      publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}
