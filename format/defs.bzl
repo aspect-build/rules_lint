@@ -17,6 +17,7 @@ See the example/tools/format/BUILD file in this repo for full examples of declar
 load("@aspect_bazel_lib//lib:lists.bzl", "unique")
 load("@aspect_bazel_lib//lib:utils.bzl", "propagate_common_rule_attributes", "propagate_common_test_rule_attributes")
 load("@rules_multirun//:defs.bzl", "command", "multirun")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
 def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks):
@@ -175,7 +176,7 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             attrs["data"] = [tool_label, workspace]
             attrs["env"]["WORKSPACE"] = "$(location {})".format(workspace)
 
-        native.sh_test(
+        sh_test(
             srcs = [Label("@aspect_rules_lint//format/private:format.sh")],
             deps = [Label("@bazel_tools//tools/bash/runfiles")],
             tags = unique(tags + (["no-sandbox", "no-cache", "external"] if workspace else [])),
