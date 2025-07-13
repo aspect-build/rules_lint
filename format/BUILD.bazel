@@ -23,6 +23,7 @@ bzl_library(
         "@aspect_bazel_lib//lib:lists",
         "@aspect_bazel_lib//lib:utils",
         "@rules_multirun//:defs",
+        "@rules_shell//shell:rules_bzl",
     ],
 )
 

@@ -1,3 +1,4 @@
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load(":release.bzl", "multi_platform_go_binaries")
 
 multi_platform_go_binaries(

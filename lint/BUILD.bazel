@@ -1,6 +1,7 @@
 load("@aspect_bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("//lint/private:lint_aspect.bzl", "lint_options")
 
 package(default_visibility = ["//visibility:public"])
