@@ -61,7 +61,7 @@ def output_files(mnemonic, target, ctx):
         tuple of struct() of output files, and the OutputGroupInfo provider that the rule should return
     """
     if type(target) == "File":
-        identifier = target.short_path
+        identifier = "{}.{}".format(target.short_path, ctx.label.name)
     else:
         identifier = target.label.name
 
@@ -104,7 +104,7 @@ def output_files(mnemonic, target, ctx):
 
 def patch_file(mnemonic, target, ctx):
     if type(target) == "File":
-        identifier = target.short_path
+        identifier = "{}.{}".format(target.short_path, ctx.label.name)
     else:
         identifier = target.label.name
 
