@@ -381,15 +381,6 @@ def _clang_tidy_aspect_impl(target, ctx):
     if not CcInfo in target:
         return []
 
-    ignore_tags = [
-        "noclangtidy",
-        "no-clang-tidy",
-    ]
-
-    for tag in ignore_tags:
-        if tag in ctx.rule.attr.tags:
-            return []
-
     files_to_lint = _filter_srcs(ctx.rule)
     compilation_context = target[CcInfo].compilation_context
     if hasattr(ctx.rule.attr, "implementation_deps"):
