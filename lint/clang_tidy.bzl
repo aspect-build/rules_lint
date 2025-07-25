@@ -410,9 +410,9 @@ def _clang_tidy_aspect_impl(target, ctx):
     infos = []
     for file in files_to_lint:
         if ctx.attr._options[LintOptionsInfo].fix:
-            outputs, info = patch_and_output_files(_MNEMONIC, file, ctx, is_file=True)
+            outputs, info = patch_and_output_files(_MNEMONIC, file, ctx)
         else:
-            outputs, info = output_files(_MNEMONIC, file, ctx, is_file=True)
+            outputs, info = output_files(_MNEMONIC, file, ctx)
 
         infos.append(info)
 
