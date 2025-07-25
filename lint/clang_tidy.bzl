@@ -291,7 +291,7 @@ def _get_compiler_args(ctx, compilation_context, srcs):
     args.extend(_prefixed(compilation_context.external_includes.to_list(), "-isystem"))
     return args
 
-def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code):
+def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_code):
     """Create a Bazel Action that spawns a clang-tidy process.
 
     Adapter for wrapping Bazel around
@@ -308,7 +308,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
     """
 
     outputs = [stdout]
-    env = _get_env(ctx, srcs)
+    env = _get_env(ctx, [src])
     env["CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE"] = stdout.path
 
     if exit_code:
@@ -317,23 +317,23 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
 
     # pass compiler args via a params file. The command line may already be long due to
     # sources, which can't go the params file, so materialize it always.
-    clang_tidy_args = _get_args(ctx, compilation_context, srcs)
+    clang_tidy_args = _get_args(ctx, compilation_context, [src])
     compiler_args = ctx.actions.args()
-    compiler_args.add_all(_get_compiler_args(ctx, compilation_context, srcs))
+    compiler_args.add_all(_get_compiler_args(ctx, compilation_context, [src]))
     compiler_args.use_param_file("--config %s", use_always = True)
 
     ctx.actions.run_shell(
-        inputs = _gather_inputs(ctx, compilation_context, srcs),
+        inputs = _gather_inputs(ctx, compilation_context, [src]),
         outputs = outputs,
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
         command = executable._clang_tidy_wrapper.path + " $@",
         arguments = [executable._clang_tidy.path] + clang_tidy_args + ["--", compiler_args],
         env = env,
         mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with clang-tidy",
+        progress_message = "Linting {} with clang-tidy".format(src.short_path),
     )
 
-def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, exit_code):
+def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exit_code):
     """Create a Bazel Action that spawns clang-tidy with --fix.
 
     Args:
@@ -345,23 +345,23 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         stdout: output file containing the stdout or --output-file of clang-tidy
         exit_code: output file containing the exit code of clang-tidy
     """
-    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
-    clang_tidy_args = _get_args(ctx, compilation_context, srcs)
-    compiler_args = _get_compiler_args(ctx, compilation_context, srcs)
+    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(src.short_path))
+    clang_tidy_args = _get_args(ctx, compilation_context, [src])
+    compiler_args = _get_compiler_args(ctx, compilation_context, [src])
 
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
             "linter": executable._clang_tidy_wrapper.path,
             "args": [executable._clang_tidy.path, "--fix"] + clang_tidy_args + ["--"] + compiler_args,
-            "env": _get_env(ctx, srcs),
-            "files_to_diff": [src.path for src in srcs],
+            "env": _get_env(ctx, [src]),
+            "files_to_diff": [src.path],
             "output": patch.path,
         }),
     )
 
     ctx.actions.run(
-        inputs = depset([patch_cfg], transitive = [_gather_inputs(ctx, compilation_context, srcs)]),
+        inputs = depset([patch_cfg], transitive = [_gather_inputs(ctx, compilation_context, [src])]),
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
@@ -373,13 +373,22 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         },
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
         mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with clang-tidy",
+        progress_message = "Linting {} with clang-tidy".format(src.short_path),
     )
 
 # buildifier: disable=function-docstring
 def _clang_tidy_aspect_impl(target, ctx):
     if not CcInfo in target:
         return []
+
+    ignore_tags = [
+        "noclangtidy",
+        "no-clang-tidy",
+    ]
+
+    for tag in ignore_tags:
+        if tag in ctx.rule.attr.tags:
+            return []
 
     files_to_lint = _filter_srcs(ctx.rule)
     compilation_context = target[CcInfo].compilation_context
@@ -389,25 +398,36 @@ def _clang_tidy_aspect_impl(target, ctx):
                                    [implementation_dep[CcInfo].compilation_context for implementation_dep in ctx.rule.attr.implementation_deps],
         )
 
-    if ctx.attr._options[LintOptionsInfo].fix:
-        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
-    else:
-        outputs, info = output_files(_MNEMONIC, target, ctx)
-
     if len(files_to_lint) == 0:
+        if ctx.attr._options[LintOptionsInfo].fix:
+            outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
+        else:
+            outputs, info = output_files(_MNEMONIC, target, ctx)
+
         noop_lint_action(ctx, outputs)
         return [info]
 
-    if hasattr(outputs, "patch"):
-        clang_tidy_fix(ctx, compilation_context, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code)
-    else:
-        clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code)
+    infos = []
+    for file in files_to_lint:
+        if ctx.attr._options[LintOptionsInfo].fix:
+            outputs, info = patch_and_output_files(_MNEMONIC, file, ctx, is_file=True)
+        else:
+            outputs, info = output_files(_MNEMONIC, file, ctx, is_file=True)
 
-    # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code)
-    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
-    return [info]
+        infos.append(info)
+
+        if hasattr(outputs, "patch"):
+            clang_tidy_fix(ctx, compilation_context, ctx.executable, file, outputs.patch, outputs.human.out, outputs.human.exit_code)
+        else:
+            clang_tidy_action(ctx, compilation_context, ctx.executable, file, outputs.human.out, outputs.human.exit_code)
+
+        # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
+        raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = file.short_path, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+        clang_tidy_action(ctx, compilation_context, ctx.executable, file, raw_machine_report, outputs.machine.exit_code)
+        parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
+
+    return infos
+
 
 def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):
     """A factory function to create a linter aspect.
