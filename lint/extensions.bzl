@@ -2,6 +2,7 @@
 
 # buildifier: disable=bzl-visibility
 load("@aspect_bazel_lib//lib/private:extension_utils.bzl", "extension_utils")
+load("@aspect_tools_telemetry_report//:defs.bzl", "TELEMETRY")  # buildifier: disable=load
 load("@bazel_features//:features.bzl", "bazel_features")
 load(
     "//tools/toolchains:register.bzl",
