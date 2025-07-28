@@ -46,8 +46,8 @@ _DISABLED_FEATURES = [
     "layering_check",
 ]
 
-def _gather_inputs(ctx, compilation_context, srcs):
-    inputs = srcs + ctx.files._configs
+def _gather_inputs(ctx, compilation_context, src):
+    inputs = [src] + ctx.files._configs
     if (any(ctx.files._global_config)):
         inputs.append(ctx.files._global_config[0])
     return depset(inputs, transitive = [compilation_context.headers])
@@ -229,8 +229,8 @@ def _aggregate_regex(ctx, compilation_context):
 def _quoted_arg(arg):
     return "\"" + arg + "\""
 
-def _get_env(ctx, srcs):
-    sources_are_cxx = _is_cxx(srcs[0])
+def _get_env(ctx, src):
+    sources_are_cxx = _is_cxx(src)
     if (sources_are_cxx):
         user_flags = ctx.fragments.cpp.cxxopts + ctx.fragments.cpp.copts
         env = _toolchain_env(ctx, user_flags, ACTION_NAMES.cpp_compile)
@@ -245,7 +245,7 @@ def _get_env(ctx, srcs):
     env["MSYS_ARG_CONV_EXCL"] = "*"
     return env
 
-def _get_args(ctx, compilation_context, srcs):
+def _get_args(ctx, compilation_context, src):
     args = []
     if (any(ctx.files._global_config)):
         args.append("--config-file=" + ctx.files._global_config[0].short_path)
@@ -256,15 +256,15 @@ def _get_args(ctx, compilation_context, srcs):
     elif (ctx.attr._header_filter):
         regex = ctx.attr._header_filter
         args.append(_quoted_arg("-header-filter=" + regex))
-    args.extend([src.short_path for src in srcs])
+    args.append(src.short_path)
     return args
 
-def _get_compiler_args(ctx, compilation_context, srcs):
+def _get_compiler_args(ctx, compilation_context, src):
     # add args specified by the toolchain, on the command line and rule copts
     args = []
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
-    sources_are_cxx = _is_cxx(srcs[0])
-    if (sources_are_cxx):
+    source_is_cxx = _is_cxx(src)
+    if (source_is_cxx):
         user_flags = ctx.fragments.cpp.cxxopts + ctx.fragments.cpp.copts
         args.extend(_safe_flags(ctx, _toolchain_flags(ctx, user_flags, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"])
     else:
@@ -301,14 +301,14 @@ def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_co
         ctx: an action context OR aspect context
         compilation_context: from target
         executable: struct with a clang-tidy field
-        srcs: file objects to lint
+        src: file object to lint
         stdout: output file containing the stdout or --output-file of clang-tidy
         exit_code: output file containing the exit code of clang-tidy.
             If None, then fail the build when clang-tidy exits non-zero.
     """
 
     outputs = [stdout]
-    env = _get_env(ctx, [src])
+    env = _get_env(ctx, src)
     env["CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE"] = stdout.path
 
     if exit_code:
@@ -317,20 +317,22 @@ def clang_tidy_action(ctx, compilation_context, executable, src, stdout, exit_co
 
     # pass compiler args via a params file. The command line may already be long due to
     # sources, which can't go the params file, so materialize it always.
-    clang_tidy_args = _get_args(ctx, compilation_context, [src])
+    clang_tidy_args = _get_args(ctx, compilation_context, src)
     compiler_args = ctx.actions.args()
-    compiler_args.add_all(_get_compiler_args(ctx, compilation_context, [src]))
+    compiler_args.add_all(_get_compiler_args(ctx, compilation_context, src))
     compiler_args.use_param_file("--config %s", use_always = True)
 
+    progress_message_identifier = src.short_path
+
     ctx.actions.run_shell(
-        inputs = _gather_inputs(ctx, compilation_context, [src]),
+        inputs = depset([src], transitive = [_gather_inputs(ctx, compilation_context, src), find_cpp_toolchain(ctx).all_files]),
         outputs = outputs,
-        tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
+        tools = [executable._clang_tidy_wrapper, executable._clang_tidy],
         command = executable._clang_tidy_wrapper.path + " $@",
         arguments = [executable._clang_tidy.path] + clang_tidy_args + ["--", compiler_args],
         env = env,
         mnemonic = _MNEMONIC,
-        progress_message = "Linting {} with clang-tidy".format(src.short_path),
+        progress_message = "Linting {} with clang-tidy".format(progress_message_identifier),
     )
 
 def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exit_code):
@@ -340,7 +342,7 @@ def clang_tidy_fix(ctx, compilation_context, executable, src, patch, stdout, exi
         ctx: an action context OR aspect context
         compilation_context: from target
         executable: struct with a clang_tidy field
-        srcs: list of file objects to lint
+        src: file object to lint
         patch: output file containing the applied fixes that can be applied with the patch(1) command.
         stdout: output file containing the stdout or --output-file of clang-tidy
         exit_code: output file containing the exit code of clang-tidy

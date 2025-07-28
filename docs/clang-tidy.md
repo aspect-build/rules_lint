@@ -45,7 +45,7 @@ clang_tidy = lint_clang_tidy_aspect(
 <pre>
 load("@aspect_rules_lint//lint:clang_tidy.bzl", "clang_tidy_action")
 
-clang_tidy_action(<a href="#clang_tidy_action-ctx">ctx</a>, <a href="#clang_tidy_action-compilation_context">compilation_context</a>, <a href="#clang_tidy_action-executable">executable</a>, <a href="#clang_tidy_action-srcs">srcs</a>, <a href="#clang_tidy_action-stdout">stdout</a>, <a href="#clang_tidy_action-exit_code">exit_code</a>)
+clang_tidy_action(<a href="#clang_tidy_action-ctx">ctx</a>, <a href="#clang_tidy_action-compilation_context">compilation_context</a>, <a href="#clang_tidy_action-executable">executable</a>, <a href="#clang_tidy_action-src">src</a>, <a href="#clang_tidy_action-stdout">stdout</a>, <a href="#clang_tidy_action-exit_code">exit_code</a>)
 </pre>
 
 Create a Bazel Action that spawns a clang-tidy process.
@@ -62,7 +62,7 @@ https://clang.llvm.org/extra/clang-tidy/
 | <a id="clang_tidy_action-ctx"></a>ctx |  an action context OR aspect context   |  none |
 | <a id="clang_tidy_action-compilation_context"></a>compilation_context |  from target   |  none |
 | <a id="clang_tidy_action-executable"></a>executable |  struct with a clang-tidy field   |  none |
-| <a id="clang_tidy_action-srcs"></a>srcs |  file objects to lint   |  none |
+| <a id="clang_tidy_action-src"></a>src |  file object to lint   |  none |
 | <a id="clang_tidy_action-stdout"></a>stdout |  output file containing the stdout or --output-file of clang-tidy   |  none |
 | <a id="clang_tidy_action-exit_code"></a>exit_code |  output file containing the exit code of clang-tidy. If None, then fail the build when clang-tidy exits non-zero.   |  none |
 
@@ -74,7 +74,7 @@ https://clang.llvm.org/extra/clang-tidy/
 <pre>
 load("@aspect_rules_lint//lint:clang_tidy.bzl", "clang_tidy_fix")
 
-clang_tidy_fix(<a href="#clang_tidy_fix-ctx">ctx</a>, <a href="#clang_tidy_fix-compilation_context">compilation_context</a>, <a href="#clang_tidy_fix-executable">executable</a>, <a href="#clang_tidy_fix-srcs">srcs</a>, <a href="#clang_tidy_fix-patch">patch</a>, <a href="#clang_tidy_fix-stdout">stdout</a>, <a href="#clang_tidy_fix-exit_code">exit_code</a>)
+clang_tidy_fix(<a href="#clang_tidy_fix-ctx">ctx</a>, <a href="#clang_tidy_fix-compilation_context">compilation_context</a>, <a href="#clang_tidy_fix-executable">executable</a>, <a href="#clang_tidy_fix-src">src</a>, <a href="#clang_tidy_fix-patch">patch</a>, <a href="#clang_tidy_fix-stdout">stdout</a>, <a href="#clang_tidy_fix-exit_code">exit_code</a>)
 </pre>
 
 Create a Bazel Action that spawns clang-tidy with --fix.
@@ -87,7 +87,7 @@ Create a Bazel Action that spawns clang-tidy with --fix.
 | <a id="clang_tidy_fix-ctx"></a>ctx |  an action context OR aspect context   |  none |
 | <a id="clang_tidy_fix-compilation_context"></a>compilation_context |  from target   |  none |
 | <a id="clang_tidy_fix-executable"></a>executable |  struct with a clang_tidy field   |  none |
-| <a id="clang_tidy_fix-srcs"></a>srcs |  list of file objects to lint   |  none |
+| <a id="clang_tidy_fix-src"></a>src |  file object to lint   |  none |
 | <a id="clang_tidy_fix-patch"></a>patch |  output file containing the applied fixes that can be applied with the patch(1) command.   |  none |
 | <a id="clang_tidy_fix-stdout"></a>stdout |  output file containing the stdout or --output-file of clang-tidy   |  none |
 | <a id="clang_tidy_fix-exit_code"></a>exit_code |  output file containing the exit code of clang-tidy   |  none |
