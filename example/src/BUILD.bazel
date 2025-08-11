@@ -4,6 +4,7 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_python//python:defs.bzl", "py_library")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
 load("//tools/lint:linters.bzl", "eslint_test")
 
