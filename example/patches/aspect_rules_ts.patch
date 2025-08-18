@@ -1,0 +1,14 @@
+diff --git a/ts/private/ts_lib.bzl b/ts/private/ts_lib.bzl
+index de720e5..9373023 100644
+--- a/ts/private/ts_lib.bzl
++++ b/ts/private/ts_lib.bzl
+@@ -82,6 +82,9 @@ https://docs.aspect.build/rulesets/aspect_rules_js/docs/js_library#deps for more
+         executable = True,
+         cfg = "exec",
+     ),
++    "eslintconfig": attr.label(
++        allow_single_file = [".js", ".mjs", ".cjs"],
++    ),
+     "tsconfig": attr.label(
+         doc = "tsconfig.json file, see https://www.typescriptlang.org/tsconfig",
+         mandatory = True,

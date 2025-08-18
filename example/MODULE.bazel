@@ -30,6 +30,13 @@ local_path_override(
     path = "..",
 )
 
+single_version_override(
+    module_name = "aspect_rules_ts",
+    patch_strip = 1,
+    patches = ["patches/aspect_rules_ts.patch"],
+    version = "3.0.0",
+)
+
 http_file(
     name = "taplo",
     sha256 = "8fe196b894ccf9072f98d4e1013a180306e17d244830b03986ee5e8eabeb6156",
