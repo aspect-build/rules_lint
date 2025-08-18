@@ -23,6 +23,7 @@ js_library(
 ts_project(
     name = "ts",
     srcs = ["test.ts"],
+    # eslintconfig = ":eslint.config.mjs",
     declaration = True,
     transpiler = "tsc",
     tsconfig = "//src:tsconfig",
