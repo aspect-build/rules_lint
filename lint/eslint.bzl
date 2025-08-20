@@ -62,11 +62,17 @@ _MNEMONIC = "AspectRulesLintESLint"
 def _gather_inputs(ctx, srcs, files):
     inputs = copy_files_to_bin_actions(ctx, srcs)
 
+    js_inputs = ctx.attr._config_files + ctx.rule.attr.deps + files
+
+    # Linting of ts targets often requires the tsconfig
+    if hasattr(ctx.rule.attr, "tsconfig"):
+        js_inputs.append(ctx.rule.attr.tsconfig)
+
     # Add the config file along with any deps it has on npm packages
     if "gather_files_from_js_providers" in dir(js_lib_helpers):
         # rules_js 1.x
         js_inputs = js_lib_helpers.gather_files_from_js_providers(
-            ctx.attr._config_files + ctx.rule.attr.deps + files,
+            js_inputs,
             include_transitive_sources = True,
             include_declarations = True,
             include_npm_linked_packages = True,
@@ -74,7 +80,7 @@ def _gather_inputs(ctx, srcs, files):
     else:
         # rules_js 2.x
         js_inputs = js_lib_helpers.gather_files_from_js_infos(
-            ctx.attr._config_files + ctx.rule.attr.deps + files,
+            js_inputs,
             include_sources = True,
             include_transitive_sources = True,
             include_types = True,
