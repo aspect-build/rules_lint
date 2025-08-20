@@ -152,6 +152,10 @@ Sometimes engineers want to ignore a file with a certain extension because the c
 For example, you might write a template for YAML and name it `my-template.yaml` even though it needs to have some interpolated values inserted before it's syntactically valid.
 We recommend instead fixing the file extension. In this example, `my.yaml.tmpl` or `my-template.yaml_` might be better.
 
+### Ignoring targets
+
+To ignore a specific target, you can use the `no-lint` tag. This will prevent the linter from visiting the target.
+
 ### Using with your editor
 
 We believe that existing editor plugins should just work as-is. They may download or bundle their own
