@@ -31,6 +31,8 @@ lint_options = rule(
 def should_visit(rule, allow_kinds, allow_filegroup_tags = []):
     """Determine whether a rule is meant to be visited by a linter aspect
 
+    A target with the "no-lint" tag will not be visited.
+
     Args:
         rule: a [rules_attributes](https://bazel.build/rules/lib/builtins/rule_attributes.html) object
         allow_kinds (list of string): return true if the rule's kind is in the list
@@ -39,6 +41,9 @@ def should_visit(rule, allow_kinds, allow_filegroup_tags = []):
     Returns:
         whether to apply the aspect on this rule
     """
+    if "no-lint" in rule.attr.tags:
+        return False
+
     if rule.kind in allow_kinds:
         return True
     if rule.kind == "filegroup":
