@@ -76,8 +76,8 @@
       {
         "kind": "archive",
         "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Windows_x86_64.tar.gz",
-        "file": "jsonnetfmt",
-        "sha256": "4395047d7fd2ee3e927897af4ff0c9b3bcde5ff4d805abc0b5c7259c89a3f080",
+        "file": "jsonnetfmt.exe",
+        "sha256": "82440a646a8d29487a243afc880db245f612a205d3eccbb900bc76d7a4049ad1",
         "os": "windows",
         "cpu": "x86_64"
       }
@@ -116,7 +116,7 @@
       {
         "kind": "file",
         "url": "https://github.com/mvdan/sh/releases/download/v3.12.0/shfmt_v3.12.0_windows_amd64.exe",
-        "sha256": "tbd",
+        "sha256": "c8bda517ba1c640ce4a715c0fa665439ddbe4357ba5e9b77b0e51e70e2b9c94b",
         "os": "windows",
         "cpu": "x86_64"
       }
@@ -159,8 +159,8 @@
       {
         "kind": "archive",
         "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_windows_amd64.zip",
-        "file": "terraform",
-        "sha256": "37c35406b70f8ef0fa6d9598e43f616e9396d001942a7e2ca4f4f6df414449cc",
+        "file": "terraform.exe",
+        "sha256": "9b7be6ae159191ec1f4b5b9d27529ae5243e41020fb545c0041235bec8d92269",
         "os": "windows",
         "cpu": "x86_64"
       }
@@ -203,8 +203,8 @@
       {
         "kind": "archive",
         "url": "https://github.com/google/yamlfmt/releases/download/v0.17.2/yamlfmt_0.17.2_Windows_x86_64.tar.gz",
-        "file": "yamlfmt",
-        "sha256": "0c392a17dd09448e3b0df051b45b3eb9642691986073d0a0a6ac8c60db7d0bc1",
+        "file": "yamlfmt.exe",
+        "sha256": "fc6fd9328f62d7880c1eda1889f9eba39f42c6317761c23c27771349ba601513",
         "os": "windows",
         "cpu": "x86_64"
       }
