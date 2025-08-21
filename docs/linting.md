@@ -107,6 +107,10 @@ Each linter aspect accepts the configuration file(s) as an argument.
 To specify whether a certain lint rule should be a warning or error, follow the documentation for the linter.
 rules_lint provides the exit code of the linter process to allow the desired developer experiences listed above.
 
+## Ignoring targets
+
+To ignore a specific target, you can use the `no-lint` tag. This will prevent the linter from visiting the target.
+
 ## Linting generated files
 
 By default, we filter out generated files from linting.
