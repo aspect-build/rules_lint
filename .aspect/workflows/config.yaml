@@ -10,7 +10,9 @@ workspaces:
         - bzlmod-false:
             without: true
   - example
-
+bazel:
+  flags:
+    - --config=ci
 tasks:
   - lint:
   - test:
