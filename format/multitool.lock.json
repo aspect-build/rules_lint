@@ -29,11 +29,11 @@
         "sha256": "0dda6600cf263b703a5ad93e792b06180c36afdee9638617a91dd552f2c6fb3e",
         "os": "macos",
         "cpu": "x86_64"
-      }
+      },
       {
         "kind": "file",
         "url": "https://github.com/mvdan/gofumpt/releases/download/v0.8.0/gofumpt_v0.8.0_windows_amd64.exe",
-        "sha256": "tbd",
+        "sha256": "6d25310f322080af6de8193617d78495b356a5ede65fde6d5d0e4bcdfff1f2a4",
         "os": "windows",
         "cpu": "x86_64"
       }
@@ -77,7 +77,7 @@
         "kind": "archive",
         "url": "https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Windows_x86_64.tar.gz",
         "file": "jsonnetfmt",
-        "sha256": "tbd",
+        "sha256": "4395047d7fd2ee3e927897af4ff0c9b3bcde5ff4d805abc0b5c7259c89a3f080",
         "os": "windows",
         "cpu": "x86_64"
       }
@@ -116,7 +116,7 @@
       {
         "kind": "file",
         "url": "https://github.com/mvdan/sh/releases/download/v3.12.0/shfmt_v3.12.0_windows_amd64.exe",
-        "sha256": "c31548693de6584e6164b7ed5fbb7b4a083f2d937ca94b4e0ddf59aa461a85e4",
+        "sha256": "tbd",
         "os": "windows",
         "cpu": "x86_64"
       }
@@ -160,7 +160,7 @@
         "kind": "archive",
         "url": "https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_windows_amd64.zip",
         "file": "terraform",
-        "sha256": "tbd",
+        "sha256": "37c35406b70f8ef0fa6d9598e43f616e9396d001942a7e2ca4f4f6df414449cc",
         "os": "windows",
         "cpu": "x86_64"
       }
@@ -204,7 +204,7 @@
         "kind": "archive",
         "url": "https://github.com/google/yamlfmt/releases/download/v0.17.2/yamlfmt_0.17.2_Windows_x86_64.tar.gz",
         "file": "yamlfmt",
-        "sha256": "tbd",
+        "sha256": "0c392a17dd09448e3b0df051b45b3eb9642691986073d0a0a6ac8c60db7d0bc1",
         "os": "windows",
         "cpu": "x86_64"
       }
