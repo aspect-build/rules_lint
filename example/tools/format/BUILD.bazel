@@ -101,6 +101,7 @@ format_multirun(
     jsonnet = "@aspect_rules_lint//format:jsonnetfmt",
     kotlin = ":ktfmt",
     markdown = ":prettier",
+    nickel = "@nickel//file",
     protocol_buffer = "//tools/lint:buf",
     python = "@aspect_rules_lint//format:ruff",
     # Note, older rules_rust versions may need

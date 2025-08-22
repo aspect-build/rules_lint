@@ -38,6 +38,15 @@ http_file(
     ],
 )
 
+http_file(
+    name = "nickel",
+    executable = True,
+    sha256 = "825657c5139d3b3c0da37da073493e18ef32cbe74afbf726a7dd643a39b4fd8b",
+    urls = [
+        "https://github.com/tweag/nickel/releases/download/1.13.0/nickel-x86_64-linux",
+    ],
+)
+
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
 rules_ts_ext.deps()
 use_repo(rules_ts_ext, "npm_typescript")

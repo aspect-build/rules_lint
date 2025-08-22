@@ -153,6 +153,7 @@ function ls-files {
       # which does support the entire HCL language FWICT
       'Terraform') patterns=('*.tf' '*.tfvars') ;;
       'TOML') patterns=('*.toml') ;;
+      'Nickel') patterns=('*.ncl') ;;
 
       *)
         echo >&2 "Internal error: unknown language $language"

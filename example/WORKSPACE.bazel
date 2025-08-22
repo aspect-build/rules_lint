@@ -21,6 +21,15 @@ http_file(
     ],
 )
 
+http_file(
+    name = "nickel",
+    executable = True,
+    sha256 = "825657c5139d3b3c0da37da073493e18ef32cbe74afbf726a7dd643a39b4fd8b",
+    urls = [
+        "https://github.com/tweag/nickel/releases/download/1.13.0/nickel-x86_64-linux",
+    ],
+)
+
 load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
 
 py_repositories()

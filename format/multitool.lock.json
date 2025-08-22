@@ -171,5 +171,30 @@
         "cpu": "x86_64"
       }
     ]
+  },
+  "nickel": {
+    "binaries": [
+      {
+        "kind": "file",
+        "url": "https://github.com/tweag/nickel/releases/download/1.13.0/nickel-arm64-linux",
+        "sha256": "6c8b2d9a4bfa24761356302ba21bf9b2f107062bac7c514dc31f40198c40edc0",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/tweag/nickel/releases/download/1.13.0/nickel-arm64-macos",
+        "sha256": "30aafb99e4deaf511ea8b2e93e507a9c0ba8bd25b9c116412fb3e6d3e7426e46",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/tweag/nickel/releases/download/1.13.0/nickel-x86_64-linux",
+        "sha256": "825657c5139d3b3c0da37da073493e18ef32cbe74afbf726a7dd643a39b4fd8b",
+        "os": "linux",
+        "cpu": "x86_64"
+      }
+    ]
   }
 }
