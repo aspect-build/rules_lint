@@ -42,6 +42,8 @@ register_toolchains("@sarif_parser_toolchains//:all")
 
 ####### Dev dependencies ########
 
+bazel_dep(name = "bazelrc-preset.bzl", version = "1.1.0")
+
 # To allow /tools to be built from source
 # NOTE: when publishing to BCR, we patch this to be True, as we publish pre-built binaries with our releases.
 IS_RELEASE = False
