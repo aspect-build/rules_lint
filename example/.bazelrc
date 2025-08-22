@@ -1,3 +1,6 @@
+import %workspace%/../tools/preset.bazelrc
+import %workspace%/tools/java17.bazelrc
+
 # Automatically apply --config=linux, --config=windows etc
 common --enable_platform_specific_config
 
@@ -5,32 +8,6 @@ common --enable_platform_specific_config
 common --experimental_isolated_extension_usages
 
 # Aspect recommended Bazel flags when using rules_java and rules_jvm_external
-
-# Pin java versions to desired language level
-# See https://bazel.build/docs/bazel-and-java#java-versions
-# and https://en.wikipedia.org/wiki/Java_version_history
-
-# What version of Java are the source files in this repo?
-# See https://bazel.build/docs/user-manual#java-language-version
-common --java_language_version=17
-
-# The Java language version used to build tools that are executed during a build
-# See https://bazel.build/docs/user-manual#tool-java-language-version
-common --tool_java_language_version=17
-
-# The version of JVM to use to execute the code and run the tests.
-# NB: The default value is local_jdk which is non-hermetic.
-# See https://bazel.build/docs/user-manual#java-runtime-version
-common --java_runtime_version=remotejdk_17
-
-# The version of JVM used to execute tools that are needed during a build.
-# See https://bazel.build/docs/user-manual#tool-java-runtime-version
-common --tool_java_runtime_version=remotejdk_17
-
-# Repository rules, such as rules_jvm_external: put Bazel's JDK on the path.
-# Avoids non-hermeticity from dependency on a JAVA_HOME pointing at a system JDK
-# see https://github.com/bazelbuild/rules_jvm_external/issues/445
-common --repo_env=JAVA_HOME=../bazel_tools/jdk
 
 common --incompatible_enable_proto_toolchain_resolution
 common --@aspect_rules_ts//ts:skipLibCheck=always
@@ -41,9 +18,6 @@ startup --windows_enable_symlinks
 # c++ options
 common:linux --action_env=BAZEL_CXXOPTS="-std=c++20"
 common:windows --action_env=BAZEL_CXXOPTS="/std:c++20"
-
-# ensure that minimal other envvars are passed by clang-tidy run_shell
-common --incompatible_strict_action_env
 
 # Do not autoload any legacy symbols that are now provided in separate repos.
 common --incompatible_autoload_externally=
