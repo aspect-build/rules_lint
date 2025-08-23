@@ -4,22 +4,14 @@ API for declaring a shellcheck lint aspect that visits sh_{binary|library|test} 
 
 Typical usage:
 
-Shellcheck is provided as a built-in tool by rules_lint. To use the built-in version, first add a dependency on rules_multitool to MODULE.bazel:
-
-```starlark
-bazel_dep(name = "rules_multitool", version = <desired version>)
-
-multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitool")
-use_repo(multitool, "multitool")
-```
-
-Then create the linter aspect, typically in `tools/lint/linters.bzl`:
+Shellcheck is provided as a built-in tool by rules_lint. To use the built-in version,
+create the linter aspect, typically in `tools/lint/linters.bzl`:
 
 ```starlark
 load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 
 shellcheck = lint_shellcheck_aspect(
-    binary = "@multitool//tools/shellcheck",
+    binary = Label("@aspect_rules_lint//lint:shellcheck_bin",
     config = Label("//:.shellcheckrc"),
 )
 ```
