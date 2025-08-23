@@ -190,3 +190,10 @@ bats_load_library "bats-assert"
 
     assert_output --partial "+ prettier --write example/src/hello.feature"
 }
+
+@test "should run nickel on ncl" {
+    run bazel run //format/test:format_Nickel_with_nickel
+    assert_success
+
+    assert_output --partial '+ nickel format example/src/hello.ncl'
+}

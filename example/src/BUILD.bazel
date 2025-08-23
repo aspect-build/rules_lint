@@ -121,6 +121,12 @@ kt_jvm_library(
     srcs = ["hello.kt"],
 )
 
+filegroup(
+    name = "nickel",
+    srcs = ["hello.ncl"],
+    tags = ["nickel"],
+)
+
 # Cause a test failure when files are not formatted.
 # This is useful when you have no other way to check formatting on CI; see documentation.
 format_test(
