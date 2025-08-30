@@ -32,7 +32,7 @@ Language attributes that may be passed to [format_multirun](#format_multirun) or
 Files with matching extensions from [GitHub Linguist] will be formatted for the given language.
 
 Some languages have dialects:
-    - `javascript` includes TypeScript, TSX, and JSON.
+    - `javascript` includes JSON/JSON5, TSX, TypeScript, and Vue.
     - `css` includes Less and Sass.
 
 **Do not call the `languages` rule directly, it exists only to document the attributes.**

@@ -21,6 +21,7 @@ exports_files(
         ".ruff.toml",
         ".shellcheckrc",
         ".scalafmt.conf",
+        ".swcrc",
         ".vale.ini",
         ".editorconfig",
         "ktlint-baseline.xml",
