@@ -62,7 +62,7 @@ _MNEMONIC = "AspectRulesLintESLint"
 def _gather_inputs(ctx, srcs, files):
     inputs = copy_files_to_bin_actions(ctx, srcs)
 
-    js_inputs = ctx.attr._config_files + ctx.rule.attr.deps + files
+    js_inputs = ctx.attr._config_files + getattr(ctx.rule.attr, "deps", []) + files
 
     # Linting of ts targets often requires the tsconfig
     if hasattr(ctx.rule.attr, "tsconfig"):
