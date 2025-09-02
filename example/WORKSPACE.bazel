@@ -59,6 +59,13 @@ http_archive(
 )
 
 http_archive(
+    name = "rules_diff",
+    integrity = "sha256-44r/+iFWzPOOMlWHR4ExLVmGU99Wlkiho9JxkadUK3Q=",
+    strip_prefix = "rules_diff-v1.0.0",
+    url = "https://gitlab.arm.com/bazel/rules_diff/-/releases/v1.0.0/downloads/src.tar.gz",
+)
+
+http_archive(
     name = "rules_shell",
     sha256 = "b15cc2e698a3c553d773ff4af35eb4b3ce2983c319163707dddd9e70faaa062d",
     strip_prefix = "rules_shell-0.5.0",
@@ -355,11 +362,4 @@ multitool(
         "@aspect_rules_lint//format:multitool.lock.json",
         "@aspect_rules_lint//lint:multitool.lock.json",
     ],
-)
-
-http_archive(
-    name = "rules_diff",
-    integrity = "sha256-44r/+iFWzPOOMlWHR4ExLVmGU99Wlkiho9JxkadUK3Q=",
-    strip_prefix = "rules_diff-v1.0.0",
-    url = "https://gitlab.arm.com/bazel/rules_diff/-/releases/v1.0.0/downloads/src.tar.gz",
 )
