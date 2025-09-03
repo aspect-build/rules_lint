@@ -34,8 +34,10 @@ EOF
 	# ESLint
 	echo <<"EOF" | assert_output --partial
 src/file.ts
-  2:7  error  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
+  6:7  error  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
 EOF
+	# The tsconfig must be properly included
+	refute_output --partial "couldn't find any tsconfig.json"
 	# If type declarations are missing, the following errors will be reported
 	refute_output --partial '@typescript-eslint/no-unsafe-call'
 	refute_output --partial '@typescript-eslint/no-unsafe-member-access'
@@ -70,9 +72,13 @@ EOF
 	echo <<"EOF" | assert_output --partial
 --- a/src/file.ts
 +++ b/src/file.ts
-@@ -1,3 +1,3 @@
- // this is a linting violation
+@@ -3,7 +3,7 @@
+ 
+ import { Greeter } from "./file-dep";
+ 
+-// this is a linting violation
 -const a: string = "a";
++// this is a linting violation, and is auto-fixed under `--fix`
 +const a = "a";
  console.log(a);
 EOF
@@ -103,3 +109,19 @@ EOF
 	# This lint check is disabled in the .eslintrc.cjs file
 	refute_output --partial "Unexpected 'debugger' statement"
 }
+
+#@test "should include tsconfig when linting ts_project targets" {
+#	# The src:ts_with_tsconfig target has tsconfig = ":tsconfig" attribute
+#	# This file intentionally has type-checking issues that require tsconfig to detect
+#	run $BATS_TEST_DIRNAME/../lint.sh //src:ts_with_tsconfig
+#	assert_success
+#
+#	# These errors ONLY appear when ESLint has access to type information via tsconfig
+#	# If lines 68-69 in eslint.bzl are commented out, ESLint can't find the tsconfig
+#	# and reports "Parsing error: project was set to `true` but couldn't find any tsconfig.json"
+#	assert_output --partial "@typescript-eslint/no-floating-promises"
+#	assert_output --partial "@typescript-eslint/await-thenable"
+#
+#	# Should NOT have parsing errors about missing tsconfig
+#	refute_output --partial "couldn't find any tsconfig.json"
+#}

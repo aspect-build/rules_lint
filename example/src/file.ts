@@ -19,3 +19,9 @@ console.log(`Hello at ${dayjs().format("HH:mm:ss")}`);
 
 const greeting = new Greeter().greet("world");
 console.log(greeting);
+
+// This will trigger @typescript-eslint/no-floating-promises because we're not handling the promise
+async function delayedGreet() {
+  return greeting;
+}
+delayedGreet();

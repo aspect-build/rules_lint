@@ -39,6 +39,7 @@ ts_project(
     srcs = ["file-dep.ts"],
     declaration = True,
     transpiler = "tsc",
+    tsconfig = ":tsconfig",
     deps = [],
 )
 
