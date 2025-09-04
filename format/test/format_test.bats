@@ -14,6 +14,8 @@ bats_load_library "bats-assert"
     assert_output --partial "+ prettier --write example/src/hello.tsx"
     assert_output --partial "+ prettier --write example/src/hello.vue"
     assert_output --partial "+ prettier --write .bcr/metadata.template.json"
+    assert_output --partial "+ prettier --write example/.swcrc"
+    assert_output --partial "+ prettier --write example/src/config.json5"
 }
 
 # File arguments: will filter with find

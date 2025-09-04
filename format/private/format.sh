@@ -112,7 +112,7 @@ function process_args_in_batches() {
 function ls-files {
     language="$1" && shift;
     # Copied file patterns from
-    # https://github.com/github-linguist/linguist/blob/559a6426942abcae16b6d6b328147476432bf6cb/lib/linguist/languages.yml
+    # https://github.com/github-linguist/linguist/blob/main/lib/linguist/languages.yml
     # using the ./mirror_linguist_languages.sh tool to transform to Bash code
     case "$language" in
       'C') patterns=('*.c' '*.cats' '*.h' '*.idc') ;;
@@ -123,6 +123,8 @@ function ls-files {
       'GraphQL') patterns=('*.graphql' '*.gql' '*.graphqls') ;;
       'HTML') patterns=('*.html' '*.hta' '*.htm' '*.html.hl' '*.inc' '*.xht' '*.xhtml') ;;
       'JSON') patterns=('.all-contributorsrc' '.arcconfig' '.auto-changelog' '.c8rc' '.htmlhintrc' '.imgbotconfig' '.nycrc' '.tern-config' '.tern-project' '.watchmanconfig' 'Pipfile.lock' 'composer.lock' 'deno.lock' 'flake.lock' 'mcmod.info' '*.json' '*.4DForm' '*.4DProject' '*.avsc' '*.geojson' '*.gltf' '*.har' '*.ice' '*.JSON-tmLanguage' '*.jsonl' '*.mcmeta' '*.tfstate' '*.tfstate.backup' '*.topojson' '*.webapp' '*.webmanifest' '*.yy' '*.yyp') ;;
+      'JSON with Comments') patterns=( '*.jsonc' '*.code-snippets' '*.code-workspace' '*.sublime-build' '*.sublime-commands' '*.sublime-completions' '*.sublime-keymap' '*.sublime-macro' '*.sublime-menu' '*.sublime-mousemap' '*.sublime-project' '*.sublime-settings' '*.sublime-theme' '*.sublime-workspace' '*.sublime_metrics' '*.sublime_session' '.babelrc' '.devcontainer.json' '.eslintrc.json' '.jscsrc' '.jshintrc' '.jslintrc' '.swcrc' 'api-extractor.json' 'devcontainer.json' 'jsconfig.json' 'language-configuration.json' 'tsconfig.json' 'tslint.json') ;;
+      'JSON5') patterns=('*.json5') ;;
       'Java') patterns=('*.java' '*.jav' '*.jsh') ;;
       'JavaScript') patterns=('Jakefile' '*.js' '*._js' '*.bones' '*.cjs' '*.es' '*.es6' '*.frag' '*.gs' '*.jake' '*.javascript' '*.jsb' '*.jscad' '*.jsfl' '*.jslib' '*.jsm' '*.jspre' '*.jss' '*.jsx' '*.mjs' '*.njs' '*.pac' '*.sjs' '*.ssjs' '*.xsjs' '*.xsjslib') ;;
       'Jsonnet') patterns=('*.jsonnet' '*.libsonnet') ;;
@@ -302,7 +304,7 @@ if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
 
     # Handle additional languages for JavaScript and CSS
     if [[ "$lang" == "JavaScript" ]]; then
-        for sublang in "JSON" "TSX" "TypeScript" "Vue"; do
+        for sublang in "JSON" "JSON5" "JSON with Comments" "TSX" "TypeScript" "Vue"; do
             process_args_in_batches "$sublang" "$bin" "${flags:-""}" "$@"
         done
     fi

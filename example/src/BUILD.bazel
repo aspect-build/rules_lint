@@ -1,6 +1,7 @@
 load("@aspect_rules_lint//format:defs.bzl", "format_test")
 load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
+load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
@@ -45,7 +46,10 @@ ts_project(
     name = "ts",
     srcs = ["file.ts"],
     declaration = True,
-    transpiler = swc,
+    transpiler = partial.make(
+        swc,
+        swcrc = "//:.swcrc",
+    ),
     deps = [
         ":ts_dep",
         "//:node_modules/dayjs",
