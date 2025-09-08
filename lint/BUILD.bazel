@@ -293,3 +293,19 @@ bzl_library(
     name = "vale_versions",
     srcs = ["vale_versions.bzl"],
 )
+
+bzl_library(
+    name = "cppcheck",
+    srcs = ["cppcheck.bzl"],
+    deps = _BAZEL_TOOLS + [
+        "//lint/private:lint_aspect",
+        "@bazel_skylib//lib:dicts",
+        "@bazel_tools//tools/build_defs/cc:action_names.bzl",
+        "@bazel_tools//tools/cpp:toolchain_utils.bzl",
+    ],
+)
+
+sh_binary(
+    name = "cppcheck_wrapper",
+    srcs = ["cppcheck_wrapper.bash"],
+)
