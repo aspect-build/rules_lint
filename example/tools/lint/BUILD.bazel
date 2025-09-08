@@ -119,3 +119,8 @@ alias(
     name = "rubocop",
     actual = "@bundle//bin:rubocop",
 )
+
+sh_binary(
+    name = "cppcheck",
+    srcs = ["cppcheck_wrapper.sh"],
+)
