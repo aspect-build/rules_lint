@@ -269,3 +269,8 @@ sh_binary(
     name = "clang_tidy_wrapper",
     srcs = ["clang_tidy_wrapper.bash"],
 )
+
+sh_binary(
+    name = "cppcheck_wrapper",
+    srcs = ["cppcheck_wrapper.bash"],
+)

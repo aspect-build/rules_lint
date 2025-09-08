@@ -104,3 +104,8 @@ native_binary(
     ),
     out = "clang_tidy",
 )
+
+sh_binary(
+    name = "cppcheck",
+    srcs = ["cppcheck_wrapper.sh"],
+)
