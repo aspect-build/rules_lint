@@ -38,6 +38,17 @@ clang_tidy = lint_clang_tidy_aspect(
 )
 ```
 
+or, to register the gcc install dir from an hermetic toolchain,
+
+```
+clang_tidy = lint_clang_tidy_aspect(
+    binary = Label("//path/to:clang-tidy"),
+    configs = [Label("//path/to:.clang-tidy")],
+    gcc_install_dir = [Label("@hermetic_cc_repo//:gcc_install_dir")],
+    deps = [Label("@hermetic_cc_repo//:content_of_gcc_install_dir")],
+)
+```
+
 <a id="clang_tidy_action"></a>
 
 ## clang_tidy_action
