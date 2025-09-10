@@ -3,6 +3,7 @@
 load("@aspect_rules_lint//lint:buf.bzl", "lint_buf_aspect")
 load("@aspect_rules_lint//lint:checkstyle.bzl", "lint_checkstyle_aspect")
 load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
+load("@aspect_rules_lint//lint:clippy.bzl", "lint_clippy_aspect")
 load("@aspect_rules_lint//lint:cppcheck.bzl", "lint_cppcheck_aspect")
 load("@aspect_rules_lint//lint:eslint.bzl", "lint_eslint_aspect")
 load("@aspect_rules_lint//lint:flake8.bzl", "lint_flake8_aspect")
@@ -22,6 +23,11 @@ load("@aspect_rules_lint//lint:yamllint.bzl", "lint_yamllint_aspect")
 
 buf = lint_buf_aspect(
     config = Label("//:buf.yaml"),
+)
+
+clippy = lint_clippy_aspect(
+    binary = Label("@rules_rust//tools/lint:clippy"),
+    config = Label("//:.clippy.toml"),
 )
 
 eslint = lint_eslint_aspect(
