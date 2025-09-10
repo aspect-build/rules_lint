@@ -37,7 +37,9 @@ def _clippy_aspect_impl(target, ctx):
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     clippy_action(ctx, ctx.executable._clippy, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, config_options)
 
-    # FIXME: does clippy have a SARIF output format built-in? Do we have to parse it?
+    # clippy uses rustc's IO format, which doesn't have a SARIF output mode built in,
+    # and they're not planning to add one.
+    # Ref: https://github.com/rust-lang/rust-clippy/issues/8122
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     return [info]
