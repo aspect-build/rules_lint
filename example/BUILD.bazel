@@ -27,6 +27,7 @@ exports_files(
         "ktlint-baseline.xml",
         ".clang-tidy",
         "spotbugs-exclude.xml",
+        ".clippy.toml",
     ],
     visibility = ["//visibility:public"],
 )
