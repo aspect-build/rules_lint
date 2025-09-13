@@ -129,6 +129,11 @@ rust.toolchain(
     edition = "2021",
     versions = ["1.75.0"],
 )
+use_repo(rust, "rust_toolchains")
+
+register_toolchains(
+    "@rust_toolchains//:all",
+)
 
 # Configure .Net toolchains
 dotnet = use_extension("@rules_dotnet//dotnet:extensions.bzl", "dotnet")
