@@ -155,6 +155,7 @@ format_test(
     ],
 )
 
+# FIXME: Try it with transitive deps
 rust_binary(
     name = "hello_rust",
     srcs = ["hello.rs"],
