@@ -12,3 +12,5 @@ common --incompatible_config_setting_private_default_visibility
 
 # Do not autoload any legacy symbols that are now provided in separate repos.
 common --incompatible_autoload_externally=
+
+try-import %workspace%/user.bazelrc
