@@ -25,10 +25,7 @@ buf = lint_buf_aspect(
     config = Label("//:buf.yaml"),
 )
 
-clippy = lint_clippy_aspect(
-    config = Label("//:.clippy.toml"),
-    rust_toolchain = Label("@rules_rust//rust:toolchain_type"),
-)
+clippy = lint_clippy_aspect()
 
 eslint = lint_eslint_aspect(
     binary = Label("//tools/lint:eslint"),
