@@ -64,3 +64,23 @@ format_multirun(
     xml = ":mock_prettier.sh",
     yaml = ":mock_yamlfmt.sh",
 )
+
+format_multirun(
+    name = "format_with_custom_args",
+    kotlin = ":mock_ktfmt.sh",
+    kotlin_fix_args = ["--custom-fix", "--flag"],
+    kotlin_check_args = ["--custom-check"],
+    java = ":mock_java-format.sh", 
+    java_fix_args = ["--replace", "--custom"],
+)
+
+sh_test(
+    name = "custom_args_test",
+    srcs = ["custom_args_test.sh"],
+    data = [
+        ":format_with_custom_args_Kotlin_with_ktfmt",
+        ":format_with_custom_args_Kotlin_with_ktfmt.check", 
+        ":format_with_custom_args_Java_with_java-format.check",
+    ],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)

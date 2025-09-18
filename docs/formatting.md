@@ -66,6 +66,32 @@ indent_style = space
 indent_size = 4
 ```
 
+### Custom formatter arguments
+
+You can override the default command-line arguments passed to formatters by specifying custom arguments for each language and mode:
+
+```starlark
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
+
+format_multirun(
+    name = "format",
+    kotlin = ":ktfmt",
+    kotlin_fix_args = ["--google-style"],
+    kotlin_check_args = ["--google-style", "--set-exit-if-changed", "--dry-run"],
+    java = ":java-format",
+    java_fix_args = ["--aosp", "--replace"],
+    python = ":ruff",
+    python_check_args = ["format", "--check", "--diff"],
+)
+```
+
+The custom argument attributes follow the pattern `{language}_{mode}_args`:
+- `{language}_fix_args`: Arguments used when running `bazel run //:format` (fix mode)
+- `{language}_check_args`: Arguments used for both `bazel run //:format.check` (check mode) and `format_test` (test mode)
+
+When custom arguments are specified, they completely replace the default arguments for that mode.
+If not specified, the built-in defaults for each formatter are used.
+
 ### One-time re-format all files
 
 Assuming you installed with the typical layout:
