@@ -103,7 +103,7 @@ To check formatting with `bazel test`, use [format_test](#format_test) instead.
 | <a id="format_multirun-jobs"></a>jobs |  how many language formatters to spawn in parallel, ideally matching how many CPUs are available   |  `4` |
 | <a id="format_multirun-print_command"></a>print_command |  whether to print a progress message before calling the formatter of each language. Note that a line is printed for a formatter even if no files of that language are to be formatted.   |  `False` |
 | <a id="format_multirun-disable_git_attribute_checks"></a>disable_git_attribute_checks |  Set to True to disable honoring .gitattributes filters   |  `False` |
-| <a id="format_multirun-kwargs"></a>kwargs |  attributes named for each language; see [languages](#languages)   |  none |
+| <a id="format_multirun-kwargs"></a>kwargs |  attributes named for each language; see [languages](#languages). Additionally supports custom arguments via {language}_fix_args and {language}_check_args to override default formatter flags for fix and check modes respectively.   |  none |
 
 
 <a id="format_test"></a>
@@ -135,6 +135,6 @@ To format with `bazel run`, see [format_multirun](#format_multirun).
 | <a id="format_test-no_sandbox"></a>no_sandbox |  Set to True to enable formatting all files in the workspace. This mode causes the test to be non-hermetic and it cannot be cached. Read the documentation in /docs/formatting.md.   |  `False` |
 | <a id="format_test-disable_git_attribute_checks"></a>disable_git_attribute_checks |  Set to True to disable honoring .gitattributes filters   |  `False` |
 | <a id="format_test-tags"></a>tags |  tags to apply to generated targets. In 'no_sandbox' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.   |  `[]` |
-| <a id="format_test-kwargs"></a>kwargs |  attributes named for each language; see [languages](#languages)   |  none |
+| <a id="format_test-kwargs"></a>kwargs |  attributes named for each language; see [languages](#languages). Additionally supports custom arguments via {language}_fix_args and {language}_check_args to override default formatter flags. Test mode uses check_args when specified.   |  none |
 
 
