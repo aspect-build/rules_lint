@@ -20,11 +20,22 @@ load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
-def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks):
+def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args = None):
     if mode not in ["check", "fix", "test"]:
         fail("Invalid mode", mode)
 
     args = []
+
+    # Determine which flags to use
+    default_flags = FIX_FLAGS[toolname] if mode == "fix" else CHECK_FLAGS[toolname]
+    flags = default_flags
+    
+    # Override with custom args if provided
+    if custom_args:
+        if mode == "fix" and "fix_args" in custom_args:
+            flags = " ".join(custom_args["fix_args"])
+        elif mode in ["check", "test"] and "check_args" in custom_args:
+            flags = " ".join(custom_args["check_args"])
 
     # this dict is used to create the attributes both to pass to command() (for
     # format_multirun) and to sh_test() (for format_test, so it has to toggle
@@ -38,7 +49,7 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_
             "FIX_TARGET": "//{}:{}".format(native.package_name(), target_name),
             "tool": "$(rlocationpaths %s)" % tool_label,
             "lang": lang,
-            "flags": FIX_FLAGS[toolname] if mode == "fix" else CHECK_FLAGS[toolname],
+            "flags": flags,
             "mode": "check" if mode == "test" else mode,
             "disable_git_attribute_checks": "true" if disable_git_attribute_checks else "false",
         },
@@ -90,7 +101,9 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
         print_command: whether to print a progress message before calling the formatter of each language.
             Note that a line is printed for a formatter even if no files of that language are to be formatted.
         disable_git_attribute_checks: Set to True to disable honoring .gitattributes filters
-        **kwargs: attributes named for each language; see [languages](#languages)
+        **kwargs: attributes named for each language; see [languages](#languages).
+            Additionally supports custom arguments via {language}_fix_args and {language}_check_args
+            to override default formatter flags for fix and check modes respectively.
     """
     commands = []
 
@@ -98,12 +111,12 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
     for k in common_attrs.keys():
         kwargs.pop(k)
 
-    for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
+    for lang, toolname, tool_label, target_name, custom_args in _tools_loop(name, kwargs):
         for mode in ["check", "fix"]:
             command(
                 command = Label("@aspect_rules_lint//format/private:format"),
                 description = "Formatting {} with {}...".format(lang, toolname),
-                **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks)
+                **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args)
             )
         commands.append(target_name)
 
@@ -143,7 +156,9 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             This mode causes the test to be non-hermetic and it cannot be cached. Read the documentation in /docs/formatting.md.
         disable_git_attribute_checks: Set to True to disable honoring .gitattributes filters
         tags: tags to apply to generated targets. In 'no_sandbox' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.
-        **kwargs: attributes named for each language; see [languages](#languages)
+        **kwargs: attributes named for each language; see [languages](#languages).
+            Additionally supports custom arguments via {language}_fix_args and {language}_check_args
+            to override default formatter flags. Test mode uses check_args when specified.
     """
     if srcs and workspace:
         fail("Cannot provide both 'srcs' and 'workspace' at the same time")
@@ -167,8 +182,8 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             srcs = srcs,
         )
 
-    for lang, toolname, tool_label, target_name in _tools_loop(name, kwargs):
-        attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test", disable_git_attribute_checks)
+    for lang, toolname, tool_label, target_name, custom_args in _tools_loop(name, kwargs):
+        attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test", disable_git_attribute_checks, custom_args)
         if srcs_label:
             attrs["data"] = [tool_label, srcs_label]
             attrs["args"] = ["$(locations {})".format(srcs_label)]
@@ -199,11 +214,26 @@ def _tools_loop(name, kwargs):
 
         tool_label = kwargs.pop(lang_attribute)
         target_name = "_".join([name, lang.replace(" ", "_"), "with", toolname])
+        
+        # Extract custom args for this language
+        fix_args = kwargs.pop(lang_attribute + "_fix_args", None)
+        check_args = kwargs.pop(lang_attribute + "_check_args", None)
+        custom_args = {}
+        if fix_args:
+            custom_args["fix_args"] = fix_args
+        if check_args:
+            custom_args["check_args"] = check_args
 
-        result.append((lang, toolname, tool_label, target_name))
+        result.append((lang, toolname, tool_label, target_name, custom_args if custom_args else None))
 
-    # Error checking in case some user keys were unmatched and therefore not pop'ed
-    for attr in kwargs.keys():
-        fail("""Unknown language "{}". Valid values: {}""".format(attr, [to_attribute_name(lang) for lang in TOOLS.keys()]))
+    # Error checking for unknown attributes
+    if kwargs.keys():
+        valid_attrs = [to_attribute_name(lang) for lang in TOOLS.keys()]
+        valid_custom_attrs = []
+        for lang in TOOLS.keys():
+            lang_attribute = to_attribute_name(lang)
+            valid_custom_attrs.extend([lang_attribute + "_fix_args", lang_attribute + "_check_args"])
+        fail("""Unknown attributes: {}. Valid language attributes: {}. Valid custom argument attributes: {}""".format(
+            list(kwargs.keys()), valid_attrs, valid_custom_attrs))
 
     return result
