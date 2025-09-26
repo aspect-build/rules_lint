@@ -50,6 +50,7 @@ format_multirun(
     jsonnet = ":mock_jsonnetfmt.sh",
     kotlin = ":mock_ktfmt.sh",
     markdown = ":mock_prettier.sh",
+    nickel = ":mock_nickel.sh",
     protocol_buffer = ":mock_buf.sh",
     python = ":mock_ruff.sh",
     rust = ":mock_rustfmt.sh",
