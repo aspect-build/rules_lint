@@ -59,16 +59,21 @@ def output_files(mnemonic, target, ctx):
 
     Args:
         mnemonic: used as part of the filename
-        target: the target being visited by a linter aspect
+        target: the target or file being visited by a linter aspect
         ctx: the aspect context
 
     Returns:
         tuple of struct() of output files, and the OutputGroupInfo provider that the rule should return
     """
-    human_out = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "out"))
+    if type(target) == "File":
+        identifier = "{}.{}".format(target.short_path, ctx.label.name)
+    else:
+        identifier = target.label.name
+
+    human_out = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = identifier, mnemonic = mnemonic, suffix = "out"))
 
     # NB: named ".report" as there are existing callers depending on that
-    machine_out = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report"))
+    machine_out = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = identifier, mnemonic = mnemonic, suffix = "report"))
 
     if ctx.attr._options[LintOptionsInfo].fail_on_violation:
         # Fail on violation means the exit code is reported to Bazel as the action result
@@ -78,8 +83,8 @@ def output_files(mnemonic, target, ctx):
         # The exit codes should instead be provided as action outputs so the build succeeds.
         # Downstream tooling like `aspect lint` will be responsible for reading the exit codes
         # and interpreting them.
-        human_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "out.exit_code"))
-        machine_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report.exit_code"))
+        human_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = identifier, mnemonic = mnemonic, suffix = "out.exit_code"))
+        machine_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = identifier, mnemonic = mnemonic, suffix = "report.exit_code"))
 
     human_outputs = [f for f in [human_out, human_exit_code] if f]
     machine_outputs = [f for f in [machine_out, machine_exit_code] if f]
@@ -103,7 +108,12 @@ def output_files(mnemonic, target, ctx):
     )
 
 def patch_file(mnemonic, target, ctx):
-    patch = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "patch"))
+    if type(target) == "File":
+        identifier = "{}.{}".format(target.short_path, ctx.label.name)
+    else:
+        identifier = target.label.name
+
+    patch = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = identifier, mnemonic = mnemonic, suffix = "patch"))
     return patch, OutputGroupInfo(rules_lint_patch = depset([patch]))
 
 # If we return multiple OutputGroupInfo from a rule implementation, only one will get used.
