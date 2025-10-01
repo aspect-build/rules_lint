@@ -248,7 +248,7 @@ def _get_env(ctx, srcs):
 def _get_args(ctx, compilation_context, srcs):
     args = []
     if (any(ctx.files._global_config)):
-        args.append("--config-file=" + ctx.files._global_config[0].short_path)
+        args.append("--config-file=" + ctx.files._global_config[0].path)
     if (ctx.attr._lint_target_headers):
         regex = _aggregate_regex(ctx, compilation_context)
         if (regex):
@@ -256,7 +256,7 @@ def _get_args(ctx, compilation_context, srcs):
     elif (ctx.attr._header_filter):
         regex = ctx.attr._header_filter
         args.append(_quoted_arg("-header-filter=" + regex))
-    args.extend([src.short_path for src in srcs])
+    args.extend([src.path for src in srcs])
     return args
 
 def _get_compiler_args(ctx, compilation_context, srcs):
