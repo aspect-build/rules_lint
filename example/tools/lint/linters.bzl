@@ -25,7 +25,9 @@ buf = lint_buf_aspect(
     config = Label("//:buf.yaml"),
 )
 
-clippy = lint_clippy_aspect()
+clippy = lint_clippy_aspect(
+    config = Label("//:.clippy.toml"),
+)
 
 eslint = lint_eslint_aspect(
     binary = Label("//tools/lint:eslint"),

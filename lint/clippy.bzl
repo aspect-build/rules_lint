@@ -5,23 +5,11 @@ Typical usage:
 TODO: more setup docs
 """
 
-load("@rules_rust//rust:defs.bzl", "CLIPPY_ACTION_ATTRS", "rust_clippy_action", "rust_common")
+load("@aspect_bazel_lib//lib:copy_file.bzl", "COPY_FILE_TOOLCHAINS", "copy_file_action")
+load("@rules_rust//rust:defs.bzl", "rust_clippy_action", "rust_common")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintClippy"
-
-def clippy_action(ctx, executable, srcs, config, stdout, exit_code = None, extra_clippy_flags = []):
-    rust_clippy_action(
-        ctx,
-        executable,
-        srcs,
-        config,
-        output = stdout,
-        # FIXME: Properly handle exit codes, currently rules_rust just writes the file if it's successful.
-        success_marker = exit_code,
-        cap_at_warnings = False,
-        extra_clippy_flags = extra_clippy_flags,
-    )
 
 # buildifier: disable=function-docstring
 def _clippy_aspect_impl(target, ctx):
@@ -51,9 +39,42 @@ def _clippy_aspect_impl(target, ctx):
 
     # FIXME : does clippy have a --fix mode that applies fixes for some violations while reporting others?
 
-    clippy_action(ctx, clippy_bin, crate_info, ctx.file._config, outputs.human.out, outputs.human.exit_code, color_options)
+    print("BL: outputs={}".format(outputs))
+
+    raw_human_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_human_report"))
+    rust_clippy_action(
+        ctx,
+        clippy_executable = clippy_bin,
+        process_wrapper = ctx.executable._process_wrapper,
+        src = crate_info,
+        config = ctx.file._config_file,
+        output = raw_human_report,
+        cap_at_warnings = True,
+        # FIXME: Properly handle exit codes, currently rules_rust just writes the file if it's successful.
+        #        success_marker = outputs.human.exit_code,
+        extra_clippy_flags = color_options + ["--cap-lints=warn"],
+    )
+
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    clippy_action(ctx, clippy_bin, crate_info, ctx.file._config, raw_machine_report, outputs.machine.exit_code, [])
+    rust_clippy_action(
+        ctx,
+        clippy_executable = clippy_bin,
+        process_wrapper = ctx.executable._process_wrapper,
+        src = crate_info,
+        config = ctx.file._config_file,
+        output = raw_machine_report,
+        cap_at_warnings = True,
+        error_format = "json",
+        # FIXME: Properly handle exit codes, currently rules_rust just writes the file if it's successful.
+        #        success_marker = outputs.machine.exit_code,
+        extra_clippy_flags = [],
+    )
+
+    ctx.actions.write(outputs.human.exit_code, "0")
+
+    copy_file_action(ctx, raw_human_report, outputs.human.out)
+    ctx.actions.write(outputs.machine.exit_code, "0")
+    #    ctx.actions.write(raw_machine_report, "0")
 
     # clippy uses rustc's IO format, which doesn't have a SARIF output mode built in,
     # and they're not planning to add one.
@@ -62,30 +83,38 @@ def _clippy_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_clippy_aspect(rule_kinds = ["rust_binary", "rust_library", "rust_test"]):
+def lint_clippy_aspect(config, rule_kinds = ["rust_binary", "rust_library", "rust_test"]):
     """A factory function to create a linter aspect.
 
     The Clippy binary will be read from the Rust toolchain.
 
     Attrs:
-        rust_toolchain_type: label of the toolchain type for rules_rust. Necessary so that rules_lint doesn't depend on rules_rust directly.
-        config: TODO: how is clippy configured?
+        config (File): Label of the desired Clippy configuration file to use. Reference: https://doc.rust-lang.org/clippy/configuration.html
     """
     attrs = {
         "_options": attr.label(
             default = "//lint:options",
             providers = [LintOptionsInfo],
         ),
+        "_config_file": attr.label(
+            default = config,
+            allow_single_file = True,
+        ),
         "_rule_kinds": attr.string_list(
             default = rule_kinds,
         ),
+        "_process_wrapper": attr.label(
+            doc = "A process wrapper for running clippy on all platforms",
+            default = Label("@rules_rust//util/process_wrapper"),
+            executable = True,
+            cfg = "exec",
+        ),
     }
-    attrs.update(CLIPPY_ACTION_ATTRS)
     return aspect(
         fragments = ["cpp"],
         implementation = _clippy_aspect_impl,
         attrs = attrs,
-        toolchains = [
+        toolchains = COPY_FILE_TOOLCHAINS + [
             OPTIONAL_SARIF_PARSER_TOOLCHAIN,
             Label("@rules_rust//rust:toolchain_type"),
             "@bazel_tools//tools/cpp:toolchain_type",
