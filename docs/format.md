@@ -22,9 +22,9 @@ See the example/tools/format/BUILD file in this repo for full examples of declar
 <pre>
 load("@aspect_rules_lint//format:defs.bzl", "languages")
 
-languages(<a href="#languages-name">name</a>, <a href="#languages-c">c</a>, <a href="#languages-cc">cc</a>, <a href="#languages-css">css</a>, <a href="#languages-cuda">cuda</a>, <a href="#languages-gherkin">gherkin</a>, <a href="#languages-go">go</a>, <a href="#languages-graphql">graphql</a>, <a href="#languages-html">html</a>, <a href="#languages-java">java</a>, <a href="#languages-javascript">javascript</a>, <a href="#languages-jsonnet">jsonnet</a>, <a href="#languages-kotlin">kotlin</a>,
-          <a href="#languages-markdown">markdown</a>, <a href="#languages-protocol_buffer">protocol_buffer</a>, <a href="#languages-python">python</a>, <a href="#languages-rust">rust</a>, <a href="#languages-scala">scala</a>, <a href="#languages-shell">shell</a>, <a href="#languages-sql">sql</a>, <a href="#languages-starlark">starlark</a>, <a href="#languages-swift">swift</a>, <a href="#languages-terraform">terraform</a>,
-          <a href="#languages-toml">toml</a>, <a href="#languages-xml">xml</a>, <a href="#languages-yaml">yaml</a>)
+languages(<a href="#languages-name">name</a>, <a href="#languages-c">c</a>, <a href="#languages-cc">cc</a>, <a href="#languages-css">css</a>, <a href="#languages-cuda">cuda</a>, <a href="#languages-gherkin">gherkin</a>, <a href="#languages-go">go</a>, <a href="#languages-graphql">graphql</a>, <a href="#languages-html">html</a>, <a href="#languages-html_jinja">html_jinja</a>, <a href="#languages-java">java</a>, <a href="#languages-javascript">javascript</a>, <a href="#languages-jsonnet">jsonnet</a>,
+          <a href="#languages-kotlin">kotlin</a>, <a href="#languages-markdown">markdown</a>, <a href="#languages-protocol_buffer">protocol_buffer</a>, <a href="#languages-python">python</a>, <a href="#languages-rust">rust</a>, <a href="#languages-scala">scala</a>, <a href="#languages-shell">shell</a>, <a href="#languages-sql">sql</a>, <a href="#languages-starlark">starlark</a>, <a href="#languages-swift">swift</a>,
+          <a href="#languages-terraform">terraform</a>, <a href="#languages-toml">toml</a>, <a href="#languages-xml">xml</a>, <a href="#languages-yaml">yaml</a>)
 </pre>
 
 Language attributes that may be passed to [format_multirun](#format_multirun) or [format_test](#format_test).
@@ -53,6 +53,7 @@ Some languages have dialects:
 | <a id="languages-go"></a>go |  a `gofmt` binary, or any other tool that has a matching command-line interface. Use `@aspect_rules_lint//format:gofumpt` to choose the built-in tool.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-graphql"></a>graphql |  a `prettier` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-html"></a>html |  a `prettier` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
+| <a id="languages-html_jinja"></a>html_jinja |  a `djlint` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-java"></a>java |  a `java-format` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-javascript"></a>javascript |  a `prettier` binary, or any other tool that has a matching command-line interface.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="languages-jsonnet"></a>jsonnet |  a `jsonnetfmt` binary, or any other tool that has a matching command-line interface. Use `@aspect_rules_lint//format:jsonnetfmt` to choose the built-in tool.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |

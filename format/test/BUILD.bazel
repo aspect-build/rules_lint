@@ -47,6 +47,7 @@ format_multirun(
     html = ":mock_prettier.sh",
     java = ":mock_java-format.sh",
     javascript = ":mock_prettier.sh",
+    html_jinja = ":mock_djlint.sh",
     jsonnet = ":mock_jsonnetfmt.sh",
     kotlin = ":mock_ktfmt.sh",
     markdown = ":mock_prettier.sh",
