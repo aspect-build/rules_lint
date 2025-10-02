@@ -23,4 +23,3 @@ js_library(
     srcs = ["stylelint.compactFormatter.mjs"],
     visibility = ["//visibility:public"],
 )
-
