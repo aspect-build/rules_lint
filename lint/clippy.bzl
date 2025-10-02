@@ -2,7 +2,42 @@
 
 Typical usage:
 
-TODO: more setup docs
+First, install `rules_rust` into your repository: https://bazelbuild.github.io/rules_rust/. For instance:
+
+```starlark
+// MODULE.bazel
+bazel_dep(name = "rules_rust", version = "0.50.1")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = ["1.75.0"],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains(
+    "@rust_toolchains//:all",
+)
+```
+
+This will install a rust toolchain, which includes rustc and clippy.
+Please ignore the `rules_rust` instructions around clippy, as `rules_lint` ignores all `rules_rust` flags.
+
+Next, create a clippy configuration file. We'll assume you've created it in `//:.clippy.toml`.
+The file name must be suffixed by either `.clippy.toml` or `clippy.toml`, otherwise clippy will silently ignore it.
+
+Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
+
+```starlark
+load("@aspect_rules_lint//lint:clippy.bzl", "lint_clippy_aspect")
+
+clippy = lint_clippy_aspect(
+    config = Label("//:.clippy.toml"),
+)
+```
+
+Now your targets will be linted with clippy.
+If you wish a target to be excluded from linting, you can give them the `noclippy` tag.
 """
 
 load("@aspect_bazel_lib//lib:copy_file.bzl", "COPY_FILE_TOOLCHAINS", "copy_file_action")
@@ -73,14 +108,17 @@ def _clippy_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_clippy_aspect(config, rule_kinds = ["rust_binary", "rust_library", "rust_test"]):
+DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_test"]
+
+def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS):
     """A factory function to create a linter aspect.
 
     The Clippy binary will be read from the Rust toolchain.
 
-    Attrs:
+    Args:
         config (File): Label of the desired Clippy configuration file to use. Reference: https://doc.rust-lang.org/clippy/configuration.html
-    """
+        rule_kinds (List[str]): List of rule kinds to lint. Defaults to {default_rule_kinds}.
+    """.format(default_rule_kinds = DEFAULT_RULE_KINDS)
     attrs = {
         "_options": attr.label(
             default = "//lint:options",
