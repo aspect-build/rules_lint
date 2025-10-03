@@ -12,6 +12,9 @@ def impl(ctx: task_context) -> int:
         "--config=lint",
         "--remote_download_regex='.*AspectRulesLint.*'",
     ]
+    if ctx.args.fix:
+        flags.append("--output_groups=rules_lint_patch")
+        flags.append("--@aspect_rules_lint//lint:fix")
     out = ctx.std.io.stdout
     if out.is_tty:
         flags.append("--output_groups=rules_lint_human")
@@ -19,6 +22,7 @@ def impl(ctx: task_context) -> int:
         # Note: to test this codepath, run with:
         # echo > nohup.out; nohup aspect-cli lint ; cat nohup.out
         flags.append("--output_groups=rules_lint_machine")
+    print("flags:", flags)
     build = ctx.bazel.build(
         ctx.args.target_pattern or "//...",
         bazel_flags = flags,
@@ -26,24 +30,32 @@ def impl(ctx: task_context) -> int:
     )
     github_output = ctx.std.env.var("GITHUB_OUTPUT")
     exit_code = 0
+    patches = []
     for event in build.events():
         if event.kind == "named_set_of_files":
             for file in event.payload.files:
-                filepath = file.file.uri.removeprefix("file://")
+                filepath = file.file.removeprefix("file://")
                 if file.name.endswith(".out"):
                     generated = ctx.std.fs.read_to_string(filepath)
                     ctx.std.io.stderr.write(generated)
                 if file.name.endswith(".report"):
                     if github_output:
                         ctx.std.fs.write(github_output, "lint-report=" + filepath)
+                if file.name.endswith(".patch"):
+                    patches.append(file.file.removeprefix("file://"))
                 if file.name.endswith(".exit_code"):
                     if int(ctx.std.fs.read_to_string(filepath).rstrip()) != 0:
                         exit_code = 1
+    if ctx.args.fix:
+        for patch in patches:
+            ctx.std.process.command("patch").arg("-p1").arg("--input=" + patch).current_dir(ctx.std.env.current_dir()).spawn().wait()
+
     return exit_code
 
 lint = task(
     implementation = impl,
     args = {
         "target_pattern": args.string(),
+        "fix": args.boolean(),
     },
 )
