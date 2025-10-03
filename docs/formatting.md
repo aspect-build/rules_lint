@@ -169,7 +169,7 @@ fi
 
 ```bash
 #!/usr/bin/env bash
-git diff --cached --diff-filter=AM --name-only -z | xargs -0 -r bazel run format --
+git diff --cached --diff-filter=AM --name-only -z | xargs --null --no-run-if-empty bazel run //:format --
 ```
 
 ### Check that files are already formatted
