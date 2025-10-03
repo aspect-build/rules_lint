@@ -21,8 +21,7 @@ def impl(ctx: task_context) -> int:
     else:
         # Note: to test this codepath, run with:
         # echo > nohup.out; nohup aspect-cli lint ; cat nohup.out
-        flags.append("--output_groups=rules_lint_machine")
-    print("flags:", flags)
+        flags.append("--output_groups=rules_lint_machine") 
     build = ctx.bazel.build(
         ctx.args.target_pattern or "//...",
         bazel_flags = flags,
