@@ -140,12 +140,36 @@ If you use [pre-commit.com](https://pre-commit.com/), add this in your `.pre-com
 > Note that pre-commit is silent while Bazel is fetching the tools, which can make it appear hung on the first run.
 > There is no way to avoid this; see https://github.com/pre-commit/pre-commit/issues/1003
 
-If you don't use pre-commit, you can just wire directly into the git hook, however
-this option will always run the formatter over all files, not just changed files.
+If you don't use pre-commit, you can just wire directly into the git hook.
+Here is a nice pattern to ensure your co-workers install the hook, and also to only format the added or modified files:
+
+1. If you don't have a workspace status script, which Bazel runs on every execution, then create `tools/workspace_status.sh`, make it executable, and register in `.bazelrc` with `common --workspace_status_command=tools/workspace_status.sh`
+2. Use a snippet like the following in that script:
 
 ```bash
-$ echo "bazel run //:format.check" >> .git/hooks/pre-commit
-$ chmod u+x .git/hooks/pre-commit
+#!/usr/bin/env bash
+inside_work_tree=$(git rev-parse --is-inside-work-tree 2>/dev/null)
+
+# Encourage developers to setup githooks
+GITHOOKS_MSG=$(cat<<EOF
+  It looks like the git config option core.hooksPath is not set.
+  This repository uses hooks stored in githooks/ to run tools such as formatters.
+
+  To set up the hooks, please run:
+
+    git config core.hooksPath githooks
+EOF
+)
+if [ "${inside_work_tree}" = "true" ] && [ "$EUID" -ne 0 ] && [ -z "`git config core.hooksPath`" ]; then
+    echo >&2 "${GITHOOKS_MSG}"
+fi
+```
+
+3. Finally, create the `githooks/pre-commit` file, make it executable and add a snippet like:
+
+```bash
+#!/usr/bin/env bash
+git diff --cached --diff-filter=AM --name-only -z | xargs -0 -r bazel run format --
 ```
 
 ### Check that files are already formatted
