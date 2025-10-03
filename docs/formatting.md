@@ -143,7 +143,8 @@ If you use [pre-commit.com](https://pre-commit.com/), add this in your `.pre-com
 If you don't use pre-commit, you can just wire directly into the git hook.
 Here is a nice pattern to ensure your co-workers install the hook, and also to only format the added or modified files:
 
-1. If you don't have a workspace status script, which Bazel runs on every execution, then create `tools/workspace_status.sh`, make it executable, and register in `.bazelrc` with `common --workspace_status_command=tools/workspace_status.sh`
+1. If you don't have a workspace status script, which Bazel runs on every execution, then create `githooks/check-config.sh`, make it executable, and register in `.bazelrc` with `common --workspace_status_command=githooks/check-config.sh` (note that a release build likely overrides the `workspace_status_command` to support stamping)
+
 2. Use a snippet like the following in that script:
 
 ```bash
@@ -151,16 +152,20 @@ Here is a nice pattern to ensure your co-workers install the hook, and also to o
 inside_work_tree=$(git rev-parse --is-inside-work-tree 2>/dev/null)
 
 # Encourage developers to setup githooks
-GITHOOKS_MSG=$(cat<<EOF
+IFS='' read -r -d '' GITHOOKS_MSG <<"EOF"
+    cat <<EOF
   It looks like the git config option core.hooksPath is not set.
   This repository uses hooks stored in githooks/ to run tools such as formatters.
+  You can disable this warning by running:
+
+    echo "common --workspace_status_command=" >> ~/.bazelrc
 
   To set up the hooks, please run:
 
     git config core.hooksPath githooks
 EOF
-)
-if [ "${inside_work_tree}" = "true" ] && [ "$EUID" -ne 0 ] && [ -z "`git config core.hooksPath`" ]; then
+
+if [ "${inside_work_tree}" = "true" ] && [ "$EUID" -ne 0 ] && [ -z "$(git config core.hooksPath)" ]; then
     echo >&2 "${GITHOOKS_MSG}"
 fi
 ```
