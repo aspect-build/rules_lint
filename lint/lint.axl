@@ -1,0 +1,49 @@
+"""Define the 'lint' task
+
+First, perform a build with linting aspects enabled, and selecting appropriate output groups.
+These can be remotely cached like any other actions.
+
+Then collect the results for presentation, either locally on the terminal or in the code review with Aspect's Marvin bot.
+"""
+
+# buildifier: disable=function-docstring
+def impl(ctx: task_context) -> int:
+    flags = [
+        "--config=lint",
+        "--remote_download_regex='.*AspectRulesLint.*'",
+    ]
+    out = ctx.std.io.stdout
+    if out.is_tty:
+        flags.append("--output_groups=rules_lint_human")
+    else:
+        # Note: to test this codepath, run with:
+        # echo > nohup.out; nohup aspect-cli lint ; cat nohup.out
+        flags.append("--output_groups=rules_lint_machine")
+    build = ctx.bazel.build(
+        ctx.args.target_pattern or "//...",
+        bazel_flags = flags,
+        events = True,
+    )
+    github_output = ctx.std.env.var("GITHUB_OUTPUT")
+    exit_code = 0
+    for event in build.events():
+        if event.kind == "named_set_of_files":
+            for file in event.payload.files:
+                filepath = file.file.uri.removeprefix("file://")
+                if file.name.endswith(".out"):
+                    generated = ctx.std.fs.read_to_string(filepath)
+                    ctx.std.io.stderr.write(generated)
+                if file.name.endswith(".report"):
+                    if github_output:
+                        ctx.std.fs.write(github_output, "lint-report=" + filepath)
+                if file.name.endswith(".exit_code"):
+                    if int(ctx.std.fs.read_to_string(filepath).rstrip()) != 0:
+                        exit_code = 1
+    return exit_code
+
+lint = task(
+    implementation = impl,
+    args = {
+        "target_pattern": args.string(),
+    },
+)
