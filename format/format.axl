@@ -1,0 +1,82 @@
+"""Define the 'format' task
+
+Format builds a multi-formatter target and then runs it on the changed files.
+It's a simple example of interaction with version control, which Bazel only does via the workspace_status_command.
+"""
+
+def bazel_run(ctx: task_context, entrypoint: str, args: list[str]) -> std.process.child:
+    """Rough port of the logic Bazel uses to execute binaries.
+
+    TODO: support env and arg attributes
+    """
+    runfiles = entrypoint + ".runfiles"
+    # TODO: this assumes the working directory is the repo root
+    workspace_directory = ctx.std.env.current_dir()
+    print("spawn", entrypoint)
+    return ctx.std.process.command(entrypoint)\
+        .current_dir(runfiles) \
+        .env("RUNFILES_DIR", runfiles) \
+        .env("JAVA_RUNFILES", runfiles) \
+        .env("RUNFILES_MANIFEST_FILE", runfiles + "_manifest") \
+        .env("BUILD_WORKSPACE_DIRECTORY", workspace_directory) \
+        .env("BUILD_WORKING_DIRECTORY", ctx.std.env.current_dir()) \
+        .args(args) \
+        .spawn()
+
+def spawn_with_output(command: std.process.command):
+    return command.stdout("piped").spawn().wait_with_output().stdout.strip()
+
+def find_changed_files(process, base_ref: str = "origin/main"):
+    merge_base = spawn_with_output(process\
+        .command("git").args(["merge-base", "HEAD", base_ref]))
+    return spawn_with_output(process\
+        .command("git").args(["diff", "--name-only", merge_base]))
+
+# buildifier: disable=function-docstring
+def impl(ctx: task_context) -> int:
+    out = ctx.std.io.stdout
+    changed_files = find_changed_files(ctx.std.process)
+    out.write("Formatting changed files:\n%s" % changed_files)
+
+    build = ctx.bazel.build(
+        ctx.args.format_target,
+        events = True,
+        bazel_flags = ["--build_runfile_links"],
+    )
+
+    entrypoint: str | None = None
+
+    for event in build.events():
+        if event.kind == "named_set_of_files":
+            for file in event.payload.files:
+                if len(file.path_prefix) == 0:
+                    continue
+                entrypoint = file.file.removeprefix("file://")
+                break
+
+    status = build.wait()
+
+    if not status.success:
+        fail("Building the formatter has failed.")
+
+    if not entrypoint:
+        fail("Failed to determine the formatter entrypoint.")
+
+    exit = bazel_run(
+        ctx,
+        entrypoint = entrypoint,
+        args = changed_files.split("\n")
+    ).wait()
+
+    if not exit.success:
+        out.write("\x1b[0;31mERROR\x1b[0m: format exited with code %d\n" % exit.code)
+
+    return exit.code
+    return 0
+
+format = task(
+    implementation = impl,
+    args = {
+        "format_target": args.string(default = "//tools/format"),
+    },
+)
