@@ -30,6 +30,7 @@ TOOLS = {
     "Rust": "rustfmt",
     "XML": "prettier",
     "Gherkin": "prettier",
+    "Nickel": "nickel",
 }
 
 # Provided to make install more convenient
@@ -60,6 +61,7 @@ CHECK_FLAGS = {
     "clang-format": "--style=file --fallback-style=none --dry-run -Werror",
     "yamlfmt": "-lint",
     "rustfmt": "--check",
+    "nickel": "format --check",
 }
 
 # Flags to pass each tool when running in default mode
@@ -87,6 +89,7 @@ FIX_FLAGS = {
     "clang-format": "-style=file --fallback-style=none -i",
     "yamlfmt": "",
     "rustfmt": "",
+    "nickel": "format",
 }
 
 def to_attribute_name(lang):
