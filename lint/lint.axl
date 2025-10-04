@@ -1,3 +1,4 @@
+
 """Define the 'lint' task
 
 First, perform a build with linting aspects enabled, and selecting appropriate output groups.
@@ -23,9 +24,9 @@ def impl(ctx: task_context) -> int:
         # echo > nohup.out; nohup aspect-cli lint ; cat nohup.out
         flags.append("--output_groups=rules_lint_machine") 
     build = ctx.bazel.build(
-        ctx.args.target_pattern or "//...",
         bazel_flags = flags,
         events = True,
+        *ctx.args.targets or ["//..."],
     )
     github_output = ctx.std.env.var("GITHUB_OUTPUT")
     exit_code = 0
@@ -54,7 +55,7 @@ def impl(ctx: task_context) -> int:
 lint = task(
     implementation = impl,
     args = {
-        "target_pattern": args.positional(),
         "fix": args.boolean(),
+        "targets": args.positional(min = 0, max = 2),
     },
 )
