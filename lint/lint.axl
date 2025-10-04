@@ -54,7 +54,7 @@ def impl(ctx: task_context) -> int:
 lint = task(
     implementation = impl,
     args = {
-        "target_pattern": args.string(),
+        "target_pattern": args.positional(),
         "fix": args.boolean(),
     },
 )
