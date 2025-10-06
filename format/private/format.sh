@@ -199,12 +199,24 @@ function ls-files {
         # Construct a command-line like
         #  find src/* -name *.ext1 -or -name *.ext2
         find_args=()
+        [ ${#patterns[@]} -ne 0 ] && find_args+=('(')
         for (( i=0; i<${#patterns[@]}; i++ )); do
           if [[ i -gt 0 ]]; then
             find_args+=('-or')
           fi
           find_args+=("-name" "${patterns[$i]}")
         done
+        [ ${#patterns[@]} -ne 0 ] && find_args+=(')' "-print")
+        if [ -n "$shebang_re" ]; then
+          [ ${#patterns[@]} -ne 0 ] && find_args+=('-or')
+          find_args+=(
+            '('
+            "-type" "f" "-and"
+            "!" "-name" "*.*"
+            "-exec" "sh" "-c" "head -n1 \"\$1\" | grep -Eq \"$shebang_re\"" "_" "{}" ";"
+            ')' "-print"
+          )
+        fi
         files=$(find "$@" "${find_args[@]}")
     fi
 
