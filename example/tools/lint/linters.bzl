@@ -29,6 +29,8 @@ clippy = lint_clippy_aspect(
     config = Label("//:.clippy.toml"),
 )
 
+clippy_test = lint_test(aspect = clippy)
+
 eslint = lint_eslint_aspect(
     binary = Label("//tools/lint:eslint"),
     # ESLint will resolve the configuration file by looking in the working directory first.

@@ -45,6 +45,24 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintClippy"
 
+def _marker_to_exit_code(ctx, marker, exit_code):
+    """Write 0 to exit_code if marker exists, fail otherwise.
+
+    rules_rust won't write the exit code to the success_marker, so we assert that it exists and write the exit code ourselves.
+    If there is no success marker, the action has failed anyway.
+
+    Args:
+        ctx (ctx): The rule or aspect context. Must have access to `ctx.actions.run_shell`
+        marker (File): A file that will only exist if the action has succeeded
+        exit_code (File): A file that will be written with the exit code 0 if marker exists
+    """
+    ctx.actions.run_shell(
+        outputs = [exit_code],
+        inputs = [marker],
+        arguments = [exit_code.path],
+        command = "echo '0' > $1",
+    )
+
 # buildifier: disable=function-docstring
 def _clippy_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
@@ -73,31 +91,35 @@ def _clippy_aspect_impl(target, ctx):
     #           (1) modify the patcher so that it can run an action through a macro, or
     #           (2) modify rules_rust so that it gives us a struct with a command line we can run it with the patcher.
 
+    human_success_indicator = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "human_success_indicator"))
     rust_clippy_action.action(
         ctx,
         clippy_executable = clippy_bin,
         process_wrapper = ctx.executable._process_wrapper,
-        src = crate_info,
+        crate_info = crate_info,
         config = ctx.file._config_file,
         output = outputs.human.out,
-        success_marker = outputs.human.exit_code,  # This won't write the exit code, but it wil only write the file if the process has succeeded.
+        success_marker = human_success_indicator,
         cap_at_warnings = True,  # We don't want to crash the process if there are clippy errors, we just want to report them.
         extra_clippy_flags = extra_options,
     )
+    _marker_to_exit_code(ctx, human_success_indicator, outputs.human.exit_code)
 
+    machine_success_indicator = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "machine_success_indicator"))
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     rust_clippy_action.action(
         ctx,
         clippy_executable = clippy_bin,
         process_wrapper = ctx.executable._process_wrapper,
-        src = crate_info,
+        crate_info = crate_info,
         config = ctx.file._config_file,
         output = raw_machine_report,
-        success_marker = outputs.machine.exit_code,  # This won't write the exit code, but it wil only write the file if the process has succeeded.
+        success_marker = machine_success_indicator,
         cap_at_warnings = True,
         extra_clippy_flags = extra_options,
         error_format = "json",
     )
+    _marker_to_exit_code(ctx, machine_success_indicator, outputs.machine.exit_code)
 
     # clippy uses rustc's IO format, which doesn't have a SARIF output mode built in,
     # and they're not planning to add one.

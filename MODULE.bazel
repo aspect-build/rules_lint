@@ -30,7 +30,7 @@ bazel_dep(name = "rules_shell", version = "0.5.0")
 bazel_dep(name = "rules_rust", version = "0.50.1")
 git_override(
     module_name = "rules_rust",
-    commit = "4bf3797ff86bdeddbefca177ae6034a1ca0bc82c",  # tip of "blorente/extract_action_for_rules_lint",
+    commit = "b76a1bb3e596a1816b8f91bbb608b5965c2c8f70",  # tip of "blorente/extract_action_for_rules_lint",
     remote = "https://github.com/blorente/rules_rust.git",
 )
 
