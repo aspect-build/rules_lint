@@ -40,7 +40,6 @@ Now your targets will be linted with clippy.
 If you wish a target to be excluded from linting, you can give them the `noclippy` tag.
 """
 
-load("@aspect_bazel_lib//lib:copy_file.bzl", "COPY_FILE_TOOLCHAINS", "copy_file_action")
 load("@rules_rust//rust:defs.bzl", "rust_clippy_action", "rust_common")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 
@@ -68,12 +67,11 @@ def _clippy_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    # FIXME : does clippy have a --fix mode that applies fixes for some violations while reporting others?
-    # It does, but I'm not sure how to use the patcher with an action that we import.
     extra_options = []
-    if ctx.attr._options[LintOptionsInfo].fix:
-        pass
-        # extra_options += ["--fix"]
+    # FIXME: Implement support for --fix mode. Clippy has a --fix flag, but our patcher doesn't currently support running an action through a macro.
+    #        We have to either
+    #           (1) modify the patcher so that it can run an action through a macro, or
+    #           (2) modify rules_rust so that it gives us a struct with a command line we can run it with the patcher.
 
     rust_clippy_action.action(
         ctx,
@@ -142,7 +140,7 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS):
         fragments = ["cpp"],
         implementation = _clippy_aspect_impl,
         attrs = attrs,
-        toolchains = COPY_FILE_TOOLCHAINS + [
+        toolchains = [
             OPTIONAL_SARIF_PARSER_TOOLCHAIN,
             Label("@rules_rust//rust:toolchain_type"),
             "@bazel_tools//tools/cpp:toolchain_type",
