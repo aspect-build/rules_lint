@@ -125,7 +125,10 @@ and from being included in language stats, for GitLab and GitHub respectively. S
 
 ### Install as a pre-commit hook
 
-If you use [pre-commit.com](https://pre-commit.com/), add this in your `.pre-commit-config.yaml`:
+#### Using the pre-commit tool
+Developers could choose to install [pre-commit.com](https://pre-commit.com/) (note that it has a Python system dependency).
+
+In this case you can add this in your `.pre-commit-config.yaml`:
 
 ```yaml
 - repo: local
@@ -139,6 +142,8 @@ If you use [pre-commit.com](https://pre-commit.com/), add this in your `.pre-com
 
 > Note that pre-commit is silent while Bazel is fetching the tools, which can make it appear hung on the first run.
 > There is no way to avoid this; see https://github.com/pre-commit/pre-commit/issues/1003
+
+#### Using a locally-defined hook
 
 If you don't use pre-commit, you can just wire directly into the git hook.
 Here is a nice pattern to ensure your co-workers install the hook, and also to only format the added or modified files:
