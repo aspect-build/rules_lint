@@ -77,4 +77,9 @@ stardoc_with_diff_test(
     bzl_library_target = "@aspect_rules_lint//lint:clang_tidy",
 )
 
+stardoc_with_diff_test(
+    name = "cppcheck",
+    bzl_library_target = "@aspect_rules_lint//lint:cppcheck",
+)
+
 update_docs(name = "update")
