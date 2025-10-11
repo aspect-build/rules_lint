@@ -45,6 +45,7 @@ Linters which are not language-specific:
 | Jsonnet                | [jsonnetfmt]              |                                  |
 | Kotlin                 | [ktfmt]                   | [ktlint]                         |
 | Markdown               | [Prettier]                | [Vale]                           |
+| Nickel                 | [nickel]                  |                                  |
 | Protocol Buffer        | [buf]                     | [buf lint]                       |
 | Python                 | [ruff]                    | [flake8], [ruff]                 |
 | Rust                   | [rustfmt]                 |                                  |
@@ -91,6 +92,7 @@ Linters which are not language-specific:
 [yamlfmt]: https://github.com/google/yamlfmt
 [rustfmt]: https://rust-lang.github.io/rustfmt
 [stylelint]: https://stylelint.io
+[nickel]: https://github.com/tweag/nickel
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift
