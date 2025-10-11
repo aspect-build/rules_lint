@@ -19,6 +19,7 @@ bazel_dep(name = "rules_go", version = "0.52.0", repo_name = "io_bazel_rules_go"
 bazel_dep(name = "rules_proto", version = "6.0.0")
 bazel_dep(name = "rules_python", version = "0.26.0")
 bazel_dep(name = "rules_rust", version = "0.50.1")
+bazel_dep(name = "rules_ruby", version = "0.21.1")
 bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 bazel_dep(name = "platforms", version = "0.0.8")
 bazel_dep(name = "rules_kotlin", version = "1.9.0")
@@ -128,3 +129,6 @@ rust.toolchain(
     edition = "2021",
     versions = ["1.75.0"],
 )
+
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(ruby_version = "3.3.0")

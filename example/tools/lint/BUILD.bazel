@@ -114,3 +114,8 @@ native_binary(
     ),
     out = "clang_tidy",
 )
+
+sh_binary(
+    name = "rubocop",
+    srcs = ["rubocop_wrapper.sh"],
+)

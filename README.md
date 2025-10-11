@@ -48,6 +48,7 @@ Linters which are not language-specific:
 | Markdown               | [Prettier]                | [Vale]                           |
 | Protocol Buffer        | [buf]                     | [buf lint]                       |
 | Python                 | [ruff]                    | [flake8], [pylint], [ruff]       |
+| Ruby                   |                           | [RuboCop]                        |
 | Rust                   | [rustfmt]                 |                                  |
 | SQL                    | [prettier-plugin-sql]     |                                  |
 | Scala                  | [scalafmt]                |                                  |
@@ -83,6 +84,7 @@ Linters which are not language-specific:
 [gofumpt]: https://github.com/mvdan/gofumpt
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
+[rubocop]: https://docs.rubocop.org/
 [ruff]: https://docs.astral.sh/ruff/
 [pylint]: https://pylint.readthedocs.io/en/stable/
 [shellcheck]: https://www.shellcheck.net/
