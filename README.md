@@ -42,6 +42,7 @@ Linters which are not language-specific:
 | JSON                   | [Prettier]                |                                  |
 | Java                   | [google-java-format]      | [pmd] , [Checkstyle], [Spotbugs] |
 | JavaScript             | [Prettier]                | [ESLint]                         |
+| HTML templates         | [djlint]                  |                                  |
 | Jsonnet                | [jsonnetfmt]              |                                  |
 | Kotlin                 | [ktfmt]                   | [ktlint]                         |
 | Markdown               | [Prettier]                | [Vale]                           |
@@ -74,6 +75,7 @@ Linters which are not language-specific:
 [ktfmt]: https://github.com/facebook/ktfmt
 [ktlint]: https://github.com/pinterest/ktlint
 [buildifier]: https://github.com/keith/buildifier-prebuilt
+[djlint]: https://djlint.com/
 [prettier-plugin-sql]: https://github.com/un-ts/prettier
 [prettier-plugin-gherkin]: https://github.com/mapado/prettier-plugin-gherkin
 [prettier/plugin-xml]: https://github.com/prettier/plugin-xml

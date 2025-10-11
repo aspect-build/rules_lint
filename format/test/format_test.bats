@@ -35,6 +35,13 @@ bats_load_library "bats-assert"
     assert_output --partial "format/private/BUILD.bazel"
 }
 
+@test "should run djlint on HTML Jinja templates" {
+    run bazel run //format/test:format_HTML_Jinja_with_djlint
+    assert_success
+
+    assert_output --partial "+ djlint --format-css --format-js --reformat example/src/hello.html.jinja"
+}
+
 @test "should run prettier on Markdown" {
     run bazel run //format/test:format_Markdown_with_prettier
     assert_success
