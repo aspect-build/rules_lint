@@ -43,6 +43,12 @@ EOF
 	# Buf
 	assert_output --partial 'src/file.proto:3:1:Import "src/unused.proto" is unused.'
 
+	# yamllint
+	echo <<"EOF" | assert_output --partial
+src/config.yaml
+  1:1       error    missing document start "---"  (document-start)
+EOF
+
 	# Vale
 	echo <<"EOF" | assert_output --partial
 3:47  warning  Try to avoid using              Google.We

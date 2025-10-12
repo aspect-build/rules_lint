@@ -29,6 +29,12 @@ filegroup(
 )
 
 filegroup(
+    name = "yaml_docs",
+    srcs = ["config.yaml"],
+    tags = ["lint-with-yamllint"],
+)
+
+filegroup(
     name = "toml",
     srcs = ["hello.toml"],
     tags = ["toml"],

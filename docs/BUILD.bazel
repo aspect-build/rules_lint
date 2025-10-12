@@ -68,6 +68,11 @@ stardoc_with_diff_test(
 )
 
 stardoc_with_diff_test(
+    name = "yamllint",
+    bzl_library_target = "@aspect_rules_lint//lint:yamllint",
+)
+
+stardoc_with_diff_test(
     name = "ktlint",
     bzl_library_target = "@aspect_rules_lint//lint:ktlint",
 )

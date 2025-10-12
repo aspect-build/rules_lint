@@ -220,6 +220,12 @@ bzl_library(
 )
 
 bzl_library(
+    name = "yamllint",
+    srcs = ["yamllint.bzl"],
+    deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
     name = "ruff_versions",
     srcs = ["ruff_versions.bzl"],
 )
