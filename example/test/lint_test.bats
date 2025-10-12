@@ -10,9 +10,11 @@ In src/hello.sh line 3:
 EOF
 
 	# Ruff
-	assert_output --partial "src/unused_import.py:18:8: F401 [*] \`os\` imported but unused"
-	assert_output --partial "Found 2 errors."
-	assert_output --partial "[*] 1 fixable with the \`--fix\` option."
+	echo <<"EOF" | assert_output --partial
+src/unused_import.py:18:8: F401 [*] `os` imported but unused
+Found 2 errors.
+[*] 1 fixable with the `--fix` option.
+EOF
 
 	# Flake8
 	assert_output --partial "src/unused_import.py:18:1: F401 'os' imported but unused"
