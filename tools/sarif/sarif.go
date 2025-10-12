@@ -15,7 +15,7 @@
  */
 
  package sarif
- 
+
  import (
 	 "bytes"
 	 "encoding/json"
@@ -182,4 +182,4 @@
  
 	 return sarifJson, err
  }
-
+ 
