@@ -65,10 +65,7 @@
 		 // TODO: upstream to https://github.com/reviewdog/errorformat/issues/62
 		 fm = []string{`%f:%l:\\t%m`}
 	 case "AspectRulesLintPylint":
-		 fm = []string{
-			`%-G************* %.%#`,
-			`%f:%l:%c: %m`,
-		 }
+		 fm = []string{`%f:%l:%c: %m`}
 	 case "AspectRulesLintRuff":
 		fm = []string{
 			// %E forces a multiline error severity message. There is no forced single line error message

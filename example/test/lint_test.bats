@@ -16,6 +16,13 @@ Found 2 errors.
 [*] 1 fixable with the `--fix` option.
 EOF
 
+	# pylint
+	echo <<"EOF" | assert_output --partial
+src/unused_import.py:15:0: C0301: Line too long (180/120) (line-too-long)
+src/unused_import.py:22:6: W1302: Invalid format string (bad-format-string)
+src/unused_import.py:18:0: W0611: Unused import os (unused-import)
+EOF
+
 	# Flake8
 	assert_output --partial "src/unused_import.py:18:1: F401 'os' imported but unused"
 
