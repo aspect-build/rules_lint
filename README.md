@@ -46,7 +46,7 @@ Linters which are not language-specific:
 | Kotlin                 | [ktfmt]                   | [ktlint]                         |
 | Markdown               | [Prettier]                | [Vale]                           |
 | Protocol Buffer        | [buf]                     | [buf lint]                       |
-| Python                 | [ruff]                    | [flake8], [ruff]                 |
+| Python                 | [ruff]                    | [flake8], [pylint], [ruff]       |
 | Rust                   | [rustfmt]                 |                                  |
 | SQL                    | [prettier-plugin-sql]     |                                  |
 | Scala                  | [scalafmt]                |                                  |
@@ -82,6 +82,7 @@ Linters which are not language-specific:
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
 [ruff]: https://docs.astral.sh/ruff/
+[pylint]: https://pylint.readthedocs.io/en/stable/
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
 [taplo]: https://taplo.tamasfe.dev/

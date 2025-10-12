@@ -1,0 +1,8 @@
+[MASTER]
+load-plugins=
+
+[MESSAGES CONTROL]
+disable=missing-module-docstring
+
+[FORMAT]
+max-line-length=120

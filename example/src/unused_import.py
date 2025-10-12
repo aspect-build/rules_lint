@@ -10,6 +10,11 @@
 # src/unused_import.py:12:8: F401 [*] `os` imported but unused
 # Found 1 error.
 # [*] 1 potentially fixable with the --fix option.
+
+# Demo with just running pylint:
+# $ bazel run --run_under="cd $PWD &&" -- //tools/lint:pylint --rcfile=.pylintrc --reports=n --score=n --msg-template="{path}:{line}:{column}: {msg_id}: {msg}" src/unused_import.py
+# src/unused_import.py:17:6: W1302: Invalid format string
+# src/unused_import.py:13:0: W0611: Unused import os
 import os
 
 # Another lint violation, which is not auto-fixable.

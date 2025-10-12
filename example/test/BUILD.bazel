@@ -5,7 +5,7 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_python//python:defs.bzl", "py_library")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
-load("//tools/lint:linters.bzl", "checkstyle_test", "eslint_test", "flake8_test", "pmd_test", "ruff_test", "shellcheck_test")
+load("//tools/lint:linters.bzl", "checkstyle_test", "eslint_test", "flake8_test", "pmd_test", "pylint_test", "ruff_test", "shellcheck_test")
 
 write_file(
     name = "ts_code_generator",
@@ -81,6 +81,11 @@ flake8_test(
     srcs = [":generated_py"],
 )
 
+pylint_test(
+    name = "pylint_should_ignore_generated",
+    srcs = [":generated_py"],
+)
+
 ruff_test(
     name = "ruff_should_ignore_generated",
     srcs = [":generated_py"],
@@ -88,6 +93,11 @@ ruff_test(
 
 ruff_test(
     name = "ruff_should_ignore_generated_filegroup",
+    srcs = [":generated_py_filegroup"],
+)
+
+pylint_test(
+    name = "pylint_should_ignore_generated_filegroup",
     srcs = [":generated_py_filegroup"],
 )
 
@@ -106,6 +116,13 @@ flake8_test(
     srcs = ["//src:unused_import"],
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
+    tags = ["manual"],
+)
+
+pylint_test(
+    name = "pylint",
+    srcs = ["//src:unused_import"],
+    # Expected to fail based on current content of the file.
     tags = ["manual"],
 )
 
