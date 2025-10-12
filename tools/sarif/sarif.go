@@ -182,3 +182,4 @@
  
 	 return sarifJson, err
  }
+
