@@ -100,7 +100,7 @@ def _pylint_aspect_impl(target, ctx):
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ruff", "lint-with-pylint"]):
+def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-pylint"]):
     """A factory function to create a linter aspect.
 
     Attrs:
