@@ -14,5 +14,5 @@ bzl_library(
     name = "formatter_binary",
     srcs = ["formatter_binary.bzl"],
     visibility = ["//format:__subpackages__"],
-    deps = ["@aspect_bazel_lib//lib:paths"],
+    deps = ["@bazel_lib//lib:paths"],
 )

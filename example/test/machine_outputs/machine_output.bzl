@@ -1,7 +1,7 @@
 "Extracts the machine-readable SARIF report from a target that has been linted with rules_lint."
 
-load("@aspect_bazel_lib//lib:testing.bzl", "assert_json_matches")
 load("@bazel_features//:features.bzl", "bazel_features")
+load("@bazel_lib//lib:testing.bzl", "assert_json_matches")
 load("//tools/lint:linters.bzl", "buf", "clang_tidy", "eslint", "flake8", "pylint", "ruff", "shellcheck", "stylelint", "vale")
 
 SARIF_TOOL_DRIVER_NAME_FILTER = ".runs[].tool.driver.name"

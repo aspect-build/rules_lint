@@ -1,5 +1,5 @@
-load("@aspect_bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
+load("@bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS")
 
 package(default_visibility = ["//visibility:public"])
@@ -20,8 +20,8 @@ bzl_library(
     srcs = ["defs.bzl"],
     deps = [
         "//format/private:formatter_binary",
-        "@aspect_bazel_lib//lib:lists",
-        "@aspect_bazel_lib//lib:utils",
+        "@bazel_lib//lib:lists",
+        "@bazel_lib//lib:utils",
         "@rules_multirun//:defs",
         "@rules_shell//shell:rules_bzl",
     ],

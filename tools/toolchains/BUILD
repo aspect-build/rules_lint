@@ -9,8 +9,8 @@ bzl_library(
     srcs = ["register.bzl"],
     deps = [
         "//tools:version",
-        "@aspect_bazel_lib//lib/private:source_toolchains_repo",
         "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain",
+        "@bazel_lib//lib/private:source_toolchains_repo",
     ],
 )
 

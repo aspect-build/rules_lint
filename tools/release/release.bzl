@@ -1,7 +1,7 @@
 """This module provides the macros for performing a release.
 """
 
-load("@aspect_bazel_lib//tools/release:hashes.bzl", "hashes")
+load("@bazel_lib//tools/release:hashes.bzl", "hashes")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
 PLATFORMS = [

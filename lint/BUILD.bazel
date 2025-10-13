@@ -1,5 +1,5 @@
-load("@aspect_bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
+load("@bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("//lint/private:lint_aspect.bzl", "lint_options")
@@ -146,15 +146,15 @@ bzl_library(
     srcs = ["eslint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@aspect_bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
+        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 
 bzl_library(
     name = "lint_test",
     srcs = ["lint_test.bzl"],  # keep
-    deps = ["@aspect_bazel_lib//lib:paths"],
+    deps = ["@bazel_lib//lib:paths"],
 )
 
 bzl_library(
@@ -220,8 +220,8 @@ bzl_library(
     srcs = ["stylelint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@aspect_bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
+        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 
@@ -271,9 +271,9 @@ bzl_library(
     srcs = ["extensions.bzl"],
     deps = [
         "//tools/toolchains:register",
-        "@aspect_bazel_lib//lib/private:extension_utils",
         "@aspect_tools_telemetry_report//:defs",
         "@bazel_features//:features",
+        "@bazel_lib//lib/private:extension_utils",
     ],
 )
 
