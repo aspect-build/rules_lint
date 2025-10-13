@@ -5,10 +5,6 @@ workspaces:
       tasks:
         - bzlmod-false:
             without: true
-  - docs:
-      tasks:
-        - bzlmod-false:
-            without: true
   - example:
       tasks:
         - gazelle:
