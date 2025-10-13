@@ -188,7 +188,7 @@ We consider type-checkers as a build tool, not as a linter. This is for a few re
 
 Rulesets for type-checkers:
 
-- Python: [rules_mypy](https://github.com/theoremlp/rules_mypy)
+- Python: [rules_mypy](https://github.com/bazel-contrib/rules_mypy)
 
 [aspect workflows]: https://docs.aspect.build/workflows
 [aspect cli]: https://docs.aspect.build/cli

@@ -35,7 +35,7 @@ flake8_test(
 ```
 """
 
-load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
+load("@bazel_lib//lib:paths.bzl", "to_rlocation_path")
 
 def _write_assert(ctx, files):
     "Create a parameter to substitute into the shell script"

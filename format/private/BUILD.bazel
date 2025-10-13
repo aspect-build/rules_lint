@@ -1,4 +1,4 @@
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
 exports_files(["format.sh"])
@@ -14,5 +14,5 @@ bzl_library(
     name = "formatter_binary",
     srcs = ["formatter_binary.bzl"],
     visibility = ["//format:__subpackages__"],
-    deps = ["@aspect_bazel_lib//lib:paths"],
+    deps = ["@bazel_lib//lib:paths"],
 )

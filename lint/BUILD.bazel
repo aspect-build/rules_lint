@@ -1,5 +1,5 @@
-load("@aspect_bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_lib//:bzl_library.bzl", "bzl_library")
+load("@bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("//lint/private:lint_aspect.bzl", "lint_options")
@@ -154,7 +154,7 @@ bzl_library(
 bzl_library(
     name = "lint_test",
     srcs = ["lint_test.bzl"],  # keep
-    deps = ["@aspect_bazel_lib//lib:paths"],
+    deps = ["@bazel_lib//lib:paths"],
 )
 
 bzl_library(
@@ -226,11 +226,6 @@ bzl_library(
 )
 
 bzl_library(
-    name = "ruff_versions",
-    srcs = ["ruff_versions.bzl"],
-)
-
-bzl_library(
     name = "vale",
     srcs = ["vale.bzl"],
     deps = _BAZEL_TOOLS + [
@@ -238,11 +233,6 @@ bzl_library(
         ":vale_versions",
         "//lint/private:lint_aspect",
     ],
-)
-
-bzl_library(
-    name = "vale_versions",
-    srcs = ["vale_versions.bzl"],
 )
 
 bzl_library(
@@ -274,4 +264,14 @@ bzl_library(
 sh_binary(
     name = "clang_tidy_wrapper",
     srcs = ["clang_tidy_wrapper.bash"],
+)
+
+bzl_library(
+    name = "ruff_versions",
+    srcs = ["ruff_versions.bzl"],
+)
+
+bzl_library(
+    name = "vale_versions",
+    srcs = ["vale_versions.bzl"],
 )

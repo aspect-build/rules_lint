@@ -1,3 +1,4 @@
+load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load(":release.bzl", "multi_platform_go_binaries")
 
@@ -13,4 +14,13 @@ sh_binary(
     args = ["$(rlocationpaths //tools/release:sarif_parser)"],
     data = ["//tools/release:sarif_parser"],
     deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+bzl_library(
+    name = "release",
+    srcs = ["release.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@io_bazel_rules_go//go:def",
+    ],
 )

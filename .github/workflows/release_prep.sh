@@ -13,6 +13,14 @@ ARCHIVE_TMP=$(mktemp)
 # NB: configuration for 'git archive' is in /.gitattributes
 git archive --format=tar --prefix=${PREFIX}/ ${TAG} >$ARCHIVE_TMP
 
+# Add generated API docs to the release, see https://github.com/bazelbuild/bazel-central-registry/issues/5593
+docs="$(mktemp -d)"; targets="$(mktemp)"
+bazel --output_base="$docs" query --output=label --output_file="$targets" 'kind("starlark_doc_extract rule", //lint/... union //format/...)'
+bazel --output_base="$docs" build --target_pattern_file="$targets"
+tar --create --auto-compress \
+    --directory "$(bazel --output_base="$docs" info bazel-bin)" \
+    --file "$GITHUB_WORKSPACE/${ARCHIVE%.tar.gz}.docs.tar.gz" .
+
 ############
 # Patch up the archive to have integrity hashes for built binaries that we downloaded in the GHA workflow.
 # Now that we've run `git archive` we are free to pollute the working directory.
@@ -68,18 +76,16 @@ http_archive(
     url = "https://github.com/aspect-build/rules_lint/releases/download/${TAG}/${ARCHIVE}",
 )
 
-# aspect_rules_lint depends on aspect_bazel_lib.
 http_archive(
-    name = "aspect_bazel_lib",
-    sha256 = "6d758a8f646ecee7a3e294fbe4386daafbe0e5966723009c290d493f227c390b",
-    strip_prefix = "bazel-lib-2.7.7",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.7/bazel-lib-v2.7.7.tar.gz",
+    name = "bazel_lib",
+    sha256 = "0758ace949a93f709230a8e08ef35c5f0aacae2ff5d219b27da1d21d8233a709",
+    strip_prefix = "bazel-lib-3.0.0-rc.0",
+    url = "https://github.com/bazel-contrib/bazel-lib/releases/download/v3.0.0-rc.0/bazel-lib-v3.0.0-rc.0.tar.gz",
 )
 
-load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies")
+load("@bazel_lib//lib:repositories.bzl", "bazel_lib_dependencies")
 
-# aspect_bazel_lib depends on bazel_skylib
-aspect_bazel_lib_dependencies()
+bazel_lib_dependencies()
 EOF
 
 awk 'f;/--SNIP--/{f=1}' example/WORKSPACE.bazel
