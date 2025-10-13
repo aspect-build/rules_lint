@@ -44,6 +44,28 @@ jobs:
       - name: "Integration test: format"
         working-directory: format
         run: bats ./test
+  aspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: bazel-contrib/setup-bazel@0.15.0
+      - name: Install Aspect CLI
+        uses: jaxxstorm/action-install-gh-release@v2.1.0
+        with:   
+          repo: aspect-build/aspect-cli
+          tag: 2024.01 # secret old tag where binaries are stashed for now
+          asset-name: aspect-cli
+          platform: unknown_linux
+          arch: x86_64
+          extension-matching: disable
+          rename-to: aspect
+          chmod: 0755
+      - name: Lint
+        working-directory: example
+        run: aspect lint
+      - name: Format
+        working-directory: example
+        run: aspect format
   test:
     strategy:
       matrix:

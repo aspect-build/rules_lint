@@ -5,5 +5,5 @@
 package linting_tools
 
 import (
-    _ "github.com/google/keep-sorted"
+	_ "github.com/google/keep-sorted"
 )
