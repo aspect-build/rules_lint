@@ -12,6 +12,7 @@ with_entries(select(.key | IN(
     "Java",
     "JavaScript",
     "Jsonnet",
+    "HTML Jinja",
     "JSON",
     "Kotlin",
     "Less",

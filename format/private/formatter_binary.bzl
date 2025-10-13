@@ -17,6 +17,7 @@ TOOLS = {
     "TOML": "taplo",
     "Kotlin": "ktfmt",
     "Java": "java-format",
+    "HTML Jinja": "djlint",
     "Scala": "scalafmt",
     "Swift": "swiftformat",
     "Go": "gofmt",
@@ -50,6 +51,7 @@ CHECK_FLAGS = {
     "ruff": "format --check --force-exclude --diff",
     "shfmt": "--diff --apply-ignore",
     "java-format": "--set-exit-if-changed --dry-run",
+    "djlint": "--format-css --format-js --check",
     "ktfmt": "--set-exit-if-changed --dry-run",
     "gofmt": "-l",
     "buf": "format -d --exit-code --disable-symlinks",
@@ -65,6 +67,7 @@ CHECK_FLAGS = {
 # Flags to pass each tool when running in default mode
 FIX_FLAGS = {
     "buildifier": "-mode=fix",
+    "djlint": "--format-css --format-js --reformat",
     "swiftformat": "",
     "prettier": "--write",
     # Force exclusions in the configuration file to be honored even when file paths are supplied
