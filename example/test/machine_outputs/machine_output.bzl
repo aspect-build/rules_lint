@@ -1,7 +1,7 @@
 "Extracts the machine-readable SARIF report from a target that has been linted with rules_lint."
 
 load("@bazel_features//:features.bzl", "bazel_features")
-load("@bazel_lib//lib:testing.bzl", "assert_json_matches")
+load("@jq.bzl//jq:jq.bzl", "jq_test")
 load("//tools/lint:linters.bzl", "buf", "clang_tidy", "eslint", "flake8", "pylint", "ruff", "shellcheck", "stylelint", "vale")
 
 SARIF_TOOL_DRIVER_NAME_FILTER = ".runs[].tool.driver.name"
@@ -11,14 +11,14 @@ def report_test(name, report, expected_tool, expected_uri):
     # WORKSPACE only works with releases, not prerelease
     if not bazel_features.external_deps.is_bzlmod_enabled:
         return
-    assert_json_matches(
+    jq_test(
         name = name,
         file1 = report,
         file2 = report,
         filter1 = SARIF_TOOL_DRIVER_NAME_FILTER,
         filter2 = "\"%s\"" % expected_tool,
     )
-    assert_json_matches(
+    jq_test(
         name = name + ".uri",
         file1 = report,
         file2 = report,
