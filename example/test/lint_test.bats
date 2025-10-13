@@ -11,13 +11,20 @@ EOF
 
 	# Ruff
 	echo <<"EOF" | assert_output --partial
-src/unused_import.py:13:8: F401 [*] `os` imported but unused
-Found 1 error.
+src/unused_import.py:18:8: F401 [*] `os` imported but unused
+Found 2 errors.
 [*] 1 fixable with the `--fix` option.
 EOF
 
+	# pylint
+	echo <<"EOF" | assert_output --partial
+src/unused_import.py:15:0: C0301: Line too long (180/120) (line-too-long)
+src/unused_import.py:22:6: W1302: Invalid format string (bad-format-string)
+src/unused_import.py:18:0: W0611: Unused import os (unused-import)
+EOF
+
 	# Flake8
-	assert_output --partial "src/unused_import.py:13:1: F401 'os' imported but unused"
+	assert_output --partial "src/unused_import.py:18:1: F401 'os' imported but unused"
 
 	# PMD
 	echo <<"EOF" | assert_output --partial
@@ -83,10 +90,10 @@ EOF
 	echo <<"EOF" | assert_output --partial
 --- a/src/unused_import.py
 +++ b/src/unused_import.py
-@@ -10,4 +10,3 @@
- # src/unused_import.py:12:8: F401 [*] `os` imported but unused
- # Found 1 error.
- # [*] 1 potentially fixable with the --fix option.
+@@ -15,7 +15,6 @@
+ # $ bazel run --run_under="cd $PWD &&" -- //tools/lint:pylint --rcfile=.pylintrc --reports=n --score=n --msg-template="{path}:{line}:{column}: {msg_id}: {msg}" src/unused_import.py
+ # src/unused_import.py:22:6: W1302: Invalid format string
+ # src/unused_import.py:18:0: W0611: Unused import os
 -import os
 EOF
 }
