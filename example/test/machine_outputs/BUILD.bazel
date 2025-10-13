@@ -5,6 +5,7 @@ load(
     "machine_buf_report",
     "machine_eslint_report",
     "machine_flake8_report",
+    "machine_pylint_report",
     "machine_ruff_report",
     "machine_shellcheck_report",
     "machine_stylelint_report",
@@ -95,6 +96,18 @@ report_test(
     expected_tool = "Flake8",
     expected_uri = "src/unused_import.py",
     report = "machine_flake8_report",
+)
+
+machine_pylint_report(
+    name = "machine_pylint_report",
+    src = "//src:unused_import",
+)
+
+report_test(
+    name = "pylint_machine_output_test",
+    expected_tool = "Pylint",
+    expected_uri = "src/unused_import.py",
+    report = "machine_pylint_report",
 )
 
 machine_yamllint_report(

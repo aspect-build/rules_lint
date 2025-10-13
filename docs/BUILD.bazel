@@ -23,6 +23,11 @@ stardoc_with_diff_test(
 )
 
 stardoc_with_diff_test(
+    name = "pylint",
+    bzl_library_target = "@aspect_rules_lint//lint:pylint",
+)
+
+stardoc_with_diff_test(
     name = "keep_sorted",
     bzl_library_target = "@aspect_rules_lint//lint:keep_sorted",
 )

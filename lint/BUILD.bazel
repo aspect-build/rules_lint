@@ -164,6 +164,12 @@ bzl_library(
 )
 
 bzl_library(
+    name = "pylint",
+    srcs = ["pylint.bzl"],
+    deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
     name = "keep_sorted",
     srcs = ["keep_sorted.bzl"],
     deps = ["//lint/private:lint_aspect"],

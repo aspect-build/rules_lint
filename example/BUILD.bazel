@@ -15,6 +15,7 @@ exports_files(
     [
         "buf.yaml",
         ".flake8",
+        ".pylintrc",
         "pmd.xml",
         "checkstyle.xml",
         "checkstyle-suppressions.xml",

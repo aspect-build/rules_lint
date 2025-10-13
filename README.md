@@ -42,11 +42,12 @@ Linters which are not language-specific:
 | JSON                   | [Prettier]                |                                  |
 | Java                   | [google-java-format]      | [pmd] , [Checkstyle], [Spotbugs] |
 | JavaScript             | [Prettier]                | [ESLint]                         |
+| HTML templates         | [djlint]                  |                                  |
 | Jsonnet                | [jsonnetfmt]              |                                  |
 | Kotlin                 | [ktfmt]                   | [ktlint]                         |
 | Markdown               | [Prettier]                | [Vale]                           |
 | Protocol Buffer        | [buf]                     | [buf lint]                       |
-| Python                 | [ruff]                    | [flake8], [ruff]                 |
+| Python                 | [ruff]                    | [flake8], [pylint], [ruff]       |
 | Rust                   | [rustfmt]                 |                                  |
 | SQL                    | [prettier-plugin-sql]     |                                  |
 | Scala                  | [scalafmt]                |                                  |
@@ -74,6 +75,7 @@ Linters which are not language-specific:
 [ktfmt]: https://github.com/facebook/ktfmt
 [ktlint]: https://github.com/pinterest/ktlint
 [buildifier]: https://github.com/keith/buildifier-prebuilt
+[djlint]: https://djlint.com/
 [prettier-plugin-sql]: https://github.com/un-ts/prettier
 [prettier-plugin-gherkin]: https://github.com/mapado/prettier-plugin-gherkin
 [prettier/plugin-xml]: https://github.com/prettier/plugin-xml
@@ -82,6 +84,7 @@ Linters which are not language-specific:
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
 [ruff]: https://docs.astral.sh/ruff/
+[pylint]: https://pylint.readthedocs.io/en/stable/
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
 [taplo]: https://taplo.tamasfe.dev/

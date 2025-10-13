@@ -27,6 +27,11 @@ py_console_script_binary(
 )
 
 py_console_script_binary(
+    name = "pylint",
+    pkg = "@pip//pylint:pkg",
+)
+
+py_console_script_binary(
     name = "yamllint",
     pkg = "@pip//yamllint:pkg",
 )

@@ -10,6 +10,7 @@ load("@aspect_rules_lint//lint:ktlint.bzl", "lint_ktlint_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
+load("@aspect_rules_lint//lint:pylint.bzl", "lint_pylint_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
@@ -43,6 +44,13 @@ flake8 = lint_flake8_aspect(
 )
 
 flake8_test = lint_test(aspect = flake8)
+
+pylint = lint_pylint_aspect(
+    binary = Label("//tools/lint:pylint"),
+    config = Label("//:.pylintrc"),
+)
+
+pylint_test = lint_test(aspect = pylint)
 
 pmd = lint_pmd_aspect(
     binary = Label("//tools/lint:pmd"),
