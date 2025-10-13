@@ -5,16 +5,12 @@ workspaces:
       tasks:
         - bzlmod-false:
             without: true
-  - example:
-      tasks:
-        - gazelle:
-            without: true
+  - example
 bazel:
   flags:
     - --config=ci
 tasks:
   - lint:
-  - gazelle:
   - test:
   - test:
       name: "Test (WORKSPACE)"
