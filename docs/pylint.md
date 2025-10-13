@@ -62,7 +62,7 @@ Attrs:
 | <a id="lint_pylint_aspect-binary"></a>binary |  <p align="center"> - </p>   |  none |
 | <a id="lint_pylint_aspect-config"></a>config |  <p align="center"> - </p>   |  none |
 | <a id="lint_pylint_aspect-rule_kinds"></a>rule_kinds |  <p align="center"> - </p>   |  `["py_binary", "py_library", "py_test"]` |
-| <a id="lint_pylint_aspect-filegroup_tags"></a>filegroup_tags |  <p align="center"> - </p>   |  `["python", "lint-with-ruff", "lint-with-pylint"]` |
+| <a id="lint_pylint_aspect-filegroup_tags"></a>filegroup_tags |  <p align="center"> - </p>   |  `["python", "lint-with-pylint"]` |
 
 
 <a id="pylint_action"></a>
