@@ -57,7 +57,7 @@ py_library(
 filegroup(
     name = "generated_py_filegroup",
     srcs = ["generated.py"],
-    tags = ["lint-with-ruff"],
+    tags = ["lint-with-ruff", "lint-with-pylint"],
 )
 
 py_library(
