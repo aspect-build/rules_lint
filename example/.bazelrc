@@ -19,5 +19,3 @@ startup --windows_enable_symlinks
 common:linux --action_env=BAZEL_CXXOPTS="-std=c++20"
 common:windows --action_env=BAZEL_CXXOPTS="/std:c++20"
 
-# Do not autoload any legacy symbols that are now provided in separate repos.
-common --incompatible_autoload_externally=
