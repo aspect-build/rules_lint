@@ -2,7 +2,7 @@
 
 load("@bazel_features//:features.bzl", "bazel_features")
 load("@jq.bzl//jq:jq.bzl", "jq_test")
-load("//tools/lint:linters.bzl", "buf", "clang_tidy", "eslint", "flake8", "pylint", "ruff", "shellcheck", "stylelint", "vale")
+load("//tools/lint:linters.bzl", "buf", "clang_tidy", "eslint", "flake8", "pylint", "ruff", "shellcheck", "stylelint", "vale", "yamllint")
 
 SARIF_TOOL_DRIVER_NAME_FILTER = ".runs[].tool.driver.name"
 PHYSICAL_ARTIFACT_LOCATION_URI_FILTER = ".runs[].results | map(.locations | map(.physicalLocation.artifactLocation.uri)) | flatten | unique[]"
