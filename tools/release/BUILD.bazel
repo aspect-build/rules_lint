@@ -21,7 +21,6 @@ bzl_library(
     srcs = ["release.bzl"],
     visibility = ["//visibility:public"],
     deps = [
-        "@bazel_lib//tools/release:hashes",
         "@io_bazel_rules_go//go:def",
     ],
 )

@@ -267,17 +267,6 @@ sh_binary(
 )
 
 bzl_library(
-    name = "extensions",
-    srcs = ["extensions.bzl"],
-    deps = [
-        "//tools/toolchains:register",
-        "@aspect_tools_telemetry_report//:defs",
-        "@bazel_features//:features",
-        "@bazel_lib//lib/private:extension_utils",
-    ],
-)
-
-bzl_library(
     name = "ruff_versions",
     srcs = ["ruff_versions.bzl"],
 )
