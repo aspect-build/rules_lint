@@ -2,11 +2,12 @@
 
 http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 
-bazel_dep(name = "aspect_rules_lint", version = "0.0.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.7")
+bazel_dep(name = "aspect_rules_lint", version = "0.0.0")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0")
 bazel_dep(name = "aspect_rules_swc", version = "2.0.0")
 bazel_dep(name = "aspect_rules_ts", version = "3.0.0")
+bazel_dep(name = "bazel_lib", version = "3.0.0-rc.0")
 bazel_dep(name = "rules_buf", version = "0.5.2")
 bazel_dep(name = "bazel_features", version = "1.29.0")
 bazel_dep(name = "bazel_skylib", version = "1.4.2")
@@ -24,6 +25,7 @@ bazel_dep(name = "rules_kotlin", version = "1.9.0")
 bazel_dep(name = "rules_cc", version = "0.0.9")
 bazel_dep(name = "gazelle", version = "0.41.0")
 bazel_dep(name = "rules_shell", version = "0.5.0")
+bazel_dep(name = "jq.bzl", version = "0.4.0")
 
 local_path_override(
     module_name = "aspect_rules_lint",

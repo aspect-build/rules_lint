@@ -88,7 +88,7 @@ fi
 # Run linters
 bazel build ${args[@]} $@
 
-# TODO: Maybe this could be hermetic with bazel run @aspect_bazel_lib//tools:jq or sth
+# TODO: Maybe this could be hermetic with bazel run @bazel_lib//tools:jq or sth
 # jq on windows outputs CRLF which breaks this script. https://github.com/jqlang/jq/issues/92
 valid_reports=$(jq --arg ext .out --raw-output "$filter" "$buildevents" | tr -d '\r')
 

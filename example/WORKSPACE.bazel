@@ -46,16 +46,30 @@ install_deps()
 
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "6d758a8f646ecee7a3e294fbe4386daafbe0e5966723009c290d493f227c390b",
-    strip_prefix = "bazel-lib-2.7.7",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.7/bazel-lib-v2.7.7.tar.gz",
+    sha256 = "53cadea9109e646a93ed4dc90c9bbcaa8073c7c3df745b92f6a5000daf7aa3da",
+    strip_prefix = "bazel-lib-2.21.2",
+    url = "https://github.com/bazel-contrib/bazel-lib/releases/download/v2.21.2/bazel-lib-v2.21.2.tar.gz",
+)
+
+http_archive(
+    name = "bazel_lib",
+    sha256 = "0758ace949a93f709230a8e08ef35c5f0aacae2ff5d219b27da1d21d8233a709",
+    strip_prefix = "bazel-lib-3.0.0-rc.0",
+    url = "https://github.com/bazel-contrib/bazel-lib/releases/download/v3.0.0-rc.0/bazel-lib-v3.0.0-rc.0.tar.gz",
+)
+
+http_archive(
+    name = "jq.bzl",
+    sha256 = "21617eb71fb775a748ef5639131ab943ef39946bd2a4ce96ea60b03f985db0c5",
+    strip_prefix = "jq.bzl-0.4.0",
+    url = "https://github.com/bazel-contrib/jq.bzl/releases/download/v0.4.0/jq.bzl-v0.4.0.tar.gz",
 )
 
 http_archive(
     name = "aspect_rules_js",
-    sha256 = "6b7e73c35b97615a09281090da3645d9f03b2a09e8caa791377ad9022c88e2e6",
-    strip_prefix = "rules_js-2.0.0",
-    url = "https://github.com/aspect-build/rules_js/releases/download/v2.0.0/rules_js-v2.0.0.tar.gz",
+    sha256 = "4c7404aa9d7f8c458c1bdf79cc5ec1fced55cab25a3f1121b236de78e91f271b",
+    strip_prefix = "rules_js-2.6.2",
+    url = "https://github.com/aspect-build/rules_js/releases/download/v2.6.2/rules_js-v2.6.2.tar.gz",
 )
 
 http_archive(
@@ -90,9 +104,17 @@ load("@bazel_features//:deps.bzl", "bazel_features_deps")
 
 bazel_features_deps()
 
-load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_register_toolchains")
+# Needed for yq
+# TODO(alexeagle) change to yq.bzl
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "aspect_bazel_lib_register_toolchains")
+
+aspect_bazel_lib_dependencies()
 
 aspect_bazel_lib_register_toolchains()
+
+load("@bazel_lib//lib:repositories.bzl", "bazel_lib_register_toolchains")
+
+bazel_lib_register_toolchains()
 
 load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
 

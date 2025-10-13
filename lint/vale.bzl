@@ -29,7 +29,7 @@ mirror of https://github.com/errata-ai/packages/blob/master/library.json.
 It's possible to fetch more styles using a typical `http_archive()` call.
 
 At runtime, Vale requires the styles are "installed" into a folder together.
-Use the [`copy_to_directory`](https://docs.aspect.build/rulesets/aspect_bazel_lib/docs/copy_to_directory/)
+Use the [`copy_to_directory`](https://docs.aspect.build/rulesets/bazel_lib/docs/copy_to_directory/)
 rule to accomplish this, for example,
 
 ```python

@@ -1,8 +1,9 @@
 """Define fetches needed for tools"""
 
-# buildifier: disable=bzl-visibility
-load("@aspect_bazel_lib//lib/private:source_toolchains_repo.bzl", "source_toolchains_repo")
 load("@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain.bzl", "SARIF_PARSER_PLATFORMS", "sarif_parser_platform_repo", "sarif_parser_toolchains_repo")
+
+# buildifier: disable=bzl-visibility
+load("@bazel_lib//lib/private:source_toolchains_repo.bzl", "source_toolchains_repo")
 load("//tools:version.bzl", "IS_PRERELEASE")
 
 DEFAULT_SARIF_PARSER_REPOSITORY = "sarif_parser"
