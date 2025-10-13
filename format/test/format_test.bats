@@ -161,6 +161,8 @@ bats_load_library "bats-assert"
     assert_success
 
     assert_output --partial "+ shfmt -w --apply-ignore .github/workflows/release_prep.sh"
+    assert_output --partial "example/src/hello.sh"
+    assert_output --partial "example/src/hello_sh"
 }
 
 @test "should run swiftformat on Swift" {

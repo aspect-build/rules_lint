@@ -163,6 +163,11 @@ function ls-files {
         ;;
     esac
 
+    shebang_re=
+    case "$language" in
+      'Shell') shebang_re='^#![ \t]*/(usr/)?bin/(env[ \t]+)?(sh|bash|mksh|bats|zsh)(\s|$)' ;;
+    esac
+
     if [ "$#" -eq 0 ]; then
         # When the formatter is run with no arguments, we run over "all files in the repo".
         # However, we want to ignore anything that is in .gitignore, is marked for delete, etc.
@@ -175,18 +180,44 @@ function ls-files {
             "^$(git ls-files --deleted)$" \
           || true;
         })
+
+        if [ -n "$shebang_re" ]; then
+            for candidate in $(git ls-files -t --cached --modified --other --exclude-standard | grep -v ^S | cut -f2- -d' ' | grep -v '\.' | {
+                grep -vE \
+                "^$(git ls-files --deleted)$" \
+                || true;
+            }); do
+                [ -f "$candidate" ] || continue
+                if head -n 1 "$candidate" | grep -E -q "$shebang_re"; then
+                    # files should be returned newline separated to avoid a "File name too long" error
+                    files+=$'\n'"$candidate"
+                fi
+            done
+        fi
     else
         # When given arguments, they are glob patterns of the superset of files to format.
         # We just need to filter those so we only select files for this language
         # Construct a command-line like
         #  find src/* -name *.ext1 -or -name *.ext2
         find_args=()
+        [ ${#patterns[@]} -ne 0 ] && find_args+=('(')
         for (( i=0; i<${#patterns[@]}; i++ )); do
           if [[ i -gt 0 ]]; then
             find_args+=('-or')
           fi
           find_args+=("-name" "${patterns[$i]}")
         done
+        [ ${#patterns[@]} -ne 0 ] && find_args+=(')' "-print")
+        if [ -n "$shebang_re" ]; then
+          [ ${#patterns[@]} -ne 0 ] && find_args+=('-or')
+          find_args+=(
+            '('
+            "-type" "f" "-and"
+            "!" "-name" "*.*"
+            "-exec" "sh" "-c" "head -n1 \"\$1\" | grep -Eq \"$shebang_re\"" "_" "{}" ";"
+            ')' "-print"
+          )
+        fi
         files=$(find "$@" "${find_args[@]}")
     fi
 
