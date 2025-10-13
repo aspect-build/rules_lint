@@ -24,6 +24,7 @@ exports_files(
         ".scalafmt.conf",
         ".swcrc",
         ".vale.ini",
+        ".yamllint",
         ".editorconfig",
         "ktlint-baseline.xml",
         ".clang-tidy",

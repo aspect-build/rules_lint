@@ -10,6 +10,7 @@ load(
     "machine_shellcheck_report",
     "machine_stylelint_report",
     "machine_vale_report",
+    "machine_yamllint_report",
     "report_test",
 )
 
@@ -107,6 +108,18 @@ report_test(
     expected_tool = "Pylint",
     expected_uri = "src/unused_import.py",
     report = "machine_pylint_report",
+)
+
+machine_yamllint_report(
+    name = "machine_yamllint_report",
+    src = "//src:yaml_docs",
+)
+
+report_test(
+    name = "yamllint_machine_output_test",
+    expected_tool = "Yamllint",
+    expected_uri = "src/config.yaml",
+    report = "machine_yamllint_report",
 )
 
 machine_buf_report(

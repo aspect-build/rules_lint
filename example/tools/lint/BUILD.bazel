@@ -31,6 +31,11 @@ py_console_script_binary(
     pkg = "@pip//pylint:pkg",
 )
 
+py_console_script_binary(
+    name = "yamllint",
+    pkg = "@pip//yamllint:pkg",
+)
+
 eslint_bin.eslint_binary(name = "eslint")
 
 stylelint_bin.stylelint_binary(name = "stylelint")

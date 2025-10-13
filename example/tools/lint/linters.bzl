@@ -15,6 +15,7 @@ load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
+load("@aspect_rules_lint//lint:yamllint.bzl", "lint_yamllint_aspect")
 
 buf = lint_buf_aspect(
     config = Label("//:buf.yaml"),
@@ -88,6 +89,15 @@ vale = lint_vale_aspect(
     config = Label("//:.vale.ini"),
     styles = Label("//tools/lint:vale_styles"),
 )
+
+vale_test = lint_test(aspect = vale)
+
+yamllint = lint_yamllint_aspect(
+    binary = Label("//tools/lint:yamllint"),
+    config = Label("//:.yamllint"),
+)
+
+yamllint_test = lint_test(aspect = yamllint)
 
 ktlint = lint_ktlint_aspect(
     binary = Label("@com_github_pinterest_ktlint//file"),

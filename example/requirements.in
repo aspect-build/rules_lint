@@ -1,3 +1,4 @@
 djlint
 flake8
 pylint
+yamllint
