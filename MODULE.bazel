@@ -5,6 +5,8 @@ module(
     compatibility_level = 1,
 )
 
+bazel_dep(name = "aspect_bazel_lib", version = "2.7.7")
+
 # Needed in the root because we use js_lib_helpers in our aspect impl
 # Minimum version needs 'chore: bump bazel-lib to 2.0 by @alexeagle in #1311'
 # to allow users on bazel-lib 2.0
