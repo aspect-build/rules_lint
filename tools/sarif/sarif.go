@@ -14,166 +14,165 @@
  * limitations under the License.
  */
 
- package sarif
+package sarif
 
- import (
-	 "bytes"
-	 "encoding/json"
-	 "fmt"
-	 "log"
-	 "regexp"
-	 "strings"
- 
-	 "github.com/reviewdog/errorformat"
-	 "github.com/reviewdog/errorformat/fmts"
-	 "github.com/reviewdog/errorformat/writer"
-	 "github.com/reviewdog/reviewdog/parser"
- )
- 
- type testStruct struct {
-	 label    string
-	 mnemonic string
-	 report   string
- }
- 
- func mnemonicPrettyName(mnemonic string) string {
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
+	"regexp"
+	"strings"
+
+	"github.com/reviewdog/errorformat"
+	"github.com/reviewdog/errorformat/fmts"
+	"github.com/reviewdog/errorformat/writer"
+	"github.com/reviewdog/reviewdog/parser"
+)
+
+type testStruct struct {
+	label    string
+	mnemonic string
+	report   string
+}
+
+func mnemonicPrettyName(mnemonic string) string {
 	return strings.Replace(mnemonic, "AspectRulesLint", "", 1)
 }
 
- func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonString string, err error) {
-	 regex := regexp.MustCompile(`^{\s+"\$schema":.+sarif`)
-	 // If it's already in SARIF format, just return it
-	 if regex.Match([]byte(report)) {
-		 return report, nil
-	 }
- 
-	 if len(mnemonic) == 0 {
-		 fmt.Sprintf("Undefined linter mnemonic for target %s\n", label)
-		 return "", nil
-	 }
- 
-	 var fm []string
- 
-	 // NB: Switch is on the MNEMONIC declared in rules_lint
-	 // Helpful link for building custom fm strings: https://vimdoc.sourceforge.net/htmldoc/quickfix.html#errorformat
-	 switch mnemonic {
-	 case "AspectRulesLintESLint":
-		 fm = fmts.DefinedFmts()["eslint-compact"].Errorformat
-	 case "AspectRulesLintFlake8":
-		 fm = fmts.DefinedFmts()["flake8"].Errorformat
-	 case "AspectRulesLintPMD":
-		 // TODO: upstream to https://github.com/reviewdog/errorformat/issues/62
-		 fm = []string{`%f:%l:\\t%m`}
-	 case "AspectRulesLintRuff":
+func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonString string, err error) {
+	regex := regexp.MustCompile(`^{\s+"\$schema":.+sarif`)
+	// If it's already in SARIF format, just return it
+	if regex.Match([]byte(report)) {
+		return report, nil
+	}
+
+	if len(mnemonic) == 0 {
+		fmt.Sprintf("Undefined linter mnemonic for target %s\n", label)
+		return "", nil
+	}
+
+	var fm []string
+
+	// NB: Switch is on the MNEMONIC declared in rules_lint
+	// Helpful link for building custom fm strings: https://vimdoc.sourceforge.net/htmldoc/quickfix.html#errorformat
+	switch mnemonic {
+	case "AspectRulesLintESLint":
+		fm = fmts.DefinedFmts()["eslint-compact"].Errorformat
+	case "AspectRulesLintFlake8":
+		fm = fmts.DefinedFmts()["flake8"].Errorformat
+	case "AspectRulesLintPMD":
+		// TODO: upstream to https://github.com/reviewdog/errorformat/issues/62
+		fm = []string{`%f:%l:\\t%m`}
+	case "AspectRulesLintRuff":
 		fm = []string{
 			// %E forces a multiline error severity message. There is no forced single line error message
 			`%E%f:%l:%c: %m`,
 			// End the multiline error message on the next line and ignore said line
 			`%-Z%r`,
 		}
-	 case "AspectRulesLintBuf":
-		 fm = []string{
-			 `--buf-plugin_out: %f:%l:%c:%m`,
-		 }
-	 case "AspectRulesLintVale":
-		 fm = []string{`%f:%l:%c:%m`}
-	 case "AspectRulesLintClangTidy":
-		 fm = []string{
-			 `%f:%l:%c: %trror: %m`,
-			 `%f:%l:%c: %tarning: %m`,
-			 `%-G%m`, // this will ignore any lines that do not match the above 2 lines
-			 // TODO: Do the other fm's need this ^
-		 }
-	 case "AspectRulesLintShellCheck":
-		 fm = []string{
-			 `%AIn\ %f\ line\ %l:`,
-			 `%C%.%#(%trror):\ %m%Z`,
-			 `%C%.%#(%tarning):\ %m%Z`,
-			 `%C%.%#`,
-		 }
-	 case "AspectRulesLintStylelint":
-		 fm = []string{
-			 `%f: line %l\, col %c\, %trror - %m`,
-			 `%f: line %l\, col %c\, %tarning - %m`,
-		 }
-	 default:
-		 fmt.Sprintf("No format string for linter mnemonic %s from target %s\n", mnemonic, label)
-	 }
- 
-	 if len(fm) == 0 {
-		 return "", nil
-	 }
-	 efm, err := errorformat.NewErrorformat(fm)
-	 if err != nil {
-		 return "", err
-	 }
- 
-	 var jsonBuffer bytes.Buffer
-	 var jsonWriter writer.Writer
- 
-	 var sarifOpt writer.SarifOption
-	 sarifOpt.ToolName = mnemonicPrettyName(mnemonic)
-	 jsonWriter, err = writer.NewSarif(&jsonBuffer, sarifOpt)
-	 if err != nil {
-		 return "", err
-	 }
- 
-	 if jsonWriter, ok := jsonWriter.(writer.BufWriter); ok {
-		 defer func() {
-			 if err := jsonWriter.Flush(); err != nil {
-				 log.Println(err)
-			 }
- 
-			 sarifJsonString = jsonBuffer.String()
-		 }()
-	 }
- 
-	 s := efm.NewScanner(strings.NewReader(report))
-	 for s.Scan() {
-		 entry := s.Entry()
-		 if entry.Filename != "" && entry.Text != "" {
-			 entry.Filename = determineRelativePath(entry.Filename, label)
-			 if err := jsonWriter.Write(entry); err != nil {
-				 return "", err
-			 }
-		 }
-	 }
- 
-	 return sarifJsonString, nil
- }
- 
- // We expect relative paths when processing lint output and therefore need to convert any absolute paths.
- // Assumptions we make when determining the relative paths:
- //   - The linter is running on the host, so the path will have an 'execroot' segment
- //   - We only lint source files, so there is no 'bazel-bin/<platform>/bin' segment
- func determineRelativePath(path string, label string) string {
-	 if !strings.HasPrefix(path, "/") || !strings.HasPrefix(label, "//") {
-		 return path
-	 }
- 
-	 bazel_package := strings.Split(label[2:], ":")[0]
- 
-	 // https://regex101.com/r/uMbVHP/1
-	 re := regexp.MustCompile(`\/execroot\/[^\/]+\/(.*)$`)
-	 if bazel_package != "" {
-		 re = regexp.MustCompile(`\/execroot\/[^\/]+\/(` + bazel_package + `\/.*)$`)
-	 }
-	 relative_path := re.FindSubmatch([]byte(path))
- 
-	 if relative_path != nil && len(relative_path) == 2 {
-		 return string(relative_path[1])
-	 }
- 
-	 return path
- }
- 
- func  toSarifJson(sarifJsonString string) (sarifJson parser.SarifJson, err error) {
-	 if sarifJsonString == "" {
-		 return parser.SarifJson{}, nil
-	 }
- 
-	 err = json.Unmarshal([]byte(sarifJsonString), &sarifJson)
- 
-	 return sarifJson, err
- }
- 
+	case "AspectRulesLintBuf":
+		fm = []string{
+			`--buf-plugin_out: %f:%l:%c:%m`,
+		}
+	case "AspectRulesLintVale":
+		fm = []string{`%f:%l:%c:%m`}
+	case "AspectRulesLintClangTidy":
+		fm = []string{
+			`%f:%l:%c: %trror: %m`,
+			`%f:%l:%c: %tarning: %m`,
+			`%-G%m`, // this will ignore any lines that do not match the above 2 lines
+			// TODO: Do the other fm's need this ^
+		}
+	case "AspectRulesLintShellCheck":
+		fm = []string{
+			`%AIn\ %f\ line\ %l:`,
+			`%C%.%#(%trror):\ %m%Z`,
+			`%C%.%#(%tarning):\ %m%Z`,
+			`%C%.%#`,
+		}
+	case "AspectRulesLintStylelint":
+		fm = []string{
+			`%f: line %l\, col %c\, %trror - %m`,
+			`%f: line %l\, col %c\, %tarning - %m`,
+		}
+	default:
+		fmt.Sprintf("No format string for linter mnemonic %s from target %s\n", mnemonic, label)
+	}
+
+	if len(fm) == 0 {
+		return "", nil
+	}
+	efm, err := errorformat.NewErrorformat(fm)
+	if err != nil {
+		return "", err
+	}
+
+	var jsonBuffer bytes.Buffer
+	var jsonWriter writer.Writer
+
+	var sarifOpt writer.SarifOption
+	sarifOpt.ToolName = mnemonicPrettyName(mnemonic)
+	jsonWriter, err = writer.NewSarif(&jsonBuffer, sarifOpt)
+	if err != nil {
+		return "", err
+	}
+
+	if jsonWriter, ok := jsonWriter.(writer.BufWriter); ok {
+		defer func() {
+			if err := jsonWriter.Flush(); err != nil {
+				log.Println(err)
+			}
+
+			sarifJsonString = jsonBuffer.String()
+		}()
+	}
+
+	s := efm.NewScanner(strings.NewReader(report))
+	for s.Scan() {
+		entry := s.Entry()
+		if entry.Filename != "" && entry.Text != "" {
+			entry.Filename = determineRelativePath(entry.Filename, label)
+			if err := jsonWriter.Write(entry); err != nil {
+				return "", err
+			}
+		}
+	}
+
+	return sarifJsonString, nil
+}
+
+// We expect relative paths when processing lint output and therefore need to convert any absolute paths.
+// Assumptions we make when determining the relative paths:
+//   - The linter is running on the host, so the path will have an 'execroot' segment
+//   - We only lint source files, so there is no 'bazel-bin/<platform>/bin' segment
+func determineRelativePath(path string, label string) string {
+	if !strings.HasPrefix(path, "/") || !strings.HasPrefix(label, "//") {
+		return path
+	}
+
+	bazel_package := strings.Split(label[2:], ":")[0]
+
+	// https://regex101.com/r/uMbVHP/1
+	re := regexp.MustCompile(`\/execroot\/[^\/]+\/(.*)$`)
+	if bazel_package != "" {
+		re = regexp.MustCompile(`\/execroot\/[^\/]+\/(` + bazel_package + `\/.*)$`)
+	}
+	relative_path := re.FindSubmatch([]byte(path))
+
+	if relative_path != nil && len(relative_path) == 2 {
+		return string(relative_path[1])
+	}
+
+	return path
+}
+
+func toSarifJson(sarifJsonString string) (sarifJson parser.SarifJson, err error) {
+	if sarifJsonString == "" {
+		return parser.SarifJson{}, nil
+	}
+
+	err = json.Unmarshal([]byte(sarifJsonString), &sarifJson)
+
+	return sarifJson, err
+}
