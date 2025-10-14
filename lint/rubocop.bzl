@@ -80,6 +80,30 @@ load(
 
 _MNEMONIC = "AspectRulesLintRuboCop"
 
+def _build_rubocop_command(rubocop_path, stdout_path, exit_code_path = None):
+    """Build shell command for running RuboCop.
+
+    Args:
+        rubocop_path: path to the RuboCop executable
+        stdout_path: path where stdout/stderr should be written
+        exit_code_path: path where exit code should be written. If None,
+            the command will fail on non-zero exit.
+
+    Returns:
+        Fully formatted shell command string
+    """
+    cmd_parts = [
+        "{rubocop} $@ >{stdout} 2>&1".format(
+            rubocop = rubocop_path,
+            stdout = stdout_path,
+        ),
+    ]
+    if exit_code_path:
+        cmd_parts.append(
+            "; echo $? >{exit_code}".format(exit_code = exit_code_path),
+        )
+    return "".join(cmd_parts)
+
 def rubocop_action(
         ctx,
         executable,
@@ -137,20 +161,18 @@ def rubocop_action(
 
     args.add_all(srcs)
 
+    command = _build_rubocop_command(
+        executable.path,
+        stdout.path,
+        exit_code.path if exit_code else None,
+    )
     if exit_code:
-        command = "{rubocop} $@ >{stdout} 2>&1; echo $? >" + exit_code.path
         outputs.append(exit_code)
-    else:
-        # Create empty file on success, as Bazel expects one
-        command = "{rubocop} $@ >{stdout} 2>&1 && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
-        command = command.format(
-            rubocop = executable.path,
-            stdout = stdout.path,
-        ),
+        command = command,
         arguments = [args],
         mnemonic = _MNEMONIC,
         env = env,
@@ -283,20 +305,18 @@ def _rubocop_aspect_impl(target, ctx):
     json_args.add_all(files_to_lint)
 
     outputs_list = [raw_machine_report]
+    command = _build_rubocop_command(
+        ctx.executable._rubocop.path,
+        raw_machine_report.path,
+        outputs.machine.exit_code.path if outputs.machine.exit_code else None,
+    )
     if outputs.machine.exit_code:
-        command = "{rubocop} $@ >{output} 2>&1; echo $? >" + \
-                  outputs.machine.exit_code.path
         outputs_list.append(outputs.machine.exit_code)
-    else:
-        command = "{rubocop} $@ >{output} 2>&1 || true"
 
     ctx.actions.run_shell(
         inputs = files_to_lint + ctx.files._config_files,
         outputs = outputs_list,
-        command = command.format(
-            rubocop = ctx.executable._rubocop.path,
-            output = raw_machine_report.path,
-        ),
+        command = command,
         arguments = [json_args],
         mnemonic = _MNEMONIC,
         tools = [ctx.executable._rubocop],
