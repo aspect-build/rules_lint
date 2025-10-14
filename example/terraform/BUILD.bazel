@@ -1,0 +1,11 @@
+load("@rules_tf//tf:def.bzl", "tf_providers_versions")
+
+package(default_visibility = ["//visibility:public"])
+
+tf_providers_versions(
+    name = "providers",
+    tf_version = "1.9.8",
+    providers = {
+        "aws": "hashicorp/aws:5.90.0",
+    },
+)

@@ -1,3 +1,4 @@
+load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 load("@bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
@@ -17,6 +18,11 @@ alias(
 alias(
     name = "shellcheck_bin",
     actual = "@multitool//tools/shellcheck",
+)
+
+alias(
+    name = "tflint_bin",
+    actual = "@tf_tooªlchains//:tflint",
 )
 
 # Used as a default for vale_aspect#styles
@@ -196,6 +202,15 @@ bzl_library(
     srcs = ["spotbugs.bzl"],
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
+    ],
+)
+
+bzl_library(
+    name = "tflint",
+    srcs = ["tflint.bzl"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "@rules_tf//tf/rules:providers",
     ],
 )
 

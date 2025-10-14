@@ -43,6 +43,10 @@ BUILTIN_TOOL_LABELS = {
     "Python": "@multitool//tools/ruff",
 }
 
+BZLMOD_TOOL_OVERRIDES = {
+    "Terraform": "@tf_toolchains//:terraform",
+}
+
 # Flags to pass each tool's CLI when running in check mode
 CHECK_FLAGS = {
     "buildifier": "-mode=check",
