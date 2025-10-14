@@ -20,11 +20,6 @@ alias(
     actual = "@multitool//tools/shellcheck",
 )
 
-alias(
-    name = "tflint_bin",
-    actual = "@tf_toolchains//:tflint",
-)
-
 # Used as a default for vale_aspect#styles
 filegroup(
     name = "empty_styles",
