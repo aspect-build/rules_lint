@@ -128,6 +128,9 @@ def rubocop_action(
     # files
     args.add("--force-exclusion")
 
+    # Disable caching as Bazel handles caching at the action level
+    args.add("--cache", "false")
+
     # Enable color output if requested
     if color:
         args.add("--color")
@@ -135,19 +138,11 @@ def rubocop_action(
     args.add_all(srcs)
 
     if exit_code:
-        command = (
-            "mkdir -p .rubocop_cache && " +
-            "XDG_CACHE_HOME=$PWD/.rubocop_cache {rubocop} $@ >{stdout} " +
-            "2>&1; echo $? >" + exit_code.path
-        )
+        command = "{rubocop} $@ >{stdout} 2>&1; echo $? >" + exit_code.path
         outputs.append(exit_code)
     else:
         # Create empty file on success, as Bazel expects one
-        command = (
-            "mkdir -p .rubocop_cache && " +
-            "XDG_CACHE_HOME=$PWD/.rubocop_cache {rubocop} $@ >{stdout} " +
-            "2>&1 && touch {stdout}"
-        )
+        command = "{rubocop} $@ >{stdout} 2>&1 && touch {stdout}"
 
     ctx.actions.run_shell(
         inputs = inputs,
@@ -195,6 +190,8 @@ def rubocop_fix(
     rubocop_args = [
         "--autocorrect-all",
         "--force-exclusion",
+        "--cache",
+        "false",
     ]
     if color:
         rubocop_args.append("--color")
@@ -282,22 +279,16 @@ def _rubocop_aspect_impl(target, ctx):
     json_args = ctx.actions.args()
     json_args.add("--format", "json")
     json_args.add("--force-exclusion")
+    json_args.add("--cache", "false")
     json_args.add_all(files_to_lint)
 
     outputs_list = [raw_machine_report]
     if outputs.machine.exit_code:
-        command = (
-            "mkdir -p .rubocop_cache && " +
-            "XDG_CACHE_HOME=$PWD/.rubocop_cache {rubocop} $@ >{output} " +
-            "2>&1; echo $? >" + outputs.machine.exit_code.path
-        )
+        command = "{rubocop} $@ >{output} 2>&1; echo $? >" + \
+                  outputs.machine.exit_code.path
         outputs_list.append(outputs.machine.exit_code)
     else:
-        command = (
-            "mkdir -p .rubocop_cache && " +
-            "XDG_CACHE_HOME=$PWD/.rubocop_cache {rubocop} $@ >{output} " +
-            "2>&1 || true"
-        )
+        command = "{rubocop} $@ >{output} 2>&1 || true"
 
     ctx.actions.run_shell(
         inputs = files_to_lint + ctx.files._config_files,
