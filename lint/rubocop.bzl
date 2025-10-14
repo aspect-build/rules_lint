@@ -119,9 +119,6 @@ def rubocop_action(
     # `rubocop --help` to see available options
     args = ctx.actions.args()
 
-    # Disable server mode to avoid permission issues in Bazel sandbox
-    args.add("--server", "false")
-
     # Force format to simple for human-readable output
     args.add("--format", "simple")
 
@@ -190,8 +187,6 @@ def rubocop_fix(
         content = json.encode({
             "linter": executable._rubocop.path,
             "args": [
-                "--server",
-                "false",
                 "--autocorrect-all",
                 "--force-exclusion",
             ] + [s.path for s in srcs],
@@ -274,7 +269,6 @@ def _rubocop_aspect_impl(target, ctx):
 
     # Create separate action for JSON output
     json_args = ctx.actions.args()
-    json_args.add("--server", "false")
     json_args.add("--format", "json")
     json_args.add("--force-exclusion")
     json_args.add_all(files_to_lint)
