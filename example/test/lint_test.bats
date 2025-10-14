@@ -62,6 +62,13 @@ EOF
                first-person plural like 'We'.
 EOF
 
+	# RuboCop
+	echo <<"EOF" | assert_output --partial
+C:  1:  1: [Correctable] Style/FrozenStringLiteralComment: Missing frozen string literal comment.
+W:  4:  1: [Correctable] Lint/UselessAssignment: Useless assignment to variable - unused_variable.
+C:  6:101: Layout/LineLength: Line is too long. [115/100]
+EOF
+
 	# stylelint
 	echo <<"EOF" | assert_output --partial
 src/hello.css
