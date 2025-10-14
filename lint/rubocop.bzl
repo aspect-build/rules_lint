@@ -111,8 +111,7 @@ def rubocop_action(
         config,
         stdout,
         exit_code = None,
-        color = False,
-        env = {}):
+        color = False):
     """Run RuboCop as an action under Bazel.
 
     RuboCop will select the configuration file to use for each source file,
@@ -136,7 +135,6 @@ def rubocop_action(
             If None, then fail the build when RuboCop exits non-zero.
             See https://docs.rubocop.org/rubocop/usage/basic_usage.html
         color: whether to enable color output
-        env: environment variables for RuboCop
     """
     inputs = srcs + config
     outputs = [stdout]
@@ -175,7 +173,6 @@ def rubocop_action(
         command = command,
         arguments = [args],
         mnemonic = _MNEMONIC,
-        env = env,
         progress_message = "Linting %{label} with RuboCop",
         tools = [executable],
     )
@@ -188,8 +185,7 @@ def rubocop_fix(
         patch,
         stdout,
         exit_code,
-        color = False,
-        env = {}):
+        color = False):
     """Create a Bazel Action that spawns RuboCop with --autocorrect-all.
 
     Args:
@@ -202,7 +198,6 @@ def rubocop_fix(
         stdout: output file of linter results to generate
         exit_code: output file to write the exit code
         color: whether to enable color output
-        env: environment variables for RuboCop
     """
     patch_cfg = ctx.actions.declare_file(
         "_{}.patch_cfg".format(ctx.label.name),
@@ -234,12 +229,12 @@ def rubocop_fix(
         outputs = [patch, exit_code, stdout],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
-        env = dict(env, **{
+        env = {
             "BAZEL_BINDIR": ".",
             "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        }),
+        },
         tools = [executable._rubocop],
         mnemonic = _MNEMONIC,
         progress_message = "Fixing %{label} with RuboCop",
