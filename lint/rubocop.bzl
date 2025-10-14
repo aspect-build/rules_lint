@@ -127,14 +127,14 @@ def rubocop_action(
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the RuboCop program
-        srcs: Ruby files to be linted
-        config: labels of RuboCop config files (.rubocop.yml)
-        stdout: output file of linter results to generate
-        exit_code: output file to write the exit code.
-            If None, then fail the build when RuboCop exits non-zero.
+        executable: File object for the RuboCop executable
+        srcs: list of File objects for Ruby source files to be linted
+        config: list of File objects for RuboCop config files (.rubocop.yml)
+        stdout: File object where linter output will be written
+        exit_code: File object where exit code will be written, or None.
+            If None, the build will fail when RuboCop exits non-zero.
             See https://docs.rubocop.org/rubocop/usage/basic_usage.html
-        color: whether to enable color output
+        color: boolean, whether to enable color output
     """
     inputs = srcs + config
     outputs = [stdout]
@@ -189,15 +189,14 @@ def rubocop_fix(
     """Create a Bazel Action that spawns RuboCop with --autocorrect-all.
 
     Args:
-        ctx: an action context OR aspect context
-        executable: struct with _rubocop and _patcher field
-        srcs: list of file objects to lint
-        config: labels of RuboCop config files (.rubocop.yml)
-        patch: output file containing the applied fixes that can be applied
-            with the patch(1) command.
-        stdout: output file of linter results to generate
-        exit_code: output file to write the exit code
-        color: whether to enable color output
+        ctx: Bazel Rule or Aspect evaluation context
+        executable: struct with _rubocop and _patcher fields
+        srcs: list of File objects for Ruby source files to lint
+        config: list of File objects for RuboCop config files (.rubocop.yml)
+        patch: File object where the patch output will be written
+        stdout: File object where linter output will be written
+        exit_code: File object where exit code will be written
+        color: boolean, whether to enable color output
     """
     patch_cfg = ctx.actions.declare_file(
         "_{}.patch_cfg".format(ctx.label.name),
@@ -294,8 +293,15 @@ def _rubocop_aspect_impl(target, ctx):
 
     # Create separate action for JSON output
     json_args = ctx.actions.args()
+
+    # Use JSON format for machine-readable output (converted to SARIF)
     json_args.add("--format", "json")
+
+    # Honor exclusions in .rubocop.yml even though we pass explicit list of
+    # files
     json_args.add("--force-exclusion")
+
+    # Disable caching as Bazel handles caching at the action level
     json_args.add("--cache", "false")
     json_args.add_all(files_to_lint)
 
@@ -337,12 +343,14 @@ def lint_rubocop_aspect(
     """A factory function to create a linter aspect.
 
     Args:
-        binary: a RuboCop executable
-        configs: RuboCop config file(s) (`.rubocop.yml`)
-        rule_kinds: which [kinds](https://bazel.build/query/language#kind)
-            of rules should be visited by the aspect
-        filegroup_tags: filegroups tagged with these tags will be visited by
-            the aspect in addition to Ruby rule kinds
+        binary: Label of the RuboCop executable.
+            Example: "//tools/lint:rubocop" or "@bundle//bin:rubocop"
+        configs: Label or list of Labels of RuboCop config file(s).
+            Example: ["//:rubocop.yml"] or "//:rubocop.yml"
+        rule_kinds: list of rule kinds to visit.
+            See https://bazel.build/query/language#kind
+        filegroup_tags: list of filegroup tags. Filegroups with these tags
+            will be visited by the aspect in addition to Ruby rule kinds.
     """
 
     # syntax-sugar: allow a single config file in addition to a list
