@@ -48,6 +48,27 @@ format_multirun(
 
 File discovery for each language is based on file extension and shebang-based discovery is currently limited to shell.
 
+### Terraform formatter
+
+When formatting Terraform sources we recommend using the binary published with
+[`rules_tf`](https://github.com/yanndegat/rules_tf) so the version is managed by Bazel.
+Under bzlmod you can add the module and register the toolchains so the built-in `terraform`
+language attribute resolves to the correct executable:
+
+```starlark
+bazel_dep(name = "rules_tf", version = "0.0.10")
+
+tf = use_extension("@rules_tf//tf:extensions.bzl", "tf_repositories")
+tf.download(
+    version = "1.9.8",
+    mirror = {"aws": "hashicorp/aws:5.90.0"},
+)
+use_repo(tf, "tf_toolchains")
+register_toolchains("@tf_toolchains//:all")
+```
+
+WORKSPACE users can continue to use the multitool-provided binary without any additional setup.
+
 ## Usage
 
 ### Configuring formatters

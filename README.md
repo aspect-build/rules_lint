@@ -37,7 +37,7 @@ Linters which are not language-specific:
 | Go                     | [gofmt] or [gofumpt]      |                                  |
 | Gherkin                | [prettier-plugin-gherkin] |                                  |
 | GraphQL                | [Prettier]                |                                  |
-| HCL (Hashicorp Config) | [terraform] fmt           |                                  |
+| HCL / Terraform        | [terraform] fmt           | [TFLint]                         |
 | HTML                   | [Prettier]                |                                  |
 | JSON                   | [Prettier]                |                                  |
 | Java                   | [google-java-format]      | [pmd] , [Checkstyle], [Spotbugs] |
@@ -60,12 +60,17 @@ Linters which are not language-specific:
 | YAML                   | [yamlfmt]                 | [yamllint]                       |
 | XML                    | [prettier/plugin-xml]     |                                  |
 
+Terraform tooling uses the binaries published by [`rules_tf`](https://github.com/yanndegat/rules_tf)
+when bzlmod is enabled. See [docs/formatting.md](./docs/formatting.md#terraform-formatter) and
+[docs/linting.md](./docs/linting.md#terraform-linting) for setup details.
+
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
 [flake8]: https://flake8.pycqa.org/en/latest/index.html
 [pmd]: https://docs.pmd-code.org/latest/index.html
 [checkstyle]: https://checkstyle.sourceforge.io/cmdline.html
 [spotbugs]: https://spotbugs.github.io/
+[TFLint]: https://github.com/terraform-linters/tflint
 [buf lint]: https://buf.build/docs/lint/overview
 [eslint]: https://eslint.org/
 [swiftformat]: https://github.com/nicklockwood/SwiftFormat
