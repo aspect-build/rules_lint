@@ -334,6 +334,25 @@ register_sarif_parser_toolchains(
     register = True,
 )
 
+http_archive(
+    name = "rules_ruby",
+    sha256 = "305d299056a586e24022651eccfe172ea1754121ea79c637e29fc1c42704ae3c",
+    strip_prefix = "rules_ruby-0.21.1",
+    url = "https://github.com/bazel-contrib/rules_ruby/releases/download/v0.21.1/rules_ruby-v0.21.1.tar.gz",
+)
+
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch", "rb_register_toolchains")
+
+rb_register_toolchains(
+    version = "3.3.9",
+)
+
+rb_bundle_fetch(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+)
+
 #---SNIP--- Below here is re-used in the workspace snippet published on releases
 
 load(
