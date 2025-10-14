@@ -87,6 +87,7 @@ def rubocop_action(
         config,
         stdout,
         exit_code = None,
+        color = False,
         env = {}):
     """Run RuboCop as an action under Bazel.
 
@@ -110,6 +111,7 @@ def rubocop_action(
         exit_code: output file to write the exit code.
             If None, then fail the build when RuboCop exits non-zero.
             See https://docs.rubocop.org/rubocop/usage/basic_usage.html
+        color: whether to enable color output
         env: environment variables for RuboCop
     """
     inputs = srcs + config
@@ -125,6 +127,11 @@ def rubocop_action(
     # Honor exclusions in .rubocop.yml even though we pass explicit list of
     # files
     args.add("--force-exclusion")
+
+    # Enable color output if requested
+    if color:
+        args.add("--color")
+
     args.add_all(srcs)
 
     if exit_code:
@@ -164,6 +171,7 @@ def rubocop_fix(
         patch,
         stdout,
         exit_code,
+        color = False,
         env = {}):
     """Create a Bazel Action that spawns RuboCop with --autocorrect-all.
 
@@ -176,20 +184,27 @@ def rubocop_fix(
             with the patch(1) command.
         stdout: output file of linter results to generate
         exit_code: output file to write the exit code
+        color: whether to enable color output
         env: environment variables for RuboCop
     """
     patch_cfg = ctx.actions.declare_file(
         "_{}.patch_cfg".format(ctx.label.name),
     )
 
+    # Build args list with color flag if needed
+    rubocop_args = [
+        "--autocorrect-all",
+        "--force-exclusion",
+    ]
+    if color:
+        rubocop_args.append("--color")
+    rubocop_args.extend([s.path for s in srcs])
+
     ctx.actions.write(
         output = patch_cfg,
         content = json.encode({
             "linter": executable._rubocop.path,
-            "args": [
-                "--autocorrect-all",
-                "--force-exclusion",
-            ] + [s.path for s in srcs],
+            "args": rubocop_args,
             "files_to_diff": [s.path for s in srcs],
             "output": patch.path,
         }),
@@ -230,10 +245,6 @@ def _rubocop_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    env = {}
-    if ctx.attr._options[LintOptionsInfo].color:
-        env["RUBOCOP_FORCE_COLOR"] = "true"
-
     # RuboCop can produce a patch at the same time as reporting the
     # unpatched violations
     if hasattr(outputs, "patch"):
@@ -245,7 +256,7 @@ def _rubocop_aspect_impl(target, ctx):
             outputs.patch,
             outputs.human.out,
             outputs.human.exit_code,
-            env = env,
+            color = ctx.attr._options[LintOptionsInfo].color,
         )
     else:
         rubocop_action(
@@ -255,7 +266,7 @@ def _rubocop_aspect_impl(target, ctx):
             ctx.files._config_files,
             outputs.human.out,
             outputs.human.exit_code,
-            env = env,
+            color = ctx.attr._options[LintOptionsInfo].color,
         )
 
     # Generate machine-readable report in JSON format for SARIF conversion
