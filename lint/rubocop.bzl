@@ -319,6 +319,9 @@ def _rubocop_aspect_impl(target, ctx):
         command = command,
         arguments = [json_args],
         mnemonic = _MNEMONIC,
+        progress_message = """\
+Generating machine-readable report for %{label} with RuboCop\
+""",
         tools = [ctx.executable._rubocop],
     )
 
