@@ -115,7 +115,7 @@ native_binary(
     out = "clang_tidy",
 )
 
-sh_binary(
+alias(
     name = "rubocop",
-    srcs = ["rubocop_wrapper.sh"],
+    actual = "@bundle//bin:rubocop",
 )

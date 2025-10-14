@@ -131,4 +131,15 @@ rust.toolchain(
 )
 
 ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
-ruby.toolchain(ruby_version = "3.3.0")
+ruby.toolchain(
+    name = "ruby",
+    version = "3.3.0",
+)
+ruby.bundle_fetch(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+)
+use_repo(ruby, "bundle", "ruby", "ruby_toolchains")
+
+register_toolchains("@ruby_toolchains//:all")
