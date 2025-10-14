@@ -10,10 +10,11 @@ def bazel_run(ctx: task_context, entrypoint: str, args: list[str]) -> std.proces
     TODO: support env and arg attributes
     """
     runfiles = entrypoint + ".runfiles"
+
     # TODO: this assumes the working directory is the repo root
     workspace_directory = ctx.std.env.current_dir()
     print("spawn", entrypoint)
-    return ctx.std.process.command(entrypoint)\
+    return ctx.std.process.command(entrypoint) \
         .current_dir(runfiles) \
         .env("RUNFILES_DIR", runfiles) \
         .env("JAVA_RUNFILES", runfiles) \
@@ -27,9 +28,9 @@ def spawn_with_output(command: std.process.command):
     return command.stdout("piped").spawn().wait_with_output().stdout.strip()
 
 def find_changed_files(process, base_ref: str = "origin/main"):
-    merge_base = spawn_with_output(process\
+    merge_base = spawn_with_output(process
         .command("git").args(["merge-base", "HEAD", base_ref]))
-    return spawn_with_output(process\
+    return spawn_with_output(process
         .command("git").args(["diff", "--name-only", merge_base]))
 
 # buildifier: disable=function-docstring
@@ -44,7 +45,7 @@ def impl(ctx: task_context) -> int:
         bazel_flags = ["--build_runfile_links"],
     )
 
-    entrypoint: str | None = None
+    entrypoint = None
 
     for event in build.events():
         if event.kind == "named_set_of_files":
@@ -65,7 +66,7 @@ def impl(ctx: task_context) -> int:
     exit = bazel_run(
         ctx,
         entrypoint = entrypoint,
-        args = changed_files.split("\n")
+        args = changed_files.split("\n"),
     ).wait()
 
     if not exit.success:
