@@ -43,6 +43,11 @@ BUILTIN_TOOL_LABELS = {
     "Python": "@multitool//tools/ruff",
 }
 
+# Under bzlmod we prefer to use toolchain-provided binaries (which live in @tf_toolchains)
+# while keeping WORKSPACE users on the multitool defaults above. Only Terraform needs this
+# swap today, but keeping the overrides in a small dict means we can add more languages
+# without threading additional conditionals through the alias comprehension. If we never
+# need another override, this could be simplified by inlining the conditional at the call site.
 BZLMOD_TOOL_OVERRIDES = {
     "Terraform": "@tf_toolchains//:terraform",
 }

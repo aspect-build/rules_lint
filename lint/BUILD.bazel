@@ -22,7 +22,7 @@ alias(
 
 alias(
     name = "tflint_bin",
-    actual = "@tf_tooªlchains//:tflint",
+    actual = "@tf_toolchains//:tflint",
 )
 
 # Used as a default for vale_aspect#styles
