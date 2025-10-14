@@ -111,14 +111,12 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
     Attrs:
         binary: a PMD executable. Can be obtained from rules_java like so:
 
-            ```
             java_binary(
                 name = "pmd",
                 main_class = "net.sourceforge.pmd.PMD",
                 # Point to wherever you have the java_import rule defined, see our example
                 runtime_deps = ["@net_sourceforge_pmd"],
             )
-            ```
 
         rulesets: the PMD ruleset XML files
     """

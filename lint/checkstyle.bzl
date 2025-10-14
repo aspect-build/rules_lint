@@ -115,14 +115,12 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
     Attrs:
         binary: a Checkstyle executable. Can be obtained from rules_java like so:
 
-            ```
             java_binary(
                 name = "checkstyle",
                 main_class = "com.puppycrawl.tools.checkstyle.Main",
                 # Point to wherever you have the java_import rule defined, see our example
                 runtime_deps = ["@com_puppycrawl_tools_checkstyle"],
             )
-            ```
 
         config: the Checkstyle XML file
     """
