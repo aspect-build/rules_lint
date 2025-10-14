@@ -110,7 +110,7 @@ Follow instructions from the release you wish to use:
 
 ## Usage
 
-Formatting and Linting are inherently different, which leads to differences in how they are used in rules_lint.
+Formatting and Linting are inherently different, which leads to differences in how they are used in rules_lint. It is best concieved as two rulesets in one.
 
 | Formatter                                                         | Linter                                                 |
 | ----------------------------------------------------------------- | ------------------------------------------------------ |
@@ -130,6 +130,8 @@ We recommend using a Git pre-commit hook to format changed files, and [Aspect Wo
 
 See [Formatting](./docs/formatting.md) for more ways to use the formatter.
 
+Also see [API Documentation](https://registry.bazel.build/modules/aspect_rules_lint#format-defs-bzl)
+
 Demo:
 ![pre-commit format](./docs/format-demo.svg)
 
@@ -141,6 +143,8 @@ For example, running `bazel lint //src:all` prints lint warnings to the terminal
 Suggested fixes from the linter tools are presented interactively.
 
 See [Linting](./docs/linting.md) for more ways to use the linter.
+
+Also see [API Documentation](https://registry.bazel.build/modules/aspect_rules_lint)
 
 Demo:
 ![bazel lint demo](./docs/lint-fix-demo.svg)

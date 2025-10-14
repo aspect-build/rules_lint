@@ -103,7 +103,7 @@ def _pylint_aspect_impl(target, ctx):
 def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-pylint"]):
     """A factory function to create a linter aspect.
 
-    Attrs:
+    Args:
         binary: a pylint executable. Can be obtained from rules_python like so:
 
             load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")

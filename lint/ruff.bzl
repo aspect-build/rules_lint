@@ -73,8 +73,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
     However this is needed because:
 
     1. ruff has an `extend` field, so it may need to read more than one config file
-    2. ruff's logic for selecting the appropriate config needs to read the file content to detect
-      a `[tool.ruff]` section.
+    2. ruff's logic for selecting the appropriate config needs to read the file content to detect a `[tool.ruff]` section.
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
