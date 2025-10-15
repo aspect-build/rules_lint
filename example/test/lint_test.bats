@@ -69,6 +69,15 @@ W:  4:  1: [Correctable] Lint/UselessAssignment: Useless assignment to variable 
 C:  6:101: Layout/LineLength: Line is too long. [115/100]
 EOF
 
+	# Standard Ruby
+	echo <<"EOF" | assert_output --partial
+== src/hello.rb ==
+W:  4:  1: [Correctable] Lint/UselessAssignment: Useless assignment to variable - unused_variable.
+C: 19:  3: [Correctable] Layout/IndentationWidth: Use 2 (not 4) spaces for indentation.
+W: 29:  1: [Correctable] Lint/UselessAssignment: Useless assignment to variable - message.
+W: 32:  1: [Correctable] Lint/UselessAssignment: Useless assignment to variable - numbers.
+EOF
+
 	# stylelint
 	echo <<"EOF" | assert_output --partial
 src/hello.css

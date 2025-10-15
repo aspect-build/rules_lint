@@ -3,6 +3,7 @@
 load("@aspect_rules_lint//format:defs.bzl", "format_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@rules_java//java:java_library.bzl", "java_library")
 load("@rules_python//python:defs.bzl", "py_library")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
 load(
@@ -15,6 +16,7 @@ load(
     "rubocop_test",
     "ruff_test",
     "shellcheck_test",
+    "standardrb_test",
 )
 
 write_file(
@@ -189,6 +191,14 @@ format_test(
 
 rubocop_test(
     name = "rubocop",
+    srcs = ["//src:hello_ruby"],
+    # Expected to fail based on current content of the file.
+    # Normally you'd fix the file instead of tagging this test.
+    tags = ["manual"],
+)
+
+standardrb_test(
+    name = "standardrb",
     srcs = ["//src:hello_ruby"],
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
