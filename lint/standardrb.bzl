@@ -146,6 +146,10 @@ def standardrb_action(
     # Force format to simple for human-readable output
     args.add("--format", "simple")
 
+    # Honor exclusions in .standard.yml even though we pass explicit list of
+    # files
+    args.add("--force-exclusion")
+
     # Disable caching as Bazel handles caching at the action level
     args.add("--cache", "false")
 
@@ -291,6 +295,10 @@ def _standardrb_aspect_impl(target, ctx):
 
     # Use JSON format for machine-readable output (converted to SARIF)
     json_args.add("--format", "json")
+
+    # Honor exclusions in .standard.yml even though we pass explicit list of
+    # files
+    json_args.add("--force-exclusion")
 
     # Disable caching as Bazel handles caching at the action level
     json_args.add("--cache", "false")

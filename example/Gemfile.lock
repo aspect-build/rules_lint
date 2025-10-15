@@ -58,7 +58,7 @@ PLATFORMS
 
 DEPENDENCIES
   rubocop (~> 1.50)
-  standard (>= 1.35.1)
+  standard (~> 1.35)
 
 BUNDLED WITH
    2.6.9
