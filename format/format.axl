@@ -7,13 +7,12 @@ It's a simple example of interaction with version control, which Bazel only does
 def bazel_run(ctx: task_context, entrypoint: str, args: list[str]) -> std.process.child:
     """Rough port of the logic Bazel uses to execute binaries.
 
-    TODO: support env and arg attributes
+    TODO: load() this from @aspect-extensions/run instead
     """
     runfiles = entrypoint + ".runfiles"
 
     # TODO: this assumes the working directory is the repo root
     workspace_directory = ctx.std.env.current_dir()
-    print("spawn", entrypoint)
     return ctx.std.process.command(entrypoint) \
         .current_dir(runfiles) \
         .env("RUNFILES_DIR", runfiles) \
@@ -24,27 +23,34 @@ def bazel_run(ctx: task_context, entrypoint: str, args: list[str]) -> std.proces
         .args(args) \
         .spawn()
 
-def spawn_with_output(command: std.process.command):
-    return command.stdout("piped").spawn().wait_with_output().stdout.strip()
+# buildifier: disable=function-docstring
+def spawn_with_output(out, command: std.process.command):
+    spawn = command.stdout("piped").spawn().wait_with_output()
+    if not spawn.status.success:
+        out.write("\x1b[0;31mERROR\x1b[0m: git exited with code %d\n" % spawn.status.code)
+        fail(spawn.stderr)
 
-def find_changed_files(process, base_ref: str = "origin/main"):
-    merge_base = spawn_with_output(process
+    return spawn.stdout.strip()
+
+# buildifier: disable=function-docstring
+def find_changed_files(out, process, base_ref: str = "origin/main"):
+    merge_base = spawn_with_output(out, process
         .command("git").args(["merge-base", "HEAD", base_ref]))
-    return spawn_with_output(process
+    return spawn_with_output(out, process
         .command("git").args(["diff", "--name-only", merge_base]))
 
 # buildifier: disable=function-docstring
-def impl(ctx: task_context) -> int:
-    out = ctx.std.io.stdout
-    changed_files = find_changed_files(ctx.std.process)
-    out.write("Formatting changed files:\n%s" % changed_files)
-
+def build_formatter(ctx: task_context) -> str:
     build = ctx.bazel.build(
         ctx.args.format_target,
         events = True,
-        bazel_flags = ["--build_runfile_links"],
+        bazel_flags = [
+            "--build_runfile_links",
+            "--noallow_analysis_cache_discard",
+        ],
     )
 
+    # Find the entrypoint by watching for the named_set_of_files build event.
     entrypoint = None
 
     for event in build.events():
@@ -55,6 +61,7 @@ def impl(ctx: task_context) -> int:
                 entrypoint = file.file.removeprefix("file://")
                 break
 
+    ctx.std.io.stdout.write("Building formatter...\n")
     status = build.wait()
 
     if not status.success:
@@ -63,9 +70,20 @@ def impl(ctx: task_context) -> int:
     if not entrypoint:
         fail("Failed to determine the formatter entrypoint.")
 
+    return entrypoint
+
+# buildifier: disable=function-docstring
+def impl(ctx: task_context) -> int:
+    out = ctx.std.io.stdout
+
+    formatter = build_formatter(ctx)
+
+    changed_files = find_changed_files(out, ctx.std.process)
+    out.write("Formatting changed files:\n%s" % changed_files)
+
     exit = bazel_run(
         ctx,
-        entrypoint = entrypoint,
+        entrypoint = formatter,
         args = changed_files.split("\n"),
     ).wait()
 
@@ -73,7 +91,6 @@ def impl(ctx: task_context) -> int:
         out.write("\x1b[0;31mERROR\x1b[0m: format exited with code %d\n" % exit.code)
 
     return exit.code
-    return 0
 
 format = task(
     implementation = impl,
