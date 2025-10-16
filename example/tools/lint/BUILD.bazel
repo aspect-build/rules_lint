@@ -126,7 +126,19 @@ alias(
     actual = "@bundle//bin:standardrb",
 )
 
+# cppcheck
+genrule(
+    name = "cppcheck_wrapper",
+    srcs = ["cppcheck_wrapper.sh.tpl"],
+    outs = ["cppcheck_wrapper.sh"],
+    cmd = "cp $(location cppcheck_wrapper.sh.tpl) $@",
+)
+
 sh_binary(
     name = "cppcheck",
-    srcs = ["cppcheck_wrapper.sh"],
+    srcs = [":cppcheck_wrapper"],
+    data = select({
+        "@platforms//os:linux": ["@cppcheck_linux//:files"],
+        "@platforms//os:macos": ["@cppcheck_macos//:files"],
+    }),
 )
