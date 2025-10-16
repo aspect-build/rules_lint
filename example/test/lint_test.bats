@@ -69,6 +69,22 @@ src/hello.css
 EOF
 }
 
+function assert_terraform_lints() {
+	# TFLint
+	echo <<"EOF" | assert_output --partial
+Notice: `subnet_id` output has no description (terraform_documented_outputs)
+
+  on terraform/aws_subnet/outputs.tf line 1:
+   1: output "subnet_id" {
+EOF
+	echo <<"EOF" | assert_output --partial
+Notice: `vpc_id` variable has no description (terraform_documented_variables)
+
+  on terraform/aws_subnet/variables.tf line 1:
+   1: variable "vpc_id" {
+EOF
+}
+
 @test "should produce reports" {
 	run $BATS_TEST_DIRNAME/../lint.sh //src:all --no@aspect_rules_lint//lint:color
 	assert_success
@@ -115,4 +131,10 @@ EOF
 	assert_success
 	# This lint check is disabled in the .eslintrc.cjs file
 	refute_output --partial "Unexpected 'debugger' statement"
+}
+
+@test "should report terraform issues from tflint" {
+	run $BATS_TEST_DIRNAME/../lint.sh //terraform/aws_subnet:module --no@aspect_rules_lint//lint:color
+	assert_success
+	assert_terraform_lints
 }

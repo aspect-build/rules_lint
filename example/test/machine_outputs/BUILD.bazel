@@ -9,6 +9,7 @@ load(
     "machine_ruff_report",
     "machine_shellcheck_report",
     "machine_stylelint_report",
+    "machine_tflint_report",
     "machine_vale_report",
     "machine_yamllint_report",
     "report_test",
@@ -132,6 +133,18 @@ report_test(
     expected_tool = "Buf",
     expected_uri = "src/file.proto",
     report = "machine_buf_report",
+)
+
+machine_tflint_report(
+    name = "machine_tflint_report",
+    src = "//terraform/aws_subnet:module",
+)
+
+report_test(
+    name = "tflint_machine_output_test",
+    expected_tool = "tflint",
+    expected_uri = "terraform/aws_subnet/variables.tf",
+    report = "machine_tflint_report",
 )
 
 # FIXME: I'm getting a C++ compile failure on macos

@@ -1,18 +1,19 @@
+load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 load("@bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
-load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS")
+load("//format/private:formatter_binary.bzl", "BZLMOD_TOOL_OVERRIDES", "BUILTIN_TOOL_LABELS")
 
 package(default_visibility = ["//visibility:public"])
 
 exports_files(glob(["*.bzl"]))
 
-# Alias the multitools for strict repo visibility under bzlmod
 [
     alias(
-        name = v.split("/")[-1],
-        actual = v,
+        name = actual_label.rsplit(":", 1)[-1] if ":" in actual_label else actual_label.rsplit("/", 1)[-1],
+        actual = actual_label,
     )
-    for v in BUILTIN_TOOL_LABELS.values()
+    for k, v in BUILTIN_TOOL_LABELS.items()
+    for actual_label in [BZLMOD_TOOL_OVERRIDES[k] if bazel_features.external_deps.is_bzlmod_enabled and k in BZLMOD_TOOL_OVERRIDES else v]
 ]
 
 bzl_library(

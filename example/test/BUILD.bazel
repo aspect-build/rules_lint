@@ -5,7 +5,7 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_python//python:defs.bzl", "py_library")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
-load("//tools/lint:linters.bzl", "checkstyle_test", "eslint_test", "flake8_test", "pmd_test", "pylint_test", "ruff_test", "shellcheck_test")
+load("//tools/lint:linters.bzl", "checkstyle_test", "eslint_test", "flake8_test", "pmd_test", "pylint_test", "ruff_test", "shellcheck_test", "tflint_test")
 
 write_file(
     name = "ts_code_generator",
@@ -168,6 +168,13 @@ shellcheck_test(
     name = "shellcheck-generated",
     srcs = [":generated_sh"],
     # Expected to fail because the sh_library opted-in to having generated code checked as well
+    tags = ["manual"],
+)
+
+tflint_test(
+    name = "tflint",
+    srcs = ["//terraform/aws_subnet:module"],
+    # Expected to fail based on current content of the module.
     tags = ["manual"],
 )
 

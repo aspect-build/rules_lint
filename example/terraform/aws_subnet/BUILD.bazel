@@ -1,0 +1,9 @@
+load("@rules_tf//tf:def.bzl", "tf_module")
+
+package(default_visibility = ["//visibility:public"])
+
+tf_module(
+    name = "aws_subnet_module",
+    providers = ["aws"],
+    providers_versions = "//terraform:providers",
+)
