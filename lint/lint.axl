@@ -55,6 +55,6 @@ lint = task(
     implementation = impl,
     args = {
         "fix": args.boolean(),
-        "targets": args.positional(min = 0),
+        "targets": args.positional(minimum = 0),
     },
 )
