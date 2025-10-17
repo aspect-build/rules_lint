@@ -1,5 +1,5 @@
 import %workspace%/../tools/preset.bazelrc
-import %workspace%/tools/java17.bazelrc
+import %workspace%/tools/java21.bazelrc
 
 # Automatically apply --config=linux, --config=windows etc
 common --enable_platform_specific_config
