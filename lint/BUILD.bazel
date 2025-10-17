@@ -19,6 +19,18 @@ alias(
     actual = "@multitool//tools/shellcheck",
 )
 
+# Exposes the "cwd" scripts that run the tools with the working directory set to were bazel is invoked.
+# See https://github.com/bazel-contrib/rules_multitool/blob/91533f6c3d42677d9a33e61dc728c7ce8f398abf/readme.md?plain=1#L90
+alias(
+    name = "ruff_bin_cwd",
+    actual = "@multitool//tools/ruff:cwd",
+)
+
+alias(
+    name = "shellcheck_bin_cwd",
+    actual = "@multitool//tools/shellcheck:cwd",
+)
+
 # Used as a default for vale_aspect#styles
 filegroup(
     name = "empty_styles",
