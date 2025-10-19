@@ -68,6 +68,19 @@ register_toolchains("@tf_toolchains//:all")
 ```
 
 WORKSPACE users can continue to use the multitool-provided binary without any additional setup.
+If you need the same version pin in WORKSPACE mode, download `rules_tf` via
+`rules_lint_dependencies()` and register the toolchains with the helper provided in this repo:
+
+```starlark
+load("@aspect_rules_lint//lint:tf_toolchains_workspace.bzl", "rules_lint_setup_tf_toolchains")
+
+rules_lint_setup_tf_toolchains(
+    version = "1.9.8",
+    mirror = {"aws": "hashicorp/aws:5.90.0"},
+)
+```
+
+The helper detects the host platform automatically using Bazel's host platform constraints.
 
 ## Usage
 

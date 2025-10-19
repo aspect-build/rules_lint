@@ -133,6 +133,20 @@ load("@aspect_rules_lint//lint:tflint.bzl", "lint_tflint_aspect")
 tflint = lint_tflint_aspect()
 ```
 
+In WORKSPACE projects, fetch `rules_tf` via `rules_lint_dependencies()` and register matching
+toolchains using the helper exposed by rules_lint:
+
+```starlark
+load("@aspect_rules_lint//lint:tf_toolchains_workspace.bzl", "rules_lint_setup_tf_toolchains")
+
+rules_lint_setup_tf_toolchains(
+    version = "1.9.8",
+    mirror = {"aws": "hashicorp/aws:5.90.0"},
+)
+```
+
+The helper detects the host platform automatically using Bazel's host platform constraints.
+
 ## Ignoring targets
 
 To ignore a specific target, you can use the `no-lint` tag. This will prevent the linter from visiting the target.

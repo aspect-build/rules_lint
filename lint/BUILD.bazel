@@ -205,8 +205,12 @@ bzl_library(
     srcs = ["tflint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@rules_tf//tf/rules:providers",
     ],
+)
+
+bzl_library(
+    name = "tf_toolchains_workspace",
+    srcs = ["tf_toolchains_workspace.bzl"],
 )
 
 bzl_library(

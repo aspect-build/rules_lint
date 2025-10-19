@@ -38,6 +38,13 @@ def rules_lint_dependencies():
         url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.9.0/bazel_features-v1.9.0.tar.gz",
     )
 
+    http_archive(
+        name = "rules_tf",
+        sha256 = "64e5f0705d7b434e6942445ea1c3259a7b0ccc70f14827e857662aae0443274e",
+        strip_prefix = "rules_tf-0.0.10",
+        url = "https://github.com/yanndegat/rules_tf/archive/refs/tags/v0.0.10.tar.gz",
+    )
+
 def fetch_java_format():
     http_jar(
         name = "google-java-format",

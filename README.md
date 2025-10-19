@@ -62,7 +62,8 @@ Linters which are not language-specific:
 
 Terraform tooling uses the binaries published by [`rules_tf`](https://github.com/yanndegat/rules_tf)
 when bzlmod is enabled. See [docs/formatting.md](./docs/formatting.md#terraform-formatter) and
-[docs/linting.md](./docs/linting.md#terraform-linting) for setup details.
+[docs/linting.md](./docs/linting.md#terraform-linting) for setup details, including guidance for
+WORKSPACE users via `rules_lint_setup_tf_toolchains`.
 
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
