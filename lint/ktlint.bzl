@@ -2,9 +2,9 @@
 
 Typical usage:
 Make sure you have `ktlint` pulled as a dependency into your WORKSPACE/module by pulling a version of it from here
-https://github.com/pinterest/ktlint/releases and using a `http_file` declaration for it like.
+https://github.com/pinterest/ktlint/releases and using a `http_file` declaration for it:
 
-```
+```starlark
 http_file(
     name = "com_github_pinterest_ktlint",
     sha256 = "2e28cf46c27d38076bf63beeba0bdef6a845688d6c5dccd26505ce876094eb92",
@@ -30,7 +30,7 @@ ktlint = lint_ktlint_aspect(
 If you plan on using Ktlint [custom rulesets](https://pinterest.github.io/ktlint/1.2.1/install/cli/#rule-sets), you can also declare
 an additional `ruleset_jar` attribute pointing to your custom ruleset jar like this
 
-```
+```starlark
 java_binary(
     name = "my_ktlint_custom_ruleset",
     ...
