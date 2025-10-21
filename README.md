@@ -172,29 +172,6 @@ But we're not trying to stop anyone, either!
 You could probably configure the editor to always run the same Bazel command, any time a file is changed.
 Instructions to do this are out-of-scope for this repo, particularly since they have to be formulated and updated for so many editors.
 
-## FAQ
-
-### What about type-checking?
-
-We consider type-checkers as a build tool, not as a linter. This is for a few reasons:
-
-- They are commonly distributed along with compilers.
-  In compiled languages like Java, types are required in order for the compiler to emit executable bytecode at all.
-  In interpreted languages they're still often linked, e.g. TypeScript does both "compiling" to JavaScript and also type-checking.
-  This suggests that rules for a language should include the type-checker,
-  e.g. we expect Sorbet to be integrated with rules_ruby and mypy/pyright to be integrated with rules_python or Aspect's rules_py.
-- We think most developers want "build error" semantics for type-checks:
-  the whole repository should successfully type-check or you cannot commit the change.
-  rules_lint is optimized for "warning" semantics, where we produce report files and it's up to the
-  Dev Infra team how to present those, for example only on changed files.
-- You can only type-check a library if its dependencies were checkable, which means short-circuiting
-  execution. rules_lint currently runs linters on every node in the dependency graph, including any
-  whose dependencies have lint warnings.
-
-Rulesets for type-checkers:
-
-- Python: [rules_mypy](https://github.com/bazel-contrib/rules_mypy)
-
 [aspect workflows]: https://docs.aspect.build/workflows
 [aspect cli]: https://docs.aspect.build/cli
 
