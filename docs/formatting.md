@@ -178,13 +178,19 @@ fi
 
 ```bash
 #!/usr/bin/env bash
-git diff --cached --diff-filter=AM --name-only -z | xargs --null --no-run-if-empty bazel run //:format --
-if ! git diff --quiet; then
-  echo "❌ Some files were modified by the pre-commit hook."
-  echo "Please review and stage the changes before committing again."
-  git diff --stat
-  exit 1
-fi
+# Get staged files and format them
+git diff --cached --diff-filter=AM --name-only -z | xargs --null --no-run-if-empty bash -c '
+  if [ $# -gt 0 ]; then
+    bazel run //:format -- "$@"
+
+    if ! git diff --quiet -- "$@"; then
+      echo "❌ Some staged files were modified by the pre-commit hook."
+      echo "Please stage the changes and try committing again:"
+      git diff --stat -- "$@"
+      exit 1
+    fi
+  fi
+' _
 ```
 
 ### Check that files are already formatted
