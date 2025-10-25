@@ -385,3 +385,19 @@ multitool(
         "@aspect_rules_lint//lint:multitool.lock.json",
     ],
 )
+
+http_archive(
+    name = "cppcheck_premium_linux",
+    build_file = "//tools/lint:cppcheck.BUILD",
+    integrity = "sha256-kacV5Qvy8pHqYoejdDCId4yS3VJDaqTqSJ9JgEIfQd0=",
+    strip_prefix = "cppcheckpremium-25.8.4",
+    urls = ["https://files.cppchecksolutions.com/25.8.4/ubuntu-22.04/cppcheckpremium-25.8.4-amd64.tar.gz"],
+)
+
+http_archive(
+    name = "cppcheck_premium_macos",
+    build_file = "//tools/lint:cppcheck.BUILD",
+    integrity = "sha256-bsxXTXw2YPcClRfTXzsLtgDNTYDmHpNapu12la93tAs=",
+    strip_prefix = "cppcheckpremium",
+    urls = ["https://files.cppchecksolutions.com/25.8.4/cppcheckpremium-25.8.4-macos-15.tar.gz"],
+)
