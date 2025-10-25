@@ -5,7 +5,17 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_python//python:defs.bzl", "py_library")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
-load("//tools/lint:linters.bzl", "checkstyle_test", "eslint_test", "flake8_test", "pmd_test", "pylint_test", "ruff_test", "shellcheck_test")
+load(
+    "//tools/lint:linters.bzl",
+    "checkstyle_test",
+    "eslint_test",
+    "flake8_test",
+    "pmd_test",
+    "pylint_test",
+    "rubocop_test",
+    "ruff_test",
+    "shellcheck_test",
+)
 
 write_file(
     name = "ts_code_generator",
@@ -174,5 +184,13 @@ shellcheck_test(
 format_test(
     name = "format_test_manual",
     srcs = [":generated_sh"],
+    tags = ["manual"],
+)
+
+rubocop_test(
+    name = "rubocop",
+    srcs = ["//src:hello_ruby"],
+    # Expected to fail based on current content of the file.
+    # Normally you'd fix the file instead of tagging this test.
     tags = ["manual"],
 )
