@@ -3,6 +3,10 @@
 The `src/` folder contains a project that we want to lint.
 It contains sources in multiple languages.
 
+The `terraform/` directory demonstrates formatting and linting Terraform modules via
+[`rules_tf`](https://github.com/yanndegat/rules_tf). The providers and toolchains are configured in
+`MODULE.bazel`, so the examples work out-of-the-box with `bazel run` and `bazel build`.
+
 ### With Aspect CLI
 
 Run `bazel lint src:all`
@@ -31,6 +35,16 @@ From /shared/cache/bazel/user_base/b6913b1339fd4037a680edabc6135c1d/execroot/_ma
 From /shared/cache/bazel/user_base/b6913b1339fd4037a680edabc6135c1d/execroot/_main/bazel-out/k8-fastbuild/bin/src/foo_proto.buf-report.txt:
 --buf-plugin_out: src/file.proto:1:1:Import "src/unused.proto" is unused.
 
+```
+
+Terraform modules can be linted and formatted the same way. For example:
+
+```
+# Lint the sample module with TFLint
+bazel build //terraform/aws_subnet:module --aspects //tools/lint:linters.bzl%tflint --output_groups=rules_lint_human
+
+# Apply formatting to Terraform sources
+bazel run //:format -- terraform/aws_subnet/main.tf
 ```
 
 ## ESLint

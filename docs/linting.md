@@ -107,6 +107,46 @@ Each linter aspect accepts the configuration file(s) as an argument.
 To specify whether a certain lint rule should be a warning or error, follow the documentation for the linter.
 rules_lint provides the exit code of the linter process to allow the desired developer experiences listed above.
 
+### Terraform linting
+
+Terraform modules can be linted with `lint_tflint_aspect`, which relies on the toolchains published by
+[`rules_tf`](https://github.com/yanndegat/rules_tf). Add that module (or the equivalent WORKSPACE repositories)
+and register the toolchains so the aspect can locate both Terraform and TFLint binaries:
+
+```starlark
+bazel_dep(name = "rules_tf", version = "0.0.10")
+
+tf = use_extension("@rules_tf//tf:extensions.bzl", "tf_repositories")
+tf.download(
+    version = "1.9.8",
+    mirror = {"aws": "hashicorp/aws:5.90.0"},
+)
+use_repo(tf, "tf_toolchains")
+register_toolchains("@tf_toolchains//:all")
+```
+
+Then declare the aspect alongside your other linters:
+
+```starlark
+load("@aspect_rules_lint//lint:tflint.bzl", "lint_tflint_aspect")
+
+tflint = lint_tflint_aspect()
+```
+
+In WORKSPACE projects, fetch `rules_tf` via `rules_lint_dependencies()` and register matching
+toolchains using the helper exposed by rules_lint:
+
+```starlark
+load("@aspect_rules_lint//lint:tf_toolchains_workspace.bzl", "rules_lint_setup_tf_toolchains")
+
+rules_lint_setup_tf_toolchains(
+    version = "1.9.8",
+    mirror = {"aws": "hashicorp/aws:5.90.0"},
+)
+```
+
+The helper detects the host platform automatically using Bazel's host platform constraints.
+
 ## Ignoring targets
 
 To ignore a specific target, you can use the `no-lint` tag. This will prevent the linter from visiting the target.

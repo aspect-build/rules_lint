@@ -14,6 +14,7 @@ load("@aspect_rules_lint//lint:pylint.bzl", "lint_pylint_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
+load("@aspect_rules_lint//lint:tflint.bzl", "lint_tflint_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
 load("@aspect_rules_lint//lint:yamllint.bzl", "lint_yamllint_aspect")
 
@@ -106,6 +107,10 @@ ktlint = lint_ktlint_aspect(
 )
 
 ktlint_test = lint_test(aspect = ktlint)
+
+tflint = lint_tflint_aspect()
+
+tflint_test = lint_test(aspect = tflint)
 
 clang_tidy = lint_clang_tidy_aspect(
     binary = Label("//tools/lint:clang_tidy"),

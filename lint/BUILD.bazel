@@ -1,3 +1,4 @@
+load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 load("@bazel_lib//lib:utils.bzl", bazel_lib_utils = "utils")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
@@ -197,6 +198,19 @@ bzl_library(
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
     ],
+)
+
+bzl_library(
+    name = "tflint",
+    srcs = ["tflint.bzl"],
+    deps = [
+        "//lint/private:lint_aspect",
+    ],
+)
+
+bzl_library(
+    name = "tf_toolchains_workspace",
+    srcs = ["tf_toolchains_workspace.bzl"],
 )
 
 bzl_library(
