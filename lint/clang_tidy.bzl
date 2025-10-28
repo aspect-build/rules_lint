@@ -262,7 +262,7 @@ def _get_args(ctx, compilation_context, srcs):
 def _get_compiler_args(ctx, compilation_context, srcs):
     # add args specified by the toolchain, on the command line and rule copts
     args = []
-    rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
+    rule_flags = list(getattr(ctx.rule.attr, "copts", [])) + list(getattr(ctx.rule.attr, "cxxopts", []))
     sources_are_cxx = _is_cxx(srcs[0])
     if (sources_are_cxx):
         user_flags = ctx.fragments.cpp.cxxopts + ctx.fragments.cpp.copts
