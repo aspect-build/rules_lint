@@ -1,9 +1,11 @@
 # Filter languages we understand
 with_entries(select(.key | IN(
     "C++",
+    "C#",
     "CSS",
     "Cuda",
     "Markdown",
+    "F#",
     "Go",
     "Gherkin",
     "GraphQL",
