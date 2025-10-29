@@ -373,6 +373,10 @@ load("@aspect_rules_lint//lint:spotbugs.bzl", "fetch_spotbugs")
 
 fetch_spotbugs()
 
+load("//3rdparty/nuget:paket.main.bzl", "main")
+
+main()
+
 ########################
 # Optional: multitool provides defaults for some tools such as yamlfmt
 # If you do not set up multitool, you must provide these tools yourself
