@@ -31,6 +31,8 @@ TOOLS = {
     "Rust": "rustfmt",
     "XML": "prettier",
     "Gherkin": "prettier",
+    "F#": "fantomas",
+    "C#": "csharpier",
 }
 
 # Provided to make install more convenient
@@ -62,6 +64,8 @@ CHECK_FLAGS = {
     "clang-format": "--style=file --fallback-style=none --dry-run -Werror",
     "yamlfmt": "-lint",
     "rustfmt": "--check",
+    "fantomas": "--check",
+    "csharpier": "check",
 }
 
 # Flags to pass each tool when running in default mode
@@ -90,9 +94,15 @@ FIX_FLAGS = {
     "clang-format": "-style=file --fallback-style=none -i",
     "yamlfmt": "",
     "rustfmt": "",
+    "fantomas": "",
+    "csharpier": "format",
 }
 
 def to_attribute_name(lang):
     if lang == "C++":
         return "cc"
+    if lang == "C#":
+        return "csharp"
+    if lang == "F#":
+        return "fsharp"
     return lang.lower().replace(" ", "_")

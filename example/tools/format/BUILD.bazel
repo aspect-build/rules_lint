@@ -94,8 +94,10 @@ format_multirun(
     name = "format",
     c = "@llvm_toolchain_llvm//:bin/clang-format",
     cc = "@llvm_toolchain_llvm//:bin/clang-format",
+    csharp = "@paket.main//csharpier/tools:csharpier",
     css = ":prettier",
     cuda = "@llvm_toolchain_llvm//:bin/clang-format",
+    fsharp = "@paket.main//fantomas/tools:fantomas",
     gherkin = ":prettier",
     # You can use standard gofmt instead of stricter gofumpt:
     # go = "@go_sdk//:bin/gofmt",

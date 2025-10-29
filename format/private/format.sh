@@ -118,7 +118,9 @@ function ls-files {
       'C') patterns=('*.c' '*.cats' '*.h' '*.idc') ;;
       'C++') patterns=('*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
       'Cuda') patterns=('*.cu' '*.cuh') ;;
+      'C#') patterns=('*.cs' '*.cshtml') ;;
       'CSS') patterns=('*.css') ;;
+      'F#') patterns=('*.fs') ;;
       'Go') patterns=('*.go') ;;
       'GraphQL') patterns=('*.graphql' '*.gql' '*.graphqls') ;;
       'HTML') patterns=('*.html' '*.hta' '*.htm' '*.html.hl' '*.inc' '*.xht' '*.xhtml') ;;
