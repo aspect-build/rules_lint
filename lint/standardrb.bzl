@@ -150,8 +150,15 @@ def standardrb_action(
     # files
     args.add("--force-exclusion")
 
-    # Disable caching as Bazel handles caching at the action level
-    args.add("--cache", "false")
+    # Set cache root to /tmp to avoid sandbox permission issues
+    # StandardRB uses RuboCop internally, which needs a writable cache directory
+    # Note: We can't use --cache false with --cache-root, so we allow caching to /tmp
+    # Note: We don't pass --no-server because it causes errors with JRuby
+    args.add("--cache-root", "/tmp")
+
+    # Disable auto-fix to prevent writing to input files in the sandbox
+    # Tests should only report violations, not modify source files
+    args.add("--no-fix")
 
     # Enable color output if requested
     if color:
