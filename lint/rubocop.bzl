@@ -150,8 +150,11 @@ def rubocop_action(
     # files
     args.add("--force-exclusion")
 
-    # Disable caching as Bazel handles caching at the action level
-    args.add("--cache", "false")
+    # Set cache root to /tmp to avoid sandbox permission issues
+    # RuboCop's server feature needs a writable cache directory
+    # Note: We can't use --cache false with --cache-root, so we allow caching to /tmp
+    # Note: We don't pass --no-server because it causes errors with JRuby
+    args.add("--cache-root", "/tmp")
 
     # Enable color output if requested
     if color:
