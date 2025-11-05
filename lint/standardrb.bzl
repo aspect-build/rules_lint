@@ -1,12 +1,13 @@
-"""API for declaring a Standard Ruby lint aspect that visits rb_{binary|library|test}
-rules.
+"""API for declaring a Standard Ruby lint aspect.
+
+Visits rb_{binary|library|test} rules.
 
 Typical usage:
 
 ## Installing Standard Ruby
 
-The recommended approach is to use Bundler with rules_ruby to manage Standard Ruby
-as a gem dependency:
+The recommended approach is to use Bundler with rules_ruby to manage
+Standard Ruby as a gem dependency:
 
 1. Add Standard Ruby to your `Gemfile`:
 ```ruby
@@ -80,7 +81,10 @@ load(
 
 _MNEMONIC = "AspectRulesLintStandardRB"
 
-def _build_standardrb_command(standardrb_path, stdout_path, exit_code_path = None):
+def _build_standardrb_command(
+        standardrb_path,
+        stdout_path,
+        exit_code_path = None):
     """Build shell command for running Standard Ruby.
 
     Args:
@@ -114,8 +118,8 @@ def standardrb_action(
         color = False):
     """Run Standard Ruby as an action under Bazel.
 
-    Standard Ruby will select the configuration file to use for each source file,
-    as documented here:
+    Standard Ruby will select the configuration file to use for each
+    source file, as documented here:
     https://github.com/standardrb/standard
 
     Note: all config files are passed to the action.
@@ -129,7 +133,8 @@ def standardrb_action(
         ctx: Bazel Rule or Aspect evaluation context
         executable: File object for the Standard Ruby executable
         srcs: list of File objects for Ruby source files to be linted
-        config: list of File objects for Standard Ruby config files (.standard.yml)
+        config: list of File objects for Standard Ruby config files
+            (.standard.yml)
         stdout: File object where linter output will be written
         exit_code: File object where exit code will be written, or None.
             If None, the build will fail when Standard Ruby exits non-zero.
@@ -151,8 +156,9 @@ def standardrb_action(
     args.add("--force-exclusion")
 
     # Set cache root to /tmp to avoid sandbox permission issues
-    # StandardRB uses RuboCop internally, which needs a writable cache directory
-    # Note: We can't use --cache false with --cache-root, so we allow caching to /tmp
+    # StandardRB uses RuboCop internally, which needs a writable cache
+    # directory. Note: We can't use --cache false with --cache-root, so
+    # we allow caching to /tmp
     # Note: We don't pass --no-server because it causes errors with JRuby
     args.add("--cache-root", "/tmp")
 
@@ -199,7 +205,8 @@ def standardrb_fix(
         ctx: Bazel Rule or Aspect evaluation context
         executable: struct with _standardrb and _patcher fields
         srcs: list of File objects for Ruby source files to lint
-        config: list of File objects for Standard Ruby config files (.standard.yml)
+        config: list of File objects for Standard Ruby config files
+            (.standard.yml)
         patch: File object where the patch output will be written
         stdout: File object where linter output will be written
         exit_code: File object where exit code will be written
