@@ -1,10 +1,7 @@
 # See https://docs.aspect.build/v/workflows/config
 ---
 workspaces:
-  - .:
-      tasks:
-        - bzlmod-false:
-            without: true
+  - .
   - example
 bazel:
   flags:
@@ -12,12 +9,21 @@ bazel:
 tasks:
   - lint:
   - test:
+      name: Bazel 6
+      env:
+        USE_BAZEL_VERSION: 6.x
   - test:
-      name: "Test (WORKSPACE)"
-      id: bzlmod-false
-      bazel:
-        flags:
-          - --noenable_bzlmod
-          - --enable_workspace
+      name: Bazel 7
+      env:
+        USE_BAZEL_VERSION: 7.x
+  - test:
+      name: Bazel 8
+      env:
+        USE_BAZEL_VERSION: 8.x
+  - test:
+      name: Bazel 9
+      env:
+        USE_BAZEL_VERSION: 9.*
+        
 notifications:
   github: {}
