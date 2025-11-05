@@ -114,3 +114,8 @@ native_binary(
     ),
     out = "clang_tidy",
 )
+
+alias(
+    name = "rubocop",
+    actual = "@bundle//bin:rubocop",
+)
