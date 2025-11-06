@@ -20,6 +20,7 @@ bazel_dep(name = "rules_go", version = "0.52.0", repo_name = "io_bazel_rules_go"
 bazel_dep(name = "rules_proto", version = "6.0.0")
 bazel_dep(name = "rules_python", version = "0.26.0")
 bazel_dep(name = "rules_rust", version = "0.50.1")
+bazel_dep(name = "rules_ruby", version = "0.21.1")
 bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 bazel_dep(name = "platforms", version = "0.0.8")
 bazel_dep(name = "rules_kotlin", version = "1.9.0")
@@ -139,3 +140,36 @@ register_toolchains("@dotnet_toolchains//:all")
 
 main_extension = use_extension("//3rdparty/nuget:paket.main_extension.bzl", "main_extension")
 use_repo(main_extension, "paket.main")
+
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    version_file = "//:.ruby-version",
+)
+ruby.bundle_fetch(
+    name = "bundle",
+    gem_checksums = {
+        "ast-2.4.3": "954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383",
+        "json-2.15.1": "b1c1b2e7c116eb1903e0ce0c374783e6ead8747a0f9eca132d274018ebb80b89",
+        "json-2.15.1-java": "a6185eebe724a6937f60729e4998276d6b3de3ecc35be34f8e47c1eb40903ecf",
+        "language_server-protocol-3.17.0.5": "fd1e39a51a28bf3eec959379985a72e296e9f9acfce46f6a79d31ca8760803cc",
+        "lint_roller-1.1.0": "2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87",
+        "parallel-1.27.0": "4ac151e1806b755fb4e2dc2332cbf0e54f2e24ba821ff2d3dcf86bf6dc4ae130",
+        "parser-3.3.9.0": "94d6929354b1a6e3e1f89d79d4d302cc8f5aa814431a6c9c7e0623335d7687f2",
+        "prism-1.5.2": "192741663a55af1ac1b987caa1092deb666e4ff46a30c5064ad5456acd05df1d",
+        "racc-1.8.1": "4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f",
+        "racc-1.8.1-java": "54f2e6d1e1b91c154013277d986f52a90e5ececbe91465d29172e49342732b98",
+        "rainbow-3.1.1": "039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a",
+        "regexp_parser-2.11.3": "ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4",
+        "rubocop-1.81.1": "352a9a6f314a4312f6c305f1f72bc466254d221c95445cd49e1b65d1f9411635",
+        "rubocop-ast-1.47.1": "592682017855408b046a8190689490763aecea175238232b1b526826349d01ae",
+        "ruby-progressbar-1.13.0": "80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33",
+        "unicode-display_width-3.2.0": "0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42",
+        "unicode-emoji-4.1.0": "4997d2d5df1ed4252f4830a9b6e86f932e2013fbff2182a9ce9ccabda4f325a5",
+    },
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+)
+use_repo(ruby, "bundle", "ruby", "ruby_toolchains")
+
+register_toolchains("@ruby_toolchains//:all")
