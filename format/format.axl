@@ -54,6 +54,12 @@ def build_formatter(ctx: TaskContext) -> str:
     entrypoint = None
 
     for event in build.events():
+        if event.kind == "progress":
+            ctx.std.io.stdout.write(event.payload.stdout)
+            ctx.std.io.stdout.flush()
+            ctx.std.io.stderr.write(event.payload.stderr)
+            ctx.std.io.stderr.flush()
+            continue
         if event.kind == "named_set_of_files":
             for file in event.payload.files:
                 if len(file.path_prefix) == 0:
