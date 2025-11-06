@@ -53,7 +53,7 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v2.1.0
         with:
           repo: aspect-build/aspect-cli
-          tag: 2025.45.30
+          tag: 2025.45.31
           asset-name: aspect-cli
           platform: unknown_linux
           arch: x86_64
