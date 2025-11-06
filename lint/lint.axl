@@ -7,7 +7,7 @@ Then collect the results for presentation, either locally on the terminal or in 
 """
 
 # buildifier: disable=function-docstring
-def impl(ctx: task_context) -> int:
+def impl(ctx: TaskContext) -> int:
     flags = [
         "--config=lint",
         "--remote_download_regex='.*AspectRulesLint.*'",

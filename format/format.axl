@@ -4,7 +4,7 @@ Format builds a multi-formatter target and then runs it on the changed files.
 It's a simple example of interaction with version control, which Bazel only does via the workspace_status_command.
 """
 
-def bazel_run(ctx: task_context, entrypoint: str, args: list[str]) -> std.process.child:
+def bazel_run(ctx: TaskContext, entrypoint: str, args: list[str]) -> std.process.Child:
     """Rough port of the logic Bazel uses to execute binaries.
 
     TODO: load() this from @aspect-extensions/run instead
@@ -24,7 +24,7 @@ def bazel_run(ctx: task_context, entrypoint: str, args: list[str]) -> std.proces
         .spawn()
 
 # buildifier: disable=function-docstring
-def spawn_with_output(out, command: std.process.command):
+def spawn_with_output(out, command: std.process.Command):
     spawn = command.stdout("piped").spawn().wait_with_output()
     if not spawn.status.success:
         out.write("\x1b[0;31mERROR\x1b[0m: git exited with code %d\n" % spawn.status.code)
@@ -40,7 +40,7 @@ def find_changed_files(out, process, base_ref: str = "origin/main"):
         .command("git").args(["diff", "--name-only", merge_base]))
 
 # buildifier: disable=function-docstring
-def build_formatter(ctx: task_context) -> str:
+def build_formatter(ctx: TaskContext) -> str:
     build = ctx.bazel.build(
         ctx.args.format_target,
         events = True,
@@ -73,7 +73,7 @@ def build_formatter(ctx: task_context) -> str:
     return entrypoint
 
 # buildifier: disable=function-docstring
-def impl(ctx: task_context) -> int:
+def impl(ctx: TaskContext) -> int:
     out = ctx.std.io.stdout
 
     formatter = build_formatter(ctx)
