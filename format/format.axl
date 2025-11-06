@@ -84,13 +84,16 @@ def impl(ctx: TaskContext) -> int:
 
     formatter = build_formatter(ctx)
 
-    changed_files = find_changed_files(out, ctx.std.process)
-    out.write("Formatting changed files:\n%s" % changed_files)
+    format_args = []
+    if not ctx.args.all_files:
+        changed_files = find_changed_files(out, ctx.std.process)
+        out.write("Formatting changed files:\n%s" % changed_files)
+        format_args = changed_files.split("\n")
 
     exit = bazel_run(
         ctx,
         entrypoint = formatter,
-        args = changed_files.split("\n"),
+        args = format_args,
     ).wait()
 
     if not exit.success:
@@ -101,6 +104,7 @@ def impl(ctx: TaskContext) -> int:
 format = task(
     implementation = impl,
     args = {
+        "all_files": args.boolean(default = False),
         "format_target": args.string(default = "//tools/format"),
     },
 )
