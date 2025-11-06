@@ -1,0 +1,2 @@
+use_task("lint/lint.axl", "lint")
+use_task("format/format.axl", "format")

@@ -1,11 +1,5 @@
 axl_local_dep(
-    name = "lint",
-    path = "../lint",
-    auto_use_tasks = True,
-)
-
-axl_local_dep(
-    name = "format",
-    path = "../format",
+    name = "rules_lint",
+    path = "..",
     auto_use_tasks = True,
 )
