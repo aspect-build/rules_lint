@@ -211,6 +211,11 @@ def _tools_loop(name, kwargs):
         lang_attribute = to_attribute_name(lang)
         if lang_attribute not in kwargs.keys():
             continue
+        elif kwargs[lang_attribute] == None:  # If the attribute is explicitly set to None, skip this language
+            kwargs.pop(lang_attribute, None)
+            kwargs.pop(lang_attribute + "_fix_args", None)
+            kwargs.pop(lang_attribute + "_check_args", None)
+            continue
 
         tool_label = kwargs.pop(lang_attribute)
         target_name = "_".join([name, lang.replace(" ", "_"), "with", toolname])

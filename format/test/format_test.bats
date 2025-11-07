@@ -201,3 +201,17 @@ bats_load_library "bats-assert"
 
     assert_output --partial "+ prettier --write example/src/hello.feature"
 }
+
+@test "should run fantomas on F#" {
+    run bazel run //format/test:format_F#_with_fantomas
+    assert_success
+
+    assert_output --partial "+ fantomas example/src/hello.fs"
+}
+
+@test "should run csharpier on C#" {
+    run bazel run //format/test:format_C#_with_csharpier
+    assert_success
+
+    assert_output --partial "+ csharpier format example/src/hello.cs"
+}
