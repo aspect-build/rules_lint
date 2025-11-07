@@ -162,3 +162,23 @@ ruby.bundle_fetch(
 use_repo(ruby, "bundle", "ruby", "ruby_toolchains")
 
 register_toolchains("@ruby_toolchains//:all")
+
+# Read more about it https://blog.aspect.build/hermetic-c-toolchain
+bazel_dep(name = "gcc_toolchain", version = "0.9.0")
+
+gcc_toolchains = use_extension("@gcc_toolchain//toolchain:module_extensions.bzl", "gcc_toolchains", dev_dependency = True)
+gcc_toolchains.toolchain(
+    name = "gcc_toolchain_x86_64",
+    extra_ldflags = [
+        "-lstdc++",  # Need this flag for C++ stdlib https://github.com/f0rmiga/gcc-toolchain/tree/main/docs#c
+        "-l:libstdc++.a",  # This is for static linking https://github.com/f0rmiga/gcc-toolchain/tree/main/docs#linking-c-standard-library
+    ],
+    gcc_version = "15.2.0",
+    target_arch = "x86_64",
+)
+use_repo(gcc_toolchains, "gcc_toolchain_x86_64")
+
+register_toolchains(
+    "@gcc_toolchain_x86_64//:cc_toolchain",
+    dev_dependency = True,
+)

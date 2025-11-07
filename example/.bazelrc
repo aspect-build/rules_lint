@@ -19,3 +19,9 @@ startup --windows_enable_symlinks
 common:linux --action_env=BAZEL_CXXOPTS="-std=c++20"
 common:windows --action_env=BAZEL_CXXOPTS="/std:c++20"
 
+######################
+# Linters
+# https://github.com/aspect-build/rules_lint/blob/v1.7.0/docs/linting.md#4-errors-during-bazel-build
+#
+build --@aspect_rules_lint//lint:fail_on_violation
+build --aspects=//tools/lint:linters.bzl%eslint
