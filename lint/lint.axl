@@ -23,14 +23,14 @@ def impl(ctx: TaskContext) -> int:
         # echo > nohup.out; nohup aspect-cli lint ; cat nohup.out
         flags.append("--output_groups=rules_lint_machine")
     build = ctx.bazel.build(
-        bazel_flags = flags,
-        events = True,
+        flags = flags,
+        build_events = True,
         *(ctx.args.targets or ["//..."])
     )
     github_output = ctx.std.env.var("GITHUB_OUTPUT")
     exit_code = 0
     patches = []
-    for event in build.events():
+    for event in build.build_events():
         if event.kind == "named_set_of_files":
             for file in event.payload.files:
                 filepath = file.file.removeprefix("file://")

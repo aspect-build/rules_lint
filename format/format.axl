@@ -41,10 +41,12 @@ def find_changed_files(out, process, base_ref: str = "origin/main"):
 
 # buildifier: disable=function-docstring
 def build_formatter(ctx: TaskContext) -> str:
+    ctx.std.io.stdout.write("Building formatter...\n")
+
     build = ctx.bazel.build(
         ctx.args.format_target,
-        events = True,
-        bazel_flags = [
+        build_events = True,
+        flags = [
             "--build_runfile_links",
             "--noallow_analysis_cache_discard",
         ],
@@ -53,13 +55,7 @@ def build_formatter(ctx: TaskContext) -> str:
     # Find the entrypoint by watching for the named_set_of_files build event.
     entrypoint = None
 
-    for event in build.events():
-        if event.kind == "progress":
-            ctx.std.io.stdout.write(event.payload.stdout)
-            ctx.std.io.stdout.flush()
-            ctx.std.io.stderr.write(event.payload.stderr)
-            ctx.std.io.stderr.flush()
-            continue
+    for event in build.build_events():
         if event.kind == "named_set_of_files":
             for file in event.payload.files:
                 if len(file.path_prefix) == 0:
@@ -67,7 +63,6 @@ def build_formatter(ctx: TaskContext) -> str:
                 entrypoint = file.file.removeprefix("file://")
                 break
 
-    ctx.std.io.stdout.write("Building formatter...\n")
     status = build.wait()
 
     if not status.success:
