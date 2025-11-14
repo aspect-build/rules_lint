@@ -181,7 +181,12 @@ fi
 # Get staged files and format them
 git diff --cached --diff-filter=AM --name-only -z | xargs --null --no-run-if-empty bash -c '
   if [ $# -gt 0 ]; then
-    bazel run //:format -- "$@"
+    # Avoid building the target if it was already placed in the bazel_env output
+    if [ -e "bazel-out/bazel_env-opt/bin/tools/bazel_env/bin/format" ]; then
+      bazel-out/bazel_env-opt/bin/tools/bazel_env/bin/format "$@"
+    else
+      bazel run //:format -- "$@"
+    fi
 
     if ! git diff --quiet -- "$@"; then
       echo "❌ Some staged files were modified by the pre-commit hook."
