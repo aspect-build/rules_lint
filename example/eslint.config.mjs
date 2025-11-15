@@ -17,6 +17,9 @@ export default tseslint.config(
         project: true,
       },
     },
+    rules: {
+      "no-unused-vars": "error",
+    },
   },
   // Demonstrate override for a subdirectory.
   // Note that unlike eslint 8 and earlier, it does not resolve to a configuration file
