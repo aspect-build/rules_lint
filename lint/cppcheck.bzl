@@ -158,7 +158,7 @@ def lint_cppcheck_aspect(binary, verbose = False):
             ```bash
             #!/bin/bash
 
-            ~/.local/bin/cppcheckpremium/cppcheck \
+            ~/.local/bin/cppcheck/cppcheck \
                 --check-level=exhaustive \
                 --enable=warning,style,performance,portability,information \
                 "$@"
