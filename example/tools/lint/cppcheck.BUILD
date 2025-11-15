@@ -1,4 +1,4 @@
-# BUILD file for cppcheck premium external repository
+# BUILD file for cppcheck external repository
 
 package(default_visibility = ["//visibility:public"])
 

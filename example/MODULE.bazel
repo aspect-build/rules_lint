@@ -181,6 +181,8 @@ register_toolchains("@ruby_toolchains//:all")
 # Download cppcheck premium tar files for different platforms
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# Even though cppcheckpremium is downloaded, it behaves like the free version, if we do not
+# provide a cppcheck.cfg file (see cppcheck.BUILD file) and license key.
 http_archive(
     name = "cppcheck_linux",
     build_file = "//tools/lint:cppcheck.BUILD",

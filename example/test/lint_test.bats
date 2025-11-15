@@ -29,7 +29,7 @@ EOF
 	# PMD
 	echo <<"EOF" | assert_output --partial
 * file: src/Foo.java
-    src:  Foo.java:9:9
+    src:  Foo.jav fa:9:9
     rule: FinalizeOverloaded
     msg:  Finalize methods should not be overloaded
     code: protected void finalize(int a) {}
