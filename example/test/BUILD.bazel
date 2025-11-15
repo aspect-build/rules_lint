@@ -15,6 +15,7 @@ load(
     "rubocop_test",
     "ruff_test",
     "shellcheck_test",
+    "standardrb_test",
 )
 
 write_file(
@@ -189,6 +190,14 @@ format_test(
 
 rubocop_test(
     name = "rubocop",
+    srcs = ["//src:hello_ruby"],
+    # Expected to fail based on current content of the file.
+    # Normally you'd fix the file instead of tagging this test.
+    tags = ["manual"],
+)
+
+standardrb_test(
+    name = "standardrb",
     srcs = ["//src:hello_ruby"],
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
