@@ -4,6 +4,18 @@ First, perform a build with linting aspects enabled, and selecting appropriate o
 These can be remotely cached like any other actions.
 
 Then collect the results for presentation, either locally on the terminal or in the code review with Aspect's Marvin bot.
+
+Install:
+    Add rules_lint to MODULE.aspect.
+    See examples in https://github.com/bazel-starters
+
+Usage:
+    # Lint all targets in the repository
+    aspect lint
+    # Lint specific targets
+    aspect lint -- //path/to:targets -//not:this_one
+    # Fix lint violations, where the underlying linter provides fixes
+    aspect lint --fix
 """
 
 # buildifier: disable=function-docstring
@@ -15,13 +27,10 @@ def impl(ctx: TaskContext) -> int:
     if ctx.args.fix:
         flags.append("--output_groups=rules_lint_patch")
         flags.append("--@aspect_rules_lint//lint:fix")
-    out = ctx.std.io.stdout
-    if out.is_tty:
-        flags.append("--output_groups=rules_lint_human")
-    else:
-        # Note: to test this codepath, run with:
-        # echo > nohup.out; nohup aspect-cli lint ; cat nohup.out
-        flags.append("--output_groups=rules_lint_machine")
+    # Note: to test the non-interactive codepath, run with:
+    # echo > nohup.out; nohup aspect lint ; cat nohup.out
+    flags.append("--output_groups=rules_lint_" + (
+        "human" if ctx.std.io.stdout.is_tty else "machine"))
     build = ctx.bazel.build(
         flags = flags,
         build_events = True,
