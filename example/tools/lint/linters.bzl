@@ -18,6 +18,7 @@ load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
 load("@aspect_rules_lint//lint:standardrb.bzl", "lint_standardrb_aspect")
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
+load("@aspect_rules_lint//lint:ty.bzl", "lint_ty_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
 load("@aspect_rules_lint//lint:yamllint.bzl", "lint_yamllint_aspect")
 
@@ -95,6 +96,13 @@ shellcheck = lint_shellcheck_aspect(
 )
 
 shellcheck_test = lint_test(aspect = shellcheck)
+
+ty = lint_ty_aspect(
+    binary = Label("@aspect_rules_lint//lint:ty_bin"),
+    config = Label("@//:ty.toml"),
+)
+
+ty_test = lint_test(aspect = ty)
 
 vale = lint_vale_aspect(
     binary = Label("//tools/lint:vale"),

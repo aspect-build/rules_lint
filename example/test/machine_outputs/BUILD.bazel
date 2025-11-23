@@ -11,6 +11,7 @@ load(
     "machine_ruff_report",
     "machine_shellcheck_report",
     "machine_stylelint_report",
+    "machine_ty_report",
     "machine_vale_report",
     "machine_yamllint_report",
     "report_test",
@@ -38,6 +39,18 @@ report_test(
     expected_tool = "Ruff",
     expected_uri = "src/unused_import.pyi",
     report = "machine_ruff_pyi_report",
+)
+
+machine_ty_report(
+    name = "machine_ty_report",
+    src = "//src:unsupported_operator",
+)
+
+report_test(
+    name = "ty_machine_output_test",
+    expected_tool = "Ty",
+    expected_uri = "src/unsupported_operator.py",
+    report = "machine_ty_report",
 )
 
 machine_shellcheck_report(

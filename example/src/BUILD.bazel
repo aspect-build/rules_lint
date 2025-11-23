@@ -97,6 +97,16 @@ py_library(
     srcs = ["unused_import.py"],
 )
 
+py_library(
+    name = "unsupported_operator",
+    srcs = ["unsupported_operator.py"],
+)
+
+py_library(
+    name = "call_non_callable",
+    srcs = ["call_non_callable.py"],
+)
+
 filegroup(
     name = "unused_import_pyi",
     srcs = ["unused_import.pyi"],

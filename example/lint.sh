@@ -35,7 +35,7 @@ esac
 args=()
 if [ $machine == "Windows" ]; then
 	# avoid missing linters on windows platform
-	args=("--aspects=$(echo //tools/lint:linters.bzl%{flake8,pylint,pmd,ruff,vale,yamllint,clang_tidy,clippy} | tr ' ' ',')")
+	args=("--aspects=$(echo //tools/lint:linters.bzl%{flake8,pylint,pmd,ruff,ty,vale,yamllint,clang_tidy,clippy} | tr ' ' ',')")
 else
 	args=("--aspects=$(echo //tools/lint:linters.bzl%{buf,eslint,flake8,keep_sorted,ktlint,pmd,pylint,ruff,shellcheck,stylelint,vale,yamllint,clang_tidy,cppcheck,clippy,spotbugs} | tr ' ' ',')")
 fi
