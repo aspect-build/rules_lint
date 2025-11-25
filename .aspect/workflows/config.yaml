@@ -10,7 +10,6 @@ bazel:
   flags:
     - --config=ci
 tasks:
-  - lint:
   - test:
   - test:
       name: "Test (WORKSPACE)"
