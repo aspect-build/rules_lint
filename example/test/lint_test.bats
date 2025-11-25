@@ -41,8 +41,10 @@ EOF
 	# ESLint
 	echo <<"EOF" | assert_output --partial
 src/file.ts
-  2:7  error  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
+  6:7  error  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
 EOF
+	# The tsconfig must be properly included
+	refute_output --partial "couldn't find any tsconfig.json"
 	# If type declarations are missing, the following errors will be reported
 	refute_output --partial '@typescript-eslint/no-unsafe-call'
 	refute_output --partial '@typescript-eslint/no-unsafe-member-access'
@@ -99,9 +101,13 @@ EOF
 	echo <<"EOF" | assert_output --partial
 --- a/src/file.ts
 +++ b/src/file.ts
-@@ -1,3 +1,3 @@
- // this is a linting violation
+@@ -3,7 +3,7 @@
+ 
+ import { Greeter } from "./file-dep";
+ 
+-// this is a linting violation
 -const a: string = "a";
++// this is a linting violation, and is auto-fixed under `--fix`
 +const a = "a";
  console.log(a);
 EOF
