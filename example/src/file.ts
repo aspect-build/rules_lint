@@ -2,6 +2,8 @@ import dayjs from "dayjs";
 
 import { Greeter } from "./file-dep";
 
+const unused = "dsfdsfdsf"; // this is an unused var linting violation
+
 // this is a linting violation, and is auto-fixed under `--fix`
 const a: string = "a";
 console.log(a);
