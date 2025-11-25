@@ -21,6 +21,7 @@ exports_files(
         "checkstyle-suppressions.xml",
         ".ruff.toml",
         ".rubocop.yml",
+        ".standard.yml",
         ".shellcheckrc",
         ".scalafmt.conf",
         ".swcrc",
