@@ -31,7 +31,7 @@ Linters which are not language-specific:
 
 | Language               | Formatter                 | Linter(s)                        |
 | ---------------------- | ------------------------- | -------------------------------- |
-| C / C++                | [clang-format]            | [clang-tidy]                     |
+| C / C++                | [clang-format]            | [clang-tidy] or [cppcheck]       |
 | Cuda                   | [clang-format]            |                                  |
 | CSS, Less, Sass        | [Prettier]                | [Stylelint]                      |
 | Go                     | [gofmt] or [gofumpt]      |                                  |
@@ -93,6 +93,7 @@ Linters which are not language-specific:
 [taplo]: https://taplo.tamasfe.dev/
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 [clang-tidy]: https://clang.llvm.org/extra/clang-tidy/
+[cppcheck]: https://www.cppcheck.com/
 [vale]: https://vale.sh/
 [yamlfmt]: https://github.com/google/yamlfmt
 [yamllint]: https://yamllint.readthedocs.io/en/stable/
