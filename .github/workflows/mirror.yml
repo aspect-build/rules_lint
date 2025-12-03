@@ -16,10 +16,6 @@ jobs:
         run: |
           ./lint/mirror_ruff.sh
           npx @bazel/buildifier lint/ruff_versions.bzl
-      - name: Update ty
-        run: |
-          ./lint/mirror_ty.sh
-          npx @bazel/buildifier lint/ty_versions.bzl
       - name: Download and Extract Latest Multitool
         run: wget -O- https://github.com/theoremlp/multitool/releases/download/v0.9.0/multitool-x86_64-unknown-linux-gnu.tar.xz | tar --strip-components=1 -xJf -
       - name: Find Updates and Render Lockfile

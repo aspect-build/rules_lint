@@ -20,6 +20,11 @@ alias(
     actual = "@rules_buf_toolchains//:buf",
 )
 
+alias(
+    name = "ty",
+    actual = "@aspect_rules_lint//lint:ty_bin"
+)
+
 # We can test that it works with:
 # bazel run :flake8 -- --help
 py_console_script_binary(
