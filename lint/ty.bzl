@@ -9,45 +9,8 @@ create the linter aspect, typically in `tools/lint/linters.bzl`:
 load("@aspect_rules_lint//lint:ty.bzl", "lint_ty_aspect")
 
 ty = lint_ty_aspect(
-    binary = Label("@aspect_rules_lint//lint:ty_bin",
+    binary = Label("@aspect_rules_lint//lint:ty_bin"),
     config = Label("//:ty.toml"),
-)
-```
-
-## Using a specific ty version
-
-In `WORKSPACE`, fetch the desired version from https://github.com/astral-sh/ty/releases
-
-```starlark
-load("@aspect_rules_lint//lint:ty.bzl", "fetch_ty")
-
-# Specify a tag from the ty repository
-fetch_ty("v0.0.1-alpha.27")
-```
-
-In `tools/lint/BUILD.bazel`, select the tool for the host platform:
-
-```starlark
-# Note: this won't interact properly with the --platform flag, see
-# https://github.com/aspect-build/rules_lint/issues/389
-alias(
-    name = "ty",
-    actual = select({
-        "@bazel_tools//src/conditions:linux_x86_64": "@ty_x86_64-unknown-linux-gnu//:ty",
-        "@bazel_tools//src/conditions:linux_aarch64": "@ty_aarch64-unknown-linux-gnu//:ty",
-        "@bazel_tools//src/conditions:darwin_arm64": "@ty_aarch64-apple-darwin//:ty",
-        "@bazel_tools//src/conditions:darwin_x86_64": "@ty_x86_64-apple-darwin//:ty",
-        "@bazel_tools//src/conditions:windows_x64": "@ty_x86_64-pc-windows-msvc//:ty.exe",
-    }),
-)
-```
-
-Finally, reference this tool alias rather than the one from `@multitool`:
-
-```starlark
-ty = lint_ty_aspect(
-    binary = "@@//tools/lint:ty",
-    ...
 )
 ```
 """
@@ -204,40 +167,3 @@ ty_workaround_20269 = repository_rule(
         "url": attr.string(),
     },
 )
-
-def fetch_ty(tag):
-    """A repository macro used from WORKSPACE to fetch ty binaries.
-
-    Allows the user to select a particular ty version, rather than get whatever is pinned in the `multitool.lock.json` file.
-
-    Args:
-        tag: a tag of ty that we have mirrored, e.g. `v0.1.0`
-    """
-    version = tag.lstrip("v")
-    url = "https://github.com/astral-sh/ty/releases/download/{tag}/ty-{version}-{plat}.{ext}"
-
-    for plat, sha256 in TY_VERSIONS[tag].items():
-        fetch_rule = http_archive
-        if plat.endswith("darwin") and not versions.is_at_least("7.2.0", versions.get()):
-            fetch_rule = ty_workaround_20269
-        is_windows = plat.endswith("windows-msvc")
-
-        # Account for ty packaging change in 0.5.0
-        strip_prefix = None
-        if versions.is_at_least("0.5.0", version) and not is_windows:
-            strip_prefix = "ty-" + plat
-
-        maybe(
-            fetch_rule,
-            name = "ty_" + plat,
-            url = url.format(
-                tag = tag,
-                plat = plat,
-                version = version,
-                ext = "zip" if is_windows else "tar.gz",
-            ),
-            strip_prefix = strip_prefix,
-            sha256 = sha256,
-            build_file_content = """exports_files(["ty", "ty.exe"])""",
-        )
-
