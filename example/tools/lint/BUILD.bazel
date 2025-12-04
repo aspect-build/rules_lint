@@ -22,7 +22,7 @@ alias(
 
 alias(
     name = "ty",
-    actual = "@aspect_rules_lint//lint:ty_bin"
+    actual = "@aspect_rules_lint//lint:ty_bin",
 )
 
 # We can test that it works with:

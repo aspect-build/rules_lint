@@ -107,6 +107,12 @@ py_library(
     srcs = ["call_non_callable.py"],
 )
 
+py_library(
+    name = "uses_dependency",
+    srcs = ["uses_dependency.py"],
+    deps = ["//src/python_lib:py_dependency"],
+)
+
 filegroup(
     name = "unused_import_pyi",
     srcs = ["unused_import.pyi"],
