@@ -52,6 +52,13 @@ http_archive(
 )
 
 http_archive(
+    name = "yq.bzl",
+    integrity = "sha256-81xJqMjt7WC50KmC4RBMSlaR1UOajobVs81Gh9CWb50=",
+    strip_prefix = "yq.bzl-0.3.2",
+    url = "https://github.com/bazel-contrib/yq.bzl/releases/download/v0.3.2/yq.bzl-v0.3.2.tar.gz",
+)
+
+http_archive(
     name = "jq.bzl",
     sha256 = "21617eb71fb775a748ef5639131ab943ef39946bd2a4ce96ea60b03f985db0c5",
     strip_prefix = "jq.bzl-0.4.0",
@@ -96,6 +103,18 @@ http_archive(
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 
 bazel_features_deps()
+
+load("@yq.bzl//yq/toolchain:platforms.bzl", "YQ_PLATFORMS", "yq_platform_repo")
+load("@yq.bzl//yq/toolchain:versions.bzl", "DEFAULT_YQ_VERSION")
+
+[
+    yq_platform_repo(
+        name = "yq_" + platform,
+        platform = platform,
+        version = DEFAULT_YQ_VERSION,
+    )
+    for platform in YQ_PLATFORMS
+]
 
 load("@bazel_lib//lib:repositories.bzl", "bazel_lib_register_toolchains")
 
