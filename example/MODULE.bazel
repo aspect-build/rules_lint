@@ -2,7 +2,7 @@
 
 http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 
-bazel_dep(name = "aspect_rules_lint", version = "0.0.0")
+bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0")
 bazel_dep(name = "aspect_rules_swc", version = "2.0.0")
 bazel_dep(name = "aspect_rules_ts", version = "3.0.0")
@@ -27,6 +27,12 @@ bazel_dep(name = "rules_cc", version = "0.0.9")
 bazel_dep(name = "gazelle", version = "0.41.0")
 bazel_dep(name = "rules_shell", version = "0.5.0")
 bazel_dep(name = "jq.bzl", version = "0.4.0")
+
+git_override(
+    module_name = "aspect_bazel_lib",
+    commit = "a7f4da4d28655a5b2b2d4370bf44be4bee6d0152",
+    remote = "https://github.com/bazel-contrib/bazel-lib.git",
+)
 
 local_path_override(
     module_name = "aspect_rules_lint",
@@ -138,7 +144,7 @@ use_repo(dotnet, "dotnet_toolchains")
 register_toolchains("@dotnet_toolchains//:all")
 
 main_extension = use_extension("//3rdparty/nuget:paket.main_extension.bzl", "main_extension")
-use_repo(main_extension, "paket.main")
+use_repo(main_extension, "packet.main")
 
 ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
 ruby.toolchain(
