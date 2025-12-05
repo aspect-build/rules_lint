@@ -7,6 +7,7 @@ rust_library(
     visibility = [
         "//src/rust:__pkg__",
         "//test:__pkg__",
+        "//test/machine_outputs:__pkg__",
     ],
 )
 
