@@ -8,7 +8,8 @@ module(
 # We don't actually depend directly on aspect_bazel_lib, but we do require this
 # version be used transitively so that it doesn't produce conflicting actions
 # with the bazel_lib module we use.
-bazel_dep(name = "aspect_bazel_lib", version = "2.22.0")
+# see https://github.com/bazelbuild/bazel/pull/25509
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.0", repo_name = None)
 
 # Needed in the root because we use js_lib_helpers in our aspect impl
 # Minimum version needs 'chore: bump bazel-lib to 2.0 by @alexeagle in #1311'
