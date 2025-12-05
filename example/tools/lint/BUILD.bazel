@@ -6,7 +6,6 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 
 load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
 load("@aspect_rules_lint//lint:vale_library.bzl", "VALE_STYLES")
-load("@aspect_rules_lint//lint:ty.bzl", "lint_ty_aspect")
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 load("@npm//:stylelint/package_json.bzl", stylelint_bin = "bin")
