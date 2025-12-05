@@ -192,7 +192,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Rust_with_rustfmt
     assert_success
 
-    assert_output --partial "+ rustfmt example/src/rust/ok_binary.rs"
+    assert_output --partial "+ rustfmt example/src/rust/bad_binary.rs example/src/rust/bad_lib.rs example/src/rust/ok_binary.rs"
 }
 
 @test "should run prettier on Gherkin" {
