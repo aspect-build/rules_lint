@@ -16,6 +16,7 @@ ty = lint_ty_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@rules_python//python:defs.bzl", "PyInfo")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
 load(":ty_versions.bzl", "TY_VERSIONS")
 
@@ -75,72 +76,50 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
         tools = [executable],
     )
 
-# Provider to propagate transitive Python sources through the aspect graph
-TyTransitiveSourcesInfo = provider(
-    doc = "Transitive Python sources needed for type checking",
-    fields = {
-        "transitive_sources": "depset of Python source files",
-    },
-)
-
 # buildifier: disable=function-docstring
 def _ty_aspect_impl(target, ctx):
-    # Collect transitive sources from dependencies first (always do this)
-    # This ensures the provider chain is not broken even for non-linted targets
+    # Collect transitive sources from dependencies using the standard PyInfo provider.
+    # This works for both workspace targets (py_library) and third-party pip packages,
+    # as they all provide PyInfo with transitive_sources.
     transitive_sources = []
 
-    # Collect from deps attribute
+    # Collect from deps attribute using PyInfo
     if hasattr(ctx.rule.attr, "deps"):
         for dep in ctx.rule.attr.deps:
-            if TyTransitiveSourcesInfo in dep:
-                transitive_sources.append(dep[TyTransitiveSourcesInfo].transitive_sources)
+            if PyInfo in dep:
+                transitive_sources.append(dep[PyInfo].transitive_sources)
 
     # When srcs contains labels to other targets (e.g., genrules that produce .py files),
     # we need to collect their transitive sources for proper type resolution
     if hasattr(ctx.rule.attr, "srcs"):
         for src in ctx.rule.attr.srcs:
-            if TyTransitiveSourcesInfo in src:
-                transitive_sources.append(src[TyTransitiveSourcesInfo].transitive_sources)
+            if PyInfo in src:
+                transitive_sources.append(src[PyInfo].transitive_sources)
 
-    # If this target shouldn't be linted, propagate collected sources anyway
     if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
-        return [
-            TyTransitiveSourcesInfo(transitive_sources = depset(transitive = transitive_sources)),
-        ]
+        return []
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)
 
-    # Add current target's sources to the transitive set
-    transitive_sources_depset = depset(
-        files_to_lint,
-        transitive = transitive_sources,
-    )
-
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
-        return [
-            info,
-            TyTransitiveSourcesInfo(transitive_sources = transitive_sources_depset),
-        ]
+        return [info]
 
     color_env = {"FORCE_COLOR": "1"} if ctx.attr._options[LintOptionsInfo].color else {}
 
     # Pass transitive sources to ty_action so ty can resolve imports from dependencies
-    transitive_only = depset(transitive = transitive_sources)
-    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_only, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env)
+    transitive_srcs_depset = depset(transitive = transitive_sources)
+    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env)
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_only, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code)
+    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code)
 
     # Ideally we'd just use {"TY_OUTPUT_FORMAT": "sarif"} however it prints absolute paths; see https://github.com/astral-sh/ruff/issues/14985
     # This issue should also be resolved when the issue from ruff is fixed.
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
-    return [
-        info,
-        TyTransitiveSourcesInfo(transitive_sources = transitive_sources_depset),
-    ]
+    return [info]
 
 def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ty"]):
     """A factory function to create a linter aspect.
@@ -154,10 +133,9 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
 
     return aspect(
         implementation = _ty_aspect_impl,
-        # Propagate the aspect to dependencies and srcs so we can collect transitive sources
-        # - deps: collects sources from py_library dependencies
-        # - srcs: collects sources from generated Python files (e.g., from genrules)
-        attr_aspects = ["deps", "srcs"],
+        # Propagate the aspect to dependencies so they are also linted.
+        # Transitive sources for type resolution are obtained via PyInfo provider.
+        attr_aspects = ["deps"],
         attrs = {
             "_options": attr.label(
                 default = "//lint:options",
