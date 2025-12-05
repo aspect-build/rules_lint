@@ -97,7 +97,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_TOML_with_taplo
     assert_success
 
-    assert_output --partial '+ taplo format _typos.toml example/.ruff.toml example/src/hello.toml example/src/subdir/ruff.toml'
+    assert_output --partial '+ taplo format _typos.toml example/.clippy.toml example/.ruff.toml example/src/hello.toml example/src/subdir/ruff.toml'
 }
 
 @test "should run terraform fmt on HCL" {
