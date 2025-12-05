@@ -2,11 +2,12 @@
 
 Typical usage:
 
-First, install `rules_rust` into your repository: https://bazelbuild.github.io/rules_rust/. For instance:
+First, install `rules_rust` into your repository, on at least version 0.67.0: https://bazelbuild.github.io/rules_rust/.
+For instance:
 
 ```starlark
 // MODULE.bazel
-bazel_dep(name = "rules_rust", version = "0.50.1")
+bazel_dep(name = "rules_rust", version = "0.67.0")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
@@ -40,6 +41,11 @@ Now your targets will be linted with clippy.
 If you wish a target to be excluded from linting, you can give them the `noclippy` tag.
 
 Please note that, for now all clippy warnings are considered failures.
+This is because rules_rust will fail the entire execution if there's even one error,
+so we need to limit the reports to just warnings so that we can continue the target execution and generate useful output files.
+Because we limit all errors to warnings, we must consider every warning as an error.
+
+Please watch issue https://github.com/aspect-build/rules_lint/issues/385 for updates on this behavior.
 """
 
 load("@rules_rust//rust:defs.bzl", "rust_clippy_action", "rust_common")
