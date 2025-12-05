@@ -55,9 +55,9 @@ http_archive(
 
 http_archive(
     name = "aspect_bazel_lib",
-    integrity = "sha256-ONORe6YLxouXKcXnLeI873PZvALx1H2vLMTcz48F9mA=",
-    strip_prefix = "bazel-lib-eeac7413446200271db813038536b72ee6ab2e67",
-    url = "https://github.com/bazel-contrib/bazel-lib/archive/eeac7413446200271db813038536b72ee6ab2e67.zip",
+    sha256 = "fc459ce72f198d3822cfaf8ddcd07f2afef71d356d1f0fe513bb1638c5094bbd",
+    strip_prefix = "bazel-lib-2.22.0",
+    url = "https://github.com/bazel-contrib/bazel-lib/releases/download/v2.22.0/bazel-lib-v2.22.0.tar.gz",
 )
 
 http_archive(
