@@ -2,6 +2,7 @@
 
 module(
     name = "aspect_rules_lint",
+    bazel_compatibility = [">=7.6.0"],
     compatibility_level = 1,
 )
 
