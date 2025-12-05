@@ -3,6 +3,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
 rust_library(
     name = "bad_lib",
     srcs = ["bad_lib.rs"],
+    edition = "2021",
     visibility = [
         "//src/rust:__pkg__",
         "//test:__pkg__",
@@ -12,6 +13,7 @@ rust_library(
 rust_binary(
     name = "bad_binary",
     srcs = ["bad_binary.rs"],
+    edition = "2021",
     visibility = [
         "//src/rust:__pkg__",
         "//test:__pkg__",
@@ -21,6 +23,7 @@ rust_binary(
 rust_binary(
     name = "ok_binary",
     srcs = ["ok_binary.rs"],
+    edition = "2021",
     visibility = [
         "//src/rust:__pkg__",
         "//test:__pkg__",

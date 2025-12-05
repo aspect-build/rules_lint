@@ -38,6 +38,8 @@ clippy = lint_clippy_aspect(
 
 Now your targets will be linted with clippy.
 If you wish a target to be excluded from linting, you can give them the `noclippy` tag.
+
+Please note that, for now all clippy warnings are considered failures.
 """
 
 load("@rules_rust//rust:defs.bzl", "rust_clippy_action", "rust_common")
@@ -45,11 +47,14 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintClippy"
 
-def _marker_to_exit_code(ctx, marker, exit_code):
-    """Write 0 to exit_code if marker exists, fail otherwise.
+def _marker_to_exit_code(ctx, marker, output, exit_code):
+    """Write 0 to exit_code if marker exists and the output is empty, fail otherwise.
 
     rules_rust won't write the exit code to the success_marker, so we assert that it exists and write the exit code ourselves.
+    If there is a success marker but the output is not empty, we mark it as a failure.
     If there is no success marker, the action has failed anyway.
+
+    Please note that all clippy warnings are considered failures.
 
     Args:
         ctx (ctx): The rule or aspect context. Must have access to `ctx.actions.run_shell`
@@ -58,9 +63,15 @@ def _marker_to_exit_code(ctx, marker, exit_code):
     """
     ctx.actions.run_shell(
         outputs = [exit_code],
-        inputs = [marker],
-        arguments = [exit_code.path],
-        command = "echo '0' > $1",
+        inputs = [marker, output],
+        arguments = [exit_code.path, output.path],
+        command = """
+            if [ -s $2 ]; then
+                echo '1' > $1
+            else
+                echo '0' > $1
+            fi
+        """,
     )
 
 # buildifier: disable=function-docstring
@@ -72,9 +83,9 @@ def _clippy_aspect_impl(target, ctx):
 
     files_to_lint = filter_srcs(ctx.rule)
     if ctx.attr._options[LintOptionsInfo].fix:
-        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
-    else:
-        outputs, info = output_files(_MNEMONIC, target, ctx)
+        print("WARNING: `fix` is not supported yet for clippy. Please follow https://github.com/aspect-build/rules_lint/issues/385 for updates.")
+
+    outputs, info = output_files(_MNEMONIC, target, ctx)
 
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
@@ -103,7 +114,7 @@ def _clippy_aspect_impl(target, ctx):
         cap_at_warnings = True,  # We don't want to crash the process if there are clippy errors, we just want to report them.
         extra_clippy_flags = extra_options,
     )
-    _marker_to_exit_code(ctx, human_success_indicator, outputs.human.exit_code)
+    _marker_to_exit_code(ctx, human_success_indicator, outputs.human.out, outputs.human.exit_code)
 
     machine_success_indicator = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "machine_success_indicator"))
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
@@ -119,7 +130,7 @@ def _clippy_aspect_impl(target, ctx):
         extra_clippy_flags = extra_options,
         error_format = "json",
     )
-    _marker_to_exit_code(ctx, machine_success_indicator, outputs.machine.exit_code)
+    _marker_to_exit_code(ctx, machine_success_indicator, outputs.machine.out, outputs.machine.exit_code)
 
     # clippy uses rustc's IO format, which doesn't have a SARIF output mode built in,
     # and they're not planning to add one.
