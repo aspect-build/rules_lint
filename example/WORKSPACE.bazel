@@ -248,8 +248,6 @@ load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
 
-bazel_features_deps()
-
 load("@rules_cc//cc:extensions.bzl", "compatibility_proxy_repo")
 
 compatibility_proxy_repo()
@@ -263,10 +261,6 @@ llvm_toolchain(
         "darwin-x86_64": "15.0.7",
     },
 )
-
-load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
-
-llvm_register_toolchains()
 
 # rules_kotlin 1.9.0 needs atleast rules_java 6.4.0
 # for WORKSPACE we need to declare this here so that this version
