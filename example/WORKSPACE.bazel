@@ -238,15 +238,21 @@ go_register_toolchains(version = "1.20.3")
 
 http_archive(
     name = "toolchains_llvm",
-    canonical_id = "0.10.3",
-    sha256 = "b7cd301ef7b0ece28d20d3e778697a5e3b81828393150bed04838c0c52963a01",
-    strip_prefix = "toolchains_llvm-0.10.3",
-    url = "https://github.com/grailbio/bazel-toolchain/releases/download/0.10.3/toolchains_llvm-0.10.3.tar.gz",
+    canonical_id = "v1.5.0",
+    sha256 = "49e69c011bcaa4c9a7246a287ab1fb4f7ed3fde7cbd7300374c1030f40d2bb95",
+    strip_prefix = "toolchains_llvm-v1.5.0",
+    url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.5.0/toolchains_llvm-v1.5.0.tar.gz",
 )
 
 load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
+
+bazel_features_deps()
+
+load("@rules_cc//cc:extensions.bzl", "compatibility_proxy_repo")
+
+compatibility_proxy_repo()
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
@@ -257,6 +263,10 @@ llvm_toolchain(
         "darwin-x86_64": "15.0.7",
     },
 )
+
+load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()
 
 # rules_kotlin 1.9.0 needs atleast rules_java 6.4.0
 # for WORKSPACE we need to declare this here so that this version
