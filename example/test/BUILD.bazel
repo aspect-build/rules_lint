@@ -213,7 +213,7 @@ clippy_test(
 
 clippy_test(
     name = "clippy_bad_library",
-    srcs = ["//src/rust:bad_library"],
+    srcs = ["//src/rust:bad_lib"],
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
     tags = ["manual"],
