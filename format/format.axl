@@ -57,7 +57,7 @@ def build_formatter(ctx: TaskContext) -> str:
     ctx.std.io.stdout.write("Building formatter...\n")
 
     build = ctx.bazel.build(
-        ctx.args.format_target,
+        ctx.args.formatter_target,
         build_events = True,
         flags = [
             "--build_runfile_links",
