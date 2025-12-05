@@ -238,15 +238,19 @@ go_register_toolchains(version = "1.20.3")
 
 http_archive(
     name = "toolchains_llvm",
-    canonical_id = "0.10.3",
-    sha256 = "b7cd301ef7b0ece28d20d3e778697a5e3b81828393150bed04838c0c52963a01",
-    strip_prefix = "toolchains_llvm-0.10.3",
-    url = "https://github.com/grailbio/bazel-toolchain/releases/download/0.10.3/toolchains_llvm-0.10.3.tar.gz",
+    canonical_id = "v1.5.0",
+    sha256 = "49e69c011bcaa4c9a7246a287ab1fb4f7ed3fde7cbd7300374c1030f40d2bb95",
+    strip_prefix = "toolchains_llvm-v1.5.0",
+    url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.5.0/toolchains_llvm-v1.5.0.tar.gz",
 )
 
 load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
+
+load("@rules_cc//cc:extensions.bzl", "compatibility_proxy_repo")
+
+compatibility_proxy_repo()
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
@@ -350,8 +354,8 @@ kt_register_toolchains()
 
 http_archive(
     name = "rules_rust",
-    integrity = "sha256-MZscNcESBO9WsdlKVJ9rnTUygTt3jwLXCe9oyDcDbPE=",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.50.1/rules_rust-v0.50.1.tar.gz"],
+    integrity = "sha256-3Ch+PsqAsp1cyV4mHK4nPu3xr0oAqWrpN+I0U02tskw=",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.67.0/rules_rust-0.67.0.tar.gz"],
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")

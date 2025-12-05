@@ -18,7 +18,7 @@ bazel_dep(name = "rules_jvm_external", version = "6.5")
 bazel_dep(name = "rules_go", version = "0.52.0", repo_name = "io_bazel_rules_go")
 bazel_dep(name = "rules_proto", version = "6.0.0")
 bazel_dep(name = "rules_python", version = "0.26.0")
-bazel_dep(name = "rules_rust", version = "0.50.1")
+bazel_dep(name = "rules_rust", version = "0.67.0")
 bazel_dep(name = "rules_ruby", version = "0.21.1")
 bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 bazel_dep(name = "platforms", version = "0.0.8")
@@ -128,6 +128,11 @@ rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2021",
     versions = ["1.75.0"],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains(
+    "@rust_toolchains//:all",
 )
 
 # Configure .Net toolchains

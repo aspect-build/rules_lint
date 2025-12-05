@@ -11,5 +11,6 @@ lint:
     - //tools/lint:linters.bzl%checkstyle
     - //tools/lint:linters.bzl%clang_tidy
     - //tools/lint:linters.bzl%cppcheck
+    - //tools/lint:linters.bzl%clippy
     - //tools/lint:linters.bzl%spotbugs
     - //tools/lint:linters.bzl%keep_sorted
