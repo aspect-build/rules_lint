@@ -33,7 +33,7 @@ bazel_dep(name = "rules_rust", version = "0.67.0")
 bazel_dep(name = "rules_proto", version = "6.0.0")
 
 # Needed in the root because we dereference PyInfo in our ty aspect impl
-bazel_dep(name = "rules_python", version = "0.35.0")
+bazel_dep(name = "rules_python", version = "0.26.0")
 
 # Needed in the root because we dereference the toolchain in our aspect impl
 bazel_dep(name = "rules_buf", version = "0.5.2")
