@@ -117,14 +117,13 @@ def _clippy_aspect_impl(target, ctx):
     _marker_to_exit_code(ctx, human_success_indicator, outputs.human.out, outputs.human.exit_code)
 
     machine_success_indicator = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "machine_success_indicator"))
-    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     rust_clippy_action.action(
         ctx,
         clippy_executable = clippy_bin,
         process_wrapper = ctx.executable._process_wrapper,
         crate_info = crate_info,
         config = ctx.file._config_file,
-        output = raw_machine_report,
+        output = outputs.machine.out,
         success_marker = machine_success_indicator,
         cap_at_warnings = True,
         extra_clippy_flags = extra_options,
@@ -132,10 +131,15 @@ def _clippy_aspect_impl(target, ctx):
     )
     _marker_to_exit_code(ctx, machine_success_indicator, outputs.machine.out, outputs.machine.exit_code)
 
+    # FIXME: Rustc only gives us JSON output, which we can't turn into SARIF yet.
     # clippy uses rustc's IO format, which doesn't have a SARIF output mode built in,
     # and they're not planning to add one.
-    # Ref: https://github.com/rust-lang/rust-clippy/issues/8122
-    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
+    # We could use clippy-sarif, which seems to be relatively maintained.
+    #
+    # Refs:
+    #  - https://github.com/rust-lang/rust-clippy/issues/8122
+    #  - https://github.com/psastras/sarif-rs/tree/main/clippy-sarif
+    # parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     return [info]
 
