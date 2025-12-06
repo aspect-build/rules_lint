@@ -19,6 +19,11 @@ alias(
     actual = "@multitool//tools/shellcheck",
 )
 
+alias(
+    name = "ty_bin",
+    actual = "@multitool//tools/ty",
+)
+
 # Used as a default for vale_aspect#styles
 filegroup(
     name = "empty_styles",
