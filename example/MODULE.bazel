@@ -202,3 +202,36 @@ http_archive(
     strip_prefix = "cppcheckpremium",
     urls = ["https://files.cppchecksolutions.com/25.8.3/cppcheckpremium-25.8.3-macos-15.tar.gz"],
 )
+
+# load(
+#     "@aspect_rules_lint//format:repositories.bzl",
+#     "fetch_java_format",
+#     "fetch_ktfmt",
+#     "fetch_swiftformat",
+# )
+
+# fetch_java_format()
+
+# fetch_ktfmt()
+
+# fetch_swiftformat()
+
+# load("@aspect_rules_lint//lint:pmd.bzl", "fetch_pmd")
+
+# fetch_pmd()
+
+# load("@aspect_rules_lint//lint:checkstyle.bzl", "fetch_checkstyle")
+
+# fetch_checkstyle()
+
+# load("@aspect_rules_lint//lint:vale.bzl", "fetch_vale")
+
+# fetch_vale()
+
+# load("@aspect_rules_lint//lint:ktlint.bzl", "fetch_ktlint")
+
+# fetch_ktlint()
+
+# load("@aspect_rules_lint//lint:spotbugs.bzl", "fetch_spotbugs")
+
+# fetch_spotbugs()

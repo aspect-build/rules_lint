@@ -2,21 +2,11 @@
 ---
 workspaces:
   - .:
-      tasks:
-        - bzlmod-false:
-            without: true
   - example
 bazel:
   flags:
     - --config=ci
 tasks:
   - test:
-  - test:
-      name: "Test (WORKSPACE)"
-      id: bzlmod-false
-      bazel:
-        flags:
-          - --noenable_bzlmod
-          - --enable_workspace
 notifications:
   github: {}
