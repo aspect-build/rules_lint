@@ -134,6 +134,25 @@ load("@bazel_features//:deps.bzl", "bazel_features_deps")
 
 bazel_features_deps()
 
+load("@jq.bzl//jq/toolchain:platforms.bzl", "JQ_PLATFORMS", "jq_platform_repo")
+load("@jq.bzl//jq/toolchain:toolchain.bzl", "DEFAULT_JQ_VERSION", "jq_toolchains_repo")
+
+[
+    jq_platform_repo(
+        name = "{}_{}".format("jq_toolchains", platform),
+        platform = platform,
+        version = DEFAULT_JQ_VERSION,
+    )
+    for platform in JQ_PLATFORMS.keys()
+]
+
+jq_toolchains_repo(
+    name = "jq_toolchains",
+    user_repository_name = "jq_toolchains",
+)
+
+register_toolchains("@jq_toolchains//:all")
+
 load("@yq.bzl//yq/toolchain:platforms.bzl", "YQ_PLATFORMS", "yq_platform_repo")
 load("@yq.bzl//yq/toolchain:versions.bzl", "DEFAULT_YQ_VERSION")
 
