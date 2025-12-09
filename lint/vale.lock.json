@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/theoremlp/rules_multitool/main/lockfile.schema.json",
+  "vale": {
+    "binaries": [
+      {
+        "kind": "archive",
+        "file": "vale",
+        "sha256": "4378ee4bc7c2493760826270e55d5569cda35d7c89582e9fdc3070e2a1089193",
+        "os": "linux",
+        "cpu": "x86_64",
+        "url": "https://github.com/errata-ai/vale/releases/download/v3.13.0/vale_3.13.0_Linux_64-bit.tar.gz"
+      },
+      {
+        "kind": "archive",
+        "file": "vale",
+        "sha256": "2134f23e7afbdf70b44272e6d3b5f26e85972340faa1e2a2b194358cf2892d84",
+        "os": "linux",
+        "cpu": "arm64",
+        "url": "https://github.com/errata-ai/vale/releases/download/v3.13.0/vale_3.13.0_Linux_arm64.tar.gz"
+      },
+      {
+        "kind": "archive",
+        "file": "vale",
+        "sha256": "9f2991092579e85dd5be082c691b7b14ddbcd7c65477a6ff44b5f5e8dc3a9079",
+        "os": "macos",
+        "cpu": "x86_64",
+        "url": "https://github.com/errata-ai/vale/releases/download/v3.13.0/vale_3.13.0_macOS_64-bit.tar.gz"
+      },
+      {
+        "kind": "archive",
+        "file": "vale",
+        "sha256": "2e89bd82cadfffa6abebda80a141529db2799df5d4197e6aa0489a4d711d8a3b",
+        "os": "macos",
+        "cpu": "arm64",
+        "url": "https://github.com/errata-ai/vale/releases/download/v3.13.0/vale_3.13.0_macOS_arm64.tar.gz"
+      },
+      {
+        "kind": "archive",
+        "file": "vale.exe",
+        "sha256": "fb1141183d783ef1b9278ea5b1cc04e85801256b1539fc47147b90f6bf082341",
+        "os": "windows",
+        "cpu": "x86_64",
+        "url": "https://github.com/errata-ai/vale/releases/download/v3.13.0/vale_3.13.0_Windows_64-bit.zip"
+      }
+    ]
+  }
+}

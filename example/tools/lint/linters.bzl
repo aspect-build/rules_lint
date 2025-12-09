@@ -97,7 +97,7 @@ shellcheck = lint_shellcheck_aspect(
 shellcheck_test = lint_test(aspect = shellcheck)
 
 vale = lint_vale_aspect(
-    binary = Label("//tools/lint:vale"),
+    binary = Label("@aspect_rules_lint//lint:vale_bin"),
     config = Label("//:.vale.ini"),
     styles = Label("//tools/lint:vale_styles"),
 )

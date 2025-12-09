@@ -19,6 +19,11 @@ alias(
     actual = "@multitool//tools/shellcheck",
 )
 
+alias(
+    name = "vale_bin",
+    actual = "@multitool//tools/vale",
+)
+
 # Used as a default for vale_aspect#styles
 filegroup(
     name = "empty_styles",
@@ -146,8 +151,8 @@ bzl_library(
     srcs = ["eslint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
+        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 
@@ -232,8 +237,8 @@ bzl_library(
     srcs = ["stylelint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
+        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 

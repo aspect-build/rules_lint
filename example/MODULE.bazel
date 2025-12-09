@@ -224,10 +224,19 @@ http_archive(
 
 # fetch_checkstyle()
 
-# load("@aspect_rules_lint//lint:vale.bzl", "fetch_vale")
+http_archive(
+    name = "vale_Google",
+    build_file_content = """exports_files(["Google"])""",
+    integrity = "sha256-XxUQYDM3uzLzySeHKnPnv9SU161NTxD7qJYalLpIHb4=",
+    url = "https://github.com/errata-ai/Google/releases/download/v0.4.2/Google.zip",
+)
 
-# fetch_vale()
-
+http_archive(
+    name = "vale_write-good",
+    build_file_content = """exports_files(["write-good"])""",
+    integrity = "sha256-4OhhIyZve4I3joSmGDu1XZjJthUovLc00XRy68Is1BU=",
+    url = "https://github.com/errata-ai/write-good/releases/download/v0.4.0/write-good.zip",
+)
 # load("@aspect_rules_lint//lint:ktlint.bzl", "fetch_ktlint")
 
 # fetch_ktlint()
