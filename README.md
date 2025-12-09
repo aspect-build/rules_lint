@@ -49,7 +49,7 @@ Linters which are not language-specific:
 | Protocol Buffer        | [buf]                     | [buf lint]                       |
 | Python                 | [ruff]                    | [flake8], [pylint], [ruff]       |
 | Ruby                   |                           | [RuboCop], [Standard]            |
-| Rust                   | [rustfmt]                 |                                  |
+| Rust                   | [rustfmt]                 | [clippy]                         |
 | SQL                    | [prettier-plugin-sql]     |                                  |
 | Scala                  | [scalafmt]                |                                  |
 | Shell                  | [shfmt]                   | [shellcheck]                     |
@@ -99,6 +99,7 @@ Linters which are not language-specific:
 [yamllint]: https://yamllint.readthedocs.io/en/stable/
 [rustfmt]: https://rust-lang.github.io/rustfmt
 [stylelint]: https://stylelint.io
+[clippy]: https://github.com/rust-lang/rust-clippy
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift
