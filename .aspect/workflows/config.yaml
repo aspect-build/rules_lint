@@ -1,7 +1,7 @@
 # See https://docs.aspect.build/v/workflows/config
 ---
 workspaces:
-  - .:
+  - .
   - example
 bazel:
   flags:
