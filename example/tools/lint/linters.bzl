@@ -41,6 +41,8 @@ stylelint = lint_stylelint_aspect(
     config = Label("//:stylelintrc"),
 )
 
+stylelint_test = lint_test(aspect = stylelint)
+
 flake8 = lint_flake8_aspect(
     binary = Label("//tools/lint:flake8"),
     config = Label("//:.flake8"),

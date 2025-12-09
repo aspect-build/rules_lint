@@ -138,3 +138,20 @@ EOF
 	# This lint check is disabled in the .eslintrc.cjs file
 	refute_output --partial "Unexpected 'debugger' statement"
 }
+
+@test "stylelint should produce output even with no violations" {
+	run $BATS_TEST_DIRNAME/../lint.sh //src:clean_css --no@aspect_rules_lint//lint:color
+	assert_success
+	# The exit code should be 0 (no violations)
+	run cat bazel-bin/src/clean_css.AspectRulesLintStylelint.out.exit_code
+	assert_output "0"
+}
+
+@test "stylelint should capture violations in output" {
+	run $BATS_TEST_DIRNAME/../lint.sh //src:css --no@aspect_rules_lint//lint:color
+	assert_success
+	# Verify the violation is captured in the output
+	run cat bazel-bin/src/css.AspectRulesLintStylelint.out
+	assert_output --partial "Unexpected empty block"
+	assert_output --partial "block-no-empty"
+}

@@ -16,6 +16,7 @@ load(
     "ruff_test",
     "shellcheck_test",
     "standardrb_test",
+    "stylelint_test",
 )
 
 write_file(
@@ -194,6 +195,11 @@ rubocop_test(
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
     tags = ["manual"],
+)
+
+stylelint_test(
+    name = "stylelint_no_violations",
+    srcs = ["//src:clean_css"],
 )
 
 standardrb_test(

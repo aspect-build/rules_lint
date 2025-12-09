@@ -24,6 +24,12 @@ filegroup(
 )
 
 filegroup(
+    name = "clean_css",
+    srcs = ["clean.css"],
+    tags = ["lint-with-stylelint"],
+)
+
+filegroup(
     name = "md",
     srcs = ["README.md"],
     tags = ["markdown"],
