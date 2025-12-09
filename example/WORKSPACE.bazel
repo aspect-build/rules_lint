@@ -89,6 +89,13 @@ http_archive(
 )
 
 http_archive(
+    name = "package_metadata",
+    sha256 = "8f27dc7393e3f3bdc793bdc4ba36d67a63c22cc9d38cc65d3204654974ea4563",
+    strip_prefix = "supply-chain-0.0.7/metadata",
+    url = "https://github.com/bazel-contrib/supply-chain/releases/download/v0.0.7/supply-chain-v0.0.7.tar.gz",
+)
+
+http_archive(
     name = "aspect_rules_js",
     sha256 = "4c7404aa9d7f8c458c1bdf79cc5ec1fced55cab25a3f1121b236de78e91f271b",
     strip_prefix = "rules_js-2.6.2",
