@@ -60,7 +60,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_CSS_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write example/src/hello.css"
+    assert_output --partial "+ prettier --write example/src/clean.css example/src/hello.css"
     assert_output --partial "+ prettier --write example/src/hello.less"
     assert_output --partial "+ prettier --write example/src/hello.scss"
 }
