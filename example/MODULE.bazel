@@ -1,7 +1,5 @@
 "Bazel dependencies"
 
-http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
-
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0")
 bazel_dep(name = "aspect_rules_swc", version = "2.0.0")
@@ -31,14 +29,6 @@ bazel_dep(name = "jq.bzl", version = "0.4.0")
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "..",
-)
-
-http_file(
-    name = "taplo",
-    sha256 = "8fe196b894ccf9072f98d4e1013a180306e17d244830b03986ee5e8eabeb6156",
-    urls = [
-        "https://github.com/tamasfe/taplo/releases/download/0.10.0/taplo-linux-x86_64.gz",
-    ],
 )
 
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
@@ -182,65 +172,27 @@ use_repo(ruby, "bundle", "ruby", "ruby_toolchains")
 
 register_toolchains("@ruby_toolchains//:all")
 
-# Download cppcheck premium tar files for different platforms
-http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-# Even though cppcheckpremium is downloaded, it behaves like the free version, if we do not
-# provide a cppcheck.cfg file (see cppcheck.BUILD file) and license key.
-http_archive(
-    name = "cppcheck_linux",
-    build_file = "//tools/lint:cppcheck.BUILD",
-    integrity = "sha256-IqQ3Iofw6LoHh4YcdbN0m3tjg6utCiey7nGaOaPMv/I=",
-    strip_prefix = "cppcheckpremium-25.8.3",
-    urls = ["https://files.cppchecksolutions.com/25.8.3/ubuntu-22.04/cppcheckpremium-25.8.3-amd64.tar.gz"],
+format = use_extension("@aspect_rules_lint//format:extensions.bzl", "format")
+format.tools(
+    google_java_format = "google-java-format",
+    ktfmt = "ktfmt",
+    swiftformat_linux = "swiftformat",
+    swiftformat_macos = "swiftformat_mac",
+    taplo = "taplo",
 )
+use_repo(format, "google-java-format", "ktfmt", "swiftformat", "swiftformat_mac", "taplo")
 
-http_archive(
-    name = "cppcheck_macos",
-    build_file = "//tools/lint:cppcheck.BUILD",
-    integrity = "sha256-PEtm/DxKNZNJJuZE+56AZ80R22sZjZoziekAmR7FhNk=",
-    strip_prefix = "cppcheckpremium",
-    urls = ["https://files.cppchecksolutions.com/25.8.3/cppcheckpremium-25.8.3-macos-15.tar.gz"],
+lint = use_extension("@aspect_rules_lint//lint:extensions.bzl", "lint")
+lint.tools(
+    checkstyle = "com_puppycrawl_tools_checkstyle",
+    cppcheck_linux = "cppcheck_linux",
+    cppcheck_macos = "cppcheck_macos",
+    ktlint = "com_github_pinterest_ktlint",
+    pmd = "net_sourceforge_pmd",
+    spotbugs = "spotbugs",
+    vale_styles = [
+        "Google",
+        "write-good",
+    ],
 )
-
-# load(
-#     "@aspect_rules_lint//format:repositories.bzl",
-#     "fetch_java_format",
-#     "fetch_ktfmt",
-#     "fetch_swiftformat",
-# )
-
-# fetch_java_format()
-
-# fetch_ktfmt()
-
-# fetch_swiftformat()
-
-# load("@aspect_rules_lint//lint:pmd.bzl", "fetch_pmd")
-
-# fetch_pmd()
-
-# load("@aspect_rules_lint//lint:checkstyle.bzl", "fetch_checkstyle")
-
-# fetch_checkstyle()
-
-http_archive(
-    name = "vale_Google",
-    build_file_content = """exports_files(["Google"])""",
-    integrity = "sha256-XxUQYDM3uzLzySeHKnPnv9SU161NTxD7qJYalLpIHb4=",
-    url = "https://github.com/errata-ai/Google/releases/download/v0.4.2/Google.zip",
-)
-
-http_archive(
-    name = "vale_write-good",
-    build_file_content = """exports_files(["write-good"])""",
-    integrity = "sha256-4OhhIyZve4I3joSmGDu1XZjJthUovLc00XRy68Is1BU=",
-    url = "https://github.com/errata-ai/write-good/releases/download/v0.4.0/write-good.zip",
-)
-# load("@aspect_rules_lint//lint:ktlint.bzl", "fetch_ktlint")
-
-# fetch_ktlint()
-
-# load("@aspect_rules_lint//lint:spotbugs.bzl", "fetch_spotbugs")
-
-# fetch_spotbugs()
+use_repo(lint, "vale_Google", "vale_write-good")
