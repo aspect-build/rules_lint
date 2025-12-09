@@ -5,3 +5,5 @@ bazel-*
 node_modules
 # Until it gets more stable
 MODULE.bazel.lock
+
+user.bazelrc

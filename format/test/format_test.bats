@@ -97,7 +97,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_TOML_with_taplo
     assert_success
 
-    assert_output --partial '+ taplo format _typos.toml example/.ruff.toml example/src/hello.toml example/src/subdir/ruff.toml'
+    assert_output --partial '+ taplo format _typos.toml example/.clippy.toml example/.ruff.toml example/src/hello.toml example/src/subdir/ruff.toml'
 }
 
 @test "should run terraform fmt on HCL" {
@@ -192,7 +192,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Rust_with_rustfmt
     assert_success
 
-    assert_output --partial "+ rustfmt example/src/hello.rs"
+    assert_output --partial "+ rustfmt example/src/rust/bad_binary.rs example/src/rust/bad_lib.rs example/src/rust/ok_binary.rs"
 }
 
 @test "should run prettier on Gherkin" {

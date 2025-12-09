@@ -89,6 +89,13 @@ http_archive(
 )
 
 http_archive(
+    name = "package_metadata",
+    sha256 = "8f27dc7393e3f3bdc793bdc4ba36d67a63c22cc9d38cc65d3204654974ea4563",
+    strip_prefix = "supply-chain-0.0.7/metadata",
+    url = "https://github.com/bazel-contrib/supply-chain/releases/download/v0.0.7/supply-chain-v0.0.7.tar.gz",
+)
+
+http_archive(
     name = "aspect_rules_js",
     sha256 = "4c7404aa9d7f8c458c1bdf79cc5ec1fced55cab25a3f1121b236de78e91f271b",
     strip_prefix = "rules_js-2.6.2",
@@ -126,6 +133,25 @@ http_archive(
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 
 bazel_features_deps()
+
+load("@jq.bzl//jq/toolchain:platforms.bzl", "JQ_PLATFORMS", "jq_platform_repo")
+load("@jq.bzl//jq/toolchain:toolchain.bzl", "DEFAULT_JQ_VERSION", "jq_toolchains_repo")
+
+[
+    jq_platform_repo(
+        name = "{}_{}".format("jq_toolchains", platform),
+        platform = platform,
+        version = DEFAULT_JQ_VERSION,
+    )
+    for platform in JQ_PLATFORMS.keys()
+]
+
+jq_toolchains_repo(
+    name = "jq_toolchains",
+    user_repository_name = "jq_toolchains",
+)
+
+register_toolchains("@jq_toolchains//:all")
 
 load("@yq.bzl//yq/toolchain:platforms.bzl", "YQ_PLATFORMS", "yq_platform_repo")
 load("@yq.bzl//yq/toolchain:versions.bzl", "DEFAULT_YQ_VERSION")
@@ -238,15 +264,19 @@ go_register_toolchains(version = "1.20.3")
 
 http_archive(
     name = "toolchains_llvm",
-    canonical_id = "0.10.3",
-    sha256 = "b7cd301ef7b0ece28d20d3e778697a5e3b81828393150bed04838c0c52963a01",
-    strip_prefix = "toolchains_llvm-0.10.3",
-    url = "https://github.com/grailbio/bazel-toolchain/releases/download/0.10.3/toolchains_llvm-0.10.3.tar.gz",
+    canonical_id = "v1.5.0",
+    sha256 = "49e69c011bcaa4c9a7246a287ab1fb4f7ed3fde7cbd7300374c1030f40d2bb95",
+    strip_prefix = "toolchains_llvm-v1.5.0",
+    url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.5.0/toolchains_llvm-v1.5.0.tar.gz",
 )
 
 load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
+
+load("@rules_cc//cc:extensions.bzl", "compatibility_proxy_repo")
+
+compatibility_proxy_repo()
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
@@ -350,8 +380,8 @@ kt_register_toolchains()
 
 http_archive(
     name = "rules_rust",
-    integrity = "sha256-MZscNcESBO9WsdlKVJ9rnTUygTt3jwLXCe9oyDcDbPE=",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.50.1/rules_rust-v0.50.1.tar.gz"],
+    integrity = "sha256-3Ch+PsqAsp1cyV4mHK4nPu3xr0oAqWrpN+I0U02tskw=",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.67.0/rules_rust-0.67.0.tar.gz"],
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
