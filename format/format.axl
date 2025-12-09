@@ -60,7 +60,6 @@ def build_formatter(ctx: TaskContext) -> str:
         ctx.args.formatter_target,
         build_events = True,
         flags = [
-            "--build_runfile_links",
             "--noallow_analysis_cache_discard",
         ],
     )

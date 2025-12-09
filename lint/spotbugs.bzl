@@ -31,6 +31,7 @@ spotbugs = lint_spotbugs_aspect(
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@rules_java//java:defs.bzl", "JavaInfo")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintSpotbugs"
