@@ -2,6 +2,19 @@
 
 Format builds a multi-formatter target and then runs it on the changed files.
 It's a simple example of interaction with version control, which Bazel only does via the workspace_status_command.
+
+Install:
+    Add rules_lint to MODULE.aspect.
+    See examples in https://github.com/bazel-starters
+
+Usage:
+    # Format changed files
+    aspect format
+    # Format all files
+    aspect format --all_files
+    # Specify the label of the format_multirun binary
+    aspect format --formatter_target=//path/to:formatter_bin
+    
 """
 
 def bazel_run(ctx: TaskContext, entrypoint: str, args: list[str]) -> std.process.Child:
@@ -44,7 +57,7 @@ def build_formatter(ctx: TaskContext) -> str:
     ctx.std.io.stdout.write("Building formatter...\n")
 
     build = ctx.bazel.build(
-        ctx.args.format_target,
+        ctx.args.formatter_target,
         build_events = True,
         flags = [
             "--build_runfile_links",
@@ -100,6 +113,6 @@ format = task(
     implementation = impl,
     args = {
         "all_files": args.boolean(default = False),
-        "format_target": args.string(default = "//tools/format"),
+        "formatter_target": args.string(default = "//tools/format"),
     },
 )

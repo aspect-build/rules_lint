@@ -146,7 +146,7 @@ bzl_library(
     srcs = ["eslint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@aspect_bazel_lib//lib:copy_to_bin",
+        "@bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
     ],
 )
@@ -206,6 +206,12 @@ bzl_library(
 )
 
 bzl_library(
+    name = "standardrb",
+    srcs = ["standardrb.bzl"],
+    deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
     name = "ruff",
     srcs = ["ruff.bzl"],
     deps = _BAZEL_TOOLS + [
@@ -226,7 +232,7 @@ bzl_library(
     srcs = ["stylelint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@aspect_bazel_lib//lib:copy_to_bin",
+        "@bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
     ],
 )
@@ -286,4 +292,20 @@ bzl_library(
 bzl_library(
     name = "vale_versions",
     srcs = ["vale_versions.bzl"],
+)
+
+bzl_library(
+    name = "cppcheck",
+    srcs = ["cppcheck.bzl"],
+    deps = _BAZEL_TOOLS + [
+        "//lint/private:lint_aspect",
+        "@bazel_skylib//lib:dicts",
+        "@bazel_tools//tools/build_defs/cc:action_names.bzl",
+        "@bazel_tools//tools/cpp:toolchain_utils.bzl",
+    ],
+)
+
+sh_binary(
+    name = "cppcheck_wrapper",
+    srcs = ["cppcheck_wrapper.bash"],
 )

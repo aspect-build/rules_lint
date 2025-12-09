@@ -66,7 +66,7 @@ jobs:
       - name: Format
         working-directory: example
         # Only format one language to keep CI time reasonable
-        run: aspect format --format_target=//tools/format:format_Shell_with_shfmt --all_files=true
+        run: aspect format --formatter_target=//tools/format:format_Shell_with_shfmt --all_files=true
   test:
     strategy:
       matrix:

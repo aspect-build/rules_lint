@@ -3,17 +3,19 @@
 load("@aspect_rules_lint//lint:buf.bzl", "lint_buf_aspect")
 load("@aspect_rules_lint//lint:checkstyle.bzl", "lint_checkstyle_aspect")
 load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
+load("@aspect_rules_lint//lint:cppcheck.bzl", "lint_cppcheck_aspect")
 load("@aspect_rules_lint//lint:eslint.bzl", "lint_eslint_aspect")
 load("@aspect_rules_lint//lint:flake8.bzl", "lint_flake8_aspect")
 load("@aspect_rules_lint//lint:keep_sorted.bzl", "lint_keep_sorted_aspect")
 load("@aspect_rules_lint//lint:ktlint.bzl", "lint_ktlint_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
+load("@aspect_rules_lint//lint:pylint.bzl", "lint_pylint_aspect")
 load("@aspect_rules_lint//lint:rubocop.bzl", "lint_rubocop_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
-load("@aspect_rules_lint//lint:pylint.bzl", "lint_pylint_aspect")
 load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
+load("@aspect_rules_lint//lint:standardrb.bzl", "lint_standardrb_aspect")
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
 load("@aspect_rules_lint//lint:yamllint.bzl", "lint_yamllint_aspect")
@@ -123,6 +125,12 @@ clang_tidy = lint_clang_tidy_aspect(
 
 clang_tidy_test = lint_test(aspect = clang_tidy)
 
+cppcheck = lint_cppcheck_aspect(
+    binary = Label("//tools/lint:cppcheck"),
+    verbose = True,
+)
+cppcheck_test = lint_test(aspect = cppcheck)
+
 # an example of setting up a different clang-tidy aspect with different
 # options. This one uses a single global clang-tidy file
 clang_tidy_global_config = lint_clang_tidy_aspect(
@@ -152,3 +160,10 @@ rubocop = lint_rubocop_aspect(
 )
 
 rubocop_test = lint_test(aspect = rubocop)
+
+standardrb = lint_standardrb_aspect(
+    binary = Label("//tools/lint:standardrb"),
+    configs = [Label("//:.standard.yml")],
+)
+
+standardrb_test = lint_test(aspect = standardrb)

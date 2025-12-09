@@ -45,17 +45,33 @@ load("@pip//:requirements.bzl", "install_deps")
 install_deps()
 
 http_archive(
+    name = "platforms",
+    sha256 = "3384eb1c30762704fbe38e440204e114154086c8fc8a8c2e3e28441028c019a8",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/platforms/releases/download/1.0.0/platforms-1.0.0.tar.gz",
+        "https://github.com/bazelbuild/platforms/releases/download/1.0.0/platforms-1.0.0.tar.gz",
+    ],
+)
+
+http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "53cadea9109e646a93ed4dc90c9bbcaa8073c7c3df745b92f6a5000daf7aa3da",
-    strip_prefix = "bazel-lib-2.21.2",
-    url = "https://github.com/bazel-contrib/bazel-lib/releases/download/v2.21.2/bazel-lib-v2.21.2.tar.gz",
+    sha256 = "fc459ce72f198d3822cfaf8ddcd07f2afef71d356d1f0fe513bb1638c5094bbd",
+    strip_prefix = "bazel-lib-2.22.0",
+    url = "https://github.com/bazel-contrib/bazel-lib/releases/download/v2.22.0/bazel-lib-v2.22.0.tar.gz",
 )
 
 http_archive(
     name = "bazel_lib",
-    sha256 = "0758ace949a93f709230a8e08ef35c5f0aacae2ff5d219b27da1d21d8233a709",
-    strip_prefix = "bazel-lib-3.0.0-rc.0",
-    url = "https://github.com/bazel-contrib/bazel-lib/releases/download/v3.0.0-rc.0/bazel-lib-v3.0.0-rc.0.tar.gz",
+    sha256 = "6fd3b1e1a38ca744f9664be4627ced80895c7d2ee353891c172f1ab61309c933",
+    strip_prefix = "bazel-lib-3.0.0",
+    url = "https://github.com/bazel-contrib/bazel-lib/releases/download/v3.0.0/bazel-lib-v3.0.0.tar.gz",
+)
+
+http_archive(
+    name = "yq.bzl",
+    integrity = "sha256-81xJqMjt7WC50KmC4RBMSlaR1UOajobVs81Gh9CWb50=",
+    strip_prefix = "yq.bzl-0.3.2",
+    url = "https://github.com/bazel-contrib/yq.bzl/releases/download/v0.3.2/yq.bzl-v0.3.2.tar.gz",
 )
 
 http_archive(
@@ -63,6 +79,13 @@ http_archive(
     sha256 = "21617eb71fb775a748ef5639131ab943ef39946bd2a4ce96ea60b03f985db0c5",
     strip_prefix = "jq.bzl-0.4.0",
     url = "https://github.com/bazel-contrib/jq.bzl/releases/download/v0.4.0/jq.bzl-v0.4.0.tar.gz",
+)
+
+http_archive(
+    name = "tar.bzl",
+    integrity = "sha256-oNZAZKWY16HlgZbRfeDe7W09LYv+FAftnmiyTDHDjo0=",
+    strip_prefix = "tar.bzl-0.7.0",
+    url = "https://github.com/bazel-contrib/tar.bzl/releases/download/v0.7.0/tar.bzl-v0.7.0.tar.gz",
 )
 
 http_archive(
@@ -104,13 +127,23 @@ load("@bazel_features//:deps.bzl", "bazel_features_deps")
 
 bazel_features_deps()
 
-# Needed for yq
-# TODO(alexeagle) change to yq.bzl
-load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "aspect_bazel_lib_register_toolchains")
+load("@yq.bzl//yq/toolchain:platforms.bzl", "YQ_PLATFORMS", "yq_platform_repo")
+load("@yq.bzl//yq/toolchain:versions.bzl", "DEFAULT_YQ_VERSION")
 
-aspect_bazel_lib_dependencies()
+[
+    yq_platform_repo(
+        name = "yq_" + platform,
+        platform = platform,
+        version = DEFAULT_YQ_VERSION,
+    )
+    for platform in YQ_PLATFORMS
+]
 
-aspect_bazel_lib_register_toolchains()
+load("@tar.bzl//tar:extensions.bzl", "create_repositories")
+
+create_repositories()
+
+register_toolchains("@bsd_tar_toolchains//:all")
 
 load("@bazel_lib//lib:repositories.bzl", "bazel_lib_register_toolchains")
 
@@ -362,9 +395,13 @@ rb_bundle_fetch(
         "racc-1.8.1-java": "54f2e6d1e1b91c154013277d986f52a90e5ececbe91465d29172e49342732b98",
         "rainbow-3.1.1": "039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a",
         "regexp_parser-2.11.3": "ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4",
-        "rubocop-1.81.1": "352a9a6f314a4312f6c305f1f72bc466254d221c95445cd49e1b65d1f9411635",
+        "rubocop-1.80.2": "6485f30fefcf5c199db3b91e5e253b1ef43f7e564784e2315255809a3dd9abf4",
         "rubocop-ast-1.47.1": "592682017855408b046a8190689490763aecea175238232b1b526826349d01ae",
+        "rubocop-performance-1.25.0": "6f7d03568a770054117a78d0a8e191cefeffb703b382871ca7743831b1a52ec1",
         "ruby-progressbar-1.13.0": "80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33",
+        "standard-1.51.1": "6d0d98a1fac26d660393f37b3d9c864632bb934b17abfa23811996b20f87faf2",
+        "standard-custom-1.0.2": "424adc84179a074f1a2a309bb9cf7cd6bfdb2b6541f20c6bf9436c0ba22a652b",
+        "standard-performance-1.8.0": "ed17b7d0e061b2a19a91dd434bef629439e2f32310f22f26acb451addc92b788",
         "unicode-display_width-3.2.0": "0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42",
         "unicode-emoji-4.1.0": "4997d2d5df1ed4252f4830a9b6e86f932e2013fbff2182a9ce9ccabda4f325a5",
     },
@@ -422,4 +459,20 @@ multitool(
         "@aspect_rules_lint//format:multitool.lock.json",
         "@aspect_rules_lint//lint:multitool.lock.json",
     ],
+)
+
+http_archive(
+    name = "cppcheck_linux",
+    build_file = "//tools/lint:cppcheck.BUILD",
+    integrity = "sha256-IqQ3Iofw6LoHh4YcdbN0m3tjg6utCiey7nGaOaPMv/I=",
+    strip_prefix = "cppcheckpremium-25.8.3",
+    urls = ["https://files.cppchecksolutions.com/25.8.3/ubuntu-22.04/cppcheckpremium-25.8.3-amd64.tar.gz"],
+)
+
+http_archive(
+    name = "cppcheck_macos",
+    build_file = "//tools/lint:cppcheck.BUILD",
+    integrity = "sha256-PEtm/DxKNZNJJuZE+56AZ80R22sZjZoziekAmR7FhNk=",
+    strip_prefix = "cppcheckpremium",
+    urls = ["https://files.cppchecksolutions.com/25.8.3/cppcheckpremium-25.8.3-macos-15.tar.gz"],
 )
