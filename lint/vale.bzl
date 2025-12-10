@@ -24,7 +24,7 @@ Vale is powered by [Styles](https://vale.sh/docs/vale-cli/structure/#styles).
 There is a [built-in style](https://vale.sh/docs/topics/styles/#built-in-style) and if this is
 sufficient then it's not necessary to follow the rest of this section.
 
-The styles from https://vale.sh/hub/ are already fetched by `fetch_vale()` which has a Bazel-based
+The styles from https://vale.sh/hub/ are already fetched by tools.vale_styles module extension which has a Bazel-based
 mirror of https://github.com/errata-ai/packages/blob/master/library.json.
 It's possible to fetch more styles using a typical `http_archive()` call.
 

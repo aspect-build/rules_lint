@@ -2,7 +2,7 @@
 
 Typical usage:
 
-First, call the `fetch_spotbugs` helper in `WORKSPACE` to download the jar file.
+First, call the tools.spotbugs module extension to download the jar file.
 Alternatively you could use whatever you prefer for managing Java dependencies, such as a Maven integration rule.
 
 Next, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:

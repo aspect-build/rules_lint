@@ -16,14 +16,7 @@ ruff = lint_ruff_aspect(
 
 ## Using a specific ruff version
 
-In `WORKSPACE`, fetch the desired version from https://github.com/astral-sh/ruff/releases
-
-```starlark
-load("@aspect_rules_lint//lint:ruff.bzl", "fetch_ruff")
-
-# Specify a tag from the ruff repository
-fetch_ruff("v0.4.10")
-```
+In `MODULE.bazel`, fetch the desired version from https://github.com/astral-sh/ruff/releases.
 
 In `tools/lint/BUILD.bazel`, select the tool for the host platform:
 
