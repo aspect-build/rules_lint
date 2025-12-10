@@ -1,7 +1,5 @@
 "Bazel dependencies"
 
-http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
-
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0")
 bazel_dep(name = "aspect_rules_swc", version = "2.0.0")
@@ -31,14 +29,6 @@ bazel_dep(name = "jq.bzl", version = "0.4.0")
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "..",
-)
-
-http_file(
-    name = "taplo",
-    sha256 = "8fe196b894ccf9072f98d4e1013a180306e17d244830b03986ee5e8eabeb6156",
-    urls = [
-        "https://github.com/tamasfe/taplo/releases/download/0.10.0/taplo-linux-x86_64.gz",
-    ],
 )
 
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
@@ -182,23 +172,24 @@ use_repo(ruby, "bundle", "ruby", "ruby_toolchains")
 
 register_toolchains("@ruby_toolchains//:all")
 
-# Download cppcheck premium tar files for different platforms
-http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+format_tools = use_extension("@aspect_rules_lint//format:extensions.bzl", "tools")
+format_tools.google_java_format()
+format_tools.ktfmt()
+format_tools.swiftformat()
+format_tools.taplo()
+use_repo(format_tools, "google-java-format", "ktfmt", "swiftformat", "swiftformat_mac", "taplo")
 
-# Even though cppcheckpremium is downloaded, it behaves like the free version, if we do not
-# provide a cppcheck.cfg file (see cppcheck.BUILD file) and license key.
-http_archive(
-    name = "cppcheck_linux",
-    build_file = "//tools/lint:cppcheck.BUILD",
-    integrity = "sha256-IqQ3Iofw6LoHh4YcdbN0m3tjg6utCiey7nGaOaPMv/I=",
-    strip_prefix = "cppcheckpremium-25.8.3",
-    urls = ["https://files.cppchecksolutions.com/25.8.3/ubuntu-22.04/cppcheckpremium-25.8.3-amd64.tar.gz"],
+lint_tools = use_extension("@aspect_rules_lint//lint:extensions.bzl", "tools")
+lint_tools.checkstyle()
+lint_tools.cppcheck()
+lint_tools.spotbugs()
+lint_tools.ktlint()
+lint_tools.pmd()
+lint_tools.vale()
+lint_tools.vale_styles(
+    styles = [
+        "Google",
+        "write-good",
+    ],
 )
-
-http_archive(
-    name = "cppcheck_macos",
-    build_file = "//tools/lint:cppcheck.BUILD",
-    integrity = "sha256-PEtm/DxKNZNJJuZE+56AZ80R22sZjZoziekAmR7FhNk=",
-    strip_prefix = "cppcheckpremium",
-    urls = ["https://files.cppchecksolutions.com/25.8.3/cppcheckpremium-25.8.3-macos-15.tar.gz"],
-)
+use_repo(lint_tools, "vale_Google", "vale_Linux_64-bit", "vale_Linux_arm64", "vale_Windows_64-bit", "vale_macOS_64-bit", "vale_macOS_arm64", "vale_write-good")
