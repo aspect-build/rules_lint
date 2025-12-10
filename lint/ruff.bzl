@@ -52,11 +52,7 @@ ruff = lint_ruff_aspect(
 ```
 """
 
-load("@bazel_skylib//lib:versions.bzl", "versions")
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
-load(":ruff_versions.bzl", "RUFF_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintRuff"
 
@@ -258,45 +254,3 @@ ruff_workaround_20269 = repository_rule(
         "url": attr.string(),
     },
 )
-
-def fetch_ruff(tag):
-    """A repository macro used from WORKSPACE to fetch ruff binaries.
-
-    Allows the user to select a particular ruff version, rather than get whatever is pinned in the `multitool.lock.json` file.
-
-    Args:
-        tag: a tag of ruff that we have mirrored, e.g. `v0.1.0`
-    """
-    version = tag.lstrip("v")
-
-    # ruff changed their release artifact naming starting with v0.1.8, so that's the minimum version we support
-    # they changed it again in 0.5.0, removing the version from the filename.
-    if versions.is_at_least("0.5.0", version):
-        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{plat}.{ext}"
-    else:
-        url = "https://github.com/astral-sh/ruff/releases/download/{tag}/ruff-{version}-{plat}.{ext}"
-
-    for plat, sha256 in RUFF_VERSIONS[tag].items():
-        fetch_rule = http_archive
-        if plat.endswith("darwin") and not versions.is_at_least("7.2.0", versions.get()):
-            fetch_rule = ruff_workaround_20269
-        is_windows = plat.endswith("windows-msvc")
-
-        # Account for ruff packaging change in 0.5.0
-        strip_prefix = None
-        if versions.is_at_least("0.5.0", version) and not is_windows:
-            strip_prefix = "ruff-" + plat
-
-        maybe(
-            fetch_rule,
-            name = "ruff_" + plat,
-            url = url.format(
-                tag = tag,
-                plat = plat,
-                version = version,
-                ext = "zip" if is_windows else "tar.gz",
-            ),
-            strip_prefix = strip_prefix,
-            sha256 = sha256,
-            build_file_content = """exports_files(["ruff", "ruff.exe"])""",
-        )

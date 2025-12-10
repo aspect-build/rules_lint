@@ -27,7 +27,6 @@ pmd = lint_pmd_aspect(
 ```
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintPMD"
@@ -147,13 +146,4 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
-    )
-
-def fetch_pmd():
-    http_archive(
-        name = "net_sourceforge_pmd",
-        build_file_content = """java_import(name = "net_sourceforge_pmd", jars = glob(["*.jar"]), visibility = ["//visibility:public"])""",
-        integrity = "sha256-vov2j2wdZphL2WRak+Yxt4ocL0L18PhxkIL+rWdVOUA=",
-        strip_prefix = "pmd-bin-7.7.0/lib",
-        url = "https://github.com/pmd/pmd/releases/download/pmd_releases/7.7.0/pmd-dist-7.7.0-bin.zip",
     )

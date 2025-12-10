@@ -51,7 +51,6 @@ If your custom ruleset is a third-party dependency and not a first-party depende
 """
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintKTLint"
@@ -206,12 +205,4 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, 
         toolchains = [
             "@bazel_tools//tools/jdk:toolchain_type",
         ],
-    )
-
-def fetch_ktlint():
-    http_file(
-        name = "com_github_pinterest_ktlint",
-        sha256 = "2e28cf46c27d38076bf63beeba0bdef6a845688d6c5dccd26505ce876094eb92",
-        url = "https://github.com/pinterest/ktlint/releases/download/1.2.1/ktlint",
-        executable = True,
     )

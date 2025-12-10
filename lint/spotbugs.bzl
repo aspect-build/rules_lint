@@ -30,7 +30,6 @@ spotbugs = lint_spotbugs_aspect(
 ```
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintSpotbugs"
@@ -138,21 +137,4 @@ def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "
                 default = rule_kinds,
             ),
         },
-    )
-
-def fetch_spotbugs():
-    http_archive(
-        name = "spotbugs",
-        integrity = "sha256-Z83FLM6xfq45T4/DZg8hZZzzVJCPgY5NH0Wmk1wuRCU=",
-        urls = ["https://github.com/spotbugs/spotbugs/releases/download/4.8.6/spotbugs-4.8.6.zip"],
-        strip_prefix = "spotbugs-4.8.6",
-        build_file_content = """
-java_import(
-    name = "jar",
-    jars = [
-        "lib/spotbugs.jar",
-    ],
-    visibility = ["//visibility:public"],
-)
-    """,
     )
