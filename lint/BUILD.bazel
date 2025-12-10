@@ -19,11 +19,6 @@ alias(
     actual = "@multitool//tools/shellcheck",
 )
 
-alias(
-    name = "vale_bin",
-    actual = "@multitool//tools/vale",
-)
-
 # Used as a default for vale_aspect#styles
 filegroup(
     name = "empty_styles",

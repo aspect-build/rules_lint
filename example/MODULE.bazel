@@ -172,27 +172,24 @@ use_repo(ruby, "bundle", "ruby", "ruby_toolchains")
 
 register_toolchains("@ruby_toolchains//:all")
 
-format = use_extension("@aspect_rules_lint//format:extensions.bzl", "format")
-format.tools(
-    google_java_format = "google-java-format",
-    ktfmt = "ktfmt",
-    swiftformat_linux = "swiftformat",
-    swiftformat_macos = "swiftformat_mac",
-    taplo = "taplo",
-)
-use_repo(format, "google-java-format", "ktfmt", "swiftformat", "swiftformat_mac", "taplo")
+format_tools = use_extension("@aspect_rules_lint//format:extensions.bzl", "tools")
+format_tools.google_java_format()
+format_tools.ktfmt()
+format_tools.swiftformat()
+format_tools.taplo()
+use_repo(format_tools, "google-java-format", "ktfmt", "swiftformat", "swiftformat_mac", "taplo")
 
-lint = use_extension("@aspect_rules_lint//lint:extensions.bzl", "lint")
-lint.tools(
-    checkstyle = "com_puppycrawl_tools_checkstyle",
-    cppcheck_linux = "cppcheck_linux",
-    cppcheck_macos = "cppcheck_macos",
-    ktlint = "com_github_pinterest_ktlint",
-    pmd = "net_sourceforge_pmd",
-    spotbugs = "spotbugs",
-    vale_styles = [
+lint_tools = use_extension("@aspect_rules_lint//lint:extensions.bzl", "tools")
+lint_tools.checkstyle()
+lint_tools.cppcheck()
+lint_tools.spotbugs()
+lint_tools.ktlint()
+lint_tools.pmd()
+lint_tools.vale()
+lint_tools.vale_styles(
+    styles = [
         "Google",
         "write-good",
     ],
 )
-use_repo(lint, "vale_Google", "vale_write-good")
+use_repo(lint_tools, "vale_Google", "vale_Linux_64-bit", "vale_Linux_arm64", "vale_Windows_64-bit", "vale_macOS_64-bit", "vale_macOS_arm64", "vale_write-good")
