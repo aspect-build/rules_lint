@@ -53,7 +53,7 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v2.1.0
         with:
           repo: aspect-build/aspect-cli
-          tag: v2025.46.6
+          tag: v2025.50.5
           asset-name: aspect-cli
           rename-to: aspect
           platform: unknown-linux
@@ -77,8 +77,8 @@ jobs:
           # - windows-latest
         version:
           - 7.x
-          # TODO(alex): missing use_repo calls for some things in WORKSPACE.bzlmod
-          # - 8.x
+          - 8.x
+          - 9.*
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -92,6 +92,5 @@ jobs:
       - name: Test
         working-directory: example
         env:
-          BAZELISK_BASE_URL: https://github.com/bazelbuild/bazel/releases/download
           USE_BAZEL_VERSION: ${{ matrix.version }}
         run: bazel test //...

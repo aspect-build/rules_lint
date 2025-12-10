@@ -54,6 +54,10 @@ def impl(ctx: TaskContext) -> int:
                 if file.name.endswith(".exit_code"):
                     if int(ctx.std.fs.read_to_string(filepath).rstrip()) != 0:
                         exit_code = 1
+    status = build.wait()
+
+    if not status.success:
+        fail("Building targets under linting aspect has failed.")
     if ctx.args.fix:
         for patch in patches:
             ctx.std.process.command("patch").arg("-p1").arg("--input=" + patch).current_dir(ctx.std.env.current_dir()).spawn().wait()

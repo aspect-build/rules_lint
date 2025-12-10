@@ -59,10 +59,7 @@ def build_formatter(ctx: TaskContext) -> str:
     build = ctx.bazel.build(
         ctx.args.formatter_target,
         build_events = True,
-        flags = [
-            "--build_runfile_links",
-            "--noallow_analysis_cache_discard",
-        ],
+        flags = ["--build_runfile_links"],
     )
 
     # Find the entrypoint by watching for the named_set_of_files build event.
@@ -83,7 +80,7 @@ def build_formatter(ctx: TaskContext) -> str:
 
     if not entrypoint:
         fail("Failed to determine the formatter entrypoint.")
-
+    print("Formatter built: %s\n" % entrypoint)
     return entrypoint
 
 # buildifier: disable=function-docstring

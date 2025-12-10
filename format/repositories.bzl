@@ -37,39 +37,3 @@ def rules_lint_dependencies():
         strip_prefix = "bazel_features-1.9.0",
         url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.9.0/bazel_features-v1.9.0.tar.gz",
     )
-
-def fetch_java_format():
-    http_jar(
-        name = "google-java-format",
-        sha256 = "33068bbbdce1099982ec1171f5e202898eb35f2919cf486141e439fc6e3a4203",
-        url = "https://github.com/google/google-java-format/releases/download/v1.17.0/google-java-format-1.17.0-all-deps.jar",
-    )
-
-def fetch_ktfmt():
-    http_jar(
-        name = "ktfmt",
-        integrity = "sha256-l/x/vRlNAan6RdgUfAVSQDAD1VusSridhNe7TV4/SN4=",
-        url = "https://repo1.maven.org/maven2/com/facebook/ktfmt/0.46/ktfmt-0.46-jar-with-dependencies.jar",
-    )
-
-def fetch_swiftformat():
-    # TODO: after https://github.com/bazelbuild/rules_swift/issues/864 we should only fetch for host
-    http_archive(
-        name = "swiftformat",
-        build_file_content = "filegroup(name = \"swiftformat\", srcs=[\"swiftformat_linux\"], visibility=[\"//visibility:public\"])",
-        patch_cmds = ["chmod u+x swiftformat_linux"],
-        sha256 = "f62813980c2848cb1941f1456a2a06251c2e2323183623760922058b98c70745",
-        url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.49.17/swiftformat_linux.zip",
-    )
-
-    http_archive(
-        name = "swiftformat_mac",
-        build_file_content = "filegroup(name = \"swiftformat_mac\", srcs=[\"swiftformat\"], visibility=[\"//visibility:public\"])",
-        patch_cmds = [
-            # On MacOS, `xattr -c` clears the "Unknown developer" warning when executing a fetched binary
-            "if command -v xattr > /dev/null; then xattr -c swiftformat; fi",
-            "chmod u+x swiftformat",
-        ],
-        sha256 = "978eaffdc3716bbc0859aecee0d83875cf3ab8d8725779448f0035309d9ad9f3",
-        url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.49.17/swiftformat.zip",
-    )

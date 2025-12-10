@@ -146,8 +146,8 @@ bzl_library(
     srcs = ["eslint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
+        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 
@@ -196,6 +196,7 @@ bzl_library(
     srcs = ["spotbugs.bzl"],
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
+        "@rules_java//java:rules",
     ],
 )
 
@@ -232,8 +233,8 @@ bzl_library(
     srcs = ["stylelint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@bazel_lib//lib:copy_to_bin",
         "@aspect_rules_js//js:libs",
+        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 
