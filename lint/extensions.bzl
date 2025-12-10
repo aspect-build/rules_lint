@@ -41,7 +41,7 @@ def _lint_extension_impl(mctx):
         for r in mod.tags.pmd:
             http_archive(
                 name = r.name,
-                build_file_content = _public_build_file_content("""java_import(name = "{}", jars = glob(["*.jar"])""").format(r.name),
+                build_file_content = _public_build_file_content("""java_import(name = "{}", jars = glob(["*.jar"]))""").format(r.name),
                 integrity = "sha256-vov2j2wdZphL2WRak+Yxt4ocL0L18PhxkIL+rWdVOUA=",
                 strip_prefix = "pmd-bin-7.7.0/lib",
                 url = "https://github.com/pmd/pmd/releases/download/pmd_releases/7.7.0/pmd-dist-7.7.0-bin.zip",

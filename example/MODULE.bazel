@@ -192,4 +192,19 @@ lint_tools.vale_styles(
         "write-good",
     ],
 )
-use_repo(lint_tools, "vale_Google", "vale_Linux_64-bit", "vale_Linux_arm64", "vale_Windows_64-bit", "vale_macOS_64-bit", "vale_macOS_arm64", "vale_write-good")
+use_repo(
+    lint_tools,
+    "com_github_pinterest_ktlint",
+    "com_puppycrawl_tools_checkstyle",
+    "cppcheck_linux",
+    "cppcheck_macos",
+    "net_sourceforge_pmd",
+    "spotbugs",
+    "vale_Google",
+    "vale_Linux_64-bit",
+    "vale_Linux_arm64",
+    "vale_Windows_64-bit",
+    "vale_macOS_64-bit",
+    "vale_macOS_arm64",
+    "vale_write-good",
+)
