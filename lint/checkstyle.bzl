@@ -2,7 +2,7 @@
 
 Typical usage:
 
-First, call the `fetch_checkstyle` helper in `WORKSPACE` to download the jar file.
+First, call the tools.checkstyle module extension to download the jar file.
 Alternatively you could use whatever you prefer for managing Java dependencies, such as a Maven integration rule.
 
 Next, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
@@ -27,7 +27,6 @@ checkstyle = lint_checkstyle_aspect(
 ```
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_jar")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintCheckstyle"
@@ -154,11 +153,4 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
                 default = rule_kinds,
             ),
         },
-    )
-
-def fetch_checkstyle():
-    http_jar(
-        name = "com_puppycrawl_tools_checkstyle",
-        url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.17.0/checkstyle-10.17.0-all.jar",
-        sha256 = "51c34d738520c1389d71998a9ab0e6dabe0d7cf262149f3e01a7294496062e42",
     )

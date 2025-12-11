@@ -4,9 +4,6 @@ Vendored from https://raw.githubusercontent.com/errata-ai/styles/master/library.
 Then the url fields are converted from latest to a format string, and sha256sums added.
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-
 VALE_STYLE_DATA = [
     {
         "name": "Google",
@@ -99,14 +96,3 @@ VALE_STYLE_DATA = [
 ]
 
 VALE_STYLES = [s["name"] for s in VALE_STYLE_DATA]
-
-def fetch_styles():
-    for style in VALE_STYLE_DATA:
-        maybe(
-            http_archive,
-            name = "vale_" + style["name"],
-            integrity = style["integrity"],
-            # Note: this is actually a directory, not a file
-            build_file_content = """exports_files(["{}"])""".format(style["name"]),
-            url = style["url"].format(style["version"]),
-        )

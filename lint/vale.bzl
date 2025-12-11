@@ -24,7 +24,7 @@ Vale is powered by [Styles](https://vale.sh/docs/vale-cli/structure/#styles).
 There is a [built-in style](https://vale.sh/docs/topics/styles/#built-in-style) and if this is
 sufficient then it's not necessary to follow the rest of this section.
 
-The styles from https://vale.sh/hub/ are already fetched by `fetch_vale()` which has a Bazel-based
+The styles from https://vale.sh/hub/ are already fetched by tools.vale_styles module extension which has a Bazel-based
 mirror of https://github.com/errata-ai/packages/blob/master/library.json.
 It's possible to fetch more styles using a typical `http_archive()` call.
 
@@ -62,11 +62,7 @@ vale = lint_vale_aspect(
 ```
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "output_files", "parse_to_sarif_action", "should_visit")
-load(":vale_library.bzl", "fetch_styles")
-load(":vale_versions.bzl", "VALE_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintVale"
 
@@ -179,30 +175,3 @@ def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
     )
-
-def fetch_vale(tag = VALE_VERSIONS.keys()[0]):
-    """A repository macro used from WORKSPACE to fetch vale binaries
-
-    Args:
-        tag: a tag of vale that we have mirrored, e.g. `v3.0.5`
-    """
-    version = tag.lstrip("v")
-    url = "https://github.com/errata-ai/vale/releases/download/{tag}/vale_{version}_{plat}.{ext}"
-
-    for plat, sha256 in VALE_VERSIONS[tag].items():
-        is_windows = plat.startswith("Windows")
-
-        maybe(
-            http_archive,
-            name = "vale_" + plat,
-            url = url.format(
-                tag = tag,
-                plat = plat,
-                version = version,
-                ext = "zip" if is_windows else "tar.gz",
-            ),
-            sha256 = sha256,
-            build_file_content = """exports_files(["vale", "vale.exe"])""",
-        )
-
-        fetch_styles()
