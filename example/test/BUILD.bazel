@@ -217,6 +217,14 @@ clippy_test(
 )
 
 clippy_test(
+    name = "clippy_binary_with_warning_and_error",
+    srcs = ["//src/rust:binary_with_warning_and_error"],
+    # Expected to fail based on current content of the file.
+    # Normally you'd fix the file instead of tagging this test.
+    tags = ["manual"],
+)
+
+clippy_test(
     name = "clippy_bad_binary_noclippy",
     srcs = ["//src/rust:bad_binary_with_noclippy"],
 )

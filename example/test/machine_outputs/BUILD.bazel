@@ -137,17 +137,30 @@ report_test(
 )
 
 machine_clippy_report(
-    name = "machine_clippy_report",
+    name = "machine_clippy_report_bad_lib",
     src = "//src/rust:bad_lib",
 )
 
 # Because the json file from clippy contains multiple messages _not_ in an array, we must take the first element.
 jq_test(
-    name = "clippy_machine_output_test",
-    file1 = ":machine_clippy_report",
-    file2 = ":machine_clippy_report",
-    filter1 = "inputs | first | .code.code",
-    filter2 = "inputs | first | \"dead_code\"",
+    name = "clippy_machine_output_test_bad_lib",
+    file1 = ":machine_clippy_report_bad_lib",
+    file2 = ":machine_clippy_report_bad_lib",
+    filter1 = ".code.code",
+    filter2 = """[inputs] | "dead_code" """,
+)
+
+machine_clippy_report(
+    name = "machine_clippy_report_warning_and_error",
+    src = "//src/rust:binary_with_warning_and_error",
+)
+
+jq_test(
+    name = "clippy_machine_output_test_warning_and_error",
+    file1 = ":machine_clippy_report_warning_and_error",
+    file2 = ":machine_clippy_report_warning_and_error",
+    filter1 = """ [inputs.level] """,
+    filter2 = """[inputs] | ["warning","error"] """,
 )
 
 # FIXME: I'm getting a C++ compile failure on macos
