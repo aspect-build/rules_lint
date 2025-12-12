@@ -76,3 +76,14 @@ rust_binary(
     ],
     deps = [":bad_lib_with_noclippy"],
 )
+
+rust_binary(
+    name = "binary_with_warning_and_error",
+    srcs = ["warning_and_error.rs"],
+    edition = "2021",
+    visibility = [
+        "//src/rust:__pkg__",
+        "//test:__pkg__",
+        "//test/machine_outputs:__pkg__",
+    ],
+)
