@@ -90,7 +90,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Python_with_ruff
     assert_success
 
-    assert_output --partial "+ ruff format --force-exclude example/src/subdir/unused_import.py"
+    assert_output --partial "+ ruff format --force-exclude example/src/call_non_callable.py"
 }
 
 @test "should run taplo on TOML" {
