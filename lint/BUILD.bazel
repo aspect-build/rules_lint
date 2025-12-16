@@ -227,6 +227,15 @@ bzl_library(
 )
 
 bzl_library(
+    name = "ty",
+    srcs = ["ty.bzl"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "@rules_python//python:defs_bzl",
+    ],
+)
+
+bzl_library(
     name = "shellcheck",
     srcs = ["shellcheck.bzl"],
     deps = ["//lint/private:lint_aspect"],
