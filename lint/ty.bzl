@@ -15,10 +15,8 @@ ty = lint_ty_aspect(
 ```
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@rules_python//python:defs.bzl", "PyInfo")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
-load(":ty_versions.bzl", "TY_VERSIONS")
 
 _MNEMONIC = "AspectRulesLintTy"
 
@@ -97,6 +95,7 @@ def _ty_aspect_impl(target, ctx):
         for dep in ctx.rule.attr.deps:
             if PyInfo in dep:
                 transitive_sources.append(dep[PyInfo].transitive_sources)
+
                 # Collect imports from pip packages for extra search paths
                 for import_path in dep[PyInfo].imports.to_list():
                     import_paths["external/" + import_path] = True
