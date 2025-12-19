@@ -117,6 +117,7 @@ function ls-files {
     case "$language" in
       'C') patterns=('*.c' '*.cats' '*.h' '*.idc') ;;
       'C++') patterns=('*.cpp' '*.c++' '*.cc' '*.cp' '*.cppm' '*.cxx' '*.h' '*.h++' '*.hh' '*.hpp' '*.hxx' '*.inc' '*.inl' '*.ino' '*.ipp' '*.ixx' '*.re' '*.tcc' '*.tpp' '*.txx') ;;
+      'CUE') patterns=('*.cue') ;;
       'Cuda') patterns=('*.cu' '*.cuh') ;;
       'C#') patterns=('*.cs' '*.cshtml') ;;
       'CSS') patterns=('*.css') ;;

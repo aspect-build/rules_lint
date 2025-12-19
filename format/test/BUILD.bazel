@@ -41,6 +41,7 @@ format_multirun(
     cc = ":mock_clang-format.sh",
     csharp = ":mock_csharpier.sh",
     css = ":mock_prettier.sh",
+    cue = ":mock_cue-fmt.sh",
     cuda = ":mock_clang-format.sh",
     fsharp = ":mock_fantomas.sh",
     gherkin = ":mock_prettier.sh",

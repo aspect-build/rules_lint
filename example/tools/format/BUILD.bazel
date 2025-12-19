@@ -98,6 +98,7 @@ format_multirun(
     # Disable when using WORKSPACE due to rules_dotnet only supporting Bzlmod
     csharp = "@paket.main//csharpier/tools:csharpier" if bzlmod_is_enabled() else None,
     css = ":prettier",
+    cue = "@aspect_rules_lint//format:cue",
     cuda = "@llvm_toolchain_llvm//:bin/clang-format",
     # Disable when using WORKSPACE due to rules_dotnet only supporting Bzlmod
     fsharp = "@paket.main//fantomas/tools:fantomas" if bzlmod_is_enabled() else None,
