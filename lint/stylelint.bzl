@@ -142,10 +142,9 @@ def stylelint_fix(ctx, executable, srcs, patch, stderr, exit_code, env = {}, opt
         ctx,
         executable,
         inputs = _gather_inputs(ctx, srcs),
-        outputs = [patch, stderr, exit_code],
         args = args,
         files_to_diff = [s.path for s in srcs],
-        output = patch.path,
+        patch_out = patch,
         tools = [executable._stylelint],
         patch_cfg_env = dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
         # Capture stylelint's stdout output so the Bazel action

@@ -11,10 +11,9 @@ def run_patcher(
         ctx,
         executable,
         inputs,
-        outputs,
         args,
         files_to_diff,
-        output,
+        patch_out,
         tools,
         stdout = None,
         stderr = None,
@@ -24,16 +23,17 @@ def run_patcher(
         mnemonic = None,
         progress_message = None,
         patch_cfg_suffix = "patch_cfg"):
-    """Run the patcher action with a patch config file.
+    """Run the linter in a sandbox, in a mode where it applies fixes to source files it reads.
+    
+    Collects the edits made to the sandbox into a patch file.
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
         executable: struct with a _patcher field
         inputs: action inputs (list or depset)
-        outputs: action outputs
         args: list of arguments to pass to the linter
         files_to_diff: list of file paths to diff
-        output: path to the output patch file
+        patch_out: output file for the patch
         tools: tools for the action (first tool is used as the linter)
         stdout: output file for stdout (optional)
         stderr: output file for stderr (optional)
@@ -52,7 +52,7 @@ def run_patcher(
         "linter": tools[0].path, # Derive linter path from the first tool
         "args": args,
         "files_to_diff": files_to_diff,
-        "output": output,
+        "output": patch_out.path,
     }
     if patch_cfg_env != None:
         patch_cfg_dict["env"] = patch_cfg_env
@@ -62,18 +62,22 @@ def run_patcher(
         content = json.encode(patch_cfg_dict),
     )
     
-    # Build common environment variables
+    # Build common environment variables and outputs list
     common_env = {
         "BAZEL_BINDIR": ".",
         "JS_BINARY__SILENT_ON_SUCCESS": "1",
     }
     
+    outputs_list = [patch_out]
     if stdout != None:
         common_env["JS_BINARY__STDOUT_OUTPUT_FILE"] = stdout.path
+        outputs_list.append(stdout)
     if stderr != None:
         common_env["JS_BINARY__STDERR_OUTPUT_FILE"] = stderr.path
+        outputs_list.append(stderr)
     if exit_code != None:
         common_env["JS_BINARY__EXIT_CODE_OUTPUT_FILE"] = exit_code.path
+        outputs_list.append(exit_code)
     
     # Merge with provided env if any
     if env != None:
@@ -92,7 +96,7 @@ def run_patcher(
     
     kwargs = {
         "inputs": final_inputs,
-        "outputs": outputs,
+        "outputs": outputs_list,
         "executable": executable._patcher,
         "arguments": [patch_cfg.path],
         "env": final_env,
