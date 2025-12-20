@@ -40,6 +40,7 @@ Finally, register the aspect with your linting workflow, such as in `.aspect/cli
 load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:patcher.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintStylelint"
 
@@ -133,37 +134,27 @@ def stylelint_fix(ctx, executable, srcs, patch, stderr, exit_code, env = {}, opt
         env: environment variables for stylelint
         options: additional command line options
     """
-    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
     args = ["--fix"]
     args.extend(options)
     args.extend([s.short_path for s in srcs])
 
-    ctx.actions.write(
-        output = patch_cfg,
-        content = json.encode({
-            "linter": executable._stylelint.path,
-            "args": args,
-            "env": dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
-            "files_to_diff": [s.path for s in srcs],
-            "output": patch.path,
-        }),
-    )
-
-    ctx.actions.run(
-        inputs = depset([patch_cfg], transitive = [_gather_inputs(ctx, srcs)]),
+    run_patcher(
+        ctx,
+        executable,
+        inputs = _gather_inputs(ctx, srcs),
         outputs = [patch, stderr, exit_code],
-        executable = executable._patcher,
-        arguments = [patch_cfg.path],
-        env = env | {
-            "BAZEL_BINDIR": ".",
-            "JS_BINARY__STDERR_OUTPUT_FILE": stderr.path,
-            # Capture stylelint's stdout output so the Bazel action
-            # always produces a file (even on exit 0).
-            # Similar to what Eslint currently does.
-            "JS_BINARY__STDOUT_OUTPUT_FILE": stderr.path,
-            "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
+        args = args,
+        files_to_diff = [s.path for s in srcs],
+        output = patch.path,
         tools = [executable._stylelint],
+        patch_cfg_env = dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
+        # Capture stylelint's stdout output so the Bazel action
+        # always produces a file (even on exit 0).
+        # Similar to what Eslint currently does.
+        stdout = stderr,
+        stderr = stderr,
+        exit_code = exit_code,
+        env = env,
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Stylelint",
     )
@@ -215,7 +206,7 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
 
     return aspect(
         implementation = _stylelint_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
@@ -232,11 +223,6 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
             "_compact_formatter": attr.label(
                 default = "@aspect_rules_lint//lint:stylelint.compact-formatter",
                 allow_single_file = True,
-                cfg = "exec",
-            ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
-                executable = True,
                 cfg = "exec",
             ),
             "_filegroup_tags": attr.string_list(

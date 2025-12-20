@@ -28,6 +28,7 @@ following the documentation at https://github.com/google/keep-sorted#usage.
 """
 
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files")
+load("//lint/private:patcher.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintKeepSorted"
 
@@ -77,31 +78,20 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
     )
 
 def keep_sorted_fix(ctx, executable, srcs, patch, stdout, exit_code = None, options = []):
-    patch_cfg = ctx.actions.declare_file("_{}.keep-sorted.patch_cfg".format(ctx.label.name))
-
-    ctx.actions.write(
-        output = patch_cfg,
-        content = json.encode({
-            "linter": executable._keep_sorted.path,
-            "args": ["--mode=fix"] + options + [s.path for s in srcs],
-            "files_to_diff": [s.path for s in srcs],
-            "output": patch.path,
-        }),
-    )
-
-    ctx.actions.run(
-        inputs = srcs + [patch_cfg],
+    run_patcher(
+        ctx,
+        executable,
+        inputs = srcs,
         outputs = [patch, exit_code, stdout],
-        executable = executable._patcher,
-        arguments = [patch_cfg.path],
-        env = {
-            "BAZEL_BINDIR": ".",
-            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
-            "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
+        args = ["--mode=fix"] + options + [s.path for s in srcs],
+        files_to_diff = [s.path for s in srcs],
+        output = patch.path,
         tools = [executable._keep_sorted],
+        stdout = stdout,
+        exit_code = exit_code,
         mnemonic = _MNEMONIC,
         progress_message = "Fixing %{label} with KeepSorted",
+        patch_cfg_suffix = "keep-sorted.patch_cfg",
     )
 
 def _keep_sorted_aspect_impl(target, ctx):
@@ -139,18 +129,13 @@ def lint_keep_sorted_aspect(binary):
     """
     return aspect(
         implementation = _keep_sorted_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_keep_sorted": attr.label(
                 default = binary,
-                executable = True,
-                cfg = "exec",
-            ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
                 cfg = "exec",
             ),

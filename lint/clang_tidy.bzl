@@ -40,6 +40,7 @@ clang_tidy = lint_clang_tidy_aspect(
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
+load("//lint/private:patcher.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
 _DISABLED_FEATURES = [
@@ -345,32 +346,21 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         stdout: output file containing the stdout or --output-file of clang-tidy
         exit_code: output file containing the exit code of clang-tidy
     """
-    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
     clang_tidy_args = _get_args(ctx, compilation_context, srcs)
     compiler_args = _get_compiler_args(ctx, compilation_context, srcs)
 
-    ctx.actions.write(
-        output = patch_cfg,
-        content = json.encode({
-            "linter": executable._clang_tidy_wrapper.path,
-            "args": [executable._clang_tidy.path, "--fix"] + clang_tidy_args + ["--"] + compiler_args,
-            "env": _get_env(ctx, srcs),
-            "files_to_diff": [src.path for src in srcs],
-            "output": patch.path,
-        }),
-    )
-
-    ctx.actions.run(
-        inputs = depset([patch_cfg], transitive = [_gather_inputs(ctx, compilation_context, srcs)]),
+    run_patcher(
+        ctx,
+        executable,
+        inputs = _gather_inputs(ctx, compilation_context, srcs),
         outputs = [patch, stdout, exit_code],
-        executable = executable._patcher,
-        arguments = [patch_cfg.path],
-        env = {
-            "BAZEL_BINDIR": ".",
-            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
-            "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
+        args = [executable._clang_tidy.path, "--fix"] + clang_tidy_args + ["--"] + compiler_args,
+        files_to_diff = [src.path for src in srcs],
+        output = patch.path,
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
+        patch_cfg_env = _get_env(ctx, srcs),
+        stdout = stdout,
+        exit_code = exit_code,
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with clang-tidy",
     )
@@ -441,7 +431,7 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
 
     return aspect(
         implementation = _clang_tidy_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
@@ -473,11 +463,6 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
             ),
             "_clang_tidy_wrapper": attr.label(
                 default = Label("@aspect_rules_lint//lint:clang_tidy_wrapper"),
-                executable = True,
-                cfg = "exec",
-            ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
                 cfg = "exec",
             ),

@@ -78,6 +78,7 @@ load(
     "patch_and_output_files",
     "should_visit",
 )
+load("//lint/private:patcher.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintStandardRB"
 
@@ -212,10 +213,6 @@ def standardrb_fix(
         exit_code: File object where exit code will be written
         color: boolean, whether to enable color output
     """
-    patch_cfg = ctx.actions.declare_file(
-        "_{}.patch_cfg".format(ctx.label.name),
-    )
-
     # Build args list with color flag if needed
     standardrb_args = [
         "--fix",
@@ -226,27 +223,17 @@ def standardrb_fix(
         standardrb_args.append("--color")
     standardrb_args.extend([s.path for s in srcs])
 
-    ctx.actions.write(
-        output = patch_cfg,
-        content = json.encode({
-            "linter": executable._standardrb.path,
-            "args": standardrb_args,
-            "files_to_diff": [s.path for s in srcs],
-            "output": patch.path,
-        }),
-    )
-
-    ctx.actions.run(
-        inputs = srcs + config + [patch_cfg],
+    run_patcher(
+        ctx,
+        executable,
+        inputs = srcs + config,
         outputs = [patch, exit_code, stdout],
-        executable = executable._patcher,
-        arguments = [patch_cfg.path],
-        env = {
-            "BAZEL_BINDIR": ".",
-            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
-            "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
+        args = standardrb_args,
+        files_to_diff = [s.path for s in srcs],
+        output = patch.path,
         tools = [executable._standardrb],
+        stdout = stdout,
+        exit_code = exit_code,
         mnemonic = _MNEMONIC,
         progress_message = "Fixing %{label} with Standard Ruby",
     )
@@ -371,7 +358,7 @@ def lint_standardrb_aspect(
 
     return aspect(
         implementation = _standardrb_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
@@ -379,11 +366,6 @@ def lint_standardrb_aspect(
             "_standardrb": attr.label(
                 default = binary,
                 allow_files = True,
-                executable = True,
-                cfg = "exec",
-            ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
                 cfg = "exec",
             ),

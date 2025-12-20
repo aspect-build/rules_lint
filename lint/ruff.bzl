@@ -57,6 +57,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
+load("//lint/private:patcher.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintRuff"
 
@@ -129,29 +130,18 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code, env = {}):
         exit_code: output file to write the exit code
         env: environment variaables for ruff
     """
-    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
-
-    ctx.actions.write(
-        output = patch_cfg,
-        content = json.encode({
-            "linter": executable._ruff.path,
-            "args": ["check", "--fix", "--force-exclude"] + [s.path for s in srcs],
-            "files_to_diff": [s.path for s in srcs],
-            "output": patch.path,
-        }),
-    )
-
-    ctx.actions.run(
-        inputs = srcs + config + [patch_cfg],
+    run_patcher(
+        ctx,
+        executable,
+        inputs = srcs + config,
         outputs = [patch, exit_code, stdout],
-        executable = executable._patcher,
-        arguments = [patch_cfg.path],
-        env = env | {
-            "BAZEL_BINDIR": ".",
-            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
-            "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
+        args = ["check", "--fix", "--force-exclude"] + [s.path for s in srcs],
+        files_to_diff = [s.path for s in srcs],
+        output = patch.path,
         tools = [executable._ruff],
+        stdout = stdout,
+        exit_code = exit_code,
+        env = env,
         mnemonic = _MNEMONIC,
         progress_message = "Fixing %{label} with Ruff",
     )
@@ -204,7 +194,7 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
 
     return aspect(
         implementation = _ruff_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
@@ -212,11 +202,6 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
             "_ruff": attr.label(
                 default = binary,
                 allow_files = True,
-                executable = True,
-                cfg = "exec",
-            ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
                 cfg = "exec",
             ),
