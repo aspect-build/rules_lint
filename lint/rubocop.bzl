@@ -233,10 +233,9 @@ def rubocop_fix(
         arguments = [patch_cfg.path],
         env = {
             "BAZEL_BINDIR": ".",
-            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        },
+        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
         tools = [executable._rubocop],
         mnemonic = _MNEMONIC,
         progress_message = "Fixing %{label} with RuboCop",

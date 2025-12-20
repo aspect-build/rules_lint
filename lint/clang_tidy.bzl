@@ -367,10 +367,9 @@ def clang_tidy_fix(ctx, compilation_context, executable, srcs, patch, stdout, ex
         arguments = [patch_cfg.path],
         env = {
             "BAZEL_BINDIR": ".",
-            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        },
+        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
         tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with clang-tidy",

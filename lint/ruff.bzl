@@ -146,12 +146,11 @@ def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code, env = {}):
         outputs = [patch, exit_code, stdout],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
-        env = dict(env, **{
+        env = env | {
             "BAZEL_BINDIR": ".",
-            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        }),
+        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
         tools = [executable._ruff],
         mnemonic = _MNEMONIC,
         progress_message = "Fixing %{label} with Ruff",

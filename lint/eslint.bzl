@@ -144,10 +144,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
             outputs = [stdout, exit_code],
             executable = executable._eslint,
             arguments = [args],
-            env = dict(env, **{
-                "BAZEL_BINDIR": ctx.bin_dir.path,
-                "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
-            }),
+            env = env | {"BAZEL_BINDIR": ctx.bin_dir.path} | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with ESLint",
         )
@@ -193,12 +190,12 @@ def eslint_fix(ctx, executable, srcs, patch, stdout, exit_code, format = "stylis
         outputs = [patch, stdout, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
-        env = dict(env, **{
+        # TODO: exit_code can be None when fail_on_violation is enabled; guard before using exit_code.path.
+        env = env | {
             "BAZEL_BINDIR": ".",
-            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        }),
+        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
         tools = [executable._eslint],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with ESLint",

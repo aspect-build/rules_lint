@@ -154,16 +154,15 @@ def stylelint_fix(ctx, executable, srcs, patch, stderr, exit_code, env = {}, opt
         outputs = [patch, stderr, exit_code],
         executable = executable._patcher,
         arguments = [patch_cfg.path],
-        env = dict(env, **{
+        env = env | {
             "BAZEL_BINDIR": ".",
-            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDERR_OUTPUT_FILE": stderr.path,
             # Capture stylelint's stdout output so the Bazel action
             # always produces a file (even on exit 0).
             # Similar to what Eslint currently does.
             "JS_BINARY__STDOUT_OUTPUT_FILE": stderr.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        }),
+        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
         tools = [executable._stylelint],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Stylelint",

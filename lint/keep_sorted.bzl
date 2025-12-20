@@ -96,10 +96,9 @@ def keep_sorted_fix(ctx, executable, srcs, patch, stdout, exit_code = None, opti
         arguments = [patch_cfg.path],
         env = {
             "BAZEL_BINDIR": ".",
-            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
             "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
             "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        },
+        } | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
         tools = [executable._keep_sorted],
         mnemonic = _MNEMONIC,
         progress_message = "Fixing %{label} with KeepSorted",
