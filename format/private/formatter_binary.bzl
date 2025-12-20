@@ -8,6 +8,7 @@ TOOLS = {
     "Markdown": "prettier",
     # NB: includes LESS and SASS
     "CSS": "prettier",
+    "CUE": "cue-fmt",
     "GraphQL": "prettier",
     "HTML": "prettier",
     "Python": "ruff",
@@ -37,6 +38,7 @@ TOOLS = {
 
 # Provided to make install more convenient
 BUILTIN_TOOL_LABELS = {
+    "CUE": "@multitool//tools/cue",
     "Jsonnet": "@multitool//tools/jsonnetfmt",
     "Go": "@multitool//tools/gofumpt",
     "Shell": "@multitool//tools/shfmt",
@@ -48,6 +50,7 @@ BUILTIN_TOOL_LABELS = {
 # Flags to pass each tool's CLI when running in check mode
 CHECK_FLAGS = {
     "buildifier": "-mode=check",
+    "cue-fmt": "fmt --check",
     "swiftformat": "--lint",
     "prettier": "--check",
     "ruff": "format --check --force-exclude --diff",
@@ -71,6 +74,7 @@ CHECK_FLAGS = {
 # Flags to pass each tool when running in default mode
 FIX_FLAGS = {
     "buildifier": "-mode=fix",
+    "cue-fmt": "fmt",
     "djlint": "--format-css --format-js --reformat",
     "swiftformat": "",
     "prettier": "--write",
