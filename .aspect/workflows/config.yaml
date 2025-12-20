@@ -11,6 +11,10 @@ bazel:
     - --config=ci
 tasks:
   - test:
+  - build:
+      bazel:
+        flags:
+          - --@aspect_rules_lint//lint:fail_on_violation
   - test:
       name: "Test (WORKSPACE)"
       id: bzlmod-false
