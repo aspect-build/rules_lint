@@ -46,7 +46,8 @@ jobs:
           echo "Generated test matrix: $folders"
   format:
     needs: list-examples
-    runs-on: ubuntu-latest
+
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -56,10 +57,9 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.15.0
       # Permit this gross non-hermetic dependency
       - if: matrix.folder == 'examples/cpp'
-        run: sudo apt-get install -y libtinfo5
+        run: sudo apt-get update && sudo apt-get install -y libtinfo5
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
-        continue-on-error: ${{ matrix.folder == 'examples/swift' }}
   integration-test:
     needs: list-examples
     runs-on: ubuntu-latest

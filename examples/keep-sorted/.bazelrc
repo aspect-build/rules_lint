@@ -1,0 +1,2 @@
+# Required for isolated extension usages (needed for keep-sorted dependency)
+common --experimental_isolated_extension_usages
