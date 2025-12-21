@@ -15,7 +15,6 @@ load(
     "pylint_test",
     "rubocop_test",
     "ruff_test",
-    "shellcheck_test",
     "standardrb_test",
     "stylelint_test",
     "ty_test",
@@ -179,21 +178,6 @@ eslint_test(
     srcs = ["//src:ts_typings"],
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
-)
-
-shellcheck_test(
-    name = "shellcheck",
-    srcs = ["//src:hello_shell"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
-)
-
-shellcheck_test(
-    name = "shellcheck-generated",
-    srcs = [":generated_sh"],
-    # Expected to fail because the sh_library opted-in to having generated code checked as well
     tags = ["manual"],
 )
 

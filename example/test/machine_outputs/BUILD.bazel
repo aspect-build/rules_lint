@@ -9,7 +9,6 @@ load(
     "machine_flake8_report",
     "machine_pylint_report",
     "machine_ruff_report",
-    "machine_shellcheck_report",
     "machine_stylelint_report",
     "machine_ty_report",
     "machine_vale_report",
@@ -51,18 +50,6 @@ report_test(
     expected_tool = "Ty",
     expected_uri = "src/unsupported_operator.py",
     report = "machine_ty_report",
-)
-
-machine_shellcheck_report(
-    name = "machine_shellcheck_report",
-    src = "//src:hello_shell",
-)
-
-report_test(
-    name = "shellcheck_machine_output_test",
-    expected_tool = "ShellCheck",
-    expected_uri = "src/hello.sh",
-    report = "machine_shellcheck_report",
 )
 
 machine_eslint_report(

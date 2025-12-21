@@ -1,9 +1,7 @@
-load("@aspect_rules_lint//format:defs.bzl", "format_test")
 load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@rules_shell//shell:sh_library.bzl", "sh_library")
 load("//tools/lint:linters.bzl", "eslint_test")
 
 package(default_visibility = ["//visibility:public"])
@@ -87,18 +85,4 @@ filegroup(
     name = "unused_import_pyi",
     srcs = ["unused_import.pyi"],
     tags = ["python"],
-)
-
-sh_library(
-    name = "hello_shell",
-    srcs = ["hello.sh"],
-)
-
-# Cause a test failure when files are not formatted.
-# This is useful when you have no other way to check formatting on CI; see documentation.
-format_test(
-    name = "format_files_test",
-    srcs = [
-        "hello.sh",
-    ],
 )

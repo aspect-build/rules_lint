@@ -22,7 +22,6 @@ exports_files(
         ".ruff.toml",
         ".rubocop.yml",
         ".standard.yml",
-        ".shellcheckrc",
         ".scalafmt.conf",
         ".swcrc",
         ".vale.ini",

@@ -14,7 +14,6 @@ load("@aspect_rules_lint//lint:pmd.bzl", "lint_pmd_aspect")
 load("@aspect_rules_lint//lint:pylint.bzl", "lint_pylint_aspect")
 load("@aspect_rules_lint//lint:rubocop.bzl", "lint_rubocop_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
-load("@aspect_rules_lint//lint:shellcheck.bzl", "lint_shellcheck_aspect")
 load("@aspect_rules_lint//lint:spotbugs.bzl", "lint_spotbugs_aspect")
 load("@aspect_rules_lint//lint:standardrb.bzl", "lint_standardrb_aspect")
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
@@ -89,13 +88,6 @@ ruff = lint_ruff_aspect(
 )
 
 ruff_test = lint_test(aspect = ruff)
-
-shellcheck = lint_shellcheck_aspect(
-    binary = Label("@aspect_rules_lint//lint:shellcheck_bin"),
-    config = Label("@//:.shellcheckrc"),
-)
-
-shellcheck_test = lint_test(aspect = shellcheck)
 
 ty = lint_ty_aspect(
     binary = Label("@aspect_rules_lint//lint:ty_bin"),

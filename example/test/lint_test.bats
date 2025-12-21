@@ -2,13 +2,6 @@ bats_load_library "bats-support"
 bats_load_library "bats-assert"
 
 function assert_lints() {
-	# Shellcheck
-	echo <<"EOF" | assert_output --partial
-In src/hello.sh line 3:
-[ -z $THING ] && echo "hello world"
-     ^----^ SC2086 (info): Double quote to prevent globbing and word splitting.
-EOF
-
 	# Ruff
 	echo <<"EOF" | assert_output --partial
 src/unused_import.py:18:8: F401 [*] `os` imported but unused
