@@ -17,7 +17,6 @@ hooks:
     command: aspect lint
     soft_fail: true
     when:
-      task:
-        types: ["test"]
+      equals: ["${WORKFLOWS_TASK_TYPE}", "test"]
 notifications:
   github: {}
