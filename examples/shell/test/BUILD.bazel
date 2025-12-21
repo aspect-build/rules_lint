@@ -5,8 +5,6 @@ load("//tools/lint:linters.bzl", "shellcheck_test")
 
 package(default_visibility = ["//visibility:public"])
 
-package(default_visibility = ["//visibility:public"])
-
 shellcheck_test(
     name = "shellcheck",
     srcs = ["//src:hello"],

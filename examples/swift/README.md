@@ -12,62 +12,14 @@ Note: No Swift linter is currently available in rules_lint.
 
 ## Setup
 
-### 1. Configure MODULE.bazel
+1. Configure MODULE.bazel with required dependencies
+2. Create the MODULE.aspect file to register CLI tasks
+3. Configure Format Tools (add swiftformat)
+4. Configure Formatters
 
-Add the required dependencies:
+- See `tools/format/BUILD.bazel` for how to set up the formatter
 
-```starlark
-bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "bazel_features", version = "1.32.0")
-```
-
-### 2. Configure Format Tools
-
-Add swiftformat to your format tools:
-
-```starlark
-format_tools = use_extension("@aspect_rules_lint//format:extensions.bzl", "tools")
-format_tools.swiftformat()
-use_repo(format_tools, "swiftformat", "swiftformat_mac")
-```
-
-### 3. Configure Formatter
-
-In `tools/format/BUILD.bazel`, set up the formatter:
-
-```starlark
-load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
-
-alias(
-    name = "swiftformat",
-    actual = select({
-        "@bazel_tools//src/conditions:linux": "@swiftformat",
-        "@bazel_tools//src/conditions:darwin": "@swiftformat_mac",
-    }),
-)
-
-format_multirun(
-    name = "format",
-    swift = ":swiftformat",
-    visibility = ["//:__subpackages__"],
-)
-```
-
-## Usage
-
-### Format Code
-
-Format all Swift files:
-
-```bash
-bazel run //tools/format:format
-```
-
-Format specific files:
-
-```bash
-bazel run //tools/format:format -- hello.swift
-```
+5. Perform formatting using `aspect format`
 
 ## Example Code
 

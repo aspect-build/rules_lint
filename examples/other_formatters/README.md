@@ -15,35 +15,13 @@ This example demonstrates formatting for various specialized languages and file 
 
 ## Setup
 
-### 1. Configure MODULE.bazel
+1. Configure MODULE.bazel with required dependencies
+2. Create the MODULE.aspect file to register CLI tasks
+3. Configure Formatters
 
-Add the required dependencies:
+- See `tools/format/BUILD.bazel` for how to set up each formatter
 
-```starlark
-bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "aspect_rules_js", version = "2.0.0")
-bazel_dep(name = "rules_python", version = "0.26.0")
-```
-
-### 2. Configure Formatters
-
-See `tools/format/BUILD.bazel` for how to set up each formatter.
-
-### 3. Run Formatters
-
-With Aspect CLI:
-
-```bash
-# Format code
-bazel format //src:all
-```
-
-Without Aspect CLI:
-
-```bash
-# Format code
-bazel run //tools/format -- src:all
-```
+4. Perform formatting using `aspect format`
 
 ## Example Code
 

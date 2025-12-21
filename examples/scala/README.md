@@ -12,52 +12,15 @@ Note: No Scala linter is currently available in rules_lint.
 
 ## Setup
 
-### 1. Configure MODULE.bazel
-
-Add the required dependencies:
-
-```starlark
-bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "rules_jvm_external", version = "6.5")
-```
-
-### 2. Configure Maven Dependencies
-
-Add scalafmt to your maven.install artifacts:
-
-```starlark
-maven.install(
-    artifacts = [
-        "org.scalameta:scalafmt-cli_2.13:3.7.14",
-    ],
-    lock_file = "//:maven_install.json",
-    repositories = [
-        "https://maven.google.com",
-        "https://repo1.maven.org/maven2",
-    ],
-)
-```
-
-### 3. Configure Formatters
+1. Configure MODULE.bazel with required dependencies
+2. Create the MODULE.aspect file to register CLI tasks
+3. Configure Maven Dependencies (add scalafmt to maven.install artifacts)
+4. Configure Formatters
 
 - See `tools/format/BUILD.bazel` for how to set up the formatter
 - See `.scalafmt.conf` for scalafmt configuration
 
-### 4. Run Formatters
-
-With Aspect CLI:
-
-```bash
-# Format code
-aspect format
-```
-
-Without Aspect CLI:
-
-```bash
-# Format code
-bazel run //tools/format
-```
+5. Perform formatting using `aspect format`
 
 ## Example Code
 

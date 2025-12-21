@@ -12,35 +12,14 @@ Note: No C# linter is currently available in rules_lint.
 
 ## Setup
 
-### 1. Configure MODULE.bazel
-
-Add the required dependencies:
-
-```starlark
-bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "rules_dotnet", version = "0.20.5")
-```
-
-### 2. Configure Formatters
+1. Configure MODULE.bazel with required dependencies
+2. Create the MODULE.aspect file to register CLI tasks
+3. Configure Formatters
 
 - See `tools/format/BUILD.bazel` for how to set up the formatter
 - See `3rdparty/nuget/` for paket dependency setup
 
-### 3. Run Formatters
-
-With Aspect CLI:
-
-```bash
-# Format code
-bazel format //src:all
-```
-
-Without Aspect CLI:
-
-```bash
-# Format code
-bazel run //tools/format -- src:all
-```
+4. Perform formatting using `aspect format`
 
 ## Example Code
 

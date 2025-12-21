@@ -13,34 +13,13 @@ Note: No Ruby formatter is currently available in rules_lint.
 
 ## Setup
 
-### 1. Configure MODULE.bazel
-
-Add the required dependencies:
-
-```starlark
-bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "rules_ruby", version = "0.21.1")
-```
-
-### 2. Configure Linters
+1. Configure MODULE.bazel with required dependencies
+2. Create the MODULE.aspect file to register CLI tasks
+3. Configure Linters
 
 - See `tools/lint/linters.bzl` for how to set up each linter aspect
 
-### 3. Run Linters
-
-With Aspect CLI:
-
-```bash
-# Lint code
-bazel lint //src:all
-```
-
-Without Aspect CLI:
-
-```bash
-# Lint code (use lint.sh script)
-./lint.sh src:all
-```
+4. Perform linting using `aspect lint`
 
 ## Example Code
 

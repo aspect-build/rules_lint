@@ -16,42 +16,14 @@ This example demonstrates how to set up formatting and linting for Java code usi
 
 ## Setup
 
-### 1. Configure MODULE.bazel
-
-Add the required dependencies:
-
-```starlark
-bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "rules_java", version = "8.5.0")
-bazel_dep(name = "rules_jvm_external", version = "6.5")
-```
-
-### 2. Configure Formatters and Linters
+1. Configure MODULE.bazel with required dependencies
+2. Create the MODULE.aspect file to register CLI tasks
+3. Configure Formatters and Linters
 
 - See `tools/format/BUILD.bazel` for how to set up the formatter
 - See `tools/lint/linters.bzl` for how to set up each linter aspect
 
-### 3. Run Formatters and Linters
-
-With Aspect CLI:
-
-```bash
-# Format code
-bazel format //src:all
-
-# Lint code
-bazel lint //src:all
-```
-
-Without Aspect CLI:
-
-```bash
-# Format code
-bazel run //tools/format -- src:all
-
-# Lint code (use lint.sh script)
-./lint.sh src:all
-```
+4. Perform formatting and linting using `aspect format` and `aspect lint`
 
 ## Example Code
 
