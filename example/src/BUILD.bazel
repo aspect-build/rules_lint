@@ -3,10 +3,7 @@ load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@io_bazel_rules_go//go:def.bzl", "go_binary")
-load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@rules_python//python:defs.bzl", "py_library")
-load("@rules_ruby//ruby:defs.bzl", "rb_library")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
 load("//tools/lint:linters.bzl", "eslint_test")
 
@@ -45,11 +42,6 @@ filegroup(
     name = "toml",
     srcs = ["hello.toml"],
     tags = ["toml"],
-)
-
-rb_library(
-    name = "hello_ruby",
-    srcs = ["hello.rb"],
 )
 
 ts_project(
@@ -92,47 +84,10 @@ proto_library(
     deps = [":unused"],
 )
 
-py_library(
-    name = "unused_import",
-    srcs = ["unused_import.py"],
-)
-
-py_library(
-    name = "unsupported_operator",
-    srcs = ["unsupported_operator.py"],
-)
-
-py_library(
-    name = "call_non_callable",
-    srcs = ["call_non_callable.py"],
-)
-
-py_library(
-    name = "uses_dependency",
-    srcs = ["uses_dependency.py"],
-    deps = ["//src/python_lib:py_dependency"],
-)
-
 filegroup(
     name = "unused_import_pyi",
     srcs = ["unused_import.pyi"],
     tags = ["python"],
-)
-
-java_library(
-    name = "foo",
-    srcs = ["Foo.java"],
-    deps = [":FooUtils"],
-)
-
-java_library(
-    name = "FooUtils",
-    srcs = ["FileReaderUtil.java"],
-)
-
-java_library(
-    name = "bar",
-    srcs = ["Bar.java"],
 )
 
 sh_library(
@@ -143,21 +98,6 @@ sh_library(
 go_binary(
     name = "hello_go",
     srcs = ["hello.go"],
-)
-
-cc_binary(
-    name = "hello_cc",
-    srcs = ["hello.cpp"],
-)
-
-cc_binary(
-    name = "hello_c",
-    srcs = ["hello.c"],
-)
-
-kt_jvm_library(
-    name = "hello_kt",
-    srcs = ["hello.kt"],
 )
 
 # Cause a test failure when files are not formatted.

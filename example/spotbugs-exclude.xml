@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<FindBugsFilter>
-    <!-- Exclude all warnings for the Foo.readFile() method -->
-    <Match>
-        <Bug code="OS" />
-    </Match>
-</FindBugsFilter>
