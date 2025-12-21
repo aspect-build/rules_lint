@@ -3,6 +3,7 @@
 workspaces:
   - .
   - examples/cpp
+  - examples/csharp
   - examples/java
   - examples/python
   - examples/ruby
