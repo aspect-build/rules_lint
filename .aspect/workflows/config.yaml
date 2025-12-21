@@ -2,7 +2,7 @@
 ---
 workspaces:
   - .
-  - example
+  - examples/java
 bazel:
   flags:
     - --config=ci
