@@ -22,27 +22,32 @@ jobs:
     outputs:
       format-matrix: ${{ steps.set-format-matrix.outputs.matrix }}
       test-matrix: ${{ steps.set-test-matrix.outputs.matrix }}
+      lint-matrix: ${{ steps.set-lint-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v5
       - name: Verify bcr patches
         run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
-      - name: Generate Matrices
+      - name: "List examples that have a tools/format folder"
         id: set-format-matrix
         run: |
-          # Find all examples that have a tools/format folder
           folders=$(find examples -type d -path "*/tools/format" | sed 's|/tools/format||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "matrix=$folders" >> "$GITHUB_OUTPUT"
           echo "Generated format matrix: $folders"
-      - name: Generate Test Matrix
+      - name: "List examples that have a tools/lint folder"
+        id: set-lint-matrix
+        run: |
+          folders=$(find examples -type d -path "*/tools/lint" | sed 's|/tools/lint||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "matrix=$folders" >> "$GITHUB_OUTPUT"
+          echo "Generated lint matrix: $folders"
+      - name: "Find all examples that have test/*.bats files"
         id: set-test-matrix
         run: |
-          # Find all examples that have test/*.bats files
           folders=$(find examples -name "*.bats" -path "*/test/*" | sed 's|/test/.*||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "matrix=$folders" >> "$GITHUB_OUTPUT"
           echo "Generated test matrix: $folders"
   format:
     needs: list-examples
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.folder == 'examples/cpp' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
@@ -52,7 +57,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.15.0
       # Permit this gross non-hermetic dependency
       - if: matrix.folder == 'examples/cpp'
-        run: sudo apt-get update && sudo apt-get install -y libtinfo6
+        run: sudo apt-get update && sudo apt-get install -y libtinfo5
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
   integration-test:
@@ -80,8 +85,13 @@ jobs:
       - name: "Integration test"
         working-directory: ${{ matrix.folder }}
         run: bats ./test
-  aspect:
-    runs-on: ubuntu-latest
+  lint:
+    needs: list-examples
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJson(needs.list-examples.outputs.lint-matrix) }}
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
@@ -97,12 +107,8 @@ jobs:
           chmod: 0755
           extension-matching: disable
       - name: Lint
-        working-directory: examples/java
+        working-directory: ${{ matrix.folder }}
         run: aspect lint
-      - name: Format
-        working-directory: examples/java
-        # Only format one language to keep CI time reasonable
-        run: aspect format --all_files=true
   test:
     strategy:
       matrix:
