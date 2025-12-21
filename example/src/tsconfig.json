@@ -1,0 +1,9 @@
+{
+  // A comment
+  "compilerOptions": {
+    "declaration": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true
+  },
+  "exclude": []
+}

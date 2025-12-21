@@ -1,0 +1,12 @@
+{
+  // This is a comment - not allowed in JSON
+  trailingComma: "allowed in JSON5", // Trailing commas are allowed
+  singleQuotes: "valid in JSON5", // Single quotes are allowed
+  unquotedKeys: true, // Unquoted object keys are allowed
+  hex: 0x1f, // Hexadecimal numbers are allowed
+  infinity: Infinity, // Infinity is allowed
+  nan: NaN, // NaN is allowed
+  trailing_decimal: 1, // Trailing decimal point is allowed
+  "contains.periods": true, // Dots in keys don't need to be quoted
+  "can mix": "quote styles", // Mixing quote styles is allowed
+}

@@ -1,0 +1,199 @@
+"""Verify that the machine-readable SARIF report is generated correctly for each linter aspect."""
+
+load("@jq.bzl//jq:jq.bzl", "jq_test")
+load(
+    ":machine_output.bzl",
+    "machine_buf_report",
+    "machine_clippy_report",
+    "machine_eslint_report",
+    "machine_flake8_report",
+    "machine_pylint_report",
+    "machine_ruff_report",
+    "machine_shellcheck_report",
+    "machine_stylelint_report",
+    "machine_ty_report",
+    "machine_vale_report",
+    "machine_yamllint_report",
+    "report_test",
+)
+
+machine_ruff_report(
+    name = "machine_ruff_report",
+    src = "//src:unused_import",
+)
+
+report_test(
+    name = "ruff_machine_output_test",
+    expected_tool = "Ruff",
+    expected_uri = "src/unused_import.py",
+    report = "machine_ruff_report",
+)
+
+machine_ruff_report(
+    name = "machine_ruff_pyi_report",
+    src = "//src:unused_import_pyi",
+)
+
+report_test(
+    name = "ruff_pyi_machine_output_test",
+    expected_tool = "Ruff",
+    expected_uri = "src/unused_import.pyi",
+    report = "machine_ruff_pyi_report",
+)
+
+machine_ty_report(
+    name = "machine_ty_report",
+    src = "//src:unsupported_operator",
+)
+
+report_test(
+    name = "ty_machine_output_test",
+    expected_tool = "Ty",
+    expected_uri = "src/unsupported_operator.py",
+    report = "machine_ty_report",
+)
+
+machine_shellcheck_report(
+    name = "machine_shellcheck_report",
+    src = "//src:hello_shell",
+)
+
+report_test(
+    name = "shellcheck_machine_output_test",
+    expected_tool = "ShellCheck",
+    expected_uri = "src/hello.sh",
+    report = "machine_shellcheck_report",
+)
+
+machine_eslint_report(
+    name = "machine_eslint_report",
+    src = "//src:ts_typings",
+)
+
+report_test(
+    name = "eslint_machine_output_test",
+    expected_tool = "ESLint",
+    expected_uri = "src/file.ts",
+    report = "machine_eslint_report",
+)
+
+machine_stylelint_report(
+    name = "machine_stylelint_report",
+    src = "//src:css",
+)
+
+report_test(
+    name = "stylelint_machine_output_test",
+    expected_tool = "Stylelint",
+    expected_uri = "src/hello.css",
+    report = "machine_stylelint_report",
+)
+
+machine_vale_report(
+    name = "machine_vale_report",
+    src = "//src:md",
+)
+
+report_test(
+    name = "vale_machine_output_test",
+    expected_tool = "Vale",
+    expected_uri = "src/README.md",
+    report = "machine_vale_report",
+)
+
+machine_flake8_report(
+    name = "machine_flake8_report",
+    src = "//src:unused_import",
+)
+
+report_test(
+    name = "flake8_machine_output_test",
+    expected_tool = "Flake8",
+    expected_uri = "src/unused_import.py",
+    report = "machine_flake8_report",
+)
+
+machine_pylint_report(
+    name = "machine_pylint_report",
+    src = "//src:unused_import",
+)
+
+report_test(
+    name = "pylint_machine_output_test",
+    expected_tool = "Pylint",
+    expected_uri = "src/unused_import.py",
+    report = "machine_pylint_report",
+)
+
+machine_yamllint_report(
+    name = "machine_yamllint_report",
+    src = "//src:yaml_docs",
+)
+
+report_test(
+    name = "yamllint_machine_output_test",
+    expected_tool = "Yamllint",
+    expected_uri = "src/config.yaml",
+    report = "machine_yamllint_report",
+)
+
+machine_buf_report(
+    name = "machine_buf_report",
+    src = "//src:foo_proto",
+)
+
+report_test(
+    name = "buf_machine_output_test",
+    expected_tool = "Buf",
+    expected_uri = "src/file.proto",
+    report = "machine_buf_report",
+)
+
+machine_clippy_report(
+    name = "machine_clippy_report",
+    src = "//src/rust:bad_lib",
+)
+
+# Because the json file from clippy contains multiple messages _not_ in an array, we must take the first element.
+jq_test(
+    name = "clippy_machine_output_test",
+    file1 = ":machine_clippy_report",
+    file2 = ":machine_clippy_report",
+    filter1 = "inputs | first | .code.code",
+    filter2 = "inputs | first | \"dead_code\"",
+)
+
+# FIXME: I'm getting a C++ compile failure on macos
+# machine_clang_tidy_report(
+#     name = "machine_clang_tidy_report",
+#     src = "//src:hello_cc",
+# )
+
+# report_test(
+#     name = "clang_tidy_machine_output_test",
+#     report = "machine_clang_tidy_report",
+#     expected_tool = "ClangTidy",
+#     expected_uri = "src/hello.cpp",
+# )
+
+# report_test("should get SARIF output from pmd")
+#     run_lint pmd foo
+#     REPORT_FILE=bazel-bin/src/foo.AspectRulesLintPMD.report
+#     assert_driver_name "PMD"
+#     # FIXME: report isn't finding any files??
+#     # assert_physical_artifact_location_uri "src/Hello.java"
+# }
+
+# TODO: spotbugs is not working yet.
+# It doesn't seem to print source locations (perhaps because it only works from bytecode)
+# It's the same problem I solved by starting Error Prone!!
+# @test "should get SARIF output from spotbugs" {
+#     run_lint spotbugs foo
+# }
+# TODO: add sarif parsers for keep_sorted and ktlint
+# @test "should get SARIF output from keep_sorted" {
+#     run_lint keep_sorted keep_sorted
+# }
+# @test "should get SARIF output from ktlint" {
+#     run_lint ktlint hello_kt
+# }

@@ -1,0 +1,171 @@
+load("@aspect_rules_lint//format:defs.bzl", "format_test")
+load("@aspect_rules_swc//swc:defs.bzl", "swc")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
+load("@bazel_skylib//lib:partial.bzl", "partial")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_ruby//ruby:defs.bzl", "rb_library")
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+load("//tools/lint:linters.bzl", "eslint_test")
+
+package(default_visibility = ["//visibility:public"])
+
+ts_config(
+    name = "tsconfig",
+    src = "tsconfig.json",
+)
+
+filegroup(
+    name = "css",
+    srcs = ["hello.css"],
+    tags = ["lint-with-stylelint"],
+)
+
+filegroup(
+    name = "clean_css",
+    srcs = ["clean.css"],
+    tags = ["lint-with-stylelint"],
+)
+
+filegroup(
+    name = "md",
+    srcs = ["README.md"],
+    tags = ["markdown"],
+)
+
+filegroup(
+    name = "yaml_docs",
+    srcs = ["config.yaml"],
+    tags = ["lint-with-yamllint"],
+)
+
+filegroup(
+    name = "toml",
+    srcs = ["hello.toml"],
+    tags = ["toml"],
+)
+
+rb_library(
+    name = "hello_ruby",
+    srcs = ["hello.rb"],
+)
+
+ts_project(
+    name = "ts_dep",
+    srcs = ["file-dep.ts"],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = ":tsconfig",
+    deps = [],
+)
+
+ts_project(
+    name = "ts",
+    srcs = ["file.ts"],
+    declaration = True,
+    transpiler = partial.make(
+        swc,
+        swcrc = "//:.swcrc",
+    ),
+    deps = [
+        ":ts_dep",
+        "//:node_modules/dayjs",
+    ],
+)
+
+# Regression test for https://github.com/aspect-build/rules_lint/issues/368
+eslint_test(
+    name = "eslint_empty_report",
+    srcs = [":ts"],
+)
+
+proto_library(
+    name = "unused",
+    srcs = ["unused.proto"],
+)
+
+proto_library(
+    name = "foo_proto",
+    srcs = ["file.proto"],
+    deps = [":unused"],
+)
+
+py_library(
+    name = "unused_import",
+    srcs = ["unused_import.py"],
+)
+
+py_library(
+    name = "unsupported_operator",
+    srcs = ["unsupported_operator.py"],
+)
+
+py_library(
+    name = "call_non_callable",
+    srcs = ["call_non_callable.py"],
+)
+
+py_library(
+    name = "uses_dependency",
+    srcs = ["uses_dependency.py"],
+    deps = ["//src/python_lib:py_dependency"],
+)
+
+filegroup(
+    name = "unused_import_pyi",
+    srcs = ["unused_import.pyi"],
+    tags = ["python"],
+)
+
+java_library(
+    name = "foo",
+    srcs = ["Foo.java"],
+    deps = [":FooUtils"],
+)
+
+java_library(
+    name = "FooUtils",
+    srcs = ["FileReaderUtil.java"],
+)
+
+java_library(
+    name = "bar",
+    srcs = ["Bar.java"],
+)
+
+sh_library(
+    name = "hello_shell",
+    srcs = ["hello.sh"],
+)
+
+go_binary(
+    name = "hello_go",
+    srcs = ["hello.go"],
+)
+
+cc_binary(
+    name = "hello_cc",
+    srcs = ["hello.cpp"],
+)
+
+cc_binary(
+    name = "hello_c",
+    srcs = ["hello.c"],
+)
+
+kt_jvm_library(
+    name = "hello_kt",
+    srcs = ["hello.kt"],
+)
+
+# Cause a test failure when files are not formatted.
+# This is useful when you have no other way to check formatting on CI; see documentation.
+format_test(
+    name = "format_files_test",
+    srcs = [
+        "hello.go",
+        "hello.sh",
+    ],
+)

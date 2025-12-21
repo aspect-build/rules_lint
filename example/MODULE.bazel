@@ -1,0 +1,210 @@
+"Bazel dependencies"
+
+bazel_dep(name = "aspect_rules_lint")
+bazel_dep(name = "aspect_rules_js", version = "2.0.0")
+bazel_dep(name = "aspect_rules_swc", version = "2.0.0")
+bazel_dep(name = "aspect_rules_ts", version = "3.0.0")
+bazel_dep(name = "bazel_lib", version = "3.0.0")
+bazel_dep(name = "rules_buf", version = "0.5.2")
+bazel_dep(name = "rules_dotnet", version = "0.20.5")
+bazel_dep(name = "bazel_features", version = "1.29.0")
+bazel_dep(name = "bazel_skylib", version = "1.4.2")
+bazel_dep(name = "toolchains_llvm", version = "1.1.2")
+bazel_dep(name = "toolchains_protoc", version = "0.3.7")
+bazel_dep(name = "rules_java", version = "8.5.0")
+bazel_dep(name = "rules_jvm_external", version = "6.5")
+bazel_dep(name = "rules_go", version = "0.52.0", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "rules_proto", version = "6.0.0")
+bazel_dep(name = "rules_python", version = "0.26.0")
+bazel_dep(name = "rules_rust", version = "0.67.0")
+bazel_dep(name = "rules_ruby", version = "0.21.1")
+bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
+bazel_dep(name = "platforms", version = "0.0.8")
+bazel_dep(name = "rules_kotlin", version = "1.9.0")
+bazel_dep(name = "rules_cc", version = "0.0.9")
+bazel_dep(name = "gazelle", version = "0.41.0")
+bazel_dep(name = "rules_shell", version = "0.5.0")
+bazel_dep(name = "jq.bzl", version = "0.4.0")
+
+local_path_override(
+    module_name = "aspect_rules_lint",
+    path = "..",
+)
+
+rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
+rules_ts_ext.deps()
+use_repo(rules_ts_ext, "npm_typescript")
+
+# Configure and register the toolchain.
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    llvm_versions = {
+        "": "16.0.0",
+        "darwin-x86_64": "15.0.7",
+    },
+)
+use_repo(llvm, "llvm_toolchain", "llvm_toolchain_llvm")
+
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
+npm.npm_translate_lock(
+    name = "npm",
+    npmrc = "//:.npmrc",
+    pnpm_lock = "//:pnpm-lock.yaml",
+    public_hoist_packages = {
+        "typescript-eslint": [""],
+    },
+)
+use_repo(npm, "npm")
+
+pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
+
+# Allows developers to use the matching pnpm version, for example:
+# bazel run -- @pnpm --dir /home/runner/work/rules_js/rules_js install
+use_repo(pnpm, "pnpm")
+
+python_version = "3.9"
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    python_version = python_version,
+)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pip",
+    python_version = python_version,
+    requirements_lock = "//:requirements.txt",
+)
+use_repo(pip, "pip")
+
+go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
+go_sdk.download(
+    name = "go_sdk",
+    version = "1.23.5",
+)
+use_repo(go_sdk, "go_sdk")
+
+keep_sorted_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", isolate = True)
+keep_sorted_deps.from_file(go_mod = "@aspect_rules_lint//lint/keep-sorted:go.mod")
+use_repo(keep_sorted_deps, "com_github_google_keep_sorted")
+
+# Java and other JVM languages:
+# https://github.com/bazelbuild/rules_jvm_external/blob/master/examples/bzlmod/MODULE.bazel
+# https://github.com/bazelbuild/rules_jvm_external#pinning-artifacts-and-integration-with-bazels-downloader
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+    artifacts = [
+        "org.scalameta:scalafmt-cli_2.13:3.7.14",
+    ],
+    lock_file = "//:maven_install.json",
+    repositories = [
+        "https://maven.google.com",
+        "https://repo1.maven.org/maven2",
+    ],
+)
+use_repo(
+    maven,
+    "maven",
+    "unpinned_maven",
+)
+
+buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
+
+# see https://github.com/bufbuild/buf/releases
+buf.toolchains(version = "v1.34.0")
+use_repo(buf, "rules_buf_toolchains")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = ["1.75.0"],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains(
+    "@rust_toolchains//:all",
+)
+
+# Configure .Net toolchains
+dotnet = use_extension("@rules_dotnet//dotnet:extensions.bzl", "dotnet")
+dotnet.toolchain(dotnet_version = "9.0.306")
+use_repo(dotnet, "dotnet_toolchains")
+
+register_toolchains("@dotnet_toolchains//:all")
+
+main_extension = use_extension("//3rdparty/nuget:paket.main_extension.bzl", "main_extension")
+use_repo(main_extension, "paket.main")
+
+ruby = use_extension("@rules_ruby//ruby:extensions.bzl", "ruby")
+ruby.toolchain(
+    name = "ruby",
+    version_file = "//:.ruby-version",
+)
+ruby.bundle_fetch(
+    name = "bundle",
+    gem_checksums = {
+        "ast-2.4.3": "954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383",
+        "json-2.15.1": "b1c1b2e7c116eb1903e0ce0c374783e6ead8747a0f9eca132d274018ebb80b89",
+        "json-2.15.1-java": "a6185eebe724a6937f60729e4998276d6b3de3ecc35be34f8e47c1eb40903ecf",
+        "language_server-protocol-3.17.0.5": "fd1e39a51a28bf3eec959379985a72e296e9f9acfce46f6a79d31ca8760803cc",
+        "lint_roller-1.1.0": "2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87",
+        "parallel-1.27.0": "4ac151e1806b755fb4e2dc2332cbf0e54f2e24ba821ff2d3dcf86bf6dc4ae130",
+        "parser-3.3.9.0": "94d6929354b1a6e3e1f89d79d4d302cc8f5aa814431a6c9c7e0623335d7687f2",
+        "prism-1.5.2": "192741663a55af1ac1b987caa1092deb666e4ff46a30c5064ad5456acd05df1d",
+        "racc-1.8.1": "4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f",
+        "racc-1.8.1-java": "54f2e6d1e1b91c154013277d986f52a90e5ececbe91465d29172e49342732b98",
+        "rainbow-3.1.1": "039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a",
+        "regexp_parser-2.11.3": "ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4",
+        "rubocop-1.80.2": "6485f30fefcf5c199db3b91e5e253b1ef43f7e564784e2315255809a3dd9abf4",
+        "rubocop-ast-1.47.1": "592682017855408b046a8190689490763aecea175238232b1b526826349d01ae",
+        "rubocop-performance-1.25.0": "6f7d03568a770054117a78d0a8e191cefeffb703b382871ca7743831b1a52ec1",
+        "ruby-progressbar-1.13.0": "80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33",
+        "standard-1.51.1": "6d0d98a1fac26d660393f37b3d9c864632bb934b17abfa23811996b20f87faf2",
+        "standard-custom-1.0.2": "424adc84179a074f1a2a309bb9cf7cd6bfdb2b6541f20c6bf9436c0ba22a652b",
+        "standard-performance-1.8.0": "ed17b7d0e061b2a19a91dd434bef629439e2f32310f22f26acb451addc92b788",
+        "unicode-display_width-3.2.0": "0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42",
+        "unicode-emoji-4.1.0": "4997d2d5df1ed4252f4830a9b6e86f932e2013fbff2182a9ce9ccabda4f325a5",
+    },
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+)
+use_repo(ruby, "bundle", "ruby", "ruby_toolchains")
+
+register_toolchains("@ruby_toolchains//:all")
+
+format_tools = use_extension("@aspect_rules_lint//format:extensions.bzl", "tools")
+format_tools.google_java_format()
+format_tools.ktfmt()
+format_tools.swiftformat()
+format_tools.taplo()
+use_repo(format_tools, "google-java-format", "ktfmt", "swiftformat", "swiftformat_mac", "taplo")
+
+lint_tools = use_extension("@aspect_rules_lint//lint:extensions.bzl", "tools")
+lint_tools.checkstyle()
+lint_tools.cppcheck()
+lint_tools.spotbugs()
+lint_tools.ktlint()
+lint_tools.pmd()
+lint_tools.vale()
+lint_tools.vale_styles(
+    styles = [
+        "Google",
+        "write-good",
+    ],
+)
+use_repo(
+    lint_tools,
+    "com_github_pinterest_ktlint",
+    "com_puppycrawl_tools_checkstyle",
+    "cppcheck_linux",
+    "cppcheck_macos",
+    "net_sourceforge_pmd",
+    "spotbugs",
+    "vale_Google",
+    "vale_Linux_64-bit",
+    "vale_Linux_arm64",
+    "vale_Windows_64-bit",
+    "vale_macOS_64-bit",
+    "vale_macOS_arm64",
+    "vale_write-good",
+)

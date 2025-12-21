@@ -3,5 +3,8 @@
 # see https://git-scm.com/docs/git-archive#ATTRIBUTES
 #################################
 
+# Don't include examples in the distribution artifact, to reduce size.
+examples export-ignore
+
 # Substitution for the _VERSION_PRIVATE placeholder
 tools/version.bzl export-subst
