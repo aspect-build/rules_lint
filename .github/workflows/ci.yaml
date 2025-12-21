@@ -23,33 +23,46 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify bcr patches
         run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
+  list-examples:
+    runs-on: ubuntu-latest
+    outputs:
+      format-matrix: ${{ steps.set-format-matrix.outputs.matrix }}
+      test-matrix: ${{ steps.set-test-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Generate Matrices
+        id: set-format-matrix
+        run: |
+          # Find all examples that have a tools/format folder
+          folders=$(find examples -type d -path "*/tools/format" | sed 's|/tools/format||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "matrix=$folders" >> "$GITHUB_OUTPUT"
+          echo "Generated format matrix: $folders"
+      - name: Generate Test Matrix
+        id: set-test-matrix
+        run: |
+          # Find all examples that have test/*.bats files
+          folders=$(find examples -name "*.bats" -path "*/test/*" | sed 's|/test/.*||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "matrix=$folders" >> "$GITHUB_OUTPUT"
+          echo "Generated test matrix: $folders"
   format:
+    needs: list-examples
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        folder:
-          - examples/csharp
-          - examples/go
-          - examples/scala
+        folder: ${{ fromJson(needs.list-examples.outputs.format-matrix) }}
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
   integration-test:
+    needs: list-examples
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        folder:
-          - format
-          # TODO:
-          # - examples/cpp
-          # - examples/java
-          # - examples/python
-          # - examples/ruby
-          # - examples/kotlin
-          # - examples/protobuf
-          # - examples/rust
+        folder: ${{ fromJson(needs.list-examples.outputs.test-matrix) }}
+        include:
+          - folder: format
     steps:
       - uses: actions/checkout@v4
       - name: Setup bats
