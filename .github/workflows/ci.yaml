@@ -17,12 +17,6 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
-  bcr:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Verify bcr patches
-        run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
   list-examples:
     runs-on: ubuntu-latest
     outputs:
@@ -30,6 +24,8 @@ jobs:
       test-matrix: ${{ steps.set-test-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v5
+      - name: Verify bcr patches
+        run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
       - name: Generate Matrices
         id: set-format-matrix
         run: |
@@ -46,7 +42,6 @@ jobs:
           echo "Generated test matrix: $folders"
   format:
     needs: list-examples
-
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -57,7 +52,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.15.0
       # Permit this gross non-hermetic dependency
       - if: matrix.folder == 'examples/cpp'
-        run: sudo apt-get update && sudo apt-get install -y libtinfo5
+        run: sudo apt-get update && sudo apt-get install -y libtinfo6
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
   integration-test:

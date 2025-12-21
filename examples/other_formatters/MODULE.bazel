@@ -20,7 +20,7 @@ use_repo(npm, "npm")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
-    name = "pip",
+    hub_name = "pip",
     requirements_lock = "//:requirements.txt",
 )
 use_repo(pip, "pip")
