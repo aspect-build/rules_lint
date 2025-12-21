@@ -115,8 +115,9 @@ jobs:
       - name: Lint
         working-directory: ${{ matrix.folder }}
         run: |
+          bazel build --config=lint --output_groups=rules_lint_human //...
+
           bazel build --config=lint \
-            --output_groups=rules_lint_human \
             --output_groups=rules_lint_patch \
             --@aspect_rules_lint//lint:fix \
             //...
