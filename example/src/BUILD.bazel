@@ -28,18 +28,6 @@ filegroup(
     tags = ["markdown"],
 )
 
-filegroup(
-    name = "yaml_docs",
-    srcs = ["config.yaml"],
-    tags = ["lint-with-yamllint"],
-)
-
-filegroup(
-    name = "toml",
-    srcs = ["hello.toml"],
-    tags = ["toml"],
-)
-
 ts_project(
     name = "ts_dep",
     srcs = ["file-dep.ts"],

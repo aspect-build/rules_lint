@@ -1,0 +1,5 @@
+axl_local_dep(
+    name = "rules_lint",
+    path = "../..",
+    auto_use_tasks = True,
+)

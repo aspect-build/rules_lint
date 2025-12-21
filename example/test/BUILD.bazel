@@ -16,6 +16,7 @@ load(
     "stylelint_test",
     "ty_test",
 )
+# Note: rubocop_test and standardrb_test are defined in linters.bzl but not used here
 
 write_file(
     name = "ts_code_generator",

@@ -1,0 +1,11 @@
+extends: default
+
+rules:
+  document-start:
+    level: error
+    present: true
+  truthy:
+    allowed-values:
+      - "yes"
+      - "no"
+

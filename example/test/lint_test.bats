@@ -64,12 +64,6 @@ EOF
 	refute_output --partial '@typescript-eslint/no-unsafe-call'
 	refute_output --partial '@typescript-eslint/no-unsafe-member-access'
 
-	# yamllint
-	echo <<"EOF" | assert_output --partial
-src/config.yaml
-  1:1       error    missing document start "---"  (document-start)
-EOF
-
 	# Vale
 	echo <<"EOF" | assert_output --partial
 3:47  warning  Try to avoid using              Google.We
