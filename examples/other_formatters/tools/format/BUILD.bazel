@@ -25,7 +25,7 @@ format_multirun(
     gherkin = ":prettier",
     graphql = ":prettier",
     html_jinja = ":djlint",
-    json5 = ":prettier",
+    javascript = ":prettier",  # javascript includes JSON, JSON5, TypeScript, TSX, and Vue
     jsonnet = "@aspect_rules_lint//format:jsonnetfmt",
     starlark = "@buildifier_prebuilt//:buildifier",
     visibility = ["//:__subpackages__"],

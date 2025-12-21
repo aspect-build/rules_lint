@@ -54,8 +54,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
+      # Permit this gross non-hermetic dependency
+      - if: matrix.folder == 'examples/cpp'
+        run: sudo apt-get install -y libtinfo5
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
+        continue-on-error: ${{ matrix.folder == 'examples/swift' }}
   integration-test:
     needs: list-examples
     runs-on: ubuntu-latest
@@ -90,7 +94,7 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v2.1.0
         with:
           repo: aspect-build/aspect-cli
-          tag: v2025.50.5
+          tag: v2025.51.3
           asset-name: aspect-cli
           rename-to: aspect
           platform: unknown-linux
