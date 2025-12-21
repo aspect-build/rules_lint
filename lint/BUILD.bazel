@@ -151,8 +151,9 @@ bzl_library(
     srcs = ["eslint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@bazel_lib//lib:copy_to_bin",
+        "//lint/private:patcher_action",
         "@aspect_rules_js//js:libs",
+        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 
@@ -177,7 +178,10 @@ bzl_library(
 bzl_library(
     name = "keep_sorted",
     srcs = ["keep_sorted.bzl"],
-    deps = ["//lint/private:lint_aspect"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
+    ],
 )
 
 bzl_library(
@@ -207,13 +211,19 @@ bzl_library(
 bzl_library(
     name = "rubocop",
     srcs = ["rubocop.bzl"],
-    deps = ["//lint/private:lint_aspect"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
+    ],
 )
 
 bzl_library(
     name = "standardrb",
     srcs = ["standardrb.bzl"],
-    deps = ["//lint/private:lint_aspect"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
+    ],
 )
 
 bzl_library(
@@ -222,6 +232,7 @@ bzl_library(
     deps = _BAZEL_TOOLS + [
         ":ruff_versions",
         "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
         "@bazel_skylib//lib:versions",
     ],
 )
@@ -246,8 +257,9 @@ bzl_library(
     srcs = ["stylelint.bzl"],
     deps = [
         "//lint/private:lint_aspect",
-        "@bazel_lib//lib:copy_to_bin",
+        "//lint/private:patcher_action",
         "@aspect_rules_js//js:libs",
+        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 
@@ -287,6 +299,7 @@ bzl_library(
     srcs = ["clang_tidy.bzl"],
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
         "@bazel_skylib//lib:dicts",
         "@bazel_tools//tools/build_defs/cc:action_names.bzl",
         "@bazel_tools//tools/cpp:toolchain_utils.bzl",

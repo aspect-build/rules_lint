@@ -161,11 +161,6 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
                 executable = True,
                 cfg = "exec",
             ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
-                executable = True,
-                cfg = "exec",
-            ),
             "_config_file": attr.label(
                 default = config,
                 allow_files = True,

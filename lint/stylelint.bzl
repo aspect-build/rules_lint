@@ -37,9 +37,10 @@ stylelint = lint_stylelint_aspect(
 Finally, register the aspect with your linting workflow, such as in `.aspect/cli/config.yaml` for `aspect lint`.
 """
 
-load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
+load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintStylelint"
 
@@ -67,7 +68,7 @@ def _gather_inputs(ctx, srcs, files = []):
         )
     return depset(inputs, transitive = [js_inputs])
 
-def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, options = [], format = None):
+def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, options = [], format = None, patch = None):
     """Spawn stylelint as a Bazel action
 
     Args:
@@ -85,89 +86,66 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
         env: environment variables for stylelint
         options: additional command-line arguments
         format: a formatter to add as a command line argument
+        patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
-    outputs = [stderr]
-
-    # Wire command-line options, see https://stylelint.io/user-guide/cli#options
-    args = ctx.actions.args()
-    args.add_all(options)
-    args.add_all(srcs)
-
-    if exit_code:
-        command = "{stylelint} $@ 2>{stderr}; echo $? >" + exit_code.path
-        outputs.append(exit_code)
-    else:
-        # Create empty file on success, as Bazel expects one
-        command = "{stylelint} $@ && touch {stderr}"
-
     file_inputs = []
+    format_args = []
     if type(format) == "string":
-        args.add_all(["--formatter", format])
+        format_args = ["--formatter", format]
     elif format != None:
-        args.add_all(["--custom-formatter", "../../../" + format.files.to_list()[0].path])
+        format_args = ["--custom-formatter", "../../../" + format.files.to_list()[0].path]
         file_inputs.append(format)
 
-    ctx.actions.run_shell(
-        inputs = _gather_inputs(ctx, srcs, file_inputs),
-        outputs = outputs,
-        command = command.format(stylelint = executable._stylelint.path, stderr = stderr.path),
-        arguments = [args],
-        mnemonic = _MNEMONIC,
-        env = dict(env, **{
-            "BAZEL_BINDIR": ctx.bin_dir.path,
-        }),
-        progress_message = "Linting %{label} with Stylelint",
-        tools = [executable._stylelint],
-    )
+    if patch != None:
+        # Use run_patcher for fix mode
+        args_list = ["--fix"] + list(options) + format_args + [s.short_path for s in srcs]
+        run_patcher(
+            ctx,
+            executable,
+            inputs = _gather_inputs(ctx, srcs, file_inputs),
+            args = args_list,
+            files_to_diff = [s.path for s in srcs],
+            patch_out = patch,
+            tools = [executable._stylelint],
+            patch_cfg_env = {"BAZEL_BINDIR": ctx.bin_dir.path},
+            stdout = stderr,
+            stderr = stderr,
+            exit_code = exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Linting %{label} with Stylelint",
+        )
+    else:
+        # Use run_shell for lint mode
+        outputs = [stderr]
+        args = ctx.actions.args()
+        args.add_all(options)
+        args.add_all(srcs)
 
-def stylelint_fix(ctx, executable, srcs, patch, stderr, exit_code, env = {}, options = []):
-    """Create a Bazel Action that spawns stylelint with --fix.
+        if exit_code:
+            command = "{stylelint} $@ 2>{stderr}; echo $? >" + exit_code.path
+            outputs.append(exit_code)
+        else:
+            # Create empty file on success, as Bazel expects one
+            command = "{stylelint} $@ && touch {stderr}"
 
-    Args:
-        ctx: an action context OR aspect context
-        executable: struct with a _stylelint field
-        srcs: list of file objects to lint
-        patch: output file containing the applied fixes that can be applied with the patch(1) command.
-        stderr: output file containing the stderr or --output-file of stylelint
-        exit_code: output file containing the exit code of stylelint
-        env: environment variables for stylelint
-        options: additional command line options
-    """
-    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
-    args = ["--fix"]
-    args.extend(options)
-    args.extend([s.short_path for s in srcs])
+        if type(format) == "string":
+            args.add_all(["--formatter", format])
+        elif format != None:
+            args.add_all(["--custom-formatter", "../../../" + format.files.to_list()[0].path])
+            file_inputs.append(format)
 
-    ctx.actions.write(
-        output = patch_cfg,
-        content = json.encode({
-            "linter": executable._stylelint.path,
-            "args": args,
-            "env": dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
-            "files_to_diff": [s.path for s in srcs],
-            "output": patch.path,
-        }),
-    )
-
-    ctx.actions.run(
-        inputs = depset([patch_cfg], transitive = [_gather_inputs(ctx, srcs)]),
-        outputs = [patch, stderr, exit_code],
-        executable = executable._patcher,
-        arguments = [patch_cfg.path],
-        env = dict(env, **{
-            "BAZEL_BINDIR": ".",
-            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
-            "JS_BINARY__STDERR_OUTPUT_FILE": stderr.path,
-            # Capture stylelint's stdout output so the Bazel action
-            # always produces a file (even on exit 0).
-            # Similar to what Eslint currently does.
-            "JS_BINARY__STDOUT_OUTPUT_FILE": stderr.path,
-            "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        }),
-        tools = [executable._stylelint],
-        mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with Stylelint",
-    )
+        ctx.actions.run_shell(
+            inputs = _gather_inputs(ctx, srcs, file_inputs),
+            outputs = outputs,
+            command = command.format(stylelint = executable._stylelint.path, stderr = stderr.path),
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+            env = dict(env, **{
+                "BAZEL_BINDIR": ctx.bin_dir.path,
+            }),
+            progress_message = "Linting %{label} with Stylelint",
+            tools = [executable._stylelint],
+        )
 
 # buildifier: disable=function-docstring
 def _stylelint_aspect_impl(target, ctx):
@@ -183,11 +161,15 @@ def _stylelint_aspect_impl(target, ctx):
     # https://stylelint.io/user-guide/cli#--color---no-color
     color_options = ["--color"] if ctx.attr._options[LintOptionsInfo].color else ["--no-color"]
 
-    # stylelint can produce a patch file at the same time it reports the unpatched violations
-    if hasattr(outputs, "patch"):
-        stylelint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, options = color_options)
-    else:
-        stylelint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, options = color_options)
+    stylelint_action(
+        ctx,
+        ctx.executable,
+        files_to_lint,
+        outputs.human.out,
+        outputs.human.exit_code,
+        options = color_options,
+        patch = getattr(outputs, "patch", None),
+    )
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
 
@@ -216,7 +198,7 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
 
     return aspect(
         implementation = _stylelint_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
@@ -233,11 +215,6 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
             "_compact_formatter": attr.label(
                 default = "@aspect_rules_lint//lint:stylelint.compact-formatter",
                 allow_single_file = True,
-                cfg = "exec",
-            ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
-                executable = True,
                 cfg = "exec",
             ),
             "_filegroup_tags": attr.string_list(

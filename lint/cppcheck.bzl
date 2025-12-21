@@ -187,11 +187,6 @@ def lint_cppcheck_aspect(binary, verbose = False):
                 executable = True,
                 cfg = "exec",
             ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
-                executable = True,
-                cfg = "exec",
-            ),
             "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
         },
         toolchains = [

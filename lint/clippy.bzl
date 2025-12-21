@@ -67,6 +67,9 @@ def _marker_to_exit_code(ctx, marker, output, exit_code):
         marker (File): A file that will only exist if the action has succeeded
         exit_code (File): A file that will be written with the exit code 0 if marker exists
     """
+    if not exit_code:
+        # fail_on_violation is enabled, we don't have an exit_code file.
+        return
     ctx.actions.run_shell(
         outputs = [exit_code],
         inputs = [marker, output],
