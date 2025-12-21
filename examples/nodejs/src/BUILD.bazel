@@ -23,6 +23,18 @@ filegroup(
 )
 
 filegroup(
+    name = "less",
+    srcs = ["hello.less"],
+    tags = ["lint-with-stylelint"],
+)
+
+filegroup(
+    name = "scss",
+    srcs = ["hello.scss"],
+    tags = ["lint-with-stylelint"],
+)
+
+filegroup(
     name = "md",
     srcs = ["README.md"],
     tags = ["markdown"],

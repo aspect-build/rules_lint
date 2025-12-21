@@ -1,12 +1,12 @@
 # Node.js Formatting and Linting Example
 
-This example demonstrates how to set up formatting and linting for Node.js ecosystem files (JavaScript, TypeScript, Vue, CSS, HTML, Markdown) using `rules_lint`.
+This example demonstrates how to set up formatting and linting for Node.js ecosystem files (JavaScript, TypeScript, Vue, CSS, LESS, SCSS, HTML, Markdown) using `rules_lint`.
 
 ## Supported Tools
 
 ### Formatters
 
-- **Prettier** - Code formatter for JavaScript, TypeScript, CSS, HTML, and Markdown
+- **Prettier** - Code formatter for JavaScript, TypeScript, CSS, LESS, SCSS, HTML, and Markdown
 
 ### Linters
 
@@ -74,6 +74,8 @@ The `src/` directory contains example files with intentional violations:
 - `hello.tsx` - React TypeScript file
 - `hello.vue` - Vue component
 - `hello.css`, `clean.css` - CSS files (one with violations, one clean)
+- `hello.less` - LESS file (CSS preprocessor)
+- `hello.scss` - SCSS file (SASS CSS preprocessor)
 - `index.html` - HTML file
 - `README.md` - Markdown file with Vale violations
 

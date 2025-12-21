@@ -65,6 +65,8 @@ The `src/` directory contains example Python files with intentional violations:
 ## Configuration Files
 
 - `.ruff.toml` - Ruff configuration
+- `src/ruff.toml` - Local Ruff configuration for src directory
+- `src/subdir/ruff.toml` - Path-based Ruff configuration that ignores F401 (unused imports) in subdirectory
 - `.pylintrc` - Pylint configuration
 - `.flake8` - Flake8 configuration
 - `ty.toml` - Ty type checker configuration

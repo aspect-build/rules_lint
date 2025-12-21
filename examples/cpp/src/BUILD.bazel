@@ -10,6 +10,7 @@ cc_binary(
 filegroup(
     name = "all",
     srcs = [
+        "hello.cu",
         ":hello_cc",
         "//src/cpp/main:hello-world",
     ],

@@ -13,10 +13,9 @@ load(
     "pmd_test",
     "pylint_test",
     "ruff_test",
-    "stylelint_test",
     "ty_test",
 )
-# Note: rubocop_test and standardrb_test are defined in linters.bzl but not used here
+# Note: rubocop_test, standardrb_test, and stylelint_test are defined in linters.bzl but not used here
 
 write_file(
     name = "ts_code_generator",
@@ -166,26 +165,8 @@ checkstyle_test(
     tags = ["manual"],
 )
 
-eslint_test(
-    name = "eslint",
-    # NB: we must lint the `ts_typings` target that has the .ts files in srcs,
-    # not "//src:ts" which is just a js_library re-export.
-    # For end users it's not obvious that you have to "see inside" the macro to know
-    # which ts_project output target to lint.
-    # See https://github.com/aspect-build/rules_lint/issues/369
-    srcs = ["//src:ts_typings"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
-)
-
 format_test(
     name = "format_test_manual",
     srcs = [":generated_sh"],
     tags = ["manual"],
-)
-
-stylelint_test(
-    name = "stylelint_no_violations",
-    srcs = ["//src:clean_css"],
 )

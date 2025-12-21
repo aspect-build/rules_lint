@@ -1,0 +1,105 @@
+lockfileVersion: "9.0"
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+  .:
+    dependencies:
+      prettier:
+        specifier: ^3.0.0
+        version: 3.7.4
+      prettier-plugin-gherkin:
+        specifier: ^1.0.0
+        version: 1.1.1
+
+packages:
+  "@cucumber/gherkin@24.1.0":
+    resolution:
+      {
+        integrity: sha512-B48XrUod4y3SoXe6mv12q7U1zThUNSK3yHSm/hBJCJZ6RJUJhFk3FVMN/83qOEbsYZe6iG9v+4L1Myf8/q8C6g==,
+      }
+
+  "@cucumber/messages@19.1.4":
+    resolution:
+      {
+        integrity: sha512-Pksl0pnDz2l1+L5Ug85NlG6LWrrklN9qkMxN5Mv+1XZ3T6u580dnE6mVaxjJRdcOq4tR17Pc0RqIDZMyVY1FlA==,
+      }
+
+  "@types/uuid@8.3.4":
+    resolution:
+      {
+        integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==,
+      }
+
+  class-transformer@0.5.1:
+    resolution:
+      {
+        integrity: sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw==,
+      }
+
+  prettier-plugin-gherkin@1.1.1:
+    resolution:
+      {
+        integrity: sha512-mOV7Us8mtR8NubLfObPWwUFX9ly5R6tTXZoIgY+Vem9b66aZ6avdWSFE14lKHPr72G3qwlL3mUHtBZfc4Isbew==,
+      }
+
+  prettier@2.8.8:
+    resolution:
+      {
+        integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==,
+      }
+    engines: { node: ">=10.13.0" }
+    hasBin: true
+
+  prettier@3.7.4:
+    resolution:
+      {
+        integrity: sha512-v6UNi1+3hSlVvv8fSaoUbggEM5VErKmmpGA7Pl3HF8V6uKY7rvClBOJlH6yNwQtfTueNkGVpOv/mtWL9L4bgRA==,
+      }
+    engines: { node: ">=14" }
+    hasBin: true
+
+  reflect-metadata@0.1.13:
+    resolution:
+      {
+        integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==,
+      }
+
+  uuid@9.0.0:
+    resolution:
+      {
+        integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==,
+      }
+    hasBin: true
+
+snapshots:
+  "@cucumber/gherkin@24.1.0":
+    dependencies:
+      "@cucumber/messages": 19.1.4
+
+  "@cucumber/messages@19.1.4":
+    dependencies:
+      "@types/uuid": 8.3.4
+      class-transformer: 0.5.1
+      reflect-metadata: 0.1.13
+      uuid: 9.0.0
+
+  "@types/uuid@8.3.4": {}
+
+  class-transformer@0.5.1: {}
+
+  prettier-plugin-gherkin@1.1.1:
+    dependencies:
+      "@cucumber/gherkin": 24.1.0
+      "@cucumber/messages": 19.1.4
+      prettier: 2.8.8
+
+  prettier@2.8.8: {}
+
+  prettier@3.7.4: {}
+
+  reflect-metadata@0.1.13: {}
+
+  uuid@9.0.0: {}

@@ -11,3 +11,4 @@ people: [...#Person] & [
 {name: "Alice",age: 30},
 {name: "Bob",age: 25,email: "bob@example.com"},
 ]
+

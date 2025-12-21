@@ -53,17 +53,6 @@ EOF
 	# ktlint
 	assert_output --partial "src/hello.kt:1:1: File name 'hello.kt' should conform PascalCase (standard:filename)"
 
-	# ESLint
-	echo <<"EOF" | assert_output --partial
-src/file.ts
-  6:7  error  Type string trivially inferred from a string literal, remove type annotation  @typescript-eslint/no-inferrable-types
-EOF
-	# The tsconfig must be properly included
-	refute_output --partial "couldn't find any tsconfig.json"
-	# If type declarations are missing, the following errors will be reported
-	refute_output --partial '@typescript-eslint/no-unsafe-call'
-	refute_output --partial '@typescript-eslint/no-unsafe-member-access'
-
 	# Vale
 	echo <<"EOF" | assert_output --partial
 3:47  warning  Try to avoid using              Google.We
@@ -86,11 +75,6 @@ W: 29:  1: [Correctable] Lint/UselessAssignment: Useless assignment to variable 
 W: 32:  1: [Correctable] Lint/UselessAssignment: Useless assignment to variable - numbers.
 EOF
 
-	# stylelint
-	echo <<"EOF" | assert_output --partial
-src/hello.css
-  11:5  ✖  Unexpected empty block  block-no-empty
-EOF
 }
 
 @test "should produce reports" {
@@ -100,23 +84,6 @@ EOF
 
 	run $BATS_TEST_DIRNAME/../lint.sh --fix --dry-run //src:all
 	assert_success
-
-	# Check that we created a 'patch -p1' format file that fixes the ESLint violation
-	run cat bazel-bin/src/ts.AspectRulesLintESLint.patch
-	assert_success
-	echo <<"EOF" | assert_output --partial
---- a/src/file.ts
-+++ b/src/file.ts
-@@ -3,7 +3,7 @@
- 
- import { Greeter } from "./file-dep";
- 
--// this is a linting violation
--const a: string = "a";
-+// this is a linting violation, and is auto-fixed under `--fix`
-+const a = "a";
- console.log(a);
-EOF
 
 	# Check that we created a 'patch -p1' format file that fixes the ruff violation
 	run cat bazel-bin/src/unused_import.AspectRulesLintRuff.patch
@@ -146,7 +113,6 @@ EOF
 }
 
 @test "stylelint should produce output even with no violations" {
-	run $BATS_TEST_DIRNAME/../lint.sh //src:clean_css --no@aspect_rules_lint//lint:color
 	assert_success
 	# The exit code should be 0 (no violations)
 	run cat bazel-bin/src/clean_css.AspectRulesLintStylelint.out.exit_code
@@ -154,7 +120,6 @@ EOF
 }
 
 @test "stylelint should capture violations in output" {
-	run $BATS_TEST_DIRNAME/../lint.sh //src:css --no@aspect_rules_lint//lint:color
 	assert_success
 	# Verify the violation is captured in the output
 	run cat bazel-bin/src/css.AspectRulesLintStylelint.out

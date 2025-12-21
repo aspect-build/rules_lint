@@ -25,6 +25,7 @@ ruff = lint_ruff_aspect(
     configs = [
         Label("@//:.ruff.toml"),
         Label("@//src:ruff.toml"),
+        Label("@//src/subdir:ruff.toml"),
     ],
 )
 

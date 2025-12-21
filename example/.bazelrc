@@ -1,8 +1,0 @@
-import %workspace%/../tools/preset.bazelrc
-import %workspace%/tools/java21.bazelrc
-
-# Automatically apply --config=linux, --config=windows etc
-common --enable_platform_specific_config
-
-# enable symlinks on windows
-startup --windows_enable_symlinks

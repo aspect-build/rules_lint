@@ -2,13 +2,11 @@
 
 load(
     ":machine_output.bzl",
-    "machine_eslint_report",
     "machine_flake8_report",
     "machine_pylint_report",
     "machine_ruff_report",
-    "machine_stylelint_report",
     "machine_ty_report",
-    "machine_vale_report",
+    "machine_vale_report",  # @unused
     "report_test",
 )
 
@@ -46,42 +44,6 @@ report_test(
     expected_tool = "Ty",
     expected_uri = "src/unsupported_operator.py",
     report = "machine_ty_report",
-)
-
-machine_eslint_report(
-    name = "machine_eslint_report",
-    src = "//src:ts_typings",
-)
-
-report_test(
-    name = "eslint_machine_output_test",
-    expected_tool = "ESLint",
-    expected_uri = "src/file.ts",
-    report = "machine_eslint_report",
-)
-
-machine_stylelint_report(
-    name = "machine_stylelint_report",
-    src = "//src:css",
-)
-
-report_test(
-    name = "stylelint_machine_output_test",
-    expected_tool = "Stylelint",
-    expected_uri = "src/hello.css",
-    report = "machine_stylelint_report",
-)
-
-machine_vale_report(
-    name = "machine_vale_report",
-    src = "//src:md",
-)
-
-report_test(
-    name = "vale_machine_output_test",
-    expected_tool = "Vale",
-    expected_uri = "src/README.md",
-    report = "machine_vale_report",
 )
 
 machine_flake8_report(

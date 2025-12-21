@@ -22,8 +22,6 @@ exports_files(
         ".rubocop.yml",
         ".standard.yml",
         ".scalafmt.conf",
-        ".swcrc",
-        ".vale.ini",
         ".yamllint",
         ".editorconfig",
         "ktlint-baseline.xml",
@@ -54,7 +52,6 @@ js_library(
     srcs = ["prettier.config.cjs"],
     deps = [
         ":node_modules/@prettier/plugin-xml",
-        ":node_modules/prettier-plugin-gherkin",
         ":node_modules/prettier-plugin-sql",
     ],
 )

@@ -6,7 +6,7 @@ This example demonstrates how to set up formatting and linting for C++ code usin
 
 ### Formatters
 
-- **clang-format** - C++ code formatter
+- **clang-format** - C++ and CUDA code formatter
 
 ### Linters
 
@@ -57,6 +57,7 @@ bazel run //tools/format -- src:all
 The `src/` directory contains example C++ files with intentional violations:
 
 - `hello.cpp` - Contains clang-tidy violations (atoi usage, system calls, memory issues)
+- `hello.cu` - CUDA file (formatted with clang-format)
 - `src/cpp/` - More complex C++ project structure with libraries and binaries
 
 ## Configuration Files
