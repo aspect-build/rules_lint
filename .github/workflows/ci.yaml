@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
-        with:
+        with: &bazelrc
           bazelrc: |
             common --show_progress_rate_limit=60
             common --show_timestamps
@@ -100,6 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
+        with: *bazelrc
       - name: Install Aspect CLI
         uses: jaxxstorm/action-install-gh-release@v2.1.0
         with:

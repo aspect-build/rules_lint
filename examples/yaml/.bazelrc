@@ -1,1 +1,1 @@
-common:lint --aspects=//tools/lint:linters.bzl%yamllint
+build:lint --aspects=//tools/lint:linters.bzl%yamllint

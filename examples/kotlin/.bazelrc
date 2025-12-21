@@ -1,2 +1,2 @@
 import %workspace%/../java/tools/java21.bazelrc
-common:lint --aspects=//tools/lint:linters.bzl%ktlint
+build:lint --aspects=//tools/lint:linters.bzl%ktlint
