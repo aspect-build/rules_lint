@@ -45,6 +45,7 @@ jobs:
           - examples/java
           - examples/python
           - examples/ruby
+          - examples/kotlin
     steps:
       - uses: actions/checkout@v4
       - name: Setup bats

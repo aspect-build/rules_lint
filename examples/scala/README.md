@@ -49,14 +49,14 @@ With Aspect CLI:
 
 ```bash
 # Format code
-bazel format //src:all
+aspect format
 ```
 
 Without Aspect CLI:
 
 ```bash
 # Format code
-bazel run //tools/format -- src:all
+bazel run //tools/format
 ```
 
 ## Example Code
