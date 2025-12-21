@@ -1,0 +1,47 @@
+"Bazel dependencies for Node.js formatting and linting example"
+
+bazel_dep(name = "aspect_rules_lint")
+bazel_dep(name = "aspect_rules_js", version = "2.0.0")
+bazel_dep(name = "aspect_rules_swc", version = "2.0.0")
+bazel_dep(name = "aspect_rules_ts", version = "3.0.0")
+bazel_dep(name = "bazel_features", version = "1.29.0")
+bazel_dep(name = "bazel_lib", version = "3.0.0")
+bazel_dep(name = "bazel_skylib", version = "1.4.2")
+
+local_path_override(
+    module_name = "aspect_rules_lint",
+    path = "../..",
+)
+
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
+npm.npm_translate_lock(
+    name = "npm",
+    pnpm_lock = "//:pnpm-lock.yaml",
+    public_hoist_packages = {
+        "typescript-eslint": [""],
+    },
+)
+use_repo(npm, "npm")
+
+rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
+rules_ts_ext.deps()
+use_repo(rules_ts_ext, "npm_typescript")
+
+lint_tools = use_extension("@aspect_rules_lint//lint:extensions.bzl", "tools")
+lint_tools.vale()
+lint_tools.vale_styles(
+    styles = [
+        "Google",
+        "write-good",
+    ],
+)
+use_repo(
+    lint_tools,
+    "vale_Google",
+    "vale_Linux_64-bit",
+    "vale_Linux_arm64",
+    "vale_Windows_64-bit",
+    "vale_macOS_64-bit",
+    "vale_macOS_arm64",
+    "vale_write-good",
+)
