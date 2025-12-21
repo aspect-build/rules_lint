@@ -1,0 +1,4 @@
+common:lint --aspects=//tools/lint:linters.bzl%ruff
+common:lint --aspects=//tools/lint:linters.bzl%flake8
+common:lint --aspects=//tools/lint:linters.bzl%pylint
+common:lint --aspects=//tools/lint:linters.bzl%ty

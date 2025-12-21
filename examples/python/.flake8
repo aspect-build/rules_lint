@@ -1,0 +1,5 @@
+[flake8]
+extend-ignore = E203
+exclude = external,bazel-out
+max-complexity = 10
+max-line-length = 100
