@@ -68,7 +68,7 @@ def _gather_inputs(ctx, srcs, files = []):
         )
     return depset(inputs, transitive = [js_inputs])
 
-def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, options = [], format = None):
+def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, options = [], format = None, patch = None):
     """Spawn stylelint as a Bazel action
 
     Args:
@@ -86,40 +86,67 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
         env: environment variables for stylelint
         options: additional command-line arguments
         format: a formatter to add as a command line argument
+        patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
-    outputs = [stderr]
-
-    # Wire command-line options, see https://stylelint.io/user-guide/cli#options
-    args = ctx.actions.args()
-    args.add_all(options)
-    args.add_all(srcs)
-
-    if exit_code:
-        command = "{stylelint} $@ 2>{stderr}; echo $? >" + exit_code.path
-        outputs.append(exit_code)
-    else:
-        # Create empty file on success, as Bazel expects one
-        command = "{stylelint} $@ && touch {stderr}"
-
     file_inputs = []
+    args_list = list(options)
     if type(format) == "string":
-        args.add_all(["--formatter", format])
+        args_list.extend(["--formatter", format])
     elif format != None:
-        args.add_all(["--custom-formatter", "../../../" + format.files.to_list()[0].path])
+        args_list.extend(["--custom-formatter", "../../../" + format.files.to_list()[0].path])
         file_inputs.append(format)
+    args_list.extend([s.short_path for s in srcs])
 
-    ctx.actions.run_shell(
-        inputs = _gather_inputs(ctx, srcs, file_inputs),
-        outputs = outputs,
-        command = command.format(stylelint = executable._stylelint.path, stderr = stderr.path),
-        arguments = [args],
-        mnemonic = _MNEMONIC,
-        env = dict(env, **{
-            "BAZEL_BINDIR": ctx.bin_dir.path,
-        }),
-        progress_message = "Linting %{label} with Stylelint",
-        tools = [executable._stylelint],
-    )
+    if patch != None:
+        # Use run_patcher for fix mode
+        args_list = ["--fix"] + args_list
+        run_patcher(
+            ctx,
+            executable,
+            inputs = _gather_inputs(ctx, srcs, file_inputs),
+            args = args_list,
+            files_to_diff = [s.path for s in srcs],
+            patch_out = patch,
+            tools = [executable._stylelint],
+            patch_cfg_env = {"BAZEL_BINDIR": ctx.bin_dir.path},
+            stdout = stderr,
+            stderr = stderr,
+            exit_code = exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Linting %{label} with Stylelint",
+        )
+    else:
+        # Use run_shell for lint mode
+        outputs = [stderr]
+        args = ctx.actions.args()
+        args.add_all(options)
+        args.add_all(srcs)
+
+        if exit_code:
+            command = "{stylelint} $@ 2>{stderr}; echo $? >" + exit_code.path
+            outputs.append(exit_code)
+        else:
+            # Create empty file on success, as Bazel expects one
+            command = "{stylelint} $@ && touch {stderr}"
+
+        if type(format) == "string":
+            args.add_all(["--formatter", format])
+        elif format != None:
+            args.add_all(["--custom-formatter", "../../../" + format.files.to_list()[0].path])
+            file_inputs.append(format)
+
+        ctx.actions.run_shell(
+            inputs = _gather_inputs(ctx, srcs, file_inputs),
+            outputs = outputs,
+            command = command.format(stylelint = executable._stylelint.path, stderr = stderr.path),
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+            env = dict(env, **{
+                "BAZEL_BINDIR": ctx.bin_dir.path,
+            }),
+            progress_message = "Linting %{label} with Stylelint",
+            tools = [executable._stylelint],
+        )
 
 # buildifier: disable=function-docstring
 def _stylelint_aspect_impl(target, ctx):
@@ -135,29 +162,15 @@ def _stylelint_aspect_impl(target, ctx):
     # https://stylelint.io/user-guide/cli#--color---no-color
     color_options = ["--color"] if ctx.attr._options[LintOptionsInfo].color else ["--no-color"]
 
-    # stylelint can produce a patch file at the same time it reports the unpatched violations
-    if hasattr(outputs, "patch"):
-        stylelint_fix_args = ["--fix"] + color_options + [s.short_path for s in files_to_lint]
-        run_patcher(
-            ctx,
-            ctx.executable,
-            inputs = _gather_inputs(ctx, files_to_lint),
-            args = stylelint_fix_args,
-            files_to_diff = [s.path for s in files_to_lint],
-            patch_out = outputs.patch,
-            tools = [ctx.executable._stylelint],
-            patch_cfg_env = {"BAZEL_BINDIR": ctx.bin_dir.path},
-            # Capture stylelint's stdout output so the Bazel action
-            # always produces a file (even on exit 0).
-            # Similar to what Eslint currently does.
-            stdout = outputs.human.out,
-            stderr = outputs.human.out,
-            exit_code = outputs.human.exit_code,
-            mnemonic = _MNEMONIC,
-            progress_message = "Linting %{label} with Stylelint",
-        )
-    else:
-        stylelint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, options = color_options)
+    stylelint_action(
+        ctx,
+        ctx.executable,
+        files_to_lint,
+        outputs.human.out,
+        outputs.human.exit_code,
+        options = color_options,
+        patch = getattr(outputs, "patch", None),
+    )
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
 

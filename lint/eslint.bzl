@@ -90,7 +90,7 @@ def _gather_inputs(ctx, srcs, files):
         )
     return depset(inputs, transitive = [js_inputs])
 
-def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "stylish", env = {}):
+def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "stylish", env = {}, patch = None):
     """Create a Bazel Action that spawns an eslint process.
 
     Adapter for wrapping Bazel around
@@ -105,50 +105,78 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
             If None, then fail the build when eslint exits non-zero.
         format: value for eslint `--format` CLI flag
         env: environment variables for eslint
+        patch: output file for patch (optional). If provided, uses run_patcher instead of run/run_shell.
     """
-
-    args = ctx.actions.args()
-    args.add("--no-warn-ignored")
     file_inputs = [ctx.attr._workaround_17660]
-
+    eslint_args = ["--fix"] if patch != None else ["--no-warn-ignored"]
     if ctx.attr._options[LintOptionsInfo].debug:
-        args.add("--debug")
+        eslint_args.append("--debug")
     if type(format) == "string":
-        args.add_all(["--format", format])
+        eslint_args.extend(["--format", format])
     else:
-        args.add_all(["--format", "../../../" + format.files.to_list()[0].path])
+        eslint_args.extend(["--format", "../../../" + format.files.to_list()[0].path])
         file_inputs.append(format)
-    args.add_all([s.short_path for s in srcs])
+    eslint_args.extend([s.short_path for s in srcs])
 
-    if not exit_code:
-        ctx.actions.run_shell(
+    if patch != None:
+        # Use run_patcher for fix mode
+        run_patcher(
+            ctx,
+            executable,
             inputs = _gather_inputs(ctx, srcs, file_inputs),
-            outputs = [stdout],
+            args = eslint_args,
+            files_to_diff = [s.path for s in srcs],
+            patch_out = patch,
             tools = [executable._eslint],
-            arguments = [args],
-            command = executable._eslint.path + " $@ && touch " + stdout.path,
-            env = dict(env, **{
-                "BAZEL_BINDIR": ctx.bin_dir.path,
-            }),
+            patch_cfg_env = dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
+            stdout = stdout,
+            exit_code = exit_code,
+            env = env,
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with ESLint",
         )
     else:
-        # Workaround: create an empty file in case eslint doesn't write one
-        # Use `../../..` to return to the execroot?
-        args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
+        # Use run/run_shell for lint mode
+        args = ctx.actions.args()
+        args.add("--no-warn-ignored")
+        if ctx.attr._options[LintOptionsInfo].debug:
+            args.add("--debug")
+        if type(format) == "string":
+            args.add_all(["--format", format])
+        else:
+            args.add_all(["--format", "../../../" + format.files.to_list()[0].path])
+            file_inputs.append(format)
+        args.add_all([s.short_path for s in srcs])
 
-        args.add_all(["--output-file", stdout.short_path])
+        if not exit_code:
+            ctx.actions.run_shell(
+                inputs = _gather_inputs(ctx, srcs, file_inputs),
+                outputs = [stdout],
+                tools = [executable._eslint],
+                arguments = [args],
+                command = executable._eslint.path + " $@ && touch " + stdout.path,
+                env = dict(env, **{
+                    "BAZEL_BINDIR": ctx.bin_dir.path,
+                }),
+                mnemonic = _MNEMONIC,
+                progress_message = "Linting %{label} with ESLint",
+            )
+        else:
+            # Workaround: create an empty file in case eslint doesn't write one
+            # Use `../../..` to return to the execroot?
+            args.add_joined(["--node_options", "--require", "../../../" + ctx.file._workaround_17660.path], join_with = "=")
 
-        ctx.actions.run(
-            inputs = _gather_inputs(ctx, srcs, file_inputs),
-            outputs = [stdout, exit_code],
-            executable = executable._eslint,
-            arguments = [args],
-            env = env | {"BAZEL_BINDIR": ctx.bin_dir.path} | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
-            mnemonic = _MNEMONIC,
-            progress_message = "Linting %{label} with ESLint",
-        )
+            args.add_all(["--output-file", stdout.short_path])
+
+            ctx.actions.run(
+                inputs = _gather_inputs(ctx, srcs, file_inputs),
+                outputs = [stdout, exit_code],
+                executable = executable._eslint,
+                arguments = [args],
+                env = env | {"BAZEL_BINDIR": ctx.bin_dir.path} | {"JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path} if exit_code else {},
+                mnemonic = _MNEMONIC,
+                progress_message = "Linting %{label} with ESLint",
+            )
 
 # buildifier: disable=function-docstring
 def _eslint_aspect_impl(target, ctx):
@@ -169,33 +197,16 @@ def _eslint_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    # eslint can produce a patch file at the same time it reports the unpatched violations
-    if hasattr(outputs, "patch"):
-        file_inputs = [ctx.attr._workaround_17660]
-        eslint_fix_args = ["--fix"]
-        if type(ctx.attr._stylish_formatter) == "string":
-            eslint_fix_args.extend(["--format", ctx.attr._stylish_formatter])
-        else:
-            eslint_fix_args.extend(["--format", "../../../" + ctx.attr._stylish_formatter.files.to_list()[0].path])
-            file_inputs.append(ctx.attr._stylish_formatter)
-        eslint_fix_args.extend([s.short_path for s in files_to_lint])
-        run_patcher(
-            ctx,
-            ctx.executable,
-            inputs = _gather_inputs(ctx, files_to_lint, file_inputs),
-            args = eslint_fix_args,
-            files_to_diff = [s.path for s in files_to_lint],
-            patch_out = outputs.patch,
-            tools = [ctx.executable._eslint],
-            patch_cfg_env = dict(color_env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
-            stdout = outputs.human.out,
-            exit_code = outputs.human.exit_code,
-            env = color_env,
-            mnemonic = _MNEMONIC,
-            progress_message = "Linting %{label} with ESLint",
-        )
-    else:
-        eslint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, format = ctx.attr._stylish_formatter, env = color_env)
+    eslint_action(
+        ctx,
+        ctx.executable,
+        files_to_lint,
+        outputs.human.out,
+        outputs.human.exit_code,
+        format = ctx.attr._stylish_formatter,
+        env = color_env,
+        patch = getattr(outputs, "patch", None),
+    )
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))

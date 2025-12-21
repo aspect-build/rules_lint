@@ -116,7 +116,8 @@ def standardrb_action(
         config,
         stdout,
         exit_code = None,
-        color = False):
+        color = False,
+        patch = None):
     """Run Standard Ruby as an action under Bazel.
 
     Standard Ruby will select the configuration file to use for each
@@ -141,55 +142,69 @@ def standardrb_action(
             If None, the build will fail when Standard Ruby exits non-zero.
             See https://github.com/standardrb/standard
         color: boolean, whether to enable color output
+        patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs + config
-    outputs = [stdout]
-
-    # Wire command-line options, see
-    # `standardrb --help` to see available options
-    args = ctx.actions.args()
-
-    # Force format to simple for human-readable output
-    args.add("--format", "simple")
-
-    # Honor exclusions in .standard.yml even though we pass explicit list of
-    # files
-    args.add("--force-exclusion")
-
-    # Set cache root to /tmp to avoid sandbox permission issues
-    # StandardRB uses RuboCop internally, which needs a writable cache
-    # directory. Note: We can't use --cache false with --cache-root, so
-    # we allow caching to /tmp
-    # Note: We don't pass --no-server because it causes errors with JRuby
-    args.add("--cache-root", "/tmp")
-
-    # Disable auto-fix to prevent writing to input files in the sandbox
-    # Tests should only report violations, not modify source files
-    args.add("--no-fix")
-
-    # Enable color output if requested
+    standardrb_args = [
+        "--fix",
+        "--cache",
+        "false",
+    ] if patch != None else [
+        "--format",
+        "simple",
+        "--force-exclusion",
+        "--cache-root",
+        "/tmp",
+        "--no-fix",
+    ]
     if color:
-        args.add("--color")
+        standardrb_args.append("--color")
+    standardrb_args.extend([s.path for s in srcs])
 
-    args.add_all(srcs)
+    if patch != None:
+        # Use run_patcher for fix mode
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = inputs,
+            args = standardrb_args,
+            files_to_diff = [s.path for s in srcs],
+            patch_out = patch,
+            tools = [executable],
+            stdout = stdout,
+            exit_code = exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with Standard Ruby",
+        )
+    else:
+        # Use run_shell for lint mode
+        outputs = [stdout]
+        args = ctx.actions.args()
+        args.add("--format", "simple")
+        args.add("--force-exclusion")
+        args.add("--cache-root", "/tmp")
+        args.add("--no-fix")
+        if color:
+            args.add("--color")
+        args.add_all(srcs)
 
-    command = _build_standardrb_command(
-        executable.path,
-        stdout.path,
-        exit_code.path if exit_code else None,
-    )
-    if exit_code:
-        outputs.append(exit_code)
+        command = _build_standardrb_command(
+            executable.path,
+            stdout.path,
+            exit_code.path if exit_code else None,
+        )
+        if exit_code:
+            outputs.append(exit_code)
 
-    ctx.actions.run_shell(
-        inputs = inputs,
-        outputs = outputs,
-        command = command,
-        arguments = [args],
-        mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with Standard Ruby",
-        tools = [executable],
-    )
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = outputs,
+            command = command,
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+            progress_message = "Linting %{label} with Standard Ruby",
+            tools = [executable],
+        )
 
 # buildifier: disable=function-docstring
 def _standardrb_aspect_impl(target, ctx):
@@ -210,40 +225,16 @@ def _standardrb_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    # Standard Ruby can produce a patch at the same time as reporting the
-    # unpatched violations
-    if hasattr(outputs, "patch"):
-        standardrb_fix_args = [
-            "--fix",
-            "--cache",
-            "false",
-        ]
-        if ctx.attr._options[LintOptionsInfo].color:
-            standardrb_fix_args.append("--color")
-        standardrb_fix_args.extend([s.path for s in files_to_lint])
-        run_patcher(
-            ctx,
-            ctx.executable,
-            inputs = files_to_lint + ctx.files._config_files,
-            args = standardrb_fix_args,
-            files_to_diff = [s.path for s in files_to_lint],
-            patch_out = outputs.patch,
-            tools = [ctx.executable._standardrb],
-            stdout = outputs.human.out,
-            exit_code = outputs.human.exit_code,
-            mnemonic = _MNEMONIC,
-            progress_message = "Fixing %{label} with Standard Ruby",
-        )
-    else:
-        standardrb_action(
-            ctx,
-            ctx.executable._standardrb,
-            files_to_lint,
-            ctx.files._config_files,
-            outputs.human.out,
-            outputs.human.exit_code,
-            color = ctx.attr._options[LintOptionsInfo].color,
-        )
+    standardrb_action(
+        ctx,
+        ctx.executable._standardrb,
+        files_to_lint,
+        ctx.files._config_files,
+        outputs.human.out,
+        outputs.human.exit_code,
+        color = ctx.attr._options[LintOptionsInfo].color,
+        patch = getattr(outputs, "patch", None),
+    )
 
     # Generate machine-readable report in JSON format for SARIF conversion
     raw_machine_report = ctx.actions.declare_file(

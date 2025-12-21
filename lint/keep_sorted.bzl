@@ -32,7 +32,7 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintKeepSorted"
 
-def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options = []):
+def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options = [], patch = None):
     """Run keep-sorted as an action under Bazel.
 
     Args:
@@ -43,39 +43,51 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
         exit_code: output file containing exit code
             If None, then fail the build when program exits non-zero.
         options: additional command-line options
+        patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs
-    outputs = [stdout]
+    args_list = options + ["--mode=fix"] + [s.path for s in srcs] if patch != None else options + ["--mode=lint"] + [s.path for s in srcs]
 
-    # Wire command-line options, see
-    # Flags:
-    # --color string              Whether to color debug output. One of "always", "never", or "auto" (default "auto")
-    # --default-options options   The options keep-sorted will use to sort. Per-block overrides apply on top of these options. Note: list options like prefix_order are not merged with per-block overrides. They are completely overridden. (default allow_yaml_lists=yes case=yes group=yes remove_duplicates=yes sticky_comments=yes)
-    # --lines line_ranges         Line ranges of the form "start:end". Only processes keep-sorted blocks that overlap with the given line ranges. Can only be used when fixing a single file. This flag can either be a comma-separated list of line ranges, or it can be specified multiple times on the command line to specify multiple line ranges. (default [])
-    # --mode mode                 Determines what mode to run this tool in. One of ["fix" "lint"] (default fix)
-    # -v, --verbose count             Log more verbosely
-    # --version                   Report the keep-sorted version.
-    args = ctx.actions.args()
-    args.add_all(options)
-    args.add("--mode=lint")
-    args.add_all(srcs)
-
-    if exit_code:
-        command = "{keep_sorted} $@ >{stdout}; echo $? > " + exit_code.path
-        outputs.append(exit_code)
+    if patch != None:
+        # Use run_patcher for fix mode
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = inputs,
+            args = args_list,
+            files_to_diff = [s.path for s in srcs],
+            patch_out = patch,
+            tools = [executable],
+            stdout = stdout,
+            exit_code = exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with KeepSorted",
+            patch_cfg_suffix = "keep-sorted.patch_cfg",
+        )
     else:
-        # Create empty stdout file on success, as Bazel expects one
-        command = "{keep_sorted} $@ && touch {stdout}"
+        # Use run_shell for lint mode
+        outputs = [stdout]
+        args = ctx.actions.args()
+        args.add_all(options)
+        args.add("--mode=lint")
+        args.add_all(srcs)
 
-    ctx.actions.run_shell(
-        inputs = inputs,
-        outputs = outputs,
-        tools = [executable],
-        command = command.format(keep_sorted = executable.path, stdout = stdout.path),
-        arguments = [args],
-        mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with KeepSorted",
-    )
+        if exit_code:
+            command = "{keep_sorted} $@ >{stdout}; echo $? > " + exit_code.path
+            outputs.append(exit_code)
+        else:
+            # Create empty stdout file on success, as Bazel expects one
+            command = "{keep_sorted} $@ && touch {stdout}"
+
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = outputs,
+            tools = [executable],
+            command = command.format(keep_sorted = executable.path, stdout = stdout.path),
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+            progress_message = "Linting %{label} with KeepSorted",
+        )
 
 def _keep_sorted_aspect_impl(target, ctx):
     if ctx.attr._options[LintOptionsInfo].fix:
@@ -94,23 +106,15 @@ def _keep_sorted_aspect_impl(target, ctx):
         return [info]
 
     color_options = ["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []
-    if hasattr(outputs, "patch"):
-        run_patcher(
-            ctx,
-            ctx.executable,
-            inputs = files_to_lint,
-            args = ["--mode=fix"] + color_options + [s.path for s in files_to_lint],
-            files_to_diff = [s.path for s in files_to_lint],
-            patch_out = outputs.patch,
-            tools = [ctx.executable._keep_sorted],
-            stdout = outputs.human.out,
-            exit_code = outputs.human.exit_code,
-            mnemonic = _MNEMONIC,
-            progress_message = "Fixing %{label} with KeepSorted",
-            patch_cfg_suffix = "keep-sorted.patch_cfg",
-        )
-    else:
-        keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, outputs.human.out, outputs.human.exit_code, color_options)
+    keep_sorted_action(
+        ctx,
+        ctx.executable._keep_sorted,
+        files_to_lint,
+        outputs.human.out,
+        outputs.human.exit_code,
+        options = color_options,
+        patch = getattr(outputs, "patch", None),
+    )
     keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, outputs.machine.out, outputs.machine.exit_code)
     return [info]
 
