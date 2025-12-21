@@ -71,7 +71,7 @@ lint:
 
 If you don't use [Aspect CLI], you can use vanilla Bazel with some wrapper like a shell script that runs the linter aspects over the requested targets.
 
-See the [example/lint.sh](/example/lint.sh) file as an example, and pay attention to the comments at the top about fitting it into your repo.
+See the [lint.sh gist](https://gist.github.com/alexeagle/44fd5444b43707766f59a3be2422dc63) as an example, and pay attention to the comments at the top about fitting it into your repo.
 
 [![asciicast](https://asciinema.org/a/gUUuQTCGIu85YMl6zz2GJIgD8.svg)](https://asciinema.org/a/gUUuQTCGIu85YMl6zz2GJIgD8)
 
