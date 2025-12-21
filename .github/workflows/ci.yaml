@@ -29,6 +29,7 @@ jobs:
       matrix:
         folder:
           - format
+          - examples/cpp
           - examples/java
           - examples/python
           - examples/ruby
