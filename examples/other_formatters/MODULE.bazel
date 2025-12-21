@@ -3,7 +3,7 @@
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0")
 bazel_dep(name = "rules_python", version = "0.26.0")
-bazel_dep(name = "bazel_features", version = "1.29.0")
+bazel_dep(name = "bazel_features", version = "1.32.0")
 bazel_dep(name = "buildifier_prebuilt", version = "6.3.3")
 
 local_path_override(

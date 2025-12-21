@@ -2,7 +2,7 @@
 
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "rules_rust", version = "0.67.0")
-bazel_dep(name = "bazel_features", version = "1.29.0")
+bazel_dep(name = "bazel_features", version = "1.32.0")
 bazel_dep(name = "jq.bzl", version = "0.4.0")
 
 local_path_override(

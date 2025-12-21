@@ -20,7 +20,7 @@ Add the required dependencies:
 
 ```starlark
 bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "bazel_features", version = "1.29.0")
+bazel_dep(name = "bazel_features", version = "1.32.0")
 bazel_dep(name = "rules_python", version = "0.26.0")
 ```
 

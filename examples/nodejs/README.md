@@ -25,7 +25,7 @@ bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0")
 bazel_dep(name = "aspect_rules_swc", version = "2.0.0")
 bazel_dep(name = "aspect_rules_ts", version = "3.0.0")
-bazel_dep(name = "bazel_features", version = "1.29.0")
+bazel_dep(name = "bazel_features", version = "1.32.0")
 ```
 
 ### 2. Set up npm dependencies

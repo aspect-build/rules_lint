@@ -47,6 +47,7 @@ jobs:
           echo "Generated test matrix: $folders"
   format:
     needs: list-examples
+    # Our version of clang-format has some deps that aren't satisfiable on newer ubuntu yet
     runs-on: ${{ matrix.folder == 'examples/cpp' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
@@ -55,6 +56,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
+        with:
+          bazelrc: |
+            common --show_progress_rate_limit=60
+            common --show_timestamps
       # Permit this gross non-hermetic dependency
       - if: matrix.folder == 'examples/cpp'
         run: sudo apt-get update && sudo apt-get install -y libtinfo5

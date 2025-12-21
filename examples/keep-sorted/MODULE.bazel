@@ -3,7 +3,7 @@
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "rules_go", version = "0.52.0", repo_name = "io_bazel_rules_go")
 bazel_dep(name = "gazelle", version = "0.41.0")
-bazel_dep(name = "bazel_features", version = "1.29.0")
+bazel_dep(name = "bazel_features", version = "1.32.0")
 
 local_path_override(
     module_name = "aspect_rules_lint",

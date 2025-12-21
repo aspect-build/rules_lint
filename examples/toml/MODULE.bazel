@@ -1,7 +1,7 @@
 "Bazel dependencies for TOML formatting example"
 
 bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "bazel_features", version = "1.29.0")
+bazel_dep(name = "bazel_features", version = "1.32.0")
 bazel_dep(name = "bazel_lib", version = "3.0.0")
 
 local_path_override(
