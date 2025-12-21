@@ -1,6 +1,5 @@
 "Define linter aspects"
 
-load("@aspect_rules_lint//lint:buf.bzl", "lint_buf_aspect")
 load("@aspect_rules_lint//lint:checkstyle.bzl", "lint_checkstyle_aspect")
 load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
 load("@aspect_rules_lint//lint:cppcheck.bzl", "lint_cppcheck_aspect")
@@ -19,10 +18,6 @@ load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
 load("@aspect_rules_lint//lint:ty.bzl", "lint_ty_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
 load("@aspect_rules_lint//lint:yamllint.bzl", "lint_yamllint_aspect")
-
-buf = lint_buf_aspect(
-    config = Label("//:buf.yaml"),
-)
 
 eslint = lint_eslint_aspect(
     binary = Label("//tools/lint:eslint"),

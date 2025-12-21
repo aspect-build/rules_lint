@@ -13,7 +13,6 @@ npm_link_all_packages(name = "node_modules")
 
 exports_files(
     [
-        "buf.yaml",
         ".flake8",
         ".pylintrc",
         "pmd.xml",

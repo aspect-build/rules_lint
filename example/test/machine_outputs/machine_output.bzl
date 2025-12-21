@@ -2,7 +2,7 @@
 
 load("@bazel_features//:features.bzl", "bazel_features")
 load("@jq.bzl//jq:jq.bzl", "jq_test")
-load("//tools/lint:linters.bzl", "buf", "clang_tidy", "eslint", "flake8", "pylint", "ruff", "stylelint", "ty", "vale", "yamllint")
+load("//tools/lint:linters.bzl", "clang_tidy", "eslint", "flake8", "pylint", "ruff", "stylelint", "ty", "vale", "yamllint")
 
 SARIF_TOOL_DRIVER_NAME_FILTER = ".runs[].tool.driver.name"
 PHYSICAL_ARTIFACT_LOCATION_URI_FILTER = ".runs[].results | map(.locations | map(.physicalLocation.artifactLocation.uri)) | flatten | unique[]"
@@ -58,11 +58,6 @@ machine_vale_report = rule(
 machine_clang_tidy_report = rule(
     implementation = _machine_report,
     attrs = {"src": attr.label(aspects = [clang_tidy])},
-)
-
-machine_buf_report = rule(
-    implementation = _machine_report,
-    attrs = {"src": attr.label(aspects = [buf])},
 )
 
 machine_flake8_report = rule(

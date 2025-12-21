@@ -64,9 +64,6 @@ EOF
 	refute_output --partial '@typescript-eslint/no-unsafe-call'
 	refute_output --partial '@typescript-eslint/no-unsafe-member-access'
 
-	# Buf
-	assert_output --partial 'src/file.proto:3:1:Import "src/unused.proto" is unused.'
-
 	# yamllint
 	echo <<"EOF" | assert_output --partial
 src/config.yaml

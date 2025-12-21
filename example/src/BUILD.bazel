@@ -1,7 +1,6 @@
 load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@bazel_skylib//lib:partial.bzl", "partial")
-load("@rules_proto//proto:defs.bzl", "proto_library")
 load("//tools/lint:linters.bzl", "eslint_test")
 
 package(default_visibility = ["//visibility:public"])
@@ -68,17 +67,6 @@ ts_project(
 eslint_test(
     name = "eslint_empty_report",
     srcs = [":ts"],
-)
-
-proto_library(
-    name = "unused",
-    srcs = ["unused.proto"],
-)
-
-proto_library(
-    name = "foo_proto",
-    srcs = ["file.proto"],
-    deps = [":unused"],
 )
 
 filegroup(

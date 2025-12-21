@@ -2,7 +2,6 @@
 
 load(
     ":machine_output.bzl",
-    "machine_buf_report",
     "machine_eslint_report",
     "machine_flake8_report",
     "machine_pylint_report",
@@ -120,18 +119,6 @@ report_test(
     expected_tool = "Yamllint",
     expected_uri = "src/config.yaml",
     report = "machine_yamllint_report",
-)
-
-machine_buf_report(
-    name = "machine_buf_report",
-    src = "//src:foo_proto",
-)
-
-report_test(
-    name = "buf_machine_output_test",
-    expected_tool = "Buf",
-    expected_uri = "src/file.proto",
-    report = "machine_buf_report",
 )
 
 # FIXME: I'm getting a C++ compile failure on macos
