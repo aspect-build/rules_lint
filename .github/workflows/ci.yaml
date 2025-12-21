@@ -75,7 +75,18 @@ jobs:
         include:
           - folder: format
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - name: Install Aspect CLI
+        uses: jaxxstorm/action-install-gh-release@v2.1.0
+        with:
+          repo: aspect-build/aspect-cli
+          tag: v2025.51.3
+          asset-name: aspect-cli
+          rename-to: aspect
+          platform: unknown-linux
+          arch: x86_64
+          chmod: 0755
+          extension-matching: disable
       - name: Setup bats
         uses: mig4/setup-bats@v1
         with:
@@ -101,20 +112,14 @@ jobs:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
         with: *bazelrc
-      - name: Install Aspect CLI
-        uses: jaxxstorm/action-install-gh-release@v2.1.0
-        with:
-          repo: aspect-build/aspect-cli
-          tag: v2025.51.3
-          asset-name: aspect-cli
-          rename-to: aspect
-          platform: unknown-linux
-          arch: x86_64
-          chmod: 0755
-          extension-matching: disable
       - name: Lint
         working-directory: ${{ matrix.folder }}
-        run: aspect lint
+        run: |
+          bazel build --config=lint \
+            --output_groups=rules_lint_human \
+            --output_groups=rules_lint_patch \
+            --@aspect_rules_lint//lint:fix \
+            //...
   test:
     strategy:
       matrix:
