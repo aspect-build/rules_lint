@@ -1,7 +1,0 @@
-package(default_visibility = ["//visibility:public"])
-
-filegroup(
-    name = "unused_import_pyi",
-    srcs = ["unused_import.pyi"],
-    tags = ["python"],
-)

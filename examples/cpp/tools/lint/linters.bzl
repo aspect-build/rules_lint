@@ -23,3 +23,13 @@ cppcheck = lint_cppcheck_aspect(
 )
 
 cppcheck_test = lint_test(aspect = cppcheck)
+
+# an example of setting up a different clang-tidy aspect with different
+# options. This one uses a single global clang-tidy file
+clang_tidy_global_config = lint_clang_tidy_aspect(
+    binary = "@@//tools/lint:clang_tidy",
+    global_config = "@@//:.clang-tidy",
+    lint_target_headers = True,
+    angle_includes_are_system = False,
+    verbose = False,
+)

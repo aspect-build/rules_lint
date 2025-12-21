@@ -27,5 +27,6 @@ format_multirun(
     html_jinja = ":djlint",
     json5 = ":prettier",
     jsonnet = "@aspect_rules_lint//format:jsonnetfmt",
+    starlark = "@buildifier_prebuilt//:buildifier",
     visibility = ["//:__subpackages__"],
 )

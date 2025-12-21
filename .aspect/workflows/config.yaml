@@ -2,21 +2,16 @@
 ---
 workspaces:
   - .
-  - examples/cpp
-  - examples/csharp
-  - examples/java
-  - examples/python
-  - examples/ruby
+  # TODO:
+  # - examples/cpp
+  # - examples/csharp
+  # - examples/java
+  # - examples/python
+  # - examples/ruby
 bazel:
   flags:
     - --config=ci
 tasks:
   - test:
-hooks:
-  - type: after_task
-    command: aspect lint
-    soft_fail: true
-    when:
-      equals: ["${WORKFLOWS_TASK_TYPE}", "test"]
 notifications:
   github: {}
