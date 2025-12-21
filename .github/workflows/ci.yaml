@@ -138,9 +138,8 @@ jobs:
           # - windows-latest
         version:
           - 7.x
-          # TODO(alex): missing use_repo calls for some things in WORKSPACE.bzlmod
-          # - 8.x
-
+          - 8.x
+          - 9.*
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
