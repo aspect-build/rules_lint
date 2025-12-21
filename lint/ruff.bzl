@@ -89,15 +89,14 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs + config
-    args_list = ["check", "--force-exclude"] + [s.path for s in srcs]
-
     if patch != None:
         # Use run_patcher for fix mode
+        args_list = ["check", "--fix", "--force-exclude"] + [s.path for s in srcs]
         run_patcher(
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args_list + ["--fix"],
+            args = args_list,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable],

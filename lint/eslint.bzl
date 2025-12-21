@@ -108,23 +108,38 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
         patch: output file for patch (optional). If provided, uses run_patcher instead of run/run_shell.
     """
     file_inputs = [ctx.attr._workaround_17660]
-    eslint_args = ["--fix"] if patch != None else ["--no-warn-ignored"]
-    if ctx.attr._options[LintOptionsInfo].debug:
-        eslint_args.append("--debug")
-    if type(format) == "string":
-        eslint_args.extend(["--format", format])
+    args = ctx.actions.args()
+
+    if patch != None:
+        args.add("--fix")
     else:
-        eslint_args.extend(["--format", "../../../" + format.files.to_list()[0].path])
+        args.add("--no-warn-ignored")
+
+    if ctx.attr._options[LintOptionsInfo].debug:
+        args.add("--debug")
+    if type(format) == "string":
+        args.add_all(["--format", format])
+    else:
+        args.add_all(["--format", "../../../" + format.files.to_list()[0].path])
         file_inputs.append(format)
-    eslint_args.extend([s.short_path for s in srcs])
+    args.add_all([s.short_path for s in srcs])
 
     if patch != None:
         # Use run_patcher for fix mode
+        # Build args list efficiently for JSON encoding (run_patcher needs a list)
+        format_args = [format] if type(format) == "string" else ["../../../" + format.files.to_list()[0].path]
+        args_list = (
+            ["--fix"] +
+            (["--debug"] if ctx.attr._options[LintOptionsInfo].debug else []) +
+            ["--format"] + format_args +
+            [s.short_path for s in srcs]
+        )
+
         run_patcher(
             ctx,
             executable,
             inputs = _gather_inputs(ctx, srcs, file_inputs),
-            args = eslint_args,
+            args = args_list,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable._eslint],
@@ -137,16 +152,6 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
         )
     else:
         # Use run/run_shell for lint mode
-        args = ctx.actions.args()
-        args.add("--no-warn-ignored")
-        if ctx.attr._options[LintOptionsInfo].debug:
-            args.add("--debug")
-        if type(format) == "string":
-            args.add_all(["--format", format])
-        else:
-            args.add_all(["--format", "../../../" + format.files.to_list()[0].path])
-            file_inputs.append(format)
-        args.add_all([s.short_path for s in srcs])
 
         if not exit_code:
             ctx.actions.run_shell(

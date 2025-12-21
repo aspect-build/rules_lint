@@ -145,24 +145,13 @@ def standardrb_action(
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs + config
-    standardrb_args = [
-        "--fix",
-        "--cache",
-        "false",
-    ] if patch != None else [
-        "--format",
-        "simple",
-        "--force-exclusion",
-        "--cache-root",
-        "/tmp",
-        "--no-fix",
-    ]
-    if color:
-        standardrb_args.append("--color")
-    standardrb_args.extend([s.path for s in srcs])
-
     if patch != None:
         # Use run_patcher for fix mode
+        standardrb_args = (
+            ["--fix", "--cache", "false"] +
+            (["--color"] if color else []) +
+            [s.path for s in srcs]
+        )
         run_patcher(
             ctx,
             ctx.executable,

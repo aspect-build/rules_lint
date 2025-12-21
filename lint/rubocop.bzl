@@ -140,24 +140,13 @@ def rubocop_action(
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs + config
-    rubocop_args = [
-        "--autocorrect-all",
-        "--force-exclusion",
-        "--cache",
-        "false",
-    ] if patch != None else [
-        "--format",
-        "simple",
-        "--force-exclusion",
-        "--cache-root",
-        "/tmp",
-    ]
-    if color:
-        rubocop_args.append("--color")
-    rubocop_args.extend([s.path for s in srcs])
-
     if patch != None:
         # Use run_patcher for fix mode
+        rubocop_args = (
+            ["--autocorrect-all", "--force-exclusion", "--cache", "false"] +
+            (["--color"] if color else []) +
+            [s.path for s in srcs]
+        )
         run_patcher(
             ctx,
             ctx.executable,

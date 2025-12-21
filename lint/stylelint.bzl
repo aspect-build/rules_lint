@@ -89,17 +89,16 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     file_inputs = []
-    args_list = list(options)
+    format_args = []
     if type(format) == "string":
-        args_list.extend(["--formatter", format])
+        format_args = ["--formatter", format]
     elif format != None:
-        args_list.extend(["--custom-formatter", "../../../" + format.files.to_list()[0].path])
+        format_args = ["--custom-formatter", "../../../" + format.files.to_list()[0].path]
         file_inputs.append(format)
-    args_list.extend([s.short_path for s in srcs])
 
     if patch != None:
         # Use run_patcher for fix mode
-        args_list = ["--fix"] + args_list
+        args_list = ["--fix"] + list(options) + format_args + [s.short_path for s in srcs]
         run_patcher(
             ctx,
             executable,
