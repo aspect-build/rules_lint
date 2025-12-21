@@ -1,0 +1,24 @@
+"Bazel dependencies for Scala formatting example"
+
+bazel_dep(name = "aspect_rules_lint")
+bazel_dep(name = "rules_jvm_external", version = "6.5")
+bazel_dep(name = "rules_java", version = "8.5.0")
+bazel_dep(name = "bazel_skylib", version = "1.4.2")
+
+local_path_override(
+    module_name = "aspect_rules_lint",
+    path = "../..",
+)
+
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+    artifacts = [
+        "org.scalameta:scalafmt-cli_2.13:3.7.14",
+    ],
+    lock_file = "@//:maven_install.json",
+    repositories = [
+        "https://maven.google.com",
+        "https://repo1.maven.org/maven2",
+    ],
+)
+use_repo(maven, "maven")

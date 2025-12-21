@@ -23,6 +23,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify bcr patches
         run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
+  format:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        folder:
+          - examples/csharp
+          - examples/scala
+    steps:
+      - uses: actions/checkout@v5
+      - uses: bazel-contrib/setup-bazel@0.15.0
+      - run: bazel run //tools/format
+        working-directory: ${{ matrix.folder }}
   integration-test:
     runs-on: ubuntu-latest
     strategy:
@@ -30,7 +42,6 @@ jobs:
         folder:
           - format
           - examples/cpp
-          - examples/csharp
           - examples/java
           - examples/python
           - examples/ruby
