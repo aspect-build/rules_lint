@@ -108,26 +108,15 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
         patch: output file for patch (optional). If provided, uses run_patcher instead of run/run_shell.
     """
     file_inputs = [ctx.attr._workaround_17660]
-    args = ctx.actions.args()
-
-    if patch != None:
-        args.add("--fix")
-    else:
-        args.add("--no-warn-ignored")
-
-    if ctx.attr._options[LintOptionsInfo].debug:
-        args.add("--debug")
-    if type(format) == "string":
-        args.add_all(["--format", format])
-    else:
-        args.add_all(["--format", "../../../" + format.files.to_list()[0].path])
-        file_inputs.append(format)
-    args.add_all([s.short_path for s in srcs])
 
     if patch != None:
         # Use run_patcher for fix mode
         # Build args list efficiently for JSON encoding (run_patcher needs a list)
-        format_args = [format] if type(format) == "string" else ["../../../" + format.files.to_list()[0].path]
+        if type(format) == "string":
+            format_args = [format]
+        else:
+            format_args = ["../../../" + format.files.to_list()[0].path]
+            file_inputs.append(format)
         args_list = (
             ["--fix"] +
             (["--debug"] if ctx.attr._options[LintOptionsInfo].debug else []) +

@@ -46,10 +46,9 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs
-    args_list = options + ["--mode=fix"] + [s.path for s in srcs] if patch != None else options + ["--mode=lint"] + [s.path for s in srcs]
-
     if patch != None:
         # Use run_patcher for fix mode
+        args_list = options + ["--mode=fix"] + [s.path for s in srcs]
         run_patcher(
             ctx,
             ctx.executable,
