@@ -37,10 +37,10 @@ stylelint = lint_stylelint_aspect(
 Finally, register the aspect with your linting workflow, such as in `.aspect/cli/config.yaml` for `aspect lint`.
 """
 
-load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
+load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
-load("//lint/private:patcher.bzl", "patcher_attrs", "run_patcher")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintStylelint"
 

@@ -78,7 +78,7 @@ load(
     "patch_and_output_files",
     "should_visit",
 )
-load("//lint/private:patcher.bzl", "patcher_attrs", "run_patcher")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintStandardRB"
 
@@ -213,6 +213,7 @@ def standardrb_fix(
         exit_code: File object where exit code will be written
         color: boolean, whether to enable color output
     """
+
     # Build args list with color flag if needed
     standardrb_args = [
         "--fix",

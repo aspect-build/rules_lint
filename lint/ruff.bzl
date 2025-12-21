@@ -56,8 +56,8 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 load(":ruff_versions.bzl", "RUFF_VERSIONS")
-load("//lint/private:patcher.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintRuff"
 

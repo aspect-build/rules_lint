@@ -28,7 +28,7 @@ following the documentation at https://github.com/google/keep-sorted#usage.
 """
 
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files")
-load("//lint/private:patcher.bzl", "patcher_attrs", "run_patcher")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintKeepSorted"
 
