@@ -1,10 +1,8 @@
 """Verify that the machine-readable SARIF report is generated correctly for each linter aspect."""
 
-load("@jq.bzl//jq:jq.bzl", "jq_test")
 load(
     ":machine_output.bzl",
     "machine_buf_report",
-    "machine_clippy_report",
     "machine_eslint_report",
     "machine_flake8_report",
     "machine_pylint_report",
@@ -134,20 +132,6 @@ report_test(
     expected_tool = "Buf",
     expected_uri = "src/file.proto",
     report = "machine_buf_report",
-)
-
-machine_clippy_report(
-    name = "machine_clippy_report",
-    src = "//src/rust:bad_lib",
-)
-
-# Because the json file from clippy contains multiple messages _not_ in an array, we must take the first element.
-jq_test(
-    name = "clippy_machine_output_test",
-    file1 = ":machine_clippy_report",
-    file2 = ":machine_clippy_report",
-    filter1 = "inputs | first | .code.code",
-    filter2 = "inputs | first | \"dead_code\"",
 )
 
 # FIXME: I'm getting a C++ compile failure on macos

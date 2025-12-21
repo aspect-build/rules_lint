@@ -1,0 +1,78 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "bad_lib",
+    srcs = ["bad_lib.rs"],
+    edition = "2021",
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+        "//test/machine_outputs:__pkg__",
+    ],
+)
+
+rust_library(
+    name = "bad_lib_with_noclippy",
+    srcs = ["bad_lib.rs"],
+    edition = "2021",
+    tags = ["noclippy"],
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+)
+
+rust_binary(
+    name = "bad_binary",
+    srcs = ["bad_binary.rs"],
+    edition = "2021",
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+)
+
+rust_binary(
+    name = "bad_binary_with_noclippy",
+    srcs = ["bad_binary.rs"],
+    edition = "2021",
+    tags = ["noclippy"],
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+)
+
+rust_binary(
+    name = "ok_binary",
+    srcs = ["ok_binary.rs"],
+    edition = "2021",
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+)
+
+rust_binary(
+    name = "ok_binary_with_bad_dep",
+    srcs = ["ok_binary.rs"],
+    edition = "2021",
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+    deps = [":bad_lib"],
+)
+
+rust_binary(
+    name = "ok_binary_with_bad_noclippy_dep",
+    srcs = ["ok_binary.rs"],
+    edition = "2021",
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+    deps = [":bad_lib_with_noclippy"],
+)
