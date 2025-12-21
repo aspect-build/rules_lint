@@ -121,43 +121,6 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
         tools = [executable._stylelint],
     )
 
-def stylelint_fix(ctx, executable, srcs, patch, stderr, exit_code, env = {}, options = []):
-    """Create a Bazel Action that spawns stylelint with --fix.
-
-    Args:
-        ctx: an action context OR aspect context
-        executable: struct with a _stylelint field
-        srcs: list of file objects to lint
-        patch: output file containing the applied fixes that can be applied with the patch(1) command.
-        stderr: output file containing the stderr or --output-file of stylelint
-        exit_code: output file containing the exit code of stylelint
-        env: environment variables for stylelint
-        options: additional command line options
-    """
-    args = ["--fix"]
-    args.extend(options)
-    args.extend([s.short_path for s in srcs])
-
-    run_patcher(
-        ctx,
-        executable,
-        inputs = _gather_inputs(ctx, srcs),
-        args = args,
-        files_to_diff = [s.path for s in srcs],
-        patch_out = patch,
-        tools = [executable._stylelint],
-        patch_cfg_env = dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
-        # Capture stylelint's stdout output so the Bazel action
-        # always produces a file (even on exit 0).
-        # Similar to what Eslint currently does.
-        stdout = stderr,
-        stderr = stderr,
-        exit_code = exit_code,
-        env = env,
-        mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with Stylelint",
-    )
-
 # buildifier: disable=function-docstring
 def _stylelint_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
@@ -174,7 +137,25 @@ def _stylelint_aspect_impl(target, ctx):
 
     # stylelint can produce a patch file at the same time it reports the unpatched violations
     if hasattr(outputs, "patch"):
-        stylelint_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, options = color_options)
+        stylelint_fix_args = ["--fix"] + color_options + [s.short_path for s in files_to_lint]
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = _gather_inputs(ctx, files_to_lint),
+            args = stylelint_fix_args,
+            files_to_diff = [s.path for s in files_to_lint],
+            patch_out = outputs.patch,
+            tools = [ctx.executable._stylelint],
+            patch_cfg_env = {"BAZEL_BINDIR": ctx.bin_dir.path},
+            # Capture stylelint's stdout output so the Bazel action
+            # always produces a file (even on exit 0).
+            # Similar to what Eslint currently does.
+            stdout = outputs.human.out,
+            stderr = outputs.human.out,
+            exit_code = outputs.human.exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Linting %{label} with Stylelint",
+        )
     else:
         stylelint_action(ctx, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, options = color_options)
 

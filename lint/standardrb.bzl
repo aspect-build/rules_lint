@@ -191,53 +191,6 @@ def standardrb_action(
         tools = [executable],
     )
 
-def standardrb_fix(
-        ctx,
-        executable,
-        srcs,
-        config,
-        patch,
-        stdout,
-        exit_code,
-        color = False):
-    """Create a Bazel Action that spawns Standard Ruby with --fix.
-
-    Args:
-        ctx: Bazel Rule or Aspect evaluation context
-        executable: struct with _standardrb and _patcher fields
-        srcs: list of File objects for Ruby source files to lint
-        config: list of File objects for Standard Ruby config files
-            (.standard.yml)
-        patch: File object where the patch output will be written
-        stdout: File object where linter output will be written
-        exit_code: File object where exit code will be written
-        color: boolean, whether to enable color output
-    """
-
-    # Build args list with color flag if needed
-    standardrb_args = [
-        "--fix",
-        "--cache",
-        "false",
-    ]
-    if color:
-        standardrb_args.append("--color")
-    standardrb_args.extend([s.path for s in srcs])
-
-    run_patcher(
-        ctx,
-        executable,
-        inputs = srcs + config,
-        args = standardrb_args,
-        files_to_diff = [s.path for s in srcs],
-        patch_out = patch,
-        tools = [executable._standardrb],
-        stdout = stdout,
-        exit_code = exit_code,
-        mnemonic = _MNEMONIC,
-        progress_message = "Fixing %{label} with Standard Ruby",
-    )
-
 # buildifier: disable=function-docstring
 def _standardrb_aspect_impl(target, ctx):
     if not should_visit(
@@ -260,15 +213,26 @@ def _standardrb_aspect_impl(target, ctx):
     # Standard Ruby can produce a patch at the same time as reporting the
     # unpatched violations
     if hasattr(outputs, "patch"):
-        standardrb_fix(
+        standardrb_fix_args = [
+            "--fix",
+            "--cache",
+            "false",
+        ]
+        if ctx.attr._options[LintOptionsInfo].color:
+            standardrb_fix_args.append("--color")
+        standardrb_fix_args.extend([s.path for s in files_to_lint])
+        run_patcher(
             ctx,
             ctx.executable,
-            files_to_lint,
-            ctx.files._config_files,
-            outputs.patch,
-            outputs.human.out,
-            outputs.human.exit_code,
-            color = ctx.attr._options[LintOptionsInfo].color,
+            inputs = files_to_lint + ctx.files._config_files,
+            args = standardrb_fix_args,
+            files_to_diff = [s.path for s in files_to_lint],
+            patch_out = outputs.patch,
+            tools = [ctx.executable._standardrb],
+            stdout = outputs.human.out,
+            exit_code = outputs.human.exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with Standard Ruby",
         )
     else:
         standardrb_action(

@@ -77,22 +77,6 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
         progress_message = "Linting %{label} with KeepSorted",
     )
 
-def keep_sorted_fix(ctx, executable, srcs, patch, stdout, exit_code = None, options = []):
-    run_patcher(
-        ctx,
-        executable,
-        inputs = srcs,
-        args = ["--mode=fix"] + options + [s.path for s in srcs],
-        files_to_diff = [s.path for s in srcs],
-        patch_out = patch,
-        tools = [executable._keep_sorted],
-        stdout = stdout,
-        exit_code = exit_code,
-        mnemonic = _MNEMONIC,
-        progress_message = "Fixing %{label} with KeepSorted",
-        patch_cfg_suffix = "keep-sorted.patch_cfg",
-    )
-
 def _keep_sorted_aspect_impl(target, ctx):
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
@@ -111,7 +95,20 @@ def _keep_sorted_aspect_impl(target, ctx):
 
     color_options = ["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []
     if hasattr(outputs, "patch"):
-        keep_sorted_fix(ctx, ctx.executable, files_to_lint, outputs.patch, outputs.human.out, outputs.human.exit_code, color_options)
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = files_to_lint,
+            args = ["--mode=fix"] + color_options + [s.path for s in files_to_lint],
+            files_to_diff = [s.path for s in files_to_lint],
+            patch_out = outputs.patch,
+            tools = [ctx.executable._keep_sorted],
+            stdout = outputs.human.out,
+            exit_code = outputs.human.exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with KeepSorted",
+            patch_cfg_suffix = "keep-sorted.patch_cfg",
+        )
     else:
         keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, outputs.human.out, outputs.human.exit_code, color_options)
     keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, outputs.machine.out, outputs.machine.exit_code)

@@ -181,53 +181,6 @@ def rubocop_action(
         tools = [executable],
     )
 
-def rubocop_fix(
-        ctx,
-        executable,
-        srcs,
-        config,
-        patch,
-        stdout,
-        exit_code,
-        color = False):
-    """Create a Bazel Action that spawns RuboCop with --autocorrect-all.
-
-    Args:
-        ctx: Bazel Rule or Aspect evaluation context
-        executable: struct with _rubocop and _patcher fields
-        srcs: list of File objects for Ruby source files to lint
-        config: list of File objects for RuboCop config files (.rubocop.yml)
-        patch: File object where the patch output will be written
-        stdout: File object where linter output will be written
-        exit_code: File object where exit code will be written
-        color: boolean, whether to enable color output
-    """
-
-    # Build args list with color flag if needed
-    rubocop_args = [
-        "--autocorrect-all",
-        "--force-exclusion",
-        "--cache",
-        "false",
-    ]
-    if color:
-        rubocop_args.append("--color")
-    rubocop_args.extend([s.path for s in srcs])
-
-    run_patcher(
-        ctx,
-        executable,
-        inputs = srcs + config,
-        args = rubocop_args,
-        files_to_diff = [s.path for s in srcs],
-        patch_out = patch,
-        tools = [executable._rubocop],
-        stdout = stdout,
-        exit_code = exit_code,
-        mnemonic = _MNEMONIC,
-        progress_message = "Fixing %{label} with RuboCop",
-    )
-
 # buildifier: disable=function-docstring
 def _rubocop_aspect_impl(target, ctx):
     if not should_visit(
@@ -250,15 +203,27 @@ def _rubocop_aspect_impl(target, ctx):
     # RuboCop can produce a patch at the same time as reporting the
     # unpatched violations
     if hasattr(outputs, "patch"):
-        rubocop_fix(
+        rubocop_fix_args = [
+            "--autocorrect-all",
+            "--force-exclusion",
+            "--cache",
+            "false",
+        ]
+        if ctx.attr._options[LintOptionsInfo].color:
+            rubocop_fix_args.append("--color")
+        rubocop_fix_args.extend([s.path for s in files_to_lint])
+        run_patcher(
             ctx,
             ctx.executable,
-            files_to_lint,
-            ctx.files._config_files,
-            outputs.patch,
-            outputs.human.out,
-            outputs.human.exit_code,
-            color = ctx.attr._options[LintOptionsInfo].color,
+            inputs = files_to_lint + ctx.files._config_files,
+            args = rubocop_fix_args,
+            files_to_diff = [s.path for s in files_to_lint],
+            patch_out = outputs.patch,
+            tools = [ctx.executable._rubocop],
+            stdout = outputs.human.out,
+            exit_code = outputs.human.exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with RuboCop",
         )
     else:
         rubocop_action(

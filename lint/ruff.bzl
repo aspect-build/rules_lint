@@ -117,34 +117,6 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
         tools = [executable],
     )
 
-def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code, env = {}):
-    """Create a Bazel Action that spawns ruff with --fix.
-
-    Args:
-        ctx: an action context OR aspect context
-        executable: struct with _ruff and _patcher field
-        srcs: list of file objects to lint
-        config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
-        patch: output file containing the applied fixes that can be applied with the patch(1) command.
-        stdout: output file of linter results to generate
-        exit_code: output file to write the exit code
-        env: environment variaables for ruff
-    """
-    run_patcher(
-        ctx,
-        executable,
-        inputs = srcs + config,
-        args = ["check", "--fix", "--force-exclude"] + [s.path for s in srcs],
-        files_to_diff = [s.path for s in srcs],
-        patch_out = patch,
-        tools = [executable._ruff],
-        stdout = stdout,
-        exit_code = exit_code,
-        env = env,
-        mnemonic = _MNEMONIC,
-        progress_message = "Fixing %{label} with Ruff",
-    )
-
 # buildifier: disable=function-docstring
 def _ruff_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
@@ -164,7 +136,20 @@ def _ruff_aspect_impl(target, ctx):
 
     # Ruff can produce a patch at the same time as reporting the unpatched violations
     if hasattr(outputs, "patch"):
-        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.out, outputs.human.exit_code, env = color_env)
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = files_to_lint + ctx.files._config_files,
+            args = ["check", "--fix", "--force-exclude"] + [s.path for s in files_to_lint],
+            files_to_diff = [s.path for s in files_to_lint],
+            patch_out = outputs.patch,
+            tools = [ctx.executable._ruff],
+            stdout = outputs.human.out,
+            exit_code = outputs.human.exit_code,
+            env = color_env,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with Ruff",
+        )
     else:
         ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.out, outputs.human.exit_code, env = color_env)
 
