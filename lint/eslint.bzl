@@ -141,6 +141,16 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
         )
     else:
         # Use run/run_shell for lint mode
+        args = ctx.actions.args()
+        args.add("--no-warn-ignored")
+        if ctx.attr._options[LintOptionsInfo].debug:
+            args.add("--debug")
+        if type(format) == "string":
+            args.add_all(["--format", format])
+        else:
+            args.add_all(["--format", "../../../" + format.files.to_list()[0].path])
+            file_inputs.append(format)
+        args.add_all([s.short_path for s in srcs])
 
         if not exit_code:
             ctx.actions.run_shell(
