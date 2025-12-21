@@ -30,6 +30,7 @@ spotbugs = lint_spotbugs_aspect(
 ```
 """
 
+load("@rules_java//java:defs.bzl", "JavaInfo")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintSpotbugs"

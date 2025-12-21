@@ -1,0 +1,4 @@
+import %workspace%/tools/java21.bazelrc
+common:lint --aspects=//tools/lint:linters.bzl%pmd
+common:lint --aspects=//tools/lint:linters.bzl%spotbugs
+common:lint --aspects=//tools/lint:linters.bzl%checkstyle

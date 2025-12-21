@@ -28,3 +28,9 @@ bzl_library(
     name = "patcher_action",
     srcs = ["patcher_action.bzl"],
 )
+
+bzl_library(
+    name = "machine_report_testing",
+    srcs = ["machine_report_testing.bzl"],
+    visibility = ["//visibility:public"],
+)
