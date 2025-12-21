@@ -15,11 +15,9 @@ prettier.prettier_binary(
 
 format_multirun(
     name = "format",
-    css = ":prettier",
+    css = ":prettier",  # css includes Less and SCSS
     html = ":prettier",
     javascript = ":prettier",
-    less = ":prettier",
     markdown = ":prettier",
-    scss = ":prettier",
     visibility = ["//:__subpackages__"],
 )

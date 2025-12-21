@@ -48,6 +48,7 @@ jobs:
     needs: list-examples
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         folder: ${{ fromJson(needs.list-examples.outputs.format-matrix) }}
     steps:
@@ -59,6 +60,7 @@ jobs:
     needs: list-examples
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         folder: ${{ fromJson(needs.list-examples.outputs.test-matrix) }}
         include:
