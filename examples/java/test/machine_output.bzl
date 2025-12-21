@@ -1,19 +1,11 @@
 "Java-specific machine report rules for testing."
 
-load("@aspect_rules_lint//lint:private/machine_report_testing.bzl", "_machine_report")
+# buildifier: disable=bzl-visibility
+load("@aspect_rules_lint//lint/private:machine_report_testing.bzl", "machine_report_rule")
 load("//tools/lint:linters.bzl", "checkstyle", "pmd", "spotbugs")
 
-machine_pmd_report = rule(
-    implementation = _machine_report,
-    attrs = {"src": attr.label(aspects = [pmd])},
-)
+machine_pmd_report = machine_report_rule(pmd)
 
-machine_checkstyle_report = rule(
-    implementation = _machine_report,
-    attrs = {"src": attr.label(aspects = [checkstyle])},
-)
+machine_checkstyle_report = machine_report_rule(checkstyle)
 
-machine_spotbugs_report = rule(
-    implementation = _machine_report,
-    attrs = {"src": attr.label(aspects = [spotbugs])},
-)
+machine_spotbugs_report = machine_report_rule(spotbugs)
