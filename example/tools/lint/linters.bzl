@@ -131,7 +131,6 @@ clang_tidy = lint_clang_tidy_aspect(
     binary = Label("//tools/lint:clang_tidy"),
     configs = [
         Label("//:.clang-tidy"),
-        Label("//src/cpp/lib:get/.clang-tidy"),
     ],
     lint_target_headers = True,
     angle_includes_are_system = False,
