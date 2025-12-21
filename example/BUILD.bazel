@@ -32,6 +32,7 @@ exports_files(
         ".clang-tidy",
         "spotbugs-exclude.xml",
         ".clippy.toml",
+        "ty.toml",
     ],
     visibility = ["//visibility:public"],
 )

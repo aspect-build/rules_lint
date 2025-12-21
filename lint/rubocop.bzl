@@ -77,6 +77,7 @@ load(
     "patch_and_output_files",
     "should_visit",
 )
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintRuboCop"
 
@@ -111,7 +112,8 @@ def rubocop_action(
         config,
         stdout,
         exit_code = None,
-        color = False):
+        color = False,
+        patch = None):
     """Run RuboCop as an action under Bazel.
 
     RuboCop will select the configuration file to use for each source file,
@@ -135,112 +137,57 @@ def rubocop_action(
             If None, the build will fail when RuboCop exits non-zero.
             See https://docs.rubocop.org/rubocop/usage/basic_usage.html
         color: boolean, whether to enable color output
+        patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs + config
-    outputs = [stdout]
+    if patch != None:
+        # Use run_patcher for fix mode
+        rubocop_args = (
+            ["--autocorrect-all", "--force-exclusion", "--cache", "false"] +
+            (["--color"] if color else []) +
+            [s.path for s in srcs]
+        )
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = inputs,
+            args = rubocop_args,
+            files_to_diff = [s.path for s in srcs],
+            patch_out = patch,
+            tools = [executable],
+            stdout = stdout,
+            exit_code = exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with RuboCop",
+        )
+    else:
+        # Use run_shell for lint mode
+        outputs = [stdout]
+        args = ctx.actions.args()
+        args.add("--format", "simple")
+        args.add("--force-exclusion")
+        args.add("--cache-root", "/tmp")
+        if color:
+            args.add("--color")
+        args.add_all(srcs)
 
-    # Wire command-line options, see
-    # `rubocop --help` to see available options
-    args = ctx.actions.args()
+        command = _build_rubocop_command(
+            executable.path,
+            stdout.path,
+            exit_code.path if exit_code else None,
+        )
+        if exit_code:
+            outputs.append(exit_code)
 
-    # Force format to simple for human-readable output
-    args.add("--format", "simple")
-
-    # Honor exclusions in .rubocop.yml even though we pass explicit list of
-    # files
-    args.add("--force-exclusion")
-
-    # Set cache root to /tmp to avoid sandbox permission issues
-    # RuboCop's server feature needs a writable cache directory
-    # Note: We can't use --cache false with --cache-root, so we allow caching to /tmp
-    # Note: We don't pass --no-server because it causes errors with JRuby
-    args.add("--cache-root", "/tmp")
-
-    # Enable color output if requested
-    if color:
-        args.add("--color")
-
-    args.add_all(srcs)
-
-    command = _build_rubocop_command(
-        executable.path,
-        stdout.path,
-        exit_code.path if exit_code else None,
-    )
-    if exit_code:
-        outputs.append(exit_code)
-
-    ctx.actions.run_shell(
-        inputs = inputs,
-        outputs = outputs,
-        command = command,
-        arguments = [args],
-        mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with RuboCop",
-        tools = [executable],
-    )
-
-def rubocop_fix(
-        ctx,
-        executable,
-        srcs,
-        config,
-        patch,
-        stdout,
-        exit_code,
-        color = False):
-    """Create a Bazel Action that spawns RuboCop with --autocorrect-all.
-
-    Args:
-        ctx: Bazel Rule or Aspect evaluation context
-        executable: struct with _rubocop and _patcher fields
-        srcs: list of File objects for Ruby source files to lint
-        config: list of File objects for RuboCop config files (.rubocop.yml)
-        patch: File object where the patch output will be written
-        stdout: File object where linter output will be written
-        exit_code: File object where exit code will be written
-        color: boolean, whether to enable color output
-    """
-    patch_cfg = ctx.actions.declare_file(
-        "_{}.patch_cfg".format(ctx.label.name),
-    )
-
-    # Build args list with color flag if needed
-    rubocop_args = [
-        "--autocorrect-all",
-        "--force-exclusion",
-        "--cache",
-        "false",
-    ]
-    if color:
-        rubocop_args.append("--color")
-    rubocop_args.extend([s.path for s in srcs])
-
-    ctx.actions.write(
-        output = patch_cfg,
-        content = json.encode({
-            "linter": executable._rubocop.path,
-            "args": rubocop_args,
-            "files_to_diff": [s.path for s in srcs],
-            "output": patch.path,
-        }),
-    )
-
-    ctx.actions.run(
-        inputs = srcs + config + [patch_cfg],
-        outputs = [patch, exit_code, stdout],
-        executable = executable._patcher,
-        arguments = [patch_cfg.path],
-        env = {
-            "BAZEL_BINDIR": ".",
-            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
-            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
-            "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        },
-        tools = [executable._rubocop],
-        mnemonic = _MNEMONIC,
-        progress_message = "Fixing %{label} with RuboCop",
-    )
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = outputs,
+            command = command,
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+            progress_message = "Linting %{label} with RuboCop",
+            tools = [executable],
+        )
 
 # buildifier: disable=function-docstring
 def _rubocop_aspect_impl(target, ctx):
@@ -261,29 +208,16 @@ def _rubocop_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    # RuboCop can produce a patch at the same time as reporting the
-    # unpatched violations
-    if hasattr(outputs, "patch"):
-        rubocop_fix(
-            ctx,
-            ctx.executable,
-            files_to_lint,
-            ctx.files._config_files,
-            outputs.patch,
-            outputs.human.out,
-            outputs.human.exit_code,
-            color = ctx.attr._options[LintOptionsInfo].color,
-        )
-    else:
-        rubocop_action(
-            ctx,
-            ctx.executable._rubocop,
-            files_to_lint,
-            ctx.files._config_files,
-            outputs.human.out,
-            outputs.human.exit_code,
-            color = ctx.attr._options[LintOptionsInfo].color,
-        )
+    rubocop_action(
+        ctx,
+        ctx.executable._rubocop,
+        files_to_lint,
+        ctx.files._config_files,
+        outputs.human.out,
+        outputs.human.exit_code,
+        color = ctx.attr._options[LintOptionsInfo].color,
+        patch = getattr(outputs, "patch", None),
+    )
 
     # Generate machine-readable report in JSON format for SARIF conversion
     raw_machine_report = ctx.actions.declare_file(
@@ -362,7 +296,7 @@ def lint_rubocop_aspect(
 
     return aspect(
         implementation = _rubocop_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
@@ -370,11 +304,6 @@ def lint_rubocop_aspect(
             "_rubocop": attr.label(
                 default = binary,
                 allow_files = True,
-                executable = True,
-                cfg = "exec",
-            ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
                 cfg = "exec",
             ),

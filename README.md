@@ -32,6 +32,7 @@ Linters which are not language-specific:
 | Language               | Formatter                 | Linter(s)                        |
 | ---------------------- | ------------------------- | -------------------------------- |
 | C / C++                | [clang-format]            | [clang-tidy] or [cppcheck]       |
+| CUE                    | [cue fmt]                 |                                  |
 | Cuda                   | [clang-format]            |                                  |
 | CSS, Less, Sass        | [Prettier]                | [Stylelint]                      |
 | Go                     | [gofmt] or [gofumpt]      |                                  |
@@ -47,7 +48,7 @@ Linters which are not language-specific:
 | Kotlin                 | [ktfmt]                   | [ktlint]                         |
 | Markdown               | [Prettier]                | [Vale]                           |
 | Protocol Buffer        | [buf]                     | [buf lint]                       |
-| Python                 | [ruff]                    | [flake8], [pylint], [ruff]       |
+| Python                 | [ruff]                    | [flake8], [pylint], [ruff], [ty] |
 | Ruby                   |                           | [RuboCop], [Standard]            |
 | Rust                   | [rustfmt]                 | [clippy]                         |
 | SQL                    | [prettier-plugin-sql]     |                                  |
@@ -87,12 +88,14 @@ Linters which are not language-specific:
 [rubocop]: https://docs.rubocop.org/
 [standard]: https://github.com/standardrb/standard
 [ruff]: https://docs.astral.sh/ruff/
+[ty]: https://docs.astral.sh/ty/
 [pylint]: https://pylint.readthedocs.io/en/stable/
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
 [taplo]: https://taplo.tamasfe.dev/
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 [clang-tidy]: https://clang.llvm.org/extra/clang-tidy/
+[cue fmt]: https://cuelang.org/docs/reference/command/cue-help-fmt/
 [cppcheck]: https://www.cppcheck.com/
 [vale]: https://vale.sh/
 [yamlfmt]: https://github.com/google/yamlfmt

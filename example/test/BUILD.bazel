@@ -18,6 +18,7 @@ load(
     "shellcheck_test",
     "standardrb_test",
     "stylelint_test",
+    "ty_test",
 )
 
 write_file(
@@ -81,6 +82,11 @@ py_library(
     srcs = ["excluded.py"],
 )
 
+py_library(
+    name = "unsupported_operator",
+    srcs = ["unsupported_operator.py"],
+)
+
 java_library(
     name = "generated_java",
     srcs = ["generated.java"],
@@ -138,6 +144,13 @@ flake8_test(
 pylint_test(
     name = "pylint",
     srcs = ["//src:unused_import"],
+    # Expected to fail based on current content of the file.
+    tags = ["manual"],
+)
+
+ty_test(
+    name = "ty_should_fail_unsupported_operator",
+    srcs = ["//src:unsupported_operator"],
     # Expected to fail based on current content of the file.
     tags = ["manual"],
 )

@@ -46,10 +46,11 @@ ruff = lint_ruff_aspect(
 """
 
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintRuff"
 
-def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}):
+def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}, patch = None):
     """Run ruff as an action under Bazel.
 
     Ruff will select the configuration file to use for each source file, as documented here:
@@ -74,77 +75,51 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
             If None, then fail the build when ruff exits non-zero.
             See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes
         env: environment variaables for ruff
+        patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs + config
-    outputs = [stdout]
-
-    # Wire command-line options, see
-    # `ruff help check` to see available options
-    args = ctx.actions.args()
-    args.add("check")
-
-    # Honor exclusions in pyproject.toml even though we pass explicit list of files
-    args.add("--force-exclude")
-    args.add_all(srcs)
-
-    if exit_code:
-        command = "{ruff} $@ >{stdout}; echo $? >" + exit_code.path
-        outputs.append(exit_code)
+    if patch != None:
+        # Use run_patcher for fix mode
+        args_list = ["check", "--fix", "--force-exclude"] + [s.path for s in srcs]
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = inputs,
+            args = args_list,
+            files_to_diff = [s.path for s in srcs],
+            patch_out = patch,
+            tools = [executable],
+            stdout = stdout,
+            exit_code = exit_code,
+            env = env,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with Ruff",
+        )
     else:
-        # Create empty file on success, as Bazel expects one
-        command = "{ruff} $@ && touch {stdout}"
+        # Use run_shell for lint mode
+        outputs = [stdout]
+        args = ctx.actions.args()
+        args.add("check")
+        args.add("--force-exclude")
+        args.add_all(srcs)
 
-    ctx.actions.run_shell(
-        inputs = inputs,
-        outputs = outputs,
-        command = command.format(ruff = executable.path, stdout = stdout.path),
-        arguments = [args],
-        mnemonic = _MNEMONIC,
-        env = env,
-        progress_message = "Linting %{label} with Ruff",
-        tools = [executable],
-    )
+        if exit_code:
+            command = "{ruff} $@ >{stdout}; echo $? >" + exit_code.path
+            outputs.append(exit_code)
+        else:
+            # Create empty file on success, as Bazel expects one
+            command = "{ruff} $@ && touch {stdout}"
 
-def ruff_fix(ctx, executable, srcs, config, patch, stdout, exit_code, env = {}):
-    """Create a Bazel Action that spawns ruff with --fix.
-
-    Args:
-        ctx: an action context OR aspect context
-        executable: struct with _ruff and _patcher field
-        srcs: list of file objects to lint
-        config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
-        patch: output file containing the applied fixes that can be applied with the patch(1) command.
-        stdout: output file of linter results to generate
-        exit_code: output file to write the exit code
-        env: environment variaables for ruff
-    """
-    patch_cfg = ctx.actions.declare_file("_{}.patch_cfg".format(ctx.label.name))
-
-    ctx.actions.write(
-        output = patch_cfg,
-        content = json.encode({
-            "linter": executable._ruff.path,
-            "args": ["check", "--fix", "--force-exclude"] + [s.path for s in srcs],
-            "files_to_diff": [s.path for s in srcs],
-            "output": patch.path,
-        }),
-    )
-
-    ctx.actions.run(
-        inputs = srcs + config + [patch_cfg],
-        outputs = [patch, exit_code, stdout],
-        executable = executable._patcher,
-        arguments = [patch_cfg.path],
-        env = dict(env, **{
-            "BAZEL_BINDIR": ".",
-            "JS_BINARY__EXIT_CODE_OUTPUT_FILE": exit_code.path,
-            "JS_BINARY__STDOUT_OUTPUT_FILE": stdout.path,
-            "JS_BINARY__SILENT_ON_SUCCESS": "1",
-        }),
-        tools = [executable._ruff],
-        mnemonic = _MNEMONIC,
-        progress_message = "Fixing %{label} with Ruff",
-    )
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = outputs,
+            command = command.format(ruff = executable.path, stdout = stdout.path),
+            arguments = [args],
+            mnemonic = _MNEMONIC,
+            env = env,
+            progress_message = "Linting %{label} with Ruff",
+            tools = [executable],
+        )
 
 # buildifier: disable=function-docstring
 def _ruff_aspect_impl(target, ctx):
@@ -163,11 +138,16 @@ def _ruff_aspect_impl(target, ctx):
 
     color_env = {"FORCE_COLOR": "1"} if ctx.attr._options[LintOptionsInfo].color else {}
 
-    # Ruff can produce a patch at the same time as reporting the unpatched violations
-    if hasattr(outputs, "patch"):
-        ruff_fix(ctx, ctx.executable, files_to_lint, ctx.files._config_files, outputs.patch, outputs.human.out, outputs.human.exit_code, env = color_env)
-    else:
-        ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, outputs.human.out, outputs.human.exit_code, env = color_env)
+    ruff_action(
+        ctx,
+        ctx.executable._ruff,
+        files_to_lint,
+        ctx.files._config_files,
+        outputs.human.out,
+        outputs.human.exit_code,
+        env = color_env,
+        patch = getattr(outputs, "patch", None),
+    )
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
@@ -194,7 +174,7 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
 
     return aspect(
         implementation = _ruff_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
@@ -202,11 +182,6 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
             "_ruff": attr.label(
                 default = binary,
                 allow_files = True,
-                executable = True,
-                cfg = "exec",
-            ),
-            "_patcher": attr.label(
-                default = "@aspect_rules_lint//lint/private:patcher",
                 executable = True,
                 cfg = "exec",
             ),

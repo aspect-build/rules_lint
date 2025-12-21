@@ -65,6 +65,13 @@ bats_load_library "bats-assert"
     assert_output --partial "+ prettier --write example/src/hello.scss"
 }
 
+@test "should run cue fmt on CUE" {
+    run bazel run //format/test:format_CUE_with_cue-fmt
+    assert_success
+
+    assert_output --partial "+ cue-fmt fmt example/src/hello.cue"
+}
+
 @test "should run prettier on HTML" {
     run bazel run //format/test:format_HTML_with_prettier
     assert_success
@@ -90,7 +97,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Python_with_ruff
     assert_success
 
-    assert_output --partial "+ ruff format --force-exclude example/src/subdir/unused_import.py"
+    assert_output --partial "+ ruff format --force-exclude example/src/call_non_callable.py"
 }
 
 @test "should run taplo on TOML" {
