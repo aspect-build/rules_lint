@@ -203,6 +203,8 @@ bzl_library(
 bzl_library(
     name = "spotbugs",
     srcs = ["spotbugs.bzl"],
+    # Something broken in the deps of rules_java
+    tags = ["manual"],
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
         "@rules_java//java:rules",
