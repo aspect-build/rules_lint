@@ -1,3 +1,0 @@
-# This file should be used by ty when linting, and should ignore one lint
-[rules]
-call-non-callable = "ignore"

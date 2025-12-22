@@ -1,7 +1,0 @@
-query {
-  world(greeting: "hello") {
-    ... on Hello {
-      salutation
-    }
-  }
-}

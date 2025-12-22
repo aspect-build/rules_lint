@@ -1,7 +1,0 @@
-# Do not try and format generated code
-pnpm-lock.yaml linguist-generated
-
-# Any of the below attributes can be set to ignore a file
-src/subdir/rules-lint-ignored.js rules-lint-ignored
-src/subdir/gitlab-generated.js gitlab-generated
-src/subdir/linguist-generated.js linguist-generated
