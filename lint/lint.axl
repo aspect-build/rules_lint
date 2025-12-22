@@ -24,9 +24,6 @@ def impl(ctx: TaskContext) -> int:
         "--config=lint",
         "--remote_download_regex='.*AspectRulesLint.*'",
     ]
-    if ctx.args.fail_on_violation:
-        flags.append("--@aspect_rules_lint//lint:fail_on_violation")
-        flags.append("--keep_going")
     if ctx.args.fix:
         flags.append("--output_groups=rules_lint_patch")
         flags.append("--@aspect_rules_lint//lint:fix")
@@ -50,6 +47,8 @@ def impl(ctx: TaskContext) -> int:
                     generated = ctx.std.fs.read_to_string(filepath)
                     ctx.std.io.stderr.write(generated)
                 if file.name.endswith(".report"):
+                    report = ctx.std.fs.read_to_string(filepath)
+                    ctx.std.io.stdout.write(report)
                     if github_output:
                         ctx.std.fs.write(github_output, "lint-report=" + filepath)
                 if file.name.endswith(".patch"):
@@ -71,6 +70,5 @@ lint = task(
     args = {
         "fix": args.boolean(),
         "targets": args.positional(minimum = 0),
-        "fail_on_violation": args.boolean(default = False),
     },
 )

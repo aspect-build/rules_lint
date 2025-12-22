@@ -4,4 +4,3 @@ import javax.security.*
 fun main() {
   println("Hello, world!")
 }
-
