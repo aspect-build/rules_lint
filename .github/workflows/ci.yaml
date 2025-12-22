@@ -58,8 +58,9 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.15.0
         with: &bazelrc
           bazelrc: |
-            common --show_progress_rate_limit=60
-            common --show_timestamps
+            common     --show_progress_rate_limit=60
+            common     --show_timestamps
+            build:lint --no@aspect_rules_lint//lint:color
       # Permit this gross non-hermetic dependency
       - if: matrix.folder == 'examples/cpp'
         run: sudo apt-get update && sudo apt-get install -y libtinfo5

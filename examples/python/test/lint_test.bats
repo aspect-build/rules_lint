@@ -36,7 +36,7 @@ EOF
 }
 
 @test "should produce reports" {
-	run aspect lint //src:all --no@aspect_rules_lint//lint:color
+	run aspect lint //src:all
 	assert_success
 	assert_python_lints
 }
