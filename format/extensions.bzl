@@ -27,8 +27,8 @@ def _format_impl(module_ctx):
                 name = r.linux,
                 build_file_content = "filegroup(name = \"swiftformat\", srcs=[\"swiftformat_linux\"], visibility=[\"//visibility:public\"])",
                 patch_cmds = ["chmod u+x swiftformat_linux"],
-                sha256 = "f62813980c2848cb1941f1456a2a06251c2e2323183623760922058b98c70745",
-                url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.49.17/swiftformat_linux.zip",
+                sha256 = "be1b4bb76ee134cbc6b30c55939ea5b4dbe947c7373cc2015e9718d4bad00ae9",
+                url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.58.7/swiftformat_linux.zip",
             )
             http_archive(
                 name = r.macos,
@@ -38,8 +38,8 @@ def _format_impl(module_ctx):
                     "if command -v xattr > /dev/null; then xattr -c swiftformat; fi",
                     "chmod u+x swiftformat",
                 ],
-                sha256 = "978eaffdc3716bbc0859aecee0d83875cf3ab8d8725779448f0035309d9ad9f3",
-                url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.49.17/swiftformat.zip",
+                sha256 = "7e43f8e14e2089eeb83d6958ce162ffa90c9330f3f309ca054693614b2b1b241",
+                url = "https://github.com/nicklockwood/SwiftFormat/releases/download/0.58.7/swiftformat.zip",
             )
     return module_ctx.extension_metadata(reproducible = True)
 

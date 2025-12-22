@@ -200,13 +200,15 @@ bzl_library(
     ],
 )
 
-bzl_library(
-    name = "spotbugs",
-    srcs = ["spotbugs.bzl"],
-    deps = _BAZEL_TOOLS + [
-        "//lint/private:lint_aspect",
-    ],
-)
+# FIXME: Something broken in the deps of rules_java
+# bzl_library(
+#     name = "spotbugs",
+#     srcs = ["spotbugs.bzl"],
+#     deps = _BAZEL_TOOLS + [
+#         "//lint/private:lint_aspect",
+#         "@rules_java//java:rules",
+#     ],
+# )
 
 bzl_library(
     name = "rubocop",

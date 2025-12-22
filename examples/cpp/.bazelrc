@@ -1,0 +1,5 @@
+build:lint --aspects=//tools/lint:linters.bzl%clang_tidy
+build:lint --aspects=//tools/lint:linters.bzl%cppcheck
+# c++ options
+common:linux --action_env=BAZEL_CXXOPTS="-std=c++20"
+common:windows --action_env=BAZEL_CXXOPTS="/std:c++20"

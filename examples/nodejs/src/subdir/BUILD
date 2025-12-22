@@ -1,0 +1,19 @@
+load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+
+js_library(
+    name = "eslint-override",
+    srcs = ["index.js"],
+)
+
+ts_project(
+    name = "ts",
+    srcs = ["test.ts"],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = "//src:tsconfig",
+    deps = [
+        "//:node_modules/@types/node",
+        "//:node_modules/moment",
+    ],
+)

@@ -55,17 +55,3 @@ then: tag the repo and push the tag, for example
 ```
 
 Then watch the automation run on GitHub actions which creates the release.
-
-## Recording a demo
-
-Install from https://asciinema.org/
-Then cd example and start recording, pasting these commands:
-
-figlet "Linting with Bazel can be nice!"
-figlet "The BUILD file is clean"
-cat src/BUILD.bazel
-figlet "We can run lint.sh on the targets"
-./lint.sh src:all
-figlet "it linted proto, python, and JS!"
-figlet "' lint ' command with an Aspect CLI plugin ->"
-bazel lint src:all

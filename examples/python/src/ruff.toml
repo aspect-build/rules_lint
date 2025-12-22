@@ -1,0 +1,3 @@
+# This file should be used by Ruff when linting files beneath this folder.
+[lint]
+ignore = ["F401"]

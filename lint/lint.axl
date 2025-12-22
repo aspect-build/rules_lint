@@ -47,6 +47,8 @@ def impl(ctx: TaskContext) -> int:
                     generated = ctx.std.fs.read_to_string(filepath)
                     ctx.std.io.stderr.write(generated)
                 if file.name.endswith(".report"):
+                    report = ctx.std.fs.read_to_string(filepath)
+                    ctx.std.io.stdout.write(report)
                     if github_output:
                         ctx.std.fs.write(github_output, "lint-report=" + filepath)
                 if file.name.endswith(".patch"):
@@ -54,6 +56,8 @@ def impl(ctx: TaskContext) -> int:
                 if file.name.endswith(".exit_code"):
                     if int(ctx.std.fs.read_to_string(filepath).rstrip()) != 0:
                         exit_code = 1
+    if not build.wait().success:
+        exit_code = 1
     if ctx.args.fix:
         for patch in patches:
             ctx.std.process.command("patch").arg("-p1").arg("--input=" + patch).current_dir(ctx.std.env.current_dir()).spawn().wait()

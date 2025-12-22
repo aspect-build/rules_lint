@@ -164,6 +164,7 @@ def standardrb_action(
             exit_code = exit_code,
             mnemonic = _MNEMONIC,
             progress_message = "Fixing %{label} with Standard Ruby",
+            patch_cfg_suffix = "standardrb.patch_cfg",
         )
     else:
         # Use run_shell for lint mode

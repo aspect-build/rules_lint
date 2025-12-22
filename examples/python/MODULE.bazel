@@ -1,0 +1,26 @@
+"Bazel dependencies for Python formatting and linting example"
+
+bazel_dep(name = "aspect_rules_lint")
+bazel_dep(name = "rules_python", version = "1.0.0")
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
+bazel_dep(name = "bazel_features", version = "1.32.0")
+
+local_path_override(
+    module_name = "aspect_rules_lint",
+    path = "../..",
+)
+
+python_version = "3.9"
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    python_version = python_version,
+)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pip",
+    python_version = python_version,
+    requirements_lock = "//:requirements.txt",
+)
+use_repo(pip, "pip")

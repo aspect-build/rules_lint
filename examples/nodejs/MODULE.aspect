@@ -1,0 +1,9 @@
+# Aspect Extension setup for CLI "lint" and "format" commands
+# This example is in rules_lint, so we use a local dependency.
+# See https://github.com/bazel-starters/js/blob/main/MODULE.aspect
+# for a real-world example.
+axl_local_dep(
+    name = "rules_lint",
+    path = "../..",
+    auto_use_tasks = True,
+)

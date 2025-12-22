@@ -2,7 +2,9 @@
 ---
 workspaces:
   - .
-  - example
+  # TODO:
+  # - examples/cpp
+  # - ...
 bazel:
   flags:
     - --config=ci

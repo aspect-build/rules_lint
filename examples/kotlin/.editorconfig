@@ -1,0 +1,10 @@
+[*.{kt,kts}]
+insert_final_newline = true
+kotlin_imports_layout = *,java.**,javax.**,kotlin.**,^
+ij_kotlin_imports_layout = *,java.**,javax.**,kotlin.**,^
+indent_size = 4
+indent_style = space
+max_line_length = 200
+ktlint_ignore_back_ticked_identifier = false
+ij_kotlin_packages_to_use_import_on_demand = java.util.*,kotlinx.android.synthetic.**
+

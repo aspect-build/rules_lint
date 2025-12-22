@@ -1,0 +1,33 @@
+"Define Node.js linter aspects"
+
+load("@aspect_rules_lint//lint:eslint.bzl", "lint_eslint_aspect")
+load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
+load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
+load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
+
+eslint = lint_eslint_aspect(
+    binary = Label("//tools/lint:eslint"),
+    # ESLint will resolve the configuration file by looking in the working directory first.
+    # See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-file-resolution
+    # We must also include any other config files we expect eslint to be able to locate, e.g. tsconfigs
+    configs = [
+        Label("//:eslintrc"),
+    ],
+)
+
+eslint_test = lint_test(aspect = eslint)
+
+stylelint = lint_stylelint_aspect(
+    binary = Label("//tools/lint:stylelint"),
+    config = Label("//:stylelintrc"),
+)
+
+stylelint_test = lint_test(aspect = stylelint)
+
+vale = lint_vale_aspect(
+    binary = Label("//tools/lint:vale"),
+    config = Label("//:.vale.ini"),
+    styles = Label("//tools/lint:vale_styles"),
+)
+
+vale_test = lint_test(aspect = vale)

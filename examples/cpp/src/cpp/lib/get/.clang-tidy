@@ -1,0 +1,6 @@
+# https://clang.llvm.org/extra/clang-tidy/
+# this is an example of a .clang-tidy file in a subdirectory that overrides
+# the configuration for files in this directory and below. It must be made
+# visible through an export_files declaration in this package and added
+# to the 'configs' attribute in clang_tidy aspect.
+Checks: "-*, misc-const-correctness"

@@ -1,0 +1,20 @@
+"Bazel dependencies for C# formatting example"
+
+bazel_dep(name = "aspect_rules_lint")
+bazel_dep(name = "rules_dotnet", version = "0.20.5")
+bazel_dep(name = "bazel_skylib", version = "1.4.2")
+bazel_dep(name = "bazel_features", version = "1.32.0")
+
+local_path_override(
+    module_name = "aspect_rules_lint",
+    path = "../..",
+)
+
+dotnet = use_extension("@rules_dotnet//dotnet:extensions.bzl", "dotnet")
+dotnet.toolchain(dotnet_version = "9.0.306")
+use_repo(dotnet, "dotnet_toolchains")
+
+register_toolchains("@dotnet_toolchains//:all")
+
+main_extension = use_extension("//3rdparty/nuget:paket.main_extension.bzl", "main_extension")
+use_repo(main_extension, "paket.main")

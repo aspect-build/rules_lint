@@ -1,0 +1,17 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "hello_cc",
+    srcs = ["hello.cpp"],
+)
+
+filegroup(
+    name = "all",
+    srcs = [
+        "hello.cu",
+        ":hello_cc",
+        "//src/cpp/main:hello-world",
+    ],
+)
