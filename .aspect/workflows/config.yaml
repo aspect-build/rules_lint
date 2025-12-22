@@ -4,10 +4,7 @@ workspaces:
   - .
   # TODO:
   # - examples/cpp
-  # - examples/csharp
-  # - examples/java
-  # - examples/python
-  # - examples/ruby
+  # - ...
 bazel:
   flags:
     - --config=ci

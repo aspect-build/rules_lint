@@ -55,7 +55,6 @@ def impl(ctx: TaskContext) -> int:
                     patches.append(file.file.removeprefix("file://"))
                 if file.name.endswith(".exit_code"):
                     if int(ctx.std.fs.read_to_string(filepath).rstrip()) != 0:
-                        ctx.std.io.stderr.write("Lint error: " + filepath)
                         exit_code = 1
     if not build.wait().success:
         exit_code = 1

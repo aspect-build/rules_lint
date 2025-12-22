@@ -152,6 +152,7 @@ jobs:
             common --announce_rc
             common --color=yes
       - name: Test
+        # Reduce time on macos runners by testing one example
         working-directory: examples/java
         env:
           USE_BAZEL_VERSION: ${{ matrix.version }}
