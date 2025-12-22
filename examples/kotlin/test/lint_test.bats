@@ -7,13 +7,13 @@ function assert_kotlin_lints() {
 }
 
 @test "should produce reports" {
-	run $BATS_TEST_DIRNAME/../lint.sh //src:all --no@aspect_rules_lint//lint:color
+	run aspect lint //src:all --no@aspect_rules_lint//lint:color
 	assert_success
 	assert_kotlin_lints
 }
 
 @test "should fail when --fail-on-violation is passed" {
-	run $BATS_TEST_DIRNAME/../lint.sh --fail-on-violation //src:all
+	run aspect lint --fail-on-violation //src:all
 	assert_failure
 	assert_kotlin_lints
 }
