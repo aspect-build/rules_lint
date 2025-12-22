@@ -15,7 +15,7 @@ prettier.prettier_binary(
     env = {"BAZEL_BINDIR": "."},
     fixed_args = [
         "--config=\"$$JS_BINARY__RUNFILES\"/$(rlocationpath //:prettierrc)",
-        "--loglevel=warn",
+        "--log-level=warn",
     ],
 )
 

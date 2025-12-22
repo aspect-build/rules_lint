@@ -1,10 +1,9 @@
 /**
  * @see https://prettier.io/docs/en/configuration.html
  */
-const config = {
+import gherkin from "prettier-plugin-gherkin";
+export default {
   tabWidth: 2,
   printWidth: 80,
-  plugins: [require("prettier-plugin-gherkin")],
+  plugins: [gherkin],
 };
-
-module.exports = config;

@@ -13,7 +13,7 @@ npm_link_all_packages(name = "node_modules")
 
 js_library(
     name = "prettierrc",
-    srcs = ["prettier.config.cjs"],
+    srcs = ["prettier.config.mjs"],
     deps = [
         ":node_modules/prettier-plugin-gherkin",
     ],

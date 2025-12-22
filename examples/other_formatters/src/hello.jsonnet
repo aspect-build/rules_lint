@@ -2,4 +2,3 @@
   w:: 'World',
   Hello: $.w,
 }
-
