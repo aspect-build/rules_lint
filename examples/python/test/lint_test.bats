@@ -41,9 +41,8 @@ EOF
 	assert_python_lints
 }
 
-@test "should fail when --fail-on-violation is passed" {
-	run aspect lint --fail-on-violation //src:all
+@test "should fail when fail_on_violation is passed" {
+	run bazel build --@aspect_rules_lint//lint:fail_on_violation //src:all
 	assert_failure
 	assert_python_lints
 }
-

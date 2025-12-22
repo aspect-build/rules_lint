@@ -24,6 +24,9 @@ def impl(ctx: TaskContext) -> int:
         "--config=lint",
         "--remote_download_regex='.*AspectRulesLint.*'",
     ]
+    if ctx.args.fail_on_violation:
+        flags.append("--@aspect_rules_lint//lint:fail_on_violation")
+        flags.append("--keep_going")
     if ctx.args.fix:
         flags.append("--output_groups=rules_lint_patch")
         flags.append("--@aspect_rules_lint//lint:fix")
@@ -53,6 +56,7 @@ def impl(ctx: TaskContext) -> int:
                     patches.append(file.file.removeprefix("file://"))
                 if file.name.endswith(".exit_code"):
                     if int(ctx.std.fs.read_to_string(filepath).rstrip()) != 0:
+                        ctx.std.io.stderr.write("Lint error: " + filepath)
                         exit_code = 1
     if not build.wait().success:
         exit_code = 1
@@ -67,5 +71,6 @@ lint = task(
     args = {
         "fix": args.boolean(),
         "targets": args.positional(minimum = 0),
+        "fail_on_violation": args.boolean(default = False),
     },
 )
