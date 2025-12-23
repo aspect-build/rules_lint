@@ -124,28 +124,6 @@ bzl_library(
     ],
 )
 
-# Aliases introduced in #432 for fear of breaking users.
-# TODO(2.0) remove them
-alias(
-    name = "eslint.workaround_17660",
-    actual = "//lint/js:eslint.workaround_17660",
-)
-
-alias(
-    name = "eslint.compact-formatter",
-    actual = "//lint/js:eslint.compact-formatter",
-)
-
-alias(
-    name = "eslint.stylish-formatter",
-    actual = "//lint/js:eslint.stylish-formatter",
-)
-
-alias(
-    name = "stylelint.compact-formatter",
-    actual = "//lint/js:stylelint.compact-formatter",
-)
-
 bzl_library(
     name = "eslint",
     srcs = ["eslint.bzl"],

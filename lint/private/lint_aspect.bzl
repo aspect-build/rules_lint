@@ -95,9 +95,6 @@ def output_files(mnemonic, target, ctx):
     ), OutputGroupInfo(
         rules_lint_human = depset(human_outputs),
         rules_lint_machine = depset(machine_outputs),
-        # Legacy name used by existing callers.
-        # TODO(2.0): remove
-        rules_lint_report = depset(machine_outputs),
         # Always cause the action to execute, even if the output isn't requested
         _validation = depset([human_out]),
     )
@@ -122,9 +119,6 @@ def patch_and_output_files(*args):
         rules_lint_human = depset(human_outputs),
         rules_lint_machine = depset(machine_outputs),
         rules_lint_patch = depset([patch]),
-        # Legacy name used by existing callers.
-        # TODO(2.0): remove
-        rules_lint_report = depset(machine_outputs),
     )
 
 def filter_srcs(rule):
