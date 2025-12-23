@@ -12,6 +12,9 @@ module(
 # see https://github.com/bazelbuild/bazel/pull/25509
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.0", repo_name = None)
 
+# Force our dependents to a Bazel-9 compatible version of rules_nodejs
+bazel_dep(name = "rules_nodejs", version = "6.5.2", repo_name = None)
+
 # Needed in the root because we use js_lib_helpers in our aspect impl
 # Minimum version needs 'chore: bump bazel-lib to 2.0 by @alexeagle in #1311'
 # to allow users on bazel-lib 2.0
@@ -55,11 +58,6 @@ use_repo(rules_lint_toolchains, "sarif_parser_toolchains")
 register_toolchains("@sarif_parser_toolchains//:all")
 
 ####### Dev dependencies ########
-
-single_version_override(
-    module_name = "rules_nodejs",
-    version = "6.5.2",
-)
 
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.1.0", dev_dependency = True)
 
