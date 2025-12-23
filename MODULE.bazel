@@ -12,6 +12,9 @@ module(
 # see https://github.com/bazelbuild/bazel/pull/25509
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.0", repo_name = None)
 
+# Force our dependents to a Bazel-9 compatible version of rules_nodejs
+bazel_dep(name = "rules_nodejs", version = "6.5.2", repo_name = None)
+
 # Needed in the root because we use js_lib_helpers in our aspect impl
 # Minimum version needs 'chore: bump bazel-lib to 2.0 by @alexeagle in #1311'
 # to allow users on bazel-lib 2.0
@@ -64,9 +67,13 @@ IS_RELEASE = False
 
 bazel_dep(
     name = "toolchains_protoc",
-    version = "0.4.1",
+    version = "0.6.0",
     dev_dependency = IS_RELEASE,
 )
+
+protoc = use_extension("@toolchains_protoc//protoc:extensions.bzl", "protoc", dev_dependency = IS_RELEASE)
+protoc.toolchain(version = "v32.0")
+
 bazel_dep(
     name = "gazelle",
     version = "0.43.0",
@@ -74,7 +81,7 @@ bazel_dep(
 )
 bazel_dep(
     name = "rules_go",
-    version = "0.54.0",
+    version = "0.59.0",
     dev_dependency = IS_RELEASE,
     repo_name = "io_bazel_rules_go",
 )

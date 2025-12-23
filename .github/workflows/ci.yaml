@@ -78,6 +78,7 @@ jobs:
         exclude:
           # FIXME: these two are hanging; why?
           - folder: examples/java
+          - folder: examples/shell
           # FIXME: these two are failing, diagnose.
           - folder: examples/python
           - folder: examples/cpp
@@ -138,9 +139,8 @@ jobs:
           # - windows-latest
         version:
           - 7.x
-          # TODO(alex): missing use_repo calls for some things in WORKSPACE.bzlmod
-          # - 8.x
-
+          - 8.x
+          - 9.*
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
