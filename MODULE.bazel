@@ -59,11 +59,6 @@ register_toolchains("@sarif_parser_toolchains//:all")
 
 ####### Dev dependencies ########
 
-single_version_override(
-    module_name = "rules_nodejs",
-    version = "6.5.2",
-)
-
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.1.0", dev_dependency = True)
 
 # To allow /tools to be built from source
