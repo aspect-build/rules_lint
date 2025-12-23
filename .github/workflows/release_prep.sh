@@ -50,43 +50,13 @@ gzip <$ARCHIVE_TMP >$ARCHIVE
 SHA=$(shasum -a 256 $ARCHIVE | awk '{print $1}')
 
 cat << EOF
-## Using Bzlmod with Bazel 6
-
-1. Enable with \`common --enable_bzlmod\` in \`.bazelrc\`.
-2. Add to your \`MODULE.bazel\` file:
+Add the `bazel_dep` to your `MODULE.bazel` file:
 
 \`\`\`starlark
 bazel_dep(name = "aspect_rules_lint", version = "${TAG:1}")
-
-# Next, follow the install instructions for
-# - linting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/linting.md
-# - formatting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/formatting.md
 \`\`\`
 
-## Using WORKSPACE
-
-Paste this snippet into your \`WORKSPACE.bazel\` file:
-
-\`\`\`starlark
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-http_archive(
-    name = "aspect_rules_lint",
-    sha256 = "${SHA}",
-    strip_prefix = "${PREFIX}",
-    url = "https://github.com/aspect-build/rules_lint/releases/download/${TAG}/${ARCHIVE}",
-)
-
-http_archive(
-    name = "bazel_lib",
-    sha256 = "0758ace949a93f709230a8e08ef35c5f0aacae2ff5d219b27da1d21d8233a709",
-    strip_prefix = "bazel-lib-3.0.0-rc.0",
-    url = "https://github.com/bazel-contrib/bazel-lib/releases/download/v3.0.0-rc.0/bazel-lib-v3.0.0-rc.0.tar.gz",
-)
-
-load("@bazel_lib//lib:repositories.bzl", "bazel_lib_dependencies")
-
-bazel_lib_dependencies()
+Then, follow the install instructions for
+- linting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/linting.md
+- formatting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/formatting.md
 EOF
-
-awk 'f;/--SNIP--/{f=1}' example/WORKSPACE.bazel
-echo "\`\`\`" 
