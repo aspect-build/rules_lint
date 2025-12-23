@@ -2,7 +2,6 @@
 
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "rules_shell", version = "0.5.0")
-bazel_dep(name = "bazel_features", version = "1.32.0")
 
 local_path_override(
     module_name = "aspect_rules_lint",

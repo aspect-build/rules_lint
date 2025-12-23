@@ -1,6 +1,5 @@
 "Common utilities for testing machine-readable SARIF reports from linter aspects."
 
-load("@bazel_features//:features.bzl", "bazel_features")
 load("@jq.bzl//jq:jq.bzl", "jq_test")
 
 SARIF_TOOL_DRIVER_NAME_FILTER = ".runs[].tool.driver.name"
@@ -16,9 +15,6 @@ def report_test(name, report, expected_tool, expected_uri):
         expected_uri: Expected file URI in the report
     """
 
-    # WORKSPACE only works with releases, not prerelease
-    if not bazel_features.external_deps.is_bzlmod_enabled:
-        return
     jq_test(
         name = name,
         file1 = report,

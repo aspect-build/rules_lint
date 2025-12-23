@@ -1,16 +1,15 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
-load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 
 package(default_visibility = ["//lint:__subpackages__"])
 
 js_binary(
     name = "patcher",
-    data = ["@rules_diff//diff/toolchain/diff:resolved"] if bazel_features.external_deps.is_bzlmod_enabled else [],
+    data = ["@rules_diff//diff/toolchain/diff:resolved"],
     entry_point = "patcher.mjs",
     env = {
         "DIFF_BIN": "$(rlocationpath @rules_diff//diff/toolchain/diff:resolved)",
-    } if bazel_features.external_deps.is_bzlmod_enabled else {},
+    },
     log_level = select({
         "@aspect_rules_lint//lint:debug.enabled": "debug",
         "//conditions:default": "error",
