@@ -213,7 +213,7 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
                 allow_files = True,
             ),
             "_compact_formatter": attr.label(
-                default = "@aspect_rules_lint//lint:stylelint.compact-formatter",
+                default = "@aspect_rules_lint//lint/js:stylelint.compact-formatter",
                 allow_single_file = True,
                 cfg = "exec",
             ),
