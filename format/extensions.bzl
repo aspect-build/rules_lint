@@ -10,6 +10,11 @@ def _format_impl(module_ctx):
                 sha256 = "8fe196b894ccf9072f98d4e1013a180306e17d244830b03986ee5e8eabeb6156",
                 url = "https://github.com/tamasfe/taplo/releases/download/0.10.0/taplo-linux-x86_64.gz",
             )
+            http_file(
+                name = r.name + "_mac",
+                sha256 = "713734314c3e71894b9e77513c5349835eefbd52908445a0d73b0c7dc469347d",
+                url = "https://github.com/tamasfe/taplo/releases/download/0.10.0/taplo-darwin-aarch64.gz",
+            )
         for r in mod.tags.google_java_format:
             http_jar(
                 name = r.name,
