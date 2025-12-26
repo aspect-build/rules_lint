@@ -23,7 +23,7 @@ pylint_test = lint_test(aspect = pylint)
 ruff = lint_ruff_aspect(
     binary = Label("@aspect_rules_lint//lint:ruff_bin"),
     configs = [
-        Label("@//:.ruff.toml"),
+        Label("@//:pyproject.toml"),
         Label("@//src:ruff.toml"),
         Label("@//src/subdir:ruff.toml"),
     ],
@@ -33,7 +33,7 @@ ruff_test = lint_test(aspect = ruff)
 
 ty = lint_ty_aspect(
     binary = Label("@aspect_rules_lint//lint:ty_bin"),
-    config = Label("@//:ty.toml"),
+    config = Label("@//:pyproject.toml"),
 )
 
 ty_test = lint_test(aspect = ty)

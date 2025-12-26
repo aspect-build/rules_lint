@@ -98,6 +98,7 @@ def _ty_aspect_impl(target, ctx):
 
                 # Collect imports from pip packages for extra search paths
                 for import_path in dep[PyInfo].imports.to_list():
+                    #if import_path != ctx.workspace_name:
                     import_paths["external/" + import_path] = True
 
     # When srcs contain labels to other targets (e.g., genrules that produce .py files),
