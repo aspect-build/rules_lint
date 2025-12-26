@@ -1,0 +1,27 @@
+[project]
+name = "scaffold_test_4309"
+classifiers = ["Private :: Do Not Upload"]
+version = "0"
+
+# Dependencies should NOT use "Version Matching clauses" (matching operator `==`)
+# https://packaging.python.org/en/latest/specifications/version-specifiers/#version-matching
+# This project uses 'uv pip compile' from https://github.com/astral-sh/uv
+# which will ensure the resolved versions of both direct and indirect dependencies are pinned.
+# Therefore we only need to constrain versions when some ranges 
+# of dependency versions are not compatible.
+dependencies = [
+    "djlint",
+    "flake8",
+    "pylint",
+    "yamllint",
+    "pytest",
+    "requests",
+]
+
+# See https://docs.astral.sh/ruff/configuration/
+[tool.ruff]
+exclude = ['test/excluded.py']
+
+# See https://docs.astral.sh/ty/reference/configuration/
+[tool.ty.rules]
+call-non-callable = "ignore"
