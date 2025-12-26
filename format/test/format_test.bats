@@ -97,14 +97,14 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Python_with_ruff
     assert_success
 
-    assert_output --partial "+ ruff format --force-exclude examples/python/src/call_non_callable.py"
+    assert_output --partial "+ ruff format --force-exclude examples/python/app/__main__.py examples/python/app/app_test.py"
 }
 
 @test "should run taplo on TOML" {
     run bazel run //format/test:format_TOML_with_taplo
     assert_success
 
-    assert_output --partial '+ taplo format _typos.toml examples/python/.ruff.toml examples/python/src/ruff.toml examples/python/src/subdir/ruff.toml examples/python/ty.toml examples/rust/.clippy.toml examples/toml/hello.toml'
+    assert_output --partial '+ taplo format _typos.toml examples/python/pyproject.toml'
 }
 
 @test "should run terraform fmt on HCL" {
