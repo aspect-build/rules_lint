@@ -5,7 +5,10 @@ package(default_visibility = ["//:__subpackages__"])
 
 genrule(
     name = "taplo",
-    srcs = ["@taplo//file"],
+    srcs = select({
+        "@platforms//os:linux": ["@taplo//file"],
+        "@platforms//os:macos": ["@taplo_mac//file"],
+    }),
     outs = ["taplo_bin"],
     cmd = "gunzip -c $< > $@",
     executable = True,

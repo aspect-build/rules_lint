@@ -2,6 +2,7 @@
 
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "bazel_lib", version = "3.0.0")
+bazel_dep(name = "platforms", version = "1.0.0")
 
 local_path_override(
     module_name = "aspect_rules_lint",
@@ -11,4 +12,4 @@ local_path_override(
 # TOML formatter tools
 format_tools = use_extension("@aspect_rules_lint//format:extensions.bzl", "tools")
 format_tools.taplo()
-use_repo(format_tools, "taplo")
+use_repo(format_tools, "taplo", "taplo_mac")
