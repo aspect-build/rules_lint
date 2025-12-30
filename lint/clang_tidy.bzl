@@ -39,7 +39,7 @@ clang_tidy = lint_clang_tidy_aspect(
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
@@ -361,6 +361,9 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
 
 # buildifier: disable=function-docstring
 def _clang_tidy_aspect_impl(target, ctx):
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
+        return []
+
     if not CcInfo in target:
         return []
 
@@ -397,7 +400,17 @@ def _clang_tidy_aspect_impl(target, ctx):
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filter = "", lint_target_headers = False, angle_includes_are_system = True, verbose = False):
+DEFAULT_RULE_KINDS = ["cc_binary", "cc_library"]
+
+def lint_clang_tidy_aspect(
+        binary,
+        configs = [],
+        global_config = [],
+        header_filter = "",
+        lint_target_headers = False,
+        angle_includes_are_system = True,
+        verbose = False,
+        rule_kinds = DEFAULT_RULE_KINDS):
     """A factory function to create a linter aspect.
 
     Args:
@@ -466,6 +479,9 @@ def lint_clang_tidy_aspect(binary, configs = [], global_config = [], header_filt
                 cfg = "exec",
             ),
             "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
+            ),
         },
         toolchains = [
             OPTIONAL_SARIF_PARSER_TOOLCHAIN,
