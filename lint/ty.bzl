@@ -96,6 +96,9 @@ echo $? >{exit_code}
 
 # buildifier: disable=function-docstring
 def _ty_aspect_impl(target, ctx):
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
+        return []
+
     # Collect transitive sources from dependencies using the standard PyInfo provider.
     transitive_sources = []
 
@@ -125,9 +128,6 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(src[PyInfo].transitive_sources)
                 for import_path in src[PyInfo].imports.to_list():
                     import_paths["external/" + import_path] = True
-
-    if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
-        return []
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)
