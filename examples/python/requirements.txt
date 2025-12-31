@@ -447,6 +447,13 @@ requests==2.32.5 \
     --hash=sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6 \
     --hash=sha256:dbba0bac56e100853db0ea71b82b4dfd5fe2bf6d3754a8893c3af500cec7d7cf
     # via scaffold-test-4309 (pyproject.toml)
+ruamel-yaml==0.19.0 \
+    --hash=sha256:96ea8bafd9f3fdb0181ce3cc05e6ec02ce0a8788cbafa9b5a6e47c76fe26dfc6 \
+    --hash=sha256:ff19233e1eb3e9301e7a3d437847713e361a80faace167639327efbe8c0e5f95
+    # via scaffold-test-4309 (pyproject.toml)
+ruamel-yaml-clibz==0.3.4 \
+    --hash=sha256:e99077ac6aa4943af1000161a0cb793a379c5c8cd03ea8dd3803e0b58739b685
+    # via ruamel-yaml
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
     --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81

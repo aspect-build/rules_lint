@@ -16,6 +16,7 @@ dependencies = [
     "yamllint",
     "pytest",
     "requests",
+    "ruamel.yaml",
 ]
 
 # See https://docs.astral.sh/ruff/configuration/
