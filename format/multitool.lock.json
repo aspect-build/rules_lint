@@ -4,41 +4,41 @@
     "binaries": [
       {
         "kind": "archive",
-        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.1/cue_v0.15.1_linux_arm64.tar.gz",
+        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.3/cue_v0.15.3_linux_arm64.tar.gz",
         "file": "cue",
-        "sha256": "6bb80ec3262c7cedf898a21e9e9481c86da54488f144788b1fa0a5dc01879a0b",
+        "sha256": "db9e6b15d02f838c47b65e4c5184caf8456e389be28a274f5186e19fab335015",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.1/cue_v0.15.1_linux_amd64.tar.gz",
+        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.3/cue_v0.15.3_linux_amd64.tar.gz",
         "file": "cue",
-        "sha256": "aa282261245e9ab0d65b17ec3c7207f5231600106f7b26fc0c2e158b3937ca3f",
+        "sha256": "309bbe62ebb0e74a2b298d2808edb0eadfd19789ed0de259b61721f19e3b5ff0",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.1/cue_v0.15.1_darwin_arm64.tar.gz",
+        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.3/cue_v0.15.3_darwin_arm64.tar.gz",
         "file": "cue",
-        "sha256": "9ee183ec8686675a0aea24f9f5cfb64235ee4e7583e8e771432a0bf58e64411a",
+        "sha256": "9b84bbd0ef1050b51328e4d9af47b2e88c772765d5c74594277417a4bc083a68",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.1/cue_v0.15.1_darwin_amd64.tar.gz",
+        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.3/cue_v0.15.3_darwin_amd64.tar.gz",
         "file": "cue",
-        "sha256": "e761c85f060283d7c52b0b80e3ae57b569a0c4e7f7029bdbf38d7f079b2128bc",
+        "sha256": "44f177363bb59453371d9bf3dd2097c6bd7fc0fccb2eaf2cfde8bc934c8ba174",
         "os": "macos",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.1/cue_v0.15.1_windows_amd64.zip",
+        "url": "https://github.com/cue-lang/cue/releases/download/v0.15.3/cue_v0.15.3_windows_amd64.zip",
         "file": "cue.exe",
-        "sha256": "516fa080c1af12578ff76a4165cc7bf14ad9bbe5d9724a0c07553860d038885e",
+        "sha256": "d291bd510887bf1308a6bc07c28d17c7f01bc75e7a885adacdbd30d6d6ecbd20",
         "os": "windows",
         "cpu": "x86_64"
       }
