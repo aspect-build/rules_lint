@@ -25,6 +25,11 @@ py_library(
     deps = ["//src/python_lib:py_dependency"],
 )
 
+py_library(
+    name = "uses_pickle",
+    srcs = ["uses_pickle.py"],
+)
+
 filegroup(
     name = "unused_import_pyi",
     srcs = ["unused_import.pyi"],
@@ -38,5 +43,6 @@ filegroup(
         ":unsupported_operator",
         ":unused_import",
         ":uses_dependency",
+        ":uses_pickle",
     ],
 )
