@@ -143,7 +143,7 @@ def _vale_aspect_impl(target, ctx):
 # Users might want to try https://github.com/dwtj/dwtj_rules_markdown but we expect many won't
 # want to take that dependency.
 # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
-def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule_kinds = ["markdown_library"], filegroup_tags = ["markdown", "lint-with-vale"]):
+def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule_kinds = ["markdown", "markdown_library"], filegroup_tags = ["markdown", "lint-with-vale"]):
     """A factory function to create a linter aspect."""
     return aspect(
         implementation = _vale_aspect_impl,
