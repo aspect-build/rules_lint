@@ -47,7 +47,8 @@ tar --file $ARCHIVE_TMP --append ${PREFIX}/tools/integrity.bzl
 ############
 
 gzip <$ARCHIVE_TMP >$ARCHIVE
-INTEGRITY="sha512-$(shasum -a 512 $ARCHIVE | xxd -p -r | base64)"
+# Note: this happens to match what we publish to BCR in source.json, though it's not required to
+INTEGRITY="sha256-$(shasum -a 256 $ARCHIVE | xxd -p -r | base64)"
 
 cat << EOF
 Add this to your `MODULE.bazel` file:
