@@ -47,13 +47,28 @@ tar --file $ARCHIVE_TMP --append ${PREFIX}/tools/integrity.bzl
 ############
 
 gzip <$ARCHIVE_TMP >$ARCHIVE
-SHA=$(shasum -a 256 $ARCHIVE | awk '{print $1}')
+INTEGRITY="sha512-$(shasum -a 512 $ARCHIVE | xxd -p -r | base64)"
 
 cat << EOF
-Add the `bazel_dep` to your `MODULE.bazel` file:
+Add this to your `MODULE.bazel` file:
 
 \`\`\`starlark
 bazel_dep(name = "aspect_rules_lint", version = "${TAG:1}")
+\`\`\`
+
+This repo also provides a `lint` task for the Aspect CLI.
+Add this to your `MODULE.aspect` file:
+
+\`\`\`starlark
+# AXL dependencies; see https://github.com/aspect-extensions
+axl_archive_dep(
+    name = "aspect_rules_lint",
+    urls = ["https://github.com/aspect-build/rules_lint/releases/download/v${TAG}/rules_lint-v${TAG}.tar.gz"],
+    integrity = ${INTEGRITY},
+    strip_prefix = "rules_lint-${TAG}",
+    dev = True,
+    auto_use_tasks = True,
+)
 \`\`\`
 
 Then, follow the install instructions for
