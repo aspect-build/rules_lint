@@ -50,6 +50,7 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
     # `ty help check` to see available options
     args = ctx.actions.args()
     args.add("check")
+    args.add("--force-exclude")
 
     # Add all source files to be linted
     args.add_all(srcs)
