@@ -6,6 +6,14 @@ Then the url fields are converted from latest to a format string, and sha256sums
 
 VALE_STYLE_DATA = [
     {
+        "name": "Bazel",
+        "description": "Dictionary of common build system and developer infra terms",
+        "homepage": "https://github.com/alexeagle/vale-bazel-vocab",
+        "integrity": "sha256-XIuKXX0iKarKz7JIdt0v4aDVI3mlG8fKxZ7lAdMf1a0=",
+        "version": "v0.1.0",
+        "url": "https://github.com/alexeagle/vale-bazel-vocab/archive/refs/heads/{}.zip",
+    },
+    {
         "name": "Google",
         "description": "A Vale-compatible implementation of the Google Developer Documentation Style Guide.",
         "homepage": "https://github.com/errata-ai/Google",
