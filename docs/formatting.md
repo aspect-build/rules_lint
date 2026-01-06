@@ -13,7 +13,7 @@ load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 format_multirun(name = "format")
 ```
 
-For more details, see the `format_multirun` [API documentation](./format.md) and
+For more details, see the `format_multirun` [API documentation](https://registry.bazel.build/docs/aspect_rules_lint#format-defs-bzl) and
 the `example/tools/format/BUILD.bazel` file.
 
 Finally, we recommend an alias in the root BUILD file, so that developers can just type `bazel run format`:
