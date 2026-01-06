@@ -27,6 +27,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Verify bcr patches
         run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
+      - uses: lycheeverse/lychee-action@v2
       - name: "List examples that have a tools/format folder"
         id: set-format-matrix
         run: |
