@@ -10,7 +10,7 @@ module(
 # version be used transitively so that it doesn't produce conflicting actions
 # with the bazel_lib module we use.
 # see https://github.com/bazelbuild/bazel/pull/25509
-bazel_dep(name = "aspect_bazel_lib", version = "2.22.0", repo_name = None)
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.4", repo_name = None)
 
 # Force our dependents to a Bazel-9 compatible version of rules_nodejs
 bazel_dep(name = "rules_nodejs", version = "6.5.2", repo_name = None)
