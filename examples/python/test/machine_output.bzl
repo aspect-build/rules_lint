@@ -2,7 +2,9 @@
 
 # buildifier: disable=bzl-visibility
 load("@aspect_rules_lint//lint/private:machine_report_testing.bzl", "machine_report_rule")
-load("//tools/lint:linters.bzl", "flake8", "pylint", "ruff", "ty")
+load("//tools/lint:linters.bzl", "bandit", "flake8", "pylint", "ruff", "ty")
+
+machine_bandit_report = machine_report_rule(bandit)
 
 machine_ruff_report = machine_report_rule(ruff)
 
