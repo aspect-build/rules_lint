@@ -1,5 +1,25 @@
 "This file is automatically updated by mirror_ruff.sh"
 RUFF_VERSIONS = {
+    "0.14.11": {
+        "aarch64-apple-darwin": "c3fab6bcad9cc2f8a342829dd4ea011c54b9671d023b71baac1cbf2b3526cefd",
+        "aarch64-pc-windows-msvc": "43faade7e8f33a8ffab726aa44ee2b6bc1fd9d51407320db797dcb3dac068461",
+        "aarch64-unknown-linux-gnu": "e5c018ac042ddeb9c02c3d96b6efe3a0dcd3406ba9bd695253d6111785f7abf6",
+        "aarch64-unknown-linux-musl": "4779a99b51812b56d56d180174be46ddb2fed98fecaea7565b450d37cff1b8c6",
+        "arm-unknown-linux-musleabihf": "a400347f59192992b61dc0bb9dfdfe640f8063403112d9e3a70f6275d34ae386",
+        "armv7-unknown-linux-gnueabihf": "7938729417dcd33b7078ae0a77440cc152bba33518bb095e19cb108c132b2602",
+        "armv7-unknown-linux-musleabihf": "57da6726050047ff2989554734deb94eb053789fc92c297a1a722a6723106a77",
+        "i686-pc-windows-msvc": "51bec5b8cdc4008fb76e11eba4cbb62b8617ff242d316465fa2247dabfd2dcb9",
+        "i686-unknown-linux-gnu": "9051f2529d36e38b58b03b6e605d77f62b6378d5afe70eba692f9a214794b273",
+        "i686-unknown-linux-musl": "3f94ba805fd14bd8c088b710c950cd89d9968294fa3cff68a618e50ad9dea73d",
+        "powerpc64-unknown-linux-gnu": "eb69c9da0285717f39ed25f666a0860d7d6a50359a1de0bf76fba6f83d59e1ea",
+        "powerpc64le-unknown-linux-gnu": "001b43b7558d32f320fa775c74af0035952a724d323bb5204b6f83017297c6db",
+        "riscv64gc-unknown-linux-gnu": "8901e1a36846c59a94ef468808e4a1af58f74e9c2830f40e045f5f9e70d6867c",
+        "s390x-unknown-linux-gnu": "d29ba2740b7735ab20663225dd420acfb0797b29358d902afc7b87ee0f1f4b08",
+        "x86_64-apple-darwin": "b301d1c04facba1004d180c8fd9ae36d868b780900682c97ecf324015c75f0b3",
+        "x86_64-pc-windows-msvc": "e254f04e054e095215b8f74d5cdb7288f2d3f226bdc42b35cd44751fc7a55b2d",
+        "x86_64-unknown-linux-gnu": "b98f19bb2cc99e0ea4de1625fbc43661902a1db45ff49a72e7f4a58cfedaabfb",
+        "x86_64-unknown-linux-musl": "8e8b7a3f791e0faf3a1728d808133f6f9bd5c1422eccb9956e7e7376ff5404b8",
+    },
     "0.14.6": {
         "aarch64-apple-darwin": "b2ace677f51d0f2b91ca27d312ac8b069658502049015f4891c16f8864136282",
         "aarch64-pc-windows-msvc": "90518b6d16fe8b705c891dcdd77b20ab41da5e042b085aced7bbc647f6f2fdcd",
