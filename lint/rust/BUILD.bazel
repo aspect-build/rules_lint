@@ -1,5 +1,6 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary", "js_test")
 load("@bazel_lib//lib:diff_test.bzl", "diff_test")
+load("//lint/private:patcher_run.bzl", "patcher_run")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
 js_library(
@@ -11,7 +12,7 @@ js_binary(
     name = "cli",
     data = [":diagnostic-formatter"],
     entry_point = "rust.cli.js",
-    # TODO BL: Fix this
+    # Must be public because users will depend on it when they instantiate the aspect.
     visibility = ["//visibility:public"],
 )
 
@@ -19,12 +20,12 @@ js_run_binary(
     name = "got.sarif",
     testonly = True,
     srcs = [
-        "testdata/clippy.json",
+        "testdata/sarif/clippy.diagnostics",
     ],
     outs = ["got.sarif.out"],
     args = [
         "sarif",
-        "$(rootpath testdata/clippy.json)",
+        "$(rootpath testdata/sarif/clippy.diagnostics)",
         "$(rootpath got.sarif.out)",
     ],
     tool = ":cli",
@@ -33,12 +34,12 @@ js_run_binary(
 js_test(
     name = "test_sarif",
     data = [
-        "testdata/clippy-sarif.out",
+        "testdata/sarif/clippy.sarif.expected",
         ":got.sarif",
     ],
     entry_point = "rust.diagnostic-formatter.test.js",
     env = {
-        "WANT": "$(rootpath testdata/clippy-sarif.out)",
+        "WANT": "$(rootpath testdata/sarif/clippy.sarif.expected)",
         "GOT": "$(rootpath :got.sarif)",
     },
 )
@@ -47,12 +48,12 @@ js_run_binary(
     name = "got.human",
     testonly = True,
     srcs = [
-        "testdata/clippy.json",
+        "testdata/human/clippy.diagnostics",
     ],
     outs = ["got.human.out"],
     args = [
         "human-readable",
-        "$(rootpath testdata/clippy.json)",
+        "$(rootpath testdata/human/clippy.diagnostics)",
         "$(rootpath got.human.out)",
     ],
     tool = ":cli",
@@ -61,7 +62,29 @@ js_run_binary(
 diff_test(
     name = "test_human",
     file1 = ":got.human",
-    file2 = ":testdata/clippy-human.out",
+    file2 = "testdata/human/clippy.human.expected",
+)
+
+patcher_run(
+    name = "got.patch",
+    testonly = True,
+    data = [
+        ":testdata/patch/clippy.diagnostics",
+    ],
+    files_to_diff = [
+        "testdata/patch/src/warning_and_error.rs",
+    ],
+    tool = ":cli",
+    tool_args = [
+        "patch",
+        "$(rootpath :testdata/patch/clippy.diagnostics)",
+    ],
+)
+
+diff_test(
+    name = "test_patch",
+    file1 = ":got.patch",
+    file2 = "testdata/patch/clippy.patch.expected",
 )
 
 sh_binary(
