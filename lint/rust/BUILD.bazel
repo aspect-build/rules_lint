@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary", "js_test")
+load("@bazel_lib//lib:diff_test.bzl", "diff_test")
 
 js_library(
     name = "diagnostic-formatter",
@@ -56,15 +57,8 @@ js_run_binary(
     tool = ":cli",
 )
 
-js_test(
+diff_test(
     name = "test_human",
-    data = [
-        "testdata/clippy-human.out",
-        ":got.human",
-    ],
-    entry_point = "rust.diagnostic-formatter.test.js",
-    env = {
-        "WANT": "$(rootpath testdata/clippy-human.out)",
-        "GOT": "$(rootpath :got.human)",
-    },
+    file1 = ":got.human",
+    file2 = ":testdata/clippy-human.out",
 )
