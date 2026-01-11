@@ -34,11 +34,13 @@ function diagnosticsToSarifPatchFile(diagnostics) {
   const results = [];
 
   diagnostics
-    .filter(
-      (message) => message.reason === "compiler-message" && message.message
-    )
+    // .filter(
+    //   (message) => message.reason === "compiler-message" && message.message
+    // )
     .forEach((message) => {
-      const diagnostic = message.message;
+      // const diagnostic = message.message;
+      const diagnostic = message;
+      console.log(`BL: Processing diagnostic: ${diagnostic}, spans = ${message.spans}`)
 
       // Skip diagnostics without spans
       if (!diagnostic.spans || diagnostic.spans.length === 0) {

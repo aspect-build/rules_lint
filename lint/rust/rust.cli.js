@@ -50,6 +50,8 @@ function main() {
       })
       .filter((item) => item !== null);
 
+    console.log(`BL: Diagnostics: ${diagnostics}`)
+
     // Process the diagnostics based on output type
     let outputContent;
     if (outputType === "human-readable") {
