@@ -15,7 +15,7 @@ function main() {
     console.error(
       "Usage: node rust.cli.js <command> <input-file> <output-file>"
     );
-    console.error('  command: "human-readable" or "patch"');
+    console.error('  command: "human-readable" or "sarif"');
     process.exit(1);
   }
 
@@ -24,9 +24,9 @@ function main() {
   const outputFile = process.argv[4];
 
   // Validate output type
-  if (outputType !== "human-readable" && outputType !== "patch") {
+  if (outputType !== "human-readable" && outputType !== "sarif") {
     console.error(
-      'Error: output-type must be either "human-readable" or "patch"'
+      'Error: output-type must be either "human-readable" or "sarif"'
     );
     process.exit(1);
   }
@@ -50,14 +50,12 @@ function main() {
       })
       .filter((item) => item !== null);
 
-    console.log(`BL: Diagnostics: ${diagnostics}`)
-
     // Process the diagnostics based on output type
     let outputContent;
     if (outputType === "human-readable") {
       outputContent = diagnosticsToHumanReadable(diagnostics);
     } else {
-      // outputType is 'patch'
+      // outputType is 'sarif'
       const sarif = diagnosticsToSarifPatchFile(diagnostics);
       outputContent = JSON.stringify(sarif, null, 2);
     }

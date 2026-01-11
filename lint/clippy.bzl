@@ -109,26 +109,19 @@ def _clippy_aspect_impl(target, ctx):
         error_format = "json",
     )
 
-    # FIXME: Rustc only gives us JSON output, which we can't turn into SARIF yet.
-    # clippy uses rustc's IO format, which doesn't have a SARIF output mode built in,
-    # and they're not planning to add one.
-    # We could use clippy-sarif, which seems to be relatively maintained.
-    #
-    # Refs:
-    #  - https://github.com/rust-lang/rust-clippy/issues/8122
-    #  - https://github.com/psastras/sarif-rs/tree/main/clippy-sarif
     _parse_to_sarif_action(ctx, _MNEMONIC, raw_rustc_json_diagnostics, outputs.machine.out)
 
     return [info]
 
 def _parse_to_sarif_action(ctx, mnemonic, rustc_diagnostics_file, sarif_output):
     args = [
-        "patch",
+        "sarif",
         rustc_diagnostics_file.path,
         sarif_output.path,
     ]
 
-    # Must be set for js_binary to run: https://github.com/aspect-build/rules_js/tree/dbb5af0d2a9a2bb50e4cf4a96dbc582b27567155?tab=readme-ov-file#running-nodejs-programs
+    # Must be set for js_binary to run.
+    # Ref: https://github.com/aspect-build/rules_js/tree/dbb5af0d2a9a2bb50e4cf4a96dbc582b27567155?tab=readme-ov-file#running-nodejs-programs
     env = {
         "BAZEL_BINDIR": ".",
     }

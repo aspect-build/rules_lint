@@ -14,29 +14,57 @@ js_binary(
 )
 
 js_run_binary(
-    name = "got.patch",
+    name = "got.sarif",
     testonly = True,
     srcs = [
-        "testdata/clippy.out",
+        "testdata/clippy.json",
     ],
-    outs = ["got.patch.out"],
+    outs = ["got.sarif.out"],
     args = [
-        "patch",
-        "$(rootpath testdata/clippy.out)",
-        "$(rootpath got.patch.out)",
+        "sarif",
+        "$(rootpath testdata/clippy.json)",
+        "$(rootpath got.sarif.out)",
     ],
     tool = ":cli",
 )
 
 js_test(
-    name = "test",
+    name = "test_sarif",
     data = [
         "testdata/clippy-sarif.out",
-        ":got.patch",
+        ":got.sarif",
     ],
     entry_point = "rust.diagnostic-formatter.test.js",
     env = {
         "WANT": "$(rootpath testdata/clippy-sarif.out)",
-        "GOT": "$(rootpath :got.patch)",
+        "GOT": "$(rootpath :got.sarif)",
+    },
+)
+
+js_run_binary(
+    name = "got.human",
+    testonly = True,
+    srcs = [
+        "testdata/clippy.json",
+    ],
+    outs = ["got.human.out"],
+    args = [
+        "human-readable",
+        "$(rootpath testdata/clippy.json)",
+        "$(rootpath got.human.out)",
+    ],
+    tool = ":cli",
+)
+
+js_test(
+    name = "test_human",
+    data = [
+        "testdata/clippy-human.out",
+        ":got.human",
+    ],
+    entry_point = "rust.diagnostic-formatter.test.js",
+    env = {
+        "WANT": "$(rootpath testdata/clippy-human.out)",
+        "GOT": "$(rootpath :got.human)",
     },
 )
