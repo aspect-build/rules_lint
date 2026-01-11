@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary", "js_test")
+load("@bazel_lib//lib:diff_test.bzl", "diff_test")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
 js_library(
@@ -10,34 +11,57 @@ js_binary(
     name = "cli",
     data = [":diagnostic-formatter"],
     entry_point = "rust.cli.js",
+    # TODO BL: Fix this
+    visibility = ["//visibility:public"],
 )
 
 js_run_binary(
-    name = "got.patch",
+    name = "got.sarif",
     testonly = True,
     srcs = [
-        "testdata/clippy.out",
+        "testdata/clippy.json",
     ],
-    outs = ["got.patch.out"],
+    outs = ["got.sarif.out"],
     args = [
-        "patch",
-        "$(rootpath testdata/clippy.out)",
-        "$(rootpath got.patch.out)",
+        "sarif",
+        "$(rootpath testdata/clippy.json)",
+        "$(rootpath got.sarif.out)",
     ],
     tool = ":cli",
 )
 
 js_test(
-    name = "test",
+    name = "test_sarif",
     data = [
         "testdata/clippy-sarif.out",
-        ":got.patch",
+        ":got.sarif",
     ],
     entry_point = "rust.diagnostic-formatter.test.js",
     env = {
         "WANT": "$(rootpath testdata/clippy-sarif.out)",
-        "GOT": "$(rootpath :got.patch)",
+        "GOT": "$(rootpath :got.sarif)",
     },
+)
+
+js_run_binary(
+    name = "got.human",
+    testonly = True,
+    srcs = [
+        "testdata/clippy.json",
+    ],
+    outs = ["got.human.out"],
+    args = [
+        "human-readable",
+        "$(rootpath testdata/clippy.json)",
+        "$(rootpath got.human.out)",
+    ],
+    tool = ":cli",
+)
+
+diff_test(
+    name = "test_human",
+    file1 = ":got.human",
+    file2 = ":testdata/clippy-human.out",
 )
 
 sh_binary(
