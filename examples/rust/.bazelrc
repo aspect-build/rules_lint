@@ -1,1 +1,4 @@
 build:lint --aspects=//tools/lint:linters.bzl%clippy
+
+# TODO BL: I can't believe I can't passthrough args to bazel:
+build --override_module=rules_rust=/Users/blorente/code/github.com/bazelbuild/rules_rust
