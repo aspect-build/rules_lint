@@ -9,6 +9,8 @@ js_binary(
     name = "cli",
     data = [":diagnostic-formatter"],
     entry_point = "rust.cli.js",
+    # TODO BL: Fix this
+    visibility = ["//visibility:public"],
 )
 
 js_run_binary(

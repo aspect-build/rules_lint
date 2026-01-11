@@ -94,13 +94,14 @@ def _clippy_aspect_impl(target, ctx):
         extra_clippy_flags = extra_options,
     )
 
+    raw_rustc_json_diagnostics = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "rustc_json_diagnostics"))
     rust_clippy_action.action(
         ctx,
         clippy_executable = clippy_bin,
         process_wrapper = ctx.executable._process_wrapper,
         crate_info = crate_info,
         config = ctx.file._config_file,
-        output = outputs.machine.out,
+        output = raw_rustc_json_diagnostics,
         exit_code_file = outputs.machine.exit_code,
         forward_clippy_exit_code = False,  # We don't want to crash the process if there are clippy errors, we just want to report them.
         cap_at_warnings = False,
@@ -116,9 +117,28 @@ def _clippy_aspect_impl(target, ctx):
     # Refs:
     #  - https://github.com/rust-lang/rust-clippy/issues/8122
     #  - https://github.com/psastras/sarif-rs/tree/main/clippy-sarif
-    # parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
+    _parse_to_sarif_action(ctx, _MNEMONIC, raw_rustc_json_diagnostics, outputs.machine.out)
 
     return [info]
+
+def _parse_to_sarif_action(ctx, mnemonic, rustc_diagnostics_file, sarif_output):
+    args = [
+        "patch",
+        rustc_diagnostics_file.path,
+        sarif_output.path,
+    ]
+
+    # Must be set for js_binary to run: https://github.com/aspect-build/rules_js/tree/dbb5af0d2a9a2bb50e4cf4a96dbc582b27567155?tab=readme-ov-file#running-nodejs-programs
+    env = {
+        "BAZEL_BINDIR": ".",
+    }
+    ctx.actions.run(
+        executable = ctx.executable._rustc_sarif_parser,
+        arguments = args,
+        inputs = [rustc_diagnostics_file],
+        outputs = [sarif_output],
+        env = env,
+    )
 
 DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_test"]
 
@@ -146,6 +166,19 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS):
         "_process_wrapper": attr.label(
             doc = "A process wrapper for running clippy on all platforms",
             default = Label("@rules_rust//util/process_wrapper"),
+            executable = True,
+            cfg = "exec",
+        ),
+        "_rustc_sarif_parser": attr.label(
+            doc = """A binary that can convert JSON rustc diagnostics into SARIF.
+
+Note that rustc diagnostics are different from cargo diagnostics, which is what common rust implementations like sarif-rs use.
+In particular, cargo diagnostics _may contain_ rustc diagnostics, but they don't have to.
+
+References:
+- Rustc diagnostic format: https://doc.rust-lang.org/beta/rustc/json.html#diagnostics
+""",
+            default = Label("//lint/rust:cli"),
             executable = True,
             cfg = "exec",
         ),
