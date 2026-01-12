@@ -75,14 +75,13 @@ To enable semantic rules (e.g., OrganizeImports with removeUnused):
 """
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
-load("@rules_java//java/common/rules:java_runtime.bzl", "JavaRuntimeInfo")
 load("@rules_java//java:defs.bzl", "JavaInfo")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintScalafix"
 
-def scalafix_action(ctx, executable, srcs, config, stdout, java_runtime, exit_code = None, options = [], patch = None, classpath = None, semanticdb_targetroots = None, sourceroot = None):
+def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, options = [], patch = None, classpath = None, semanticdb_targetroots = None, sourceroot = None):
     """Run scalafix as a build action in Bazel.
 
     Adapter for wrapping Bazel around
@@ -90,11 +89,10 @@ def scalafix_action(ctx, executable, srcs, config, stdout, java_runtime, exit_co
 
     Args:
         ctx: an action context or aspect context
-        executable: struct with scalafix field (the java_binary)
+        executable: the scalafix java_binary executable
         srcs: A list of Scala source files to lint
         config: The .scalafix.conf configuration file
         stdout: output file for linter results
-        java_runtime: The Java Runtime configured for this build, from the registered toolchain
         exit_code: output file to write the exit code.
             If None, then fail the build when scalafix exits non-zero.
         options: additional command-line arguments to scalafix
@@ -108,15 +106,6 @@ def scalafix_action(ctx, executable, srcs, config, stdout, java_runtime, exit_co
 
     inputs = list(srcs)
     outputs = [stdout]
-
-    # Java runtime from toolchain for hermetic execution
-    java_home = java_runtime[JavaRuntimeInfo].java_home
-    java_runtime_files = java_runtime[JavaRuntimeInfo].files
-    env = {
-        "JAVA_HOME": java_home,
-    }
-
-    inputs.append(executable)
 
     # Add config file
     if config:
@@ -139,12 +128,6 @@ def scalafix_action(ctx, executable, srcs, config, stdout, java_runtime, exit_co
     args.add("--files")
     args.add_all(srcs)
 
-    # Include Java runtime files required for scalafix
-    inputs = depset(direct = inputs, transitive = [java_runtime_files])
-
-    # Make hermetic java available to scalafix
-    command = "export PATH=$PATH:$JAVA_HOME/bin\n"
-
     if patch != None:
         # Use run_patcher for fix mode
         args_list = ["--config", config.path] if config else []
@@ -161,14 +144,13 @@ def scalafix_action(ctx, executable, srcs, config, stdout, java_runtime, exit_co
         run_patcher(
             ctx,
             ctx.executable,
-            inputs = inputs.to_list() if hasattr(inputs, "to_list") else inputs,
+            inputs = inputs,
             args = args_list,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable],
             stdout = stdout,
             exit_code = exit_code,
-            env = env,
             mnemonic = _MNEMONIC,
             progress_message = "Fixing %{label} with Scalafix",
         )
@@ -178,11 +160,11 @@ def scalafix_action(ctx, executable, srcs, config, stdout, java_runtime, exit_co
 
         if exit_code:
             # Don't fail scalafix and just report the violations
-            command += "{scalafix} $@ >{stdout}; echo $? >" + exit_code.path
+            command = "{scalafix} $@ >{stdout}; echo $? >" + exit_code.path
             outputs.append(exit_code)
         else:
-            # Run scalafix with arguments passed
-            command += "{scalafix} $@ && touch {stdout}"
+            # Run scalafix with arguments passed, create empty stdout file on success
+            command = "{scalafix} $@ && touch {stdout}"
 
         ctx.actions.run_shell(
             inputs = inputs,
@@ -190,8 +172,8 @@ def scalafix_action(ctx, executable, srcs, config, stdout, java_runtime, exit_co
             command = command.format(scalafix = executable.path, stdout = stdout.path),
             arguments = [args],
             mnemonic = _MNEMONIC,
+            tools = [executable],
             progress_message = "Linting %{label} with Scalafix",
-            env = env,
         )
 
 def _scalafix_aspect_impl(target, ctx):
@@ -248,7 +230,6 @@ def _scalafix_aspect_impl(target, ctx):
         files_to_lint,
         ctx.file._config,
         outputs.human.out,
-        ctx.attr._java_runtime,
         outputs.human.exit_code,
         color_options,
         patch = getattr(outputs, "patch", None),
@@ -265,7 +246,6 @@ def _scalafix_aspect_impl(target, ctx):
         files_to_lint,
         ctx.file._config,
         raw_machine_report,
-        ctx.attr._java_runtime,
         outputs.machine.exit_code,
         classpath = classpath,
         semanticdb_targetroots = semanticdb_targetroots,
@@ -309,9 +289,6 @@ def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_b
                 default = config,
                 allow_single_file = True,
             ),
-            "_java_runtime": attr.label(
-                default = "@rules_java//toolchains:current_java_runtime",
-            ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
@@ -320,7 +297,6 @@ def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_b
             ),
         }),
         toolchains = [
-            "@bazel_tools//tools/jdk:toolchain_type",
             OPTIONAL_SARIF_PARSER_TOOLCHAIN,
         ],
     )
