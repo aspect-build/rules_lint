@@ -1,0 +1,8 @@
+load("@rules_java//java:defs.bzl", "java_binary")
+
+java_binary(
+    name = "scalafix",
+    main_class = "scalafix.cli.Cli",
+    runtime_deps = ["@maven//:ch_epfl_scala_scalafix_cli_2_13_18"],
+    visibility = ["//visibility:public"],
+)

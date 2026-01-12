@@ -1,8 +1,9 @@
-"Bazel dependencies for Scala formatting example"
+"Bazel dependencies for Scala formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "rules_jvm_external", version = "6.5")
 bazel_dep(name = "rules_java", version = "8.5.0")
+bazel_dep(name = "rules_scala", version = "7.1.6")
 bazel_dep(name = "bazel_skylib", version = "1.4.2")
 
 local_path_override(
@@ -10,10 +11,24 @@ local_path_override(
     path = "../..",
 )
 
+# Protocol compiler toolchains for rules_scala
+register_toolchains(
+    "@rules_scala_protoc_toolchains//...:all",
+    dev_dependency = True,
+)
+
+scala_protoc = use_extension(
+    "@rules_scala//scala/extensions:protoc.bzl",
+    "scala_protoc",
+    dev_dependency = True,
+)
+use_repo(scala_protoc, "rules_scala_protoc_toolchains")
+
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
     artifacts = [
         "org.scalameta:scalafmt-cli_2.13:3.7.14",
+        "ch.epfl.scala:scalafix-cli_2.13.18:0.14.5",
     ],
     lock_file = "@//:maven_install.json",
     repositories = [
