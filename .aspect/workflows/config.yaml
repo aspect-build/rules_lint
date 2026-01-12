@@ -1,4 +1,4 @@
-# See https://docs.aspect.build/v/workflows/config
+# See https://docs.aspect.build/aspect-workflows/additional-materials/reference-config
 ---
 workspaces:
   - .
