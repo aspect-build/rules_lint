@@ -50,28 +50,44 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
     # `ty help check` to see available options
     args = ctx.actions.args()
     args.add("check")
+    args.add("--force-exclude")
 
     # Add all source files to be linted
     args.add_all(srcs)
 
-    # Add extra search paths for third-party dependencies (pip packages)
-    for path in extra_search_paths:
-        args.add("--extra-search-path", path)
-
     ## Ty's color output is turned off for non-interactive invocations
     args.add("--color", "always")
 
+    # Build a script that adds --extra-search-path only for directories that exist
+    # Some pip package directories may not exist, so we check first
+    extra_search_path_script = "EXTRA_SEARCH_PATHS=''\n"
+    for path in extra_search_paths:
+        extra_search_path_script += """if [ -d "{path}" ]; then
+  EXTRA_SEARCH_PATHS="$EXTRA_SEARCH_PATHS --extra-search-path {path}"
+fi
+""".format(path = path)
+
     if exit_code:
-        command = "{ty} $@ >{stdout}; echo $? >" + exit_code.path
+        command = """{extra_search_path_script}
+{ty} $@ $EXTRA_SEARCH_PATHS >{stdout}
+echo $? >{exit_code}
+"""
         outputs.append(exit_code)
     else:
         # Create empty file on success, as Bazel expects one
-        command = "{ty} $@ && touch {stdout}"
+        command = """{extra_search_path_script}
+{ty} $@ $EXTRA_SEARCH_PATHS && touch {stdout}
+"""
 
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
-        command = command.format(ty = executable.path, stdout = stdout.path),
+        command = command.format(
+            ty = executable.path,
+            stdout = stdout.path,
+            exit_code = exit_code.path if exit_code else "",
+            extra_search_path_script = extra_search_path_script,
+        ),
         arguments = [args],
         mnemonic = _MNEMONIC,
         env = env,
@@ -81,6 +97,9 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
 
 # buildifier: disable=function-docstring
 def _ty_aspect_impl(target, ctx):
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
+        return []
+
     # Collect transitive sources from dependencies using the standard PyInfo provider.
     transitive_sources = []
 
@@ -110,9 +129,6 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(src[PyInfo].transitive_sources)
                 for import_path in src[PyInfo].imports.to_list():
                     import_paths["external/" + import_path] = True
-
-    if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
-        return []
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)

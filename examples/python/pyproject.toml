@@ -10,12 +10,14 @@ version = "0"
 # Therefore we only need to constrain versions when some ranges 
 # of dependency versions are not compatible.
 dependencies = [
+    "bandit[sarif,toml]",
     "djlint",
     "flake8",
     "pylint",
     "yamllint",
     "pytest",
     "requests",
+    "ruamel.yaml",
 ]
 
 # See https://docs.astral.sh/ruff/configuration/

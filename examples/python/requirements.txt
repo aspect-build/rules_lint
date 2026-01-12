@@ -6,6 +6,16 @@ astroid==3.3.11 \
     --hash=sha256:1e5a5011af2920c7c67a53f65d536d65bfa7116feeaf2354d8b94f29573bb0ce \
     --hash=sha256:54c760ae8322ece1abd213057c4b5bba7c49818853fc901ef09719a60dbf9dec
     # via pylint
+attrs==25.4.0 \
+    --hash=sha256:16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11 \
+    --hash=sha256:adcf7e2a1fb3b36ac48d97835bb6d8ade15b8dcce26aba8bf1d14847b57a3373
+    # via
+    #   jschema-to-python
+    #   sarif-om
+bandit[sarif, toml]==1.8.6 \
+    --hash=sha256:3348e934d736fcdb68b6aa4030487097e23a501adf3e7827b63658df464dddd0 \
+    --hash=sha256:dbfe9c25fc6961c2078593de55fd19f2559f9e45b99f1272341f5b95dea4e56b
+    # via scaffold-test-4309 (pyproject.toml)
 certifi==2025.11.12 \
     --hash=sha256:97de8790030bbd5c2d96b7ec782fc2f7820ef8dba6db909ccf95449f2d062d4b \
     --hash=sha256:d8ab5478f2ecd78af242878415affce761ca6bc54a22a27e026d7c25357c3316
@@ -201,16 +211,32 @@ jsbeautifier==1.15.4 \
     # via
     #   cssbeautifier
     #   djlint
+jschema-to-python==1.2.3 \
+    --hash=sha256:76ff14fe5d304708ccad1284e4b11f96a658949a31ee7faed9e0995279549b91 \
+    --hash=sha256:8a703ca7604d42d74b2815eecf99a33359a8dccbb80806cce386d5e2dd992b05
+    # via bandit
 json5==0.12.1 \
     --hash=sha256:b2743e77b3242f8d03c143dd975a6ec7c52e2f2afe76ed934e53503dd4ad4990 \
     --hash=sha256:d9c9b3bc34a5f54d43c35e11ef7cb87d8bdd098c6ace87117a7b7e83e705c1d5
     # via djlint
+jsonpickle==4.1.1 \
+    --hash=sha256:bb141da6057898aa2438ff268362b126826c812a1721e31cf08a6e142910dc91 \
+    --hash=sha256:f86e18f13e2b96c1c1eede0b7b90095bbb61d99fedc14813c44dc2f361dbbae1
+    # via jschema-to-python
+markdown-it-py==3.0.0 \
+    --hash=sha256:355216845c60bd96232cd8d8c40e8f9765cc86f46880e43a8fd22dc1a1a8cab1 \
+    --hash=sha256:e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb
+    # via rich
 mccabe==0.7.0 \
     --hash=sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325 \
     --hash=sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e
     # via
     #   flake8
     #   pylint
+mdurl==0.1.2 \
+    --hash=sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8 \
+    --hash=sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba
+    # via markdown-it-py
 packaging==25.0 \
     --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \
     --hash=sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f
@@ -221,6 +247,12 @@ pathspec==0.12.1 \
     # via
     #   djlint
     #   yamllint
+pbr==7.0.3 \
+    --hash=sha256:b46004ec30a5324672683ec848aed9e8fc500b0d261d40a3229c2d2bbfcedc29 \
+    --hash=sha256:ff223894eb1cd271a98076b13d3badff3bb36c424074d26334cd25aebeecea6b
+    # via
+    #   jschema-to-python
+    #   sarif-om
 platformdirs==4.4.0 \
     --hash=sha256:abd01743f24e5287cd7a5db3752faf1a2d65353f38ec26d98e25a6db65958c85 \
     --hash=sha256:ca753cf4d81dc309bc67b0ea38fd15dc97bc30ce419a7f58d13eb3bf14c4febf
@@ -240,7 +272,9 @@ pyflakes==3.1.0 \
 pygments==2.19.2 \
     --hash=sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887 \
     --hash=sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b
-    # via pytest
+    # via
+    #   pytest
+    #   rich
 pylint==3.3.9 \
     --hash=sha256:01f9b0462c7730f94786c283f3e52a1fbdf0494bbe0971a78d7277ef46a751e7 \
     --hash=sha256:d312737d7b25ccf6b01cc4ac629b5dcd14a0fcf3ec392735ac70f137a9d5f83a
@@ -324,6 +358,7 @@ pyyaml==6.0.3 \
     --hash=sha256:fa160448684b4e94d80416c0fa4aac48967a969efe22931448d853ada8baf926 \
     --hash=sha256:fc09d0aa354569bc501d4e787133afc08552722d3ab34836a80547331bb5d4a0
     # via
+    #   bandit
     #   djlint
     #   yamllint
 regex==2025.9.18 \
@@ -447,12 +482,35 @@ requests==2.32.5 \
     --hash=sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6 \
     --hash=sha256:dbba0bac56e100853db0ea71b82b4dfd5fe2bf6d3754a8893c3af500cec7d7cf
     # via scaffold-test-4309 (pyproject.toml)
+rich==14.2.0 \
+    --hash=sha256:73ff50c7c0c1c77c8243079283f4edb376f0f6442433aecb8ce7e6d0b92d1fe4 \
+    --hash=sha256:76bc51fe2e57d2b1be1f96c524b890b816e334ab4c1e45888799bfaab0021edd
+    # via bandit
+ruamel-yaml==0.19.0 \
+    --hash=sha256:96ea8bafd9f3fdb0181ce3cc05e6ec02ce0a8788cbafa9b5a6e47c76fe26dfc6 \
+    --hash=sha256:ff19233e1eb3e9301e7a3d437847713e361a80faace167639327efbe8c0e5f95
+    # via scaffold-test-4309 (pyproject.toml)
+ruamel-yaml-clibz==0.3.4 \
+    --hash=sha256:e99077ac6aa4943af1000161a0cb793a379c5c8cd03ea8dd3803e0b58739b685
+    # via ruamel-yaml
+sarif-om==1.0.4 \
+    --hash=sha256:539ef47a662329b1c8502388ad92457425e95dc0aaaf995fe46f4984c4771911 \
+    --hash=sha256:cd5f416b3083e00d402a92e449a7ff67af46f11241073eea0461802a3b5aef98
+    # via bandit
+setuptools==80.9.0 \
+    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
+    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
+    # via pbr
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
     --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81
     # via
     #   cssbeautifier
     #   jsbeautifier
+stevedore==5.5.0 \
+    --hash=sha256:18363d4d268181e8e8452e71a38cd77630f345b2ef6b4a8d5614dac5ee0d18cf \
+    --hash=sha256:d31496a4f4df9825e1a1e4f1f74d19abb0154aff311c3b376fcc89dae8fccd73
+    # via bandit
 tomli==2.3.0 \
     --hash=sha256:00b5f5d95bbfc7d12f91ad8c593a1659b6387b43f054104cda404be6bda62456 \
     --hash=sha256:0a154a9ae14bfcf5d8917a59b51ffd5a3ac1fd149b71b47a3a104ca4edcfa845 \
@@ -497,6 +555,7 @@ tomli==2.3.0 \
     --hash=sha256:feb0dacc61170ed7ab602d3d972a58f14ee3ee60494292d384649a3dc38ef463 \
     --hash=sha256:ff72b71b5d10d22ecb084d345fc26f42b5143c5533db5e2eaba7d2d335358876
     # via
+    #   bandit
     #   djlint
     #   pylint
     #   pytest

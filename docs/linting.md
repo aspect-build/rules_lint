@@ -13,7 +13,7 @@ We suggest creating a `linters.bzl` file in whatever package contains most of yo
 custom Bazel configuration, commonly in `tools/lint`.
 This `linters.bzl` should contain linter aspect declarations.
 
-See the [example linters.bzl](/example/tools/lint/linters.bzl) for a complete install example.
+See the `/tools/lint/linters.bzl` file under each `/examples/[lang]` folder for a complete install example.
 See the `docs/` folder for API docs of the "aspect factory functions" that declare your linters.
 Some linter tools are built-in to rules_lint and may be installed by [multitool].
 The aspect factory function docs in the `docs/` folder describe when these are available and how to use them.
@@ -45,7 +45,7 @@ We recommend this workflow for several reasons:
 5. This is how Google does it, in the [Tricorder] tool that's integrated into code review (Critique) to present static analysis results.
    With [Aspect Workflows] we've provided a similar experience.
 
-[Tricorder]: https://static.googleusercontent.com/media/research.google.com/en/pubs/archive/43322.pdf
+[Tricorder]: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/43322.pdf
 
 ### 2. Warnings in the terminal with `bazel lint`
 
@@ -90,11 +90,12 @@ Add at least the following to the command-line or to your `.bazelrc` file to cau
 ```
 
 This makes the build fail when any lint violations are present.
-You may wish to use the `--keep_going` flag to continue linting even after the first failure. See [example/lint.sh](/example/lint.sh) for more available flags.
+You may wish to use the `--keep_going` flag to continue linting even after the first failure.
 
 ### 5. Failures during `bazel test`
 
-Call the [lint_test](./lint_test.md) factory function in your `linters.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
+Call the [lint_test](https://registry.bazel.build/docs/aspect_rules_lint#lint-lint_test-bzl)
+factory function in your `linters.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
 
 See the `example/test/BUILD.bazel` file in this repo for some examples.
 

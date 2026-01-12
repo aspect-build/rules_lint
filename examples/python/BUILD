@@ -11,6 +11,8 @@ exports_files(
     visibility = ["//visibility:public"],
 )
 
+# Update requirements.txt by running:
+# bazel run //:requirements.update
 pip_compile(
     name = "requirements",
     requirements_in = "pyproject.toml",

@@ -9,6 +9,11 @@ load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_cons
 package(default_visibility = ["//:__subpackages__"])
 
 py_console_script_binary(
+    name = "bandit",
+    pkg = "@pip//bandit:pkg",
+)
+
+py_console_script_binary(
     name = "flake8",
     pkg = "@pip//flake8:pkg",
 )
