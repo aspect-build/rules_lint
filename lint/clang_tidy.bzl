@@ -37,6 +37,7 @@ clang_tidy = lint_clang_tidy_aspect(
 ```
 """
 
+load("@bazel_skylib//rules/directory:providers.bzl", "DirectoryInfo")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
@@ -51,6 +52,8 @@ def _gather_inputs(ctx, compilation_context, srcs):
     inputs = srcs + ctx.files._configs
     if (any(ctx.files._global_config)):
         inputs.append(ctx.files._global_config[0])
+    for dep in ctx.files._deps:
+        inputs.append(dep)
     return depset(inputs, transitive = [compilation_context.headers])
 
 def _toolchain_env(ctx, user_flags, action_name = ACTION_NAMES.cpp_compile):
@@ -263,6 +266,14 @@ def _get_args(ctx, compilation_context, srcs):
 def _get_compiler_args(ctx, compilation_context, srcs):
     # add args specified by the toolchain, on the command line and rule copts
     args = []
+
+    if ctx.attr._gcc_install_dir:
+        gcc_install_dir = ctx.attr._gcc_install_dir[0].files.to_list()
+        if len(gcc_install_dir) > 1:
+            fail("gcc_install_dir must contain at most one directory")
+        for dir in gcc_install_dir:
+            args.append("--gcc-install-dir=" + dir.path)
+
     rule_flags = list(getattr(ctx.rule.attr, "copts", [])) + list(getattr(ctx.rule.attr, "cxxopts", []))
     sources_are_cxx = _is_cxx(srcs[0])
     if (sources_are_cxx):
@@ -406,6 +417,8 @@ def lint_clang_tidy_aspect(
         binary,
         configs = [],
         global_config = [],
+        gcc_install_dir = [],
+        deps = [],
         header_filter = "",
         lint_target_headers = False,
         angle_includes_are_system = True,
@@ -428,6 +441,9 @@ def lint_clang_tidy_aspect(
             files which may be used for formatting fixes.
         global_config: label of a single global .clang-tidy file to pass to clang-tidy on the command line. This
             will cause clang-tidy to ignore any other config files in the source directories.
+        deps: labels of additional dependencies used during the clang-tidy run.
+        gcc_install_dir: optional, label of a `Directory` from the skylib library pointing to the gcc install
+            directory.  The argument is passed to the underlying clang as `--gcc-install-dir`.
         header_filter: optional, set to a posix regex to supply to clang-tidy with the -header-filter option
         lint_target_headers: optional, set to True to pass a pattern that includes all headers with the target's
             directory prefix. This crude control may include headers from the linted target in the results. If
@@ -455,6 +471,13 @@ def lint_clang_tidy_aspect(
             "_global_config": attr.label_list(
                 default = global_config,
                 allow_files = True,
+            ),
+            "_deps": attr.label_list(
+                default = deps,
+            ),
+            "_gcc_install_dir": attr.label_list(
+                default = gcc_install_dir,
+                providers = [DirectoryInfo],
             ),
             "_lint_target_headers": attr.bool(
                 default = lint_target_headers,
