@@ -51,7 +51,7 @@ If your custom ruleset is a third-party dependency and not a first-party depende
 """
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
-load("@rules_java//java/common/rules:java_runtime.bzl", "JavaRuntimeInfo")
+load("@rules_java//toolchains:toolchain_utils.bzl", "find_java_runtime_toolchain")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintKTLint"
@@ -84,12 +84,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
     # ktlint artifact is published as an "executable" script which calls the fat jar
     # so we need to pass a hermetic Java runtime from our build to avoid relying on
     # system Java
-    java_home = java_runtime[JavaRuntimeInfo].java_home
-    java_runtime_files = java_runtime[JavaRuntimeInfo].files
-    env = {
-        "JAVA_HOME": java_home,
-    }
-
+    java_runtime = find_java_runtime_toolchain(ctx, java_runtime)
     inputs.append(executable)
 
     if editorconfig:
@@ -105,7 +100,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
     args.add("--relative")
 
     # Include source files and Java runtime files required for ktlint
-    inputs = depset(direct = inputs, transitive = [java_runtime_files])
+    inputs = depset(direct = inputs, transitive = [java_runtime.files])
 
     # This makes hermetic java available to ktlint executable
     command = "export PATH=$PATH:$JAVA_HOME/bin\n"
@@ -125,7 +120,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
         arguments = [args],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Ktlint",
-        env = env,
+        env = {"JAVA_HOME": java_runtime.java_home},
     )
 
 def _ktlint_aspect_impl(target, ctx):

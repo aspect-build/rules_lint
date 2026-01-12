@@ -277,6 +277,7 @@ bzl_library(
     deps = _BAZEL_TOOLS + [
         "//lint/private:lint_aspect",
         "@bazel_skylib//lib:dicts",
+        "@rules_java//toolchains:toolchain_utils",
     ],
 )
 
