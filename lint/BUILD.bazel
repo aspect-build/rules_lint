@@ -275,14 +275,14 @@ bzl_library(
 # in deps attribute of starlark_doc_extract rule //lint:ktlint.doc_extract: missing bzl_library targets for
 # Starlark module(s) @@rules_cc+//cc/private/rules_impl:objc_common.bzl. Since this rule was created by the
 # macro 'bzl_library', the error might have been caused by the macro implementation
-bzl_library(
-    name = "ktlint",
-    srcs = ["ktlint.bzl"],
-    deps = _BAZEL_TOOLS + [
-        "//lint/private:lint_aspect",
-        "@bazel_skylib//lib:dicts",
-    ],
-)
+# bzl_library(
+#     name = "ktlint",
+#     srcs = ["ktlint.bzl"],
+#     deps = _BAZEL_TOOLS + [
+#         "//lint/private:lint_aspect",
+#         "@bazel_skylib//lib:dicts",
+#     ],
+# )
 
 # See comment below for why this is broken
 # bzl_library(
