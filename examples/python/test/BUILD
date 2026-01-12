@@ -6,6 +6,7 @@ load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_python//python:defs.bzl", "py_library")
 load(
     "//tools/lint:linters.bzl",
+    "bandit_test",
     "flake8_test",
     "pylint_test",
     "ruff_test",
@@ -13,6 +14,7 @@ load(
 )
 load(
     ":machine_output.bzl",
+    "machine_bandit_report",
     "machine_flake8_report",
     "machine_pylint_report",
     "machine_ruff_report",
@@ -74,6 +76,13 @@ ruff_test(
     srcs = [":excluded_py"],
 )
 
+bandit_test(
+    name = "bandit",
+    srcs = ["//src:uses_eval"],
+    # Expected to fail.
+    tags = ["manual"],
+)
+
 flake8_test(
     name = "flake8",
     srcs = ["//src:unused_import"],
@@ -94,6 +103,18 @@ ty_test(
     srcs = ["//src:unsupported_operator"],
     # Expected to fail based on current content of the file.
     tags = ["manual"],
+)
+
+machine_bandit_report(
+    name = "machine_bandit_report",
+    src = "//src:uses_eval",
+)
+
+report_test(
+    name = "bandit_machine_output_test",
+    expected_tool = "Bandit",
+    expected_uri = "src/uses_eval.py",
+    report = "machine_bandit_report",
 )
 
 machine_ruff_report(
