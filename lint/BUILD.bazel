@@ -284,15 +284,17 @@ bzl_library(
 #     ],
 # )
 
-bzl_library(
-    name = "scalafix",
-    srcs = ["scalafix.bzl"],
-    deps = _BAZEL_TOOLS + [
-        "//lint/private:lint_aspect",
-        "//lint/private:patcher_action",
-        "@bazel_skylib//lib:dicts",
-    ],
-)
+# Broken: missing bzl_library targets for @rules_java//java/private:proto_support.bzl
+# bzl_library(
+#     name = "scalafix",
+#     srcs = ["scalafix.bzl"],
+#     deps = _BAZEL_TOOLS + [
+#         "//lint/private:lint_aspect",
+#         "//lint/private:patcher_action",
+#         "@bazel_skylib//lib:dicts",
+#         "@rules_java//java:rules",
+#     ],
+# )
 
 # See comment below for why this is broken
 # bzl_library(

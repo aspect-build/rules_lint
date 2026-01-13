@@ -1,1 +1,3 @@
 import %workspace%/../java/tools/java21.bazelrc
+
+build:lint --aspects=//tools/lint:linters.bzl%scalafix
