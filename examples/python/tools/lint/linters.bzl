@@ -5,6 +5,7 @@ load("@aspect_rules_lint//lint:flake8.bzl", "lint_flake8_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:pylint.bzl", "lint_pylint_aspect")
 load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
+load("@aspect_rules_lint//lint:semgrep.bzl", "lint_semgrep_aspect")
 load("@aspect_rules_lint//lint:ty.bzl", "lint_ty_aspect")
 
 bandit = lint_bandit_aspect(
@@ -38,6 +39,12 @@ ruff = lint_ruff_aspect(
 )
 
 ruff_test = lint_test(aspect = ruff)
+
+semgrep = lint_semgrep_aspect(
+    binary = Label("//tools/lint:semgrep"),
+)
+
+semgrep_test = lint_test(aspect = semgrep)
 
 ty = lint_ty_aspect(
     binary = Label("@aspect_rules_lint//lint:ty_bin"),

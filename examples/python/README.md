@@ -12,6 +12,7 @@ This example demonstrates how to set up formatting and linting for Python code u
 
 - **Ruff** - Fast Python linter (can catch many issues)
 - **Pylint** - Comprehensive Python linter
+- **semgrep** - A lightweight static analysis for many languages.
 - **Flake8** - Style guide enforcement
 - **Ty** - Type checker
 

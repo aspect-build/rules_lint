@@ -22,3 +22,9 @@ py_console_script_binary(
     name = "pylint",
     pkg = "@pip//pylint:pkg",
 )
+
+py_console_script_binary(
+    name = "semgrep",
+    pkg = "@pip//semgrep:pkg",
+    script = "pysemgrep",
+)

@@ -18,6 +18,7 @@ load(
     "machine_flake8_report",
     "machine_pylint_report",
     "machine_ruff_report",
+    "machine_semgrep_report",
     "machine_ty_report",
 )
 
@@ -175,4 +176,16 @@ report_test(
     expected_tool = "Pylint",
     expected_uri = "src/unused_import.py",
     report = "machine_pylint_report",
+)
+
+machine_semgrep_report(
+    name = "machine_semgrep_report",
+    src = "//src:uses_pickle",
+)
+
+report_test(
+    name = "semgrep_machine_output_test",
+    expected_tool = "Semgrep OSS",
+    expected_uri = "src/uses_pickle.py",
+    report = "machine_semgrep_report",
 )
