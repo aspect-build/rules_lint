@@ -116,7 +116,7 @@ lint_options(
 )
 
 bzl_library(
-    name = "brandit",
+    name = "bandit",
     srcs = ["bandit.bzl"],
     deps = ["//lint/private:lint_aspect"],
 )
