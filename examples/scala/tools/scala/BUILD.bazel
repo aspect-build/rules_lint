@@ -3,9 +3,9 @@ load("@rules_scala//scala:scala_toolchain.bzl", "scala_toolchain")
 scala_toolchain(
     name = "semanticdb_toolchain_impl",
     enable_semanticdb = True,
-    semanticdb_bundle_in_jar = False,
     # Required for OrganizeImports.removeUnused to detect unused imports
     scalacopts = ["-Wunused:imports"],
+    semanticdb_bundle_in_jar = True,
     visibility = ["//visibility:public"],
 )
 

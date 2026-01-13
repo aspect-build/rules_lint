@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/reviewdog/errorformat"
@@ -64,7 +65,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	case "AspectRulesLintPMD":
 		// TODO: upstream to https://github.com/reviewdog/errorformat/issues/62
 		fm = []string{`%f:%l:\\t%m`}
-  case "AspectRulesLintPylint":
+	case "AspectRulesLintPylint":
 		fm = []string{`%f:%l:%c: %m`}
 	case "AspectRulesLintRuff":
 		fm = []string{
@@ -143,6 +144,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	}
 
 	s := efm.NewScanner(strings.NewReader(report))
+	entriesWritten := 0
 	for s.Scan() {
 		entry := s.Entry()
 		if entry.Filename != "" && entry.Text != "" {
@@ -150,6 +152,17 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			if err := jsonWriter.Write(entry); err != nil {
 				return "", err
 			}
+			entriesWritten++
+		}
+	}
+
+	if entriesWritten == 0 && mnemonic == "AspectRulesLintScalafix" {
+		for _, entry := range scalafixDiffEntries(report) {
+			entry.Filename = determineRelativePath(entry.Filename, label)
+			if err := jsonWriter.Write(entry); err != nil {
+				return "", err
+			}
+			entriesWritten++
 		}
 	}
 
@@ -179,6 +192,51 @@ func determineRelativePath(path string, label string) string {
 	}
 
 	return path
+}
+
+func scalafixDiffEntries(report string) []*errorformat.Entry {
+	var entries []*errorformat.Entry
+	var currentFile string
+	hunkRe := regexp.MustCompile(`^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@`)
+
+	for _, line := range strings.Split(report, "\n") {
+		if strings.HasPrefix(line, "--- ") {
+			path := strings.TrimSpace(strings.TrimPrefix(line, "--- "))
+			if path == "" || path == "/dev/null" {
+				currentFile = ""
+				continue
+			}
+			currentFile = path
+			continue
+		}
+		if strings.HasPrefix(line, "+++ ") {
+			if currentFile == "" {
+				path := strings.TrimSpace(strings.TrimPrefix(line, "+++ "))
+				if path != "" && path != "/dev/null" && path != "<expected fix>" {
+					currentFile = path
+				}
+			}
+			continue
+		}
+
+		match := hunkRe.FindStringSubmatch(line)
+		if len(match) == 2 && currentFile != "" {
+			start, err := strconv.Atoi(match[1])
+			if err != nil {
+				continue
+			}
+			entries = append(entries, &errorformat.Entry{
+				Filename: currentFile,
+				Lnum:     start,
+				Col:      1,
+				Text:     "Scalafix rewrite suggested",
+				Type:     'W',
+				Valid:    true,
+			})
+		}
+	}
+
+	return entries
 }
 
 func toSarifJson(sarifJsonString string) (sarifJson parser.SarifJson, err error) {

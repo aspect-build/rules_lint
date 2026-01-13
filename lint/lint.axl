@@ -16,12 +16,14 @@ Usage:
     aspect lint -- //path/to:targets -//not:this_one
     # Fix lint violations, where the underlying linter provides fixes
     aspect lint --fix
+    # Use an alternate bazel config, e.g. semantic linting
+    aspect lint --config=lint-semantic -- //path/to:targets
 """
 
 # buildifier: disable=function-docstring
 def impl(ctx: TaskContext) -> int:
     flags = [
-        "--config=lint",
+        "--config=" + ctx.args.config,
         "--remote_download_regex='.*AspectRulesLint.*'",
     ]
     if ctx.args.fix:
@@ -67,6 +69,7 @@ def impl(ctx: TaskContext) -> int:
 lint = task(
     implementation = impl,
     args = {
+        "config": args.string(default = "lint"),
         "fix": args.boolean(),
         "targets": args.positional(minimum = 0),
     },
