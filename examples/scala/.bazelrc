@@ -1,3 +1,8 @@
 import %workspace%/../java/tools/java21.bazelrc
 
+# Use syntactic mode for targets without SemanticDB
 build:lint --aspects=//tools/lint:linters.bzl%scalafix
+
+# Use semantic mode for targets with SemanticDB enabled
+# Note: semantic mode can also run syntactic rules if configured in .scalafix.semantic.conf
+build:lint-semantic --aspects=//tools/lint:linters.bzl%scalafix_semantic

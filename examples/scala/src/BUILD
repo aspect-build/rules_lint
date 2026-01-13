@@ -13,3 +13,9 @@ scala_library(
     name = "hello",
     srcs = ["hello.scala"],
 )
+
+# Scala library target for semantic linting example (unused imports)
+scala_library(
+    name = "semantic_test",
+    srcs = ["semantic_test.scala"],
+)

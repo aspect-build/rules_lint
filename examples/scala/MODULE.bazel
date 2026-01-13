@@ -40,3 +40,6 @@ maven.install(
     ],
 )
 use_repo(maven, "maven")
+
+# Register custom toolchain with SemanticDB enabled for semantic linting rules
+register_toolchains("//tools/scala:semanticdb_toolchain")
