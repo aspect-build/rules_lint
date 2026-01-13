@@ -16,7 +16,10 @@ format_multirun(name = "format")
 For more details, see the `format_multirun` [API documentation](https://registry.bazel.build/docs/aspect_rules_lint#format-defs-bzl) and
 the `example/tools/format/BUILD.bazel` file.
 
-Finally, we recommend an alias in the root BUILD file, so that developers can just type `bazel run format`:
+Finally, make it easy for developers to run on their changed files:
+
+1. With Aspect CLI, add the `format` task to `MODULE.aspect` by running `aspect axl add gh:aspect-build/rules_lint`, then developers run `aspect format`
+1. Add an alias in the root BUILD file, so that developers can type `bazel run format` (assuming their working directory is the repository root):
 
 ```starlark
 alias(
