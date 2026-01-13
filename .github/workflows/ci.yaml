@@ -78,8 +78,8 @@ jobs:
           - folder: format
         exclude:
           # FIXME: these two are hanging; why?
-          - folder: examples/java
-          - folder: examples/shell
+          # - folder: examples/java
+          # - folder: examples/shell
           # FIXME: these two are failing, diagnose.
           - folder: examples/python
           - folder: examples/cpp
