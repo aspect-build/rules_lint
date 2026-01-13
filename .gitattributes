@@ -8,3 +8,8 @@ examples export-ignore
 
 # Substitution for the _VERSION_PRIVATE placeholder
 tools/version.bzl export-subst
+
+#################################
+# Generated files - collapse in GitHub diffs and hide from git diff
+#################################
+**/maven_install.json linguist-generated=true -diff
