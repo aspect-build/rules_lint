@@ -92,6 +92,7 @@ def _clippy_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
+    crate_info = rust_clippy_action.get_clippy_ready_crate_info(target, ctx)
     if not crate_info:
         noop_lint_action(ctx, outputs)
         return [info]
