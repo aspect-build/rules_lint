@@ -6,6 +6,9 @@ module(
     compatibility_level = 1,
 )
 
+# NOTE: when publishing to BCR, we patch this to be True, as we publish pre-built binaries with our releases.
+IS_RELEASE = False
+
 # We don't actually depend directly on aspect_bazel_lib, but we do require this
 # version be used transitively so that it doesn't produce conflicting actions
 # with the bazel_lib module we use.
@@ -35,7 +38,7 @@ bazel_dep(name = "rules_java", version = "7.0.6")
 bazel_dep(name = "rules_rust", version = "0.67.0")
 
 # Needed in the root because we dereference ProtoInfo in our aspect impl
-bazel_dep(name = "rules_proto", version = "6.0.0")
+bazel_dep(name = "rules_proto", version = "7.1.0")
 
 # Needed in the root because we dereference PyInfo in our ty aspect impl
 bazel_dep(name = "rules_python", version = "0.26.0")
@@ -60,20 +63,9 @@ register_toolchains("@sarif_parser_toolchains//:all")
 ####### Dev dependencies ########
 
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.1.0", dev_dependency = True)
+bazel_dep(name = "protobuf", version = "33.4", dev_dependency = True)
 
 # To allow /tools to be built from source
-# NOTE: when publishing to BCR, we patch this to be True, as we publish pre-built binaries with our releases.
-IS_RELEASE = False
-
-bazel_dep(
-    name = "toolchains_protoc",
-    version = "0.6.0",
-    dev_dependency = IS_RELEASE,
-)
-
-protoc = use_extension("@toolchains_protoc//protoc:extensions.bzl", "protoc", dev_dependency = IS_RELEASE)
-protoc.toolchain(version = "v32.0")
-
 bazel_dep(
     name = "gazelle",
     version = "0.43.0",
