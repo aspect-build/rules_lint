@@ -38,3 +38,14 @@ js_test(
         "GOT": "$(rootpath :got.patch)",
     },
 )
+
+sh_binary(
+    name = "process_wrapper_wrapper",
+    srcs = ["process_wrapper_wrapper.bash"],
+    data = [
+        "@rules_rust//util/process_wrapper",
+    ],
+    # Aspect visibility rules are not on by default.
+    visibility = ["//visibility:public"],
+    deps = ["@rules_shell//shell/runfiles"],
+)
