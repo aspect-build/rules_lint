@@ -61,7 +61,6 @@ use_repo(rules_lint_toolchains, "sarif_parser_toolchains")
 register_toolchains("@sarif_parser_toolchains//:all")
 
 ####### Dev dependencies ########
-# To allow /tools to be built from source
 
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.1.0", dev_dependency = True)
 bazel_dep(name = "protobuf", version = "33.4", dev_dependency = True)
