@@ -81,7 +81,12 @@ def _clippy_aspect_impl(target, ctx):
     if ctx.attr._options[LintOptionsInfo].fix:
         print("WARNING: `fix` is not supported yet for clippy. Please follow https://github.com/aspect-build/rules_lint/issues/385 for updates.")
 
-    outputs, info = output_files(_MNEMONIC, target, ctx)
+    # Declare outputs with sibling = crate_info.output when available, so they're placed in the same directory
+    # structure that rustc expects. This is required because rust_clippy_action sets --out-dir based on
+    # crate_info.output and rustc needs to write .d files to that directory
+    crate_info = rust_clippy_action.get_clippy_ready_crate_info(target, ctx)
+    sibling = crate_info.output if crate_info else None
+    outputs, info = output_files(_MNEMONIC, target, ctx, sibling)
 
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
@@ -104,8 +109,8 @@ def _clippy_aspect_impl(target, ctx):
     #           (2) modify rules_rust so that it gives us a struct with a command line we can run it with the patcher.
 
     raw_outputs = struct(
-        human = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human")),
-        machine = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_machine")),
+        human = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling),
+        machine = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_machine"), sibling = sibling),
     )
 
     rust_clippy_action.action(

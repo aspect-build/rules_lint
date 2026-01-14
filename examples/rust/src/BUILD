@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -45,6 +45,15 @@ rust_binary(
     ],
 )
 
+rust_test(
+    name = "bad_test",
+    srcs = ["bad_test.rs"],
+    edition = "2021",
+    visibility = [
+        "//test:__pkg__",
+    ],
+)
+
 rust_binary(
     name = "ok_binary",
     srcs = ["ok_binary.rs"],
@@ -75,6 +84,15 @@ rust_binary(
         "//test:__pkg__",
     ],
     deps = [":bad_lib_with_noclippy"],
+)
+
+rust_test(
+    name = "ok_test",
+    srcs = ["ok_test.rs"],
+    edition = "2021",
+    visibility = [
+        "//test:__pkg__",
+    ],
 )
 
 rust_binary(

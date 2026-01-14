@@ -23,6 +23,13 @@ clippy_test(
 )
 
 clippy_test(
+    name = "clippy_ok_test",
+    srcs = ["//src:ok_test"],
+    # Tests that clippy works with rust_test targets (which place
+    # crate_info.output in a subdirectory like test-<hash>/).
+)
+
+clippy_test(
     name = "clippy_bad_binary",
     srcs = ["//src:bad_binary"],
     # Expected to fail based on current content of the file.
@@ -38,6 +45,14 @@ clippy_test(
 clippy_test(
     name = "clippy_bad_library",
     srcs = ["//src:bad_lib"],
+    # Expected to fail based on current content of the file.
+    # Normally you'd fix the file instead of tagging this test.
+    tags = ["manual"],
+)
+
+clippy_test(
+    name = "clippy_bad_test",
+    srcs = ["//src:bad_test"],
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
     tags = ["manual"],
