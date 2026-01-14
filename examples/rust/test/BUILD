@@ -58,6 +58,14 @@ clippy_test(
     tags = ["manual"],
 )
 
+clippy_test(
+    name = "clippy_binary_with_warning_and_error",
+    srcs = ["//src:binary_with_warning_and_error"],
+    # Expected to fail based on current content of the file.
+    # Normally you'd fix the file instead of tagging this test.
+    tags = ["manual"],
+)
+
 machine_clippy_report(
     name = "machine_clippy_report",
     src = "//src:bad_lib",
