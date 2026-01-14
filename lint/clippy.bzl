@@ -94,13 +94,17 @@ def _clippy_aspect_impl(target, ctx):
     if ctx.attr._options[LintOptionsInfo].fix:
         print("WARNING: `fix` is not supported yet for clippy. Please follow https://github.com/aspect-build/rules_lint/issues/385 for updates.")
 
-    outputs, info = output_files(_MNEMONIC, target, ctx)
+    # Declare outputs with sibling = crate_info.output when available, so they're placed in the same directory
+    # structure that rustc expects. This is required because rust_clippy_action sets --out-dir based on
+    # crate_info.output and rustc needs to write .d files to that directory
+    crate_info = rust_clippy_action.get_clippy_ready_crate_info(target, ctx)
+    sibling = crate_info.output if crate_info else None
+    outputs, info = output_files(_MNEMONIC, target, ctx, sibling)
 
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
         return [info]
 
-    crate_info = rust_clippy_action.get_clippy_ready_crate_info(target, ctx)
     if not crate_info:
         noop_lint_action(ctx, outputs)
         return [info]
@@ -111,7 +115,7 @@ def _clippy_aspect_impl(target, ctx):
     #           (1) modify the patcher so that it can run an action through a macro, or
     #           (2) modify rules_rust so that it gives us a struct with a command line we can run it with the patcher.
 
-    human_success_indicator = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "human_success_indicator"))
+    human_success_indicator = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "human_success_indicator"), sibling = sibling)
     rust_clippy_action.action(
         ctx,
         clippy_executable = clippy_bin,
@@ -125,7 +129,7 @@ def _clippy_aspect_impl(target, ctx):
     )
     _marker_to_exit_code(ctx, human_success_indicator, outputs.human.out, outputs.human.exit_code)
 
-    machine_success_indicator = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "machine_success_indicator"))
+    machine_success_indicator = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "machine_success_indicator"), sibling = sibling)
     rust_clippy_action.action(
         ctx,
         clippy_executable = clippy_bin,
