@@ -55,14 +55,13 @@ We recommend this workflow for several reasons:
 - If a linter reports errors (by exiting non-zero), then `lint` exits 1.
 - If suggested fixes are produced by linters, `lint` will offer to apply them.
 
-To configure it, add a block like the following in `.aspect/cli/config.yaml` to point to the `*_lint` definition symbols.
-The `%` syntax is the same as [aspects declared on the command-line](https://bazel.build/extending/aspects#invoking_the_aspect_using_the_command_line)
+To configure it,
 
-```yaml
-lint:
-  aspects:
-    # Format: <extension file label>%<aspect top-level name>
-    - //tools/lint:linters.bzl%eslint
+1. Add the task to `MODULE.aspect` by running `aspect axl add gh:aspect-build/rules_lint`
+1. Add the `lint` config to `.bazelrc`, see [aspects declared on the command-line](https://bazel.build/extending/aspects#invoking_the_aspect_using_the_command_line)
+
+```
+common:lint --aspects=//tools/lint:linters.bzl%linter1[,...]
 ```
 
 [![asciicast](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq.svg)](https://asciinema.org/a/xQWU1Wc1JINOubeguDDQbBqcq)
