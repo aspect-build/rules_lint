@@ -50,29 +50,42 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClippy"
 
-def _parse_wrapper_output_into_files(ctx, outputs, raw_process_wrapper_wrapper_output):
-    ctx.actions.run_shell(
-        command = """
+def _parse_wrapper_output_into_files(ctx, outputs, raw_process_wrapper_wrapper_output, fail_on_violation):
+    arguments = [
+        raw_process_wrapper_wrapper_output.path,
+        outputs.human.out.path,
+    ]
+    outs = [
+        outputs.human.out,
+    ]
+    command = """
 exit_code=$(head -n 1 $1)
 output=$(tail -n +2 $1)
 echo "${output}" > $2
+"""
+
+    if fail_on_violation:
+        command += """
+echo "${output}" >&2
+exit "${exit_code}"
+"""
+    else:
+        command += """
 echo "${exit_code}" > $3
 echo "${exit_code}" > $4
-""",
-        arguments = [
-            raw_process_wrapper_wrapper_output.path,
-            outputs.human.out.path,
-            outputs.human.exit_code.path,
-            outputs.machine.exit_code.path,
-        ],
+"""
+        arguments.append(outputs.human.exit_code.path)
+        arguments.append(outputs.machine.exit_code.path)
+        outs.append(outputs.human.exit_code)
+        outs.append(outputs.machine.exit_code)
+
+    ctx.actions.run_shell(
+        command = command,
+        arguments = arguments,
         inputs = [
             raw_process_wrapper_wrapper_output,
         ],
-        outputs = [
-            outputs.human.out,
-            outputs.human.exit_code,
-            outputs.machine.exit_code,
-        ],
+        outputs = outs,
     )
 
 # buildifier: disable=function-docstring
@@ -108,8 +121,11 @@ def _clippy_aspect_impl(target, ctx):
         "-Wwarnings",
     ]
 
+    fail_on_violation = ctx.attr._options[LintOptionsInfo].fail_on_violation
+
     raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling)
     raw_rustc_json_diagnostics = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "rustc_json_diagnostics"), sibling = sibling)
+    raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling)
 
     rust_clippy_action.action(
         ctx,
@@ -123,7 +139,7 @@ def _clippy_aspect_impl(target, ctx):
         clippy_diagnostics_file = raw_rustc_json_diagnostics,
     )
 
-    _parse_wrapper_output_into_files(ctx, outputs, raw_output)
+    _parse_wrapper_output_into_files(ctx, outputs, raw_output, fail_on_violation)
     _parse_to_sarif_action(ctx, raw_rustc_json_diagnostics, outputs.machine.out)
 
     if patch_file != None:
