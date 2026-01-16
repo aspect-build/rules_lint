@@ -66,14 +66,24 @@ clippy_test(
     tags = ["manual"],
 )
 
+clippy_test(
+    name = "clippy_warning_lib",
+    srcs = ["//src:warning_lib"],
+)
+
+clippy_test(
+    name = "clippy_ok_binary_with_warning_dep",
+    srcs = ["//src:ok_binary_with_warning_dep"],
+)
+
 machine_clippy_report(
     name = "machine_clippy_report",
-    src = "//src:bad_lib",
+    src = "//src:binary_with_warning_and_error",
 )
 
 report_test(
     name = "clippy_machine_output_test",
     expected_tool = "clippy",
-    expected_uri = "src/bad_lib.rs",
+    expected_uri = "src/warning_and_error.rs",
     report = "machine_clippy_report",
 )

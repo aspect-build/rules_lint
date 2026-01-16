@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 /**
  * Extracts all rendered diagnostics from a list of Rust compiler diagnostics
  * and joins them into a newline-delimited string.
@@ -24,7 +26,7 @@ function diagnosticsToHumanReadable(diagnostics) {
  * @param diagnostics An array of Rust compiler output diagnostics
  * @returns A SARIF-compatible JSON object
  */
-function diagnosticsToSarifPatchFile(diagnostics) {
+function diagnosticsToSarif(diagnostics) {
   // Track rule IDs with a map to assign indices
   const ruleMap = new Map();
   const rules = [];
@@ -102,6 +104,82 @@ function diagnosticsToSarifPatchFile(diagnostics) {
       },
     ],
   };
+}
+
+/**
+ * @typedef {Object} Replacement
+ * @property {string} file_name - file name where
+ * @property {number} byte_start - byte offset where this replacement starts
+ * @property {number} byte_end - byte offset where this replacement ends
+ * @property {string} suggested_replacement - content to replace the byte offset with
+ */
+/**
+ * Apply diagnostics to the relevant files, in the same order as the rustfix crate.
+ * Assumes the file paths referenced in diagnostics are relative to the bindir.
+ * Will write the new file contents to disk.
+ *
+ * @param diagnostics
+ * @return void
+ */
+function applyDiagnosticsAsPatches(diagnostics) {
+
+  // Gather all the files that need fixing, with all the fix spans
+  /**
+   *
+   * @type {Object.<string, Replacement[]>}
+   */
+  let filesToFixSpans = {};
+
+  /**
+   * @param {Replacement} span
+   */
+  const record_span_for_file = (span) => {
+    if (filesToFixSpans[span.file_name] === undefined) {
+      filesToFixSpans[span.file_name] = [];
+    }
+    filesToFixSpans[span.file_name].push(span);
+  }
+
+  const gatherFixSpans = (diagnostic) => {
+    (diagnostic.spans ?? []).forEach((span) => {
+        if (span.suggested_replacement !== null && span.suggestion_applicability === "MachineApplicable") {
+          record_span_for_file(span)
+        }
+      });
+
+    (diagnostic.children ?? []).forEach(gatherFixSpans);
+  };
+  diagnostics.forEach(gatherFixSpans);
+
+  // Apply the fixes to the file and write them to disk
+  Object.entries(filesToFixSpans).forEach(applyReplacementsToFile)
+}
+
+/**
+ * Apply the fixes to the files in the filesystem.
+ *
+ * @param {string} path_relative_to_ws_root
+ * @param {Replacement[]} unsorted_replacements
+ */
+function applyReplacementsToFile([path_to_fix, unsorted_replacements]) {
+
+  /**
+   * @type Buffer
+   */
+  const fileContents = fs.readFileSync(path_to_fix); // No encoding because we want a buffer that we can replace.
+  const replacements = sortReplacements(unsorted_replacements, fileContents);
+
+  let fixedContents = fileContents;
+  for (const span of replacements) {
+    fixedContents = replaceByteRange(fixedContents, span.byte_start, span.byte_end, span.suggested_replacement);
+  }
+
+  // Write file contents to disk
+  try {
+    fs.writeFileSync(path_to_fix, fixedContents);
+  } catch (err) {
+    console.error(`failed to write back changes to ${path_to_fix}`)
+  }
 }
 
 /**
@@ -233,7 +311,87 @@ function getRelatedLocations(diagnostic) {
   return relatedLocations;
 }
 
+/**
+ * Replace `[start..end]` in `buffer` with `replacement`, and return the resulting buffer.
+ *
+ * @param {Buffer} buffer
+ * @param {number} start
+ * @param {number} end
+ * @param {string | Buffer} replacement
+ * @return Buffer
+ */
+function replaceByteRange(buffer, start, end, replacement) {
+  const replacementBuffer =
+      Buffer.isBuffer(replacement)
+          ? replacement
+          : Buffer.from(replacement);
+
+  return Buffer.concat([
+    buffer.slice(0, start),
+    replacementBuffer,
+    buffer.slice(end),
+  ]);
+}
+
+/**
+ * Sort fixes according to the logic in rustfix
+ *   Ref: https://github.com/rust-lang/cargo/blob/master/crates/rustfix/src/replace.rs#L143-L150
+ *
+ * @param {Replacement[]} spans
+ * @param {Buffer} fileContents
+ * @return {Replacement[]}
+ */
+function sortReplacements(spans, fileContents) {
+  /**
+   * @type {Replacement[]}
+   */
+  const replacements = [];
+
+  for (const span of spans) {
+    const start = span.byte_start;
+    const end = span.byte_end;
+
+    console.assert(start <= end, `span ends before it starts: ${JSON.stringify(span)}`);
+    console.assert(end <= fileContents.length, `span ends after file end: ${JSON.stringify(span)}`)
+
+    let insertion_point = replacements.findIndex((replacement) => {
+      return (replacement.byte_start < start ||
+          (replacement.byte_start === start && replacement.byte_end < end)
+      )
+    });
+
+    // If we did not find a proper insertion point, insert at the end of the replacement queue.
+    if (insertion_point === -1) {
+      insertion_point = replacements.length;
+    }
+
+    // Reject if the change starts before the previous one ends.
+    const previousReplacementIdx = insertion_point - 1;
+    if (previousReplacementIdx >= 0) {
+      const previousReplacement = replacements[previousReplacementIdx];
+      if (start < previousReplacement.byte_end) {
+        contine
+      }
+    }
+
+    // Reject if the change ends after the next one starts,
+    // or if this is an insert and there's already an insert there.
+    if (0 <= insertion_point < replacements.length) {
+      const nextReplacement = replacements[insertion_point];
+      const areTheSameRange = start === nextReplacement.byte_start && end === nextReplacement.byte_end;
+      if (end > nextReplacement.byte_start || areTheSameRange) {
+        continue
+      }
+    }
+
+    replacements.splice(insertion_point, 0, span);
+  }
+
+  return replacements;
+}
+
 module.exports = {
   diagnosticsToHumanReadable,
-  diagnosticsToSarifPatchFile,
+  diagnosticsToSarif,
+  applyDiagnosticsAsPatches,
 };

@@ -101,8 +101,8 @@ def output_files(mnemonic, target, ctx, sibling = None):
         _validation = depset([human_out]),
     )
 
-def patch_file(mnemonic, target, ctx):
-    patch = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "patch"))
+def patch_file(mnemonic, target, ctx, sibling = None):
+    patch = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "patch"), sibling = sibling)
     return patch, OutputGroupInfo(rules_lint_patch = depset([patch]))
 
 # If we return multiple OutputGroupInfo from a rule implementation, only one will get used.
