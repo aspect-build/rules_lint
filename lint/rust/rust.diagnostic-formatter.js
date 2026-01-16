@@ -9,12 +9,9 @@ function diagnosticsToHumanReadable(diagnostics) {
   // Filter for compiler-message type items and extract their rendered diagnostic
   const renderedDiagnostics = diagnostics
     .filter(
-      (message) =>
-        message.reason === "compiler-message" &&
-        message.message &&
-        message.message.rendered
+      (message) => message.rendered
     )
-    .map((message) => message.message.rendered);
+    .map((message) => message.rendered);
 
   // Join all rendered diagnostics with newlines
   return renderedDiagnostics.join("\n");
@@ -34,12 +31,7 @@ function diagnosticsToSarifPatchFile(diagnostics) {
   const results = [];
 
   diagnostics
-    .filter(
-      (message) => message.reason === "compiler-message" && message.message
-    )
-    .forEach((message) => {
-      const diagnostic = message.message;
-
+    .forEach((diagnostic) => {
       // Skip diagnostics without spans
       if (!diagnostic.spans || diagnostic.spans.length === 0) {
         return;
