@@ -44,8 +44,8 @@ Please watch issue https://github.com/aspect-build/rules_lint/issues/385 for upd
 """
 
 load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
-load("@rules_rust//rust:defs.bzl", "rust_clippy_action", "rust_common")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("@rules_rust//rust:defs.bzl", "rust_clippy_action")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClippy"
@@ -88,10 +88,6 @@ def _clippy_aspect_impl(target, ctx):
     # structure that rustc expects. This is required because rust_clippy_action sets --out-dir based on
     # crate_info.output and rustc needs to write .d files to that directory
     crate_info = rust_clippy_action.get_clippy_ready_crate_info(target, ctx)
-    if not crate_info:
-        noop_lint_action(ctx, outputs)
-        return [info]
-
     sibling = crate_info.output if crate_info else None
 
     patch_file = None
@@ -101,7 +97,7 @@ def _clippy_aspect_impl(target, ctx):
     else:
         outputs, info = output_files(_MNEMONIC, target, ctx, sibling)
 
-    if len(files_to_lint) == 0:
+    if len(files_to_lint) == 0 or not crate_info:
         noop_lint_action(ctx, outputs)
         return [info]
 
@@ -128,7 +124,7 @@ def _clippy_aspect_impl(target, ctx):
     )
 
     _parse_wrapper_output_into_files(ctx, outputs, raw_output)
-    _parse_to_sarif_action(ctx, _MNEMONIC, raw_rustc_json_diagnostics, outputs.machine.out)
+    _parse_to_sarif_action(ctx, raw_rustc_json_diagnostics, outputs.machine.out)
 
     if patch_file != None:
         _run_patcher(ctx, files_to_lint, raw_rustc_json_diagnostics, patch_file)
@@ -143,9 +139,6 @@ def _run_patcher(ctx, srcs, rustc_diagnostics_file, patch_file):
     ]
     srcs_inputs = copy_files_to_bin_actions(ctx, srcs)
 
-    env = {}
-    executable = ctx.executable._rustc_diagnostic_parser
-
     run_patcher(
         ctx,
         ctx.executable,
@@ -155,12 +148,12 @@ def _run_patcher(ctx, srcs, rustc_diagnostics_file, patch_file):
         files_to_diff = [s.path for s in srcs],
         patch_out = patch_file,
         patch_cfg_env = dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
-        env = env,
+        env = {},
         mnemonic = _MNEMONIC,
         progress_message = "Applying Clippy fixes to %{label}",
     )
 
-def _parse_to_sarif_action(ctx, mnemonic, rustc_diagnostics_file, sarif_output):
+def _parse_to_sarif_action(ctx, rustc_diagnostics_file, sarif_output):
     args = [
         "sarif",
         rustc_diagnostics_file.path,
