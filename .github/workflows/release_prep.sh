@@ -56,6 +56,12 @@ Add the `bazel_dep` to your `MODULE.bazel` file:
 bazel_dep(name = "aspect_rules_lint", version = "${TAG:1}")
 \`\`\`
 
+Add the `lint` task to your `MODULE.aspect` file:
+
+\`\`\`shell
+aspect axl add gh:aspect-build/rules_lint:${TAG}
+\`\`\`
+
 Then, follow the install instructions for
 - linting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/linting.md
 - formatting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/formatting.md
