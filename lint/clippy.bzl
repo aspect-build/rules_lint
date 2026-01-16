@@ -111,8 +111,8 @@ def _clippy_aspect_impl(target, ctx):
     #           (1) modify the patcher so that it can run an action through a macro, or
     #           (2) modify rules_rust so that it gives us a struct with a command line we can run it with the patcher.
 
-    raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"))
-    raw_rustc_json_diagnostics = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "rustc_json_diagnostics"))
+    raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling)
+    raw_rustc_json_diagnostics = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "rustc_json_diagnostics"), sibling = sibling)
 
     rust_clippy_action.action(
         ctx,
@@ -175,7 +175,7 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS):
             default = rule_kinds,
         ),
         "_process_wrapper_wrapper": attr.label(
-            doc = "A wrapper around the rules_rust process wrapper. See @aspect_rules_lint//lint/rust:process_wrapper_wrapper.sh for motivation and documetnation.",
+            doc = "A wrapper around the rules_rust process wrapper. See @aspect_rules_lint//lint/rust:process_wrapper_wrapper.sh for motivation and documentation.",
             default = Label("//lint/rust:process_wrapper_wrapper"),
             executable = True,
             cfg = "exec",
