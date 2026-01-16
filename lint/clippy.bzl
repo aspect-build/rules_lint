@@ -48,26 +48,42 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintClippy"
 
-def _parse_wrapper_output_into_files(ctx, output_file, exit_code_file, raw_process_wrapper_wrapper_output):
-    ctx.actions.run_shell(
-        command = """
+def _parse_wrapper_output_into_files(ctx, outputs, raw_process_wrapper_wrapper_output, fail_on_violation):
+    arguments = [
+        raw_process_wrapper_wrapper_output.path,
+        outputs.human.out.path,
+    ]
+    outs = [
+        outputs.human.out,
+    ]
+    command = """
 exit_code=$(head -n 1 $1)
 output=$(tail -n +2 $1)
 echo "${output}" > $2
+"""
+
+    if fail_on_violation:
+        command += """
+echo "${output}" >&2
+exit "${exit_code}"
+"""
+    else:
+        command += """
 echo "${exit_code}" > $3
-""",
-        arguments = [
-            raw_process_wrapper_wrapper_output.path,
-            output_file.path,
-            exit_code_file.path,
-        ],
+echo "${exit_code}" > $4
+"""
+        arguments.append(outputs.human.exit_code.path)
+        arguments.append(outputs.machine.exit_code.path)
+        outs.append(outputs.human.exit_code)
+        outs.append(outputs.machine.exit_code)
+
+    ctx.actions.run_shell(
+        command = command,
+        arguments = arguments,
         inputs = [
             raw_process_wrapper_wrapper_output,
         ],
-        outputs = [
-            output_file,
-            exit_code_file,
-        ],
+        outputs = outs,
     )
 
 # buildifier: disable=function-docstring
@@ -103,28 +119,15 @@ def _clippy_aspect_impl(target, ctx):
         # However, we don't need to do that because we keep track of output files and exit codes separately.
         "-Wwarnings",
     ]
+
     # FIXME: Implement support for --fix mode. Clippy has a --fix flag, but our patcher doesn't currently support running an action through a macro.
     #        We have to either
     #           (1) modify the patcher so that it can run an action through a macro, or
     #           (2) modify rules_rust so that it gives us a struct with a command line we can run it with the patcher.
+    raw_rustc_json_diagnostics = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "rustc_json_diagnostics"))
 
-    raw_outputs = struct(
-        human = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling),
-        machine = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_machine"), sibling = sibling),
-    )
-
-    rust_clippy_action.action(
-        ctx,
-        clippy_executable = clippy_bin,
-        process_wrapper = ctx.executable._process_wrapper_wrapper,
-        crate_info = crate_info,
-        config = ctx.file._config_file,
-        output = raw_outputs.human,
-        cap_at_warnings = False,
-        extra_clippy_flags = extra_options,
-    )
-
-    _parse_wrapper_output_into_files(ctx, outputs.human.out, outputs.human.exit_code, raw_outputs.human)
+    fail_on_violation = ctx.attr._options[LintOptionsInfo].fail_on_violation
+    raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"))
 
     rust_clippy_action.action(
         ctx,
@@ -132,25 +135,36 @@ def _clippy_aspect_impl(target, ctx):
         process_wrapper = ctx.executable._process_wrapper_wrapper,
         crate_info = crate_info,
         config = ctx.file._config_file,
-        output = raw_outputs.machine,
+        output = raw_output,
         cap_at_warnings = False,
         extra_clippy_flags = extra_options,
-        error_format = "json",
+        clippy_diagnostics_file = raw_rustc_json_diagnostics,
     )
+    _parse_to_sarif_action(ctx, _MNEMONIC, raw_rustc_json_diagnostics, outputs.machine.out)
 
-    _parse_wrapper_output_into_files(ctx, outputs.machine.out, outputs.machine.exit_code, raw_outputs.machine)
-
-    # FIXME: Rustc only gives us JSON output, which we can't turn into SARIF yet.
-    # clippy uses rustc's IO format, which doesn't have a SARIF output mode built in,
-    # and they're not planning to add one.
-    # We could use clippy-sarif, which seems to be relatively maintained.
-    #
-    # Refs:
-    #  - https://github.com/rust-lang/rust-clippy/issues/8122
-    #  - https://github.com/psastras/sarif-rs/tree/main/clippy-sarif
-    # parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
+    _parse_wrapper_output_into_files(ctx, outputs, raw_output, fail_on_violation)
 
     return [info]
+
+def _parse_to_sarif_action(ctx, mnemonic, rustc_diagnostics_file, sarif_output):
+    args = [
+        "sarif",
+        rustc_diagnostics_file.path,
+        sarif_output.path,
+    ]
+
+    # Must be set for js_binary to run.
+    # Ref: https://github.com/aspect-build/rules_js/tree/dbb5af0d2a9a2bb50e4cf4a96dbc582b27567155?tab=readme-ov-file#running-nodejs-programs
+    env = {
+        "BAZEL_BINDIR": ".",
+    }
+    ctx.actions.run(
+        executable = ctx.executable._rustc_sarif_parser,
+        arguments = args,
+        inputs = [rustc_diagnostics_file],
+        outputs = [sarif_output],
+        env = env,
+    )
 
 DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_test"]
 
@@ -175,9 +189,28 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS):
         "_rule_kinds": attr.string_list(
             default = rule_kinds,
         ),
+        "_process_wrapper": attr.label(
+            doc = "The rules_rust process wrapper, which we call directly when we want to `fail_on_violation`",
+            default = Label("@rules_rust//util/process_wrapper:process_wrapper"),
+            executable = True,
+            cfg = "exec",
+        ),
         "_process_wrapper_wrapper": attr.label(
             doc = "A wrapper around the rules_rust process wrapper. See @aspect_rules_lint//lint/rust:process_wrapper_wrapper.sh for motivation and documetnation.",
             default = Label("//lint/rust:process_wrapper_wrapper"),
+            executable = True,
+            cfg = "exec",
+        ),
+        "_rustc_sarif_parser": attr.label(
+            doc = """A binary that can convert JSON rustc diagnostics into SARIF.
+
+Note that rustc diagnostics are different from cargo diagnostics, which is what common rust implementations like sarif-rs use.
+In particular, cargo diagnostics _may contain_ rustc diagnostics, but they don't have to.
+
+References:
+- Rustc diagnostic format: https://doc.rust-lang.org/beta/rustc/json.html#diagnostics
+""",
+            default = Label("//lint/rust:cli"),
             executable = True,
             cfg = "exec",
         ),

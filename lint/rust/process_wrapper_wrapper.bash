@@ -44,6 +44,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+
 # Ensure that _some_ command is left
 if [[ ${#cmd[@]} -eq 0 ]]; then
   echo "Error: no command to execute" >&2

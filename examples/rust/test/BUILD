@@ -1,4 +1,4 @@
-load("@jq.bzl//jq:jq.bzl", "jq_test")
+load("@aspect_rules_lint//lint/private:machine_report_testing.bzl", "report_test")
 load("//test:machine_output.bzl", "machine_clippy_report")
 load("//tools/lint:linters.bzl", "clippy_test")
 
@@ -71,11 +71,9 @@ machine_clippy_report(
     src = "//src:bad_lib",
 )
 
-# Because the json file from clippy contains multiple messages _not_ in an array, we must take the first element.
-jq_test(
+report_test(
     name = "clippy_machine_output_test",
-    file1 = ":machine_clippy_report",
-    file2 = ":machine_clippy_report",
-    filter1 = "inputs | first | .code.code",
-    filter2 = "inputs | first | \"dead_code\"",
+    expected_tool = "clippy",
+    expected_uri = "src/bad_lib.rs",
+    report = "machine_clippy_report",
 )
