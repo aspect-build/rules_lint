@@ -50,6 +50,26 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(19)))
 	})
 
+	t.Run("processes scalafix diff output -> sarif correctly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		diff := `--- /private/var/tmp/_bazel_foo/execroot/_main/src/semantic_test.scala
++++ <expected fix>
+@@ -2,8 +2,8 @@
+-import scala.util.Try
++import scala.util.Try
+`
+
+		sarifJsonString, _ := ToSarifJsonString("//src:semantic_test", "AspectRulesLintScalafix", diff)
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs)).To(Equal(1))
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(1))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("Scalafix rewrite suggested"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/semantic_test.scala"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(2)))
+	})
+
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
