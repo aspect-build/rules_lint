@@ -29,7 +29,7 @@ def _patcher_run_impl(ctx):
         patch_cfg_env = dict(env, **{"BAZEL_BINDIR": bindir}),
         env = env,
         mnemonic = ctx.attr.mnemonic,
-        progress_message = "Running patcher in %{label}",  # TODO BL: This could be better.
+        progress_message = "Running patcher in %{label} as part of the build",
     )
 
     return [DefaultInfo(files = depset([diff_file]))]
