@@ -147,7 +147,7 @@ def _run_patcher(ctx, srcs, rustc_diagnostics_file, patch_file):
         tools = [ctx.executable._rustc_diagnostic_parser],
         files_to_diff = [s.path for s in srcs],
         patch_out = patch_file,
-        patch_cfg_env = dict(env, **{"BAZEL_BINDIR": ctx.bin_dir.path}),
+        patch_cfg_env = {"BAZEL_BINDIR": ctx.bin_dir.path},
         env = {},
         mnemonic = _MNEMONIC,
         progress_message = "Applying Clippy fixes to %{label}",
@@ -160,16 +160,16 @@ def _parse_to_sarif_action(ctx, rustc_diagnostics_file, sarif_output):
         sarif_output.path,
     ]
 
-    # Must be set for js_binary to run.
-    # Ref: https://github.com/aspect-build/rules_js/tree/dbb5af0d2a9a2bb50e4cf4a96dbc582b27567155?tab=readme-ov-file#running-nodejs-programs
-    env = {
-        "BAZEL_BINDIR": ".",
-    }
     ctx.actions.run(
         executable = ctx.executable._rustc_diagnostic_parser,
         arguments = args,
         inputs = [rustc_diagnostics_file],
         outputs = [sarif_output],
+        # Must be set for js_binary to run.
+        # Ref: https://github.com/aspect-build/rules_js/tree/dbb5af0d2a9a2bb50e4cf4a96dbc582b27567155?tab=readme-ov-file#running-nodejs-programs
+        env = {
+            "BAZEL_BINDIR": ".",
+        }
     )
 
 DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_test"]
