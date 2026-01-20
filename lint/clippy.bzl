@@ -170,7 +170,6 @@ def _parse_to_sarif_action(ctx, rustc_diagnostics_file, sarif_output):
         arguments = args,
         inputs = [rustc_diagnostics_file],
         outputs = [sarif_output],
-        env = env,
     )
 
 DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_test"]
