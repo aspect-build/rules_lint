@@ -30,7 +30,7 @@ jobs:
       - uses: lycheeverse/lychee-action@v2
         with:
           # Allow 503 Service Unavailable when rate limited
-          args: --accept '200..=204,503'
+          args: --accept '200..=204,503' --base . --verbose --no-progress './**/*.md' './**/*.html'
       - name: "List examples that have a tools/format folder"
         id: set-format-matrix
         run: |
