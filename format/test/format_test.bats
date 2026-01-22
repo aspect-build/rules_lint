@@ -20,7 +20,7 @@ bats_load_library "bats-assert"
 
 # File arguments: will filter with find
 @test "should run prettier on javascript using find" {
-    run bazel run //format/test:format_JavaScript_with_prettier README.md examples/nodejs/.eslintrc.cjs
+    run bazel run //format/test:format_JavaScript_with_prettier README.md examples/nodejs/eslint.config.mjs
     assert_success
 
     assert_output --partial "README.md"
