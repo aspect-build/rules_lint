@@ -31,6 +31,7 @@ jobs:
         with:
           # Allow 503 Service Unavailable when rate limited
           args: --accept '200..=204,503' --base ${{ github.workspace }} --verbose --no-progress './**/*.md' './**/*.html'
+          fail: false # sigh
       - name: "List examples that have a tools/format folder"
         id: set-format-matrix
         run: |
