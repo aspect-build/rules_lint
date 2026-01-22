@@ -43,8 +43,10 @@ If you wish a target to be excluded from linting, you can give them the `noclipp
 Please watch issue https://github.com/aspect-build/rules_lint/issues/385 for updates on this behavior.
 """
 
-load("@rules_rust//rust:defs.bzl", "rust_clippy_action", "rust_common")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
+load("@rules_rust//rust:defs.bzl", "rust_clippy_action")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClippy"
 
@@ -81,22 +83,21 @@ def _clippy_aspect_impl(target, ctx):
     clippy_bin = ctx.toolchains[Label("@rules_rust//rust:toolchain_type")].clippy_driver
 
     files_to_lint = filter_srcs(ctx.rule)
-    if ctx.attr._options[LintOptionsInfo].fix:
-        print("WARNING: `fix` is not supported yet for clippy. Please follow https://github.com/aspect-build/rules_lint/issues/385 for updates.")
 
     # Declare outputs with sibling = crate_info.output when available, so they're placed in the same directory
     # structure that rustc expects. This is required because rust_clippy_action sets --out-dir based on
     # crate_info.output and rustc needs to write .d files to that directory
     crate_info = rust_clippy_action.get_clippy_ready_crate_info(target, ctx)
     sibling = crate_info.output if crate_info else None
-    outputs, info = output_files(_MNEMONIC, target, ctx, sibling)
 
-    if len(files_to_lint) == 0:
-        noop_lint_action(ctx, outputs)
-        return [info]
+    patch_file = None
+    if ctx.attr._options[LintOptionsInfo].fix:
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx, sibling)
+        patch_file = getattr(outputs, "patch", None)
+    else:
+        outputs, info = output_files(_MNEMONIC, target, ctx, sibling)
 
-    crate_info = rust_clippy_action.get_clippy_ready_crate_info(target, ctx)
-    if not crate_info:
+    if len(files_to_lint) == 0 or not crate_info:
         noop_lint_action(ctx, outputs)
         return [info]
 
@@ -106,10 +107,6 @@ def _clippy_aspect_impl(target, ctx):
         # However, we don't need to do that because we keep track of output files and exit codes separately.
         "-Wwarnings",
     ]
-    # FIXME: Implement support for --fix mode. Clippy has a --fix flag, but our patcher doesn't currently support running an action through a macro.
-    #        We have to either
-    #           (1) modify the patcher so that it can run an action through a macro, or
-    #           (2) modify rules_rust so that it gives us a struct with a command line we can run it with the patcher.
 
     raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling)
     raw_rustc_json_diagnostics = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "rustc_json_diagnostics"), sibling = sibling)
@@ -127,28 +124,52 @@ def _clippy_aspect_impl(target, ctx):
     )
 
     _parse_wrapper_output_into_files(ctx, outputs, raw_output)
-    _parse_to_sarif_action(ctx, _MNEMONIC, raw_rustc_json_diagnostics, outputs.machine.out)
+    _parse_to_sarif_action(ctx, raw_rustc_json_diagnostics, outputs.machine.out)
+
+    if patch_file != None:
+        _run_patcher(ctx, files_to_lint, raw_rustc_json_diagnostics, patch_file)
 
     return [info]
 
-def _parse_to_sarif_action(ctx, mnemonic, rustc_diagnostics_file, sarif_output):
+def _run_patcher(ctx, srcs, rustc_diagnostics_file, patch_file):
+    args = [
+        "patch",
+        # This path is relative to the execroot, we must relativize it to the bindir.
+        "../../../" + rustc_diagnostics_file.path,
+    ]
+    srcs_inputs = copy_files_to_bin_actions(ctx, srcs)
+
+    run_patcher(
+        ctx,
+        ctx.executable,
+        inputs = [rustc_diagnostics_file] + srcs_inputs,
+        args = args,
+        tools = [ctx.executable._rustc_diagnostic_parser],
+        files_to_diff = [s.path for s in srcs],
+        patch_out = patch_file,
+        patch_cfg_env = {"BAZEL_BINDIR": ctx.bin_dir.path},
+        env = {},
+        mnemonic = _MNEMONIC,
+        progress_message = "Applying Clippy fixes to %{label}",
+    )
+
+def _parse_to_sarif_action(ctx, rustc_diagnostics_file, sarif_output):
     args = [
         "sarif",
         rustc_diagnostics_file.path,
         sarif_output.path,
     ]
 
-    # Must be set for js_binary to run.
-    # Ref: https://github.com/aspect-build/rules_js/tree/dbb5af0d2a9a2bb50e4cf4a96dbc582b27567155?tab=readme-ov-file#running-nodejs-programs
-    env = {
-        "BAZEL_BINDIR": ".",
-    }
     ctx.actions.run(
-        executable = ctx.executable._rustc_sarif_parser,
+        executable = ctx.executable._rustc_diagnostic_parser,
         arguments = args,
         inputs = [rustc_diagnostics_file],
         outputs = [sarif_output],
-        env = env,
+        # Must be set for js_binary to run.
+        # Ref: https://github.com/aspect-build/rules_js/tree/dbb5af0d2a9a2bb50e4cf4a96dbc582b27567155?tab=readme-ov-file#running-nodejs-programs
+        env = {
+            "BAZEL_BINDIR": ".",
+        }
     )
 
 DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_test"]
@@ -193,14 +214,28 @@ References:
             executable = True,
             cfg = "exec",
         ),
+        "_rustc_diagnostic_parser": attr.label(
+            doc = """A binary that can convert JSON rustc diagnostics into SARIF.
+
+Note that rustc diagnostics are different from cargo diagnostics, which is what common rust implementations like sarif-rs use.
+In particular, cargo diagnostics _may contain_ rustc diagnostics, but they don't have to.
+
+References:
+- Rustc diagnostic format: https://doc.rust-lang.org/beta/rustc/json.html#diagnostics
+""",
+            default = Label("//lint/rust:cli"),
+            executable = True,
+            cfg = "exec",
+        ),
     }
     return aspect(
         fragments = ["cpp"],
         implementation = _clippy_aspect_impl,
-        attrs = attrs,
-        toolchains = [
-            OPTIONAL_SARIF_PARSER_TOOLCHAIN,
-            Label("@rules_rust//rust:toolchain_type"),
-            "@bazel_tools//tools/cpp:toolchain_type",
-        ],
+        attrs = patcher_attrs | attrs,
+        toolchains =
+            COPY_FILE_TO_BIN_TOOLCHAINS +
+            [
+                Label("@rules_rust//rust:toolchain_type"),
+                "@bazel_tools//tools/cpp:toolchain_type",
+            ],
     )

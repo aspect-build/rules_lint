@@ -95,6 +95,27 @@ rust_test(
     ],
 )
 
+rust_library(
+    name = "warning_lib",
+    srcs = ["warning_lib.rs"],
+    edition = "2021",
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+)
+
+rust_binary(
+    name = "ok_binary_with_warning_dep",
+    srcs = ["ok_binary.rs"],
+    edition = "2021",
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+    deps = [":warning_lib"],
+)
+
 rust_binary(
     name = "binary_with_warning_and_error",
     srcs = ["warning_and_error.rs"],
