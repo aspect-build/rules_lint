@@ -28,6 +28,9 @@ jobs:
       - name: Verify bcr patches
         run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
       - uses: lycheeverse/lychee-action@v2
+        with:
+          # Allow 503 Service Unavailable when rate limited
+          args: --accept '200..=204,503'
       - name: "List examples that have a tools/format folder"
         id: set-format-matrix
         run: |
