@@ -70,6 +70,8 @@ jobs:
   integration-test:
     needs: list-examples
     runs-on: ubuntu-latest
+    env:
+      USE_BAZEL_VERSION: 8.x
     strategy:
       fail-fast: false
       matrix:
