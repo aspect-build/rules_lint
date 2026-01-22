@@ -65,13 +65,14 @@ jobs:
       # Permit this gross non-hermetic dependency
       - if: matrix.folder == 'examples/cpp'
         run: sudo apt-get update && sudo apt-get install -y libtinfo5
+      # TODO: Fix for Bazel 9
+      - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
+        run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
   integration-test:
     needs: list-examples
     runs-on: ubuntu-latest
-    env:
-      USE_BAZEL_VERSION: 8.x
     strategy:
       fail-fast: false
       matrix:
@@ -79,9 +80,6 @@ jobs:
         include:
           - folder: format
         exclude:
-          # FIXME: these two are hanging; why?
-          # - folder: examples/java
-          # - folder: examples/shell
           # FIXME: these two are failing, diagnose.
           - folder: examples/python
           - folder: examples/cpp
@@ -109,6 +107,10 @@ jobs:
           support-version: "0.3.0"
           assert-path: /usr/lib/bats/bats-assert
           assert-version: "2.1.0"
+      # TODO: Fix for Bazel 9
+      - if: matrix.folder == 'examples/java' || matrix.folder == 'examples/shell' || matrix.folder == 'format'
+        run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
+
       - name: "Integration test"
         working-directory: ${{ matrix.folder }}
         run: bats ./test
@@ -123,6 +125,10 @@ jobs:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
         with: *bazelrc
+      # TODO: Fix for Bazel 9
+      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs' || matrix.folder == 'examples/python'
+        run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
+
       - name: Lint
         working-directory: ${{ matrix.folder }}
         run: |
