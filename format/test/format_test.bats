@@ -23,7 +23,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_JavaScript_with_prettier README.md examples/nodejs/eslint.config.mjs
     assert_success
 
-    assert_output --partial "README.md"
+    assert_output --partial "examples/nodejs/eslint.config.mjs"
     refute_output --partial "file.ts"
 }
 
