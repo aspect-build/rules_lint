@@ -155,7 +155,7 @@ jobs:
         version:
           - 7.x
           - 8.x
-          - 9.*
+          - 9.x
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
