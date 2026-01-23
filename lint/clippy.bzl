@@ -61,7 +61,11 @@ def _parse_wrapper_output_into_files(ctx, outputs, raw_process_wrapper_wrapper_o
     command = """
 exit_code=$(head -n 1 $1)
 output=$(tail -n +2 $1)
-echo "${output}" > $2
+if [[ "${output}" != "" ]]; then
+    echo "${output}" > $2
+else
+    touch $2
+fi
 """
 
     if fail_on_violation:
@@ -88,6 +92,11 @@ echo "${exit_code}" > $4
         outputs = outs,
     )
 
+_CLIPPY_SKIP_TAG = "noclippy"
+
+def _has_skip_tag(rule):
+    return _CLIPPY_SKIP_TAG in rule.attr.tags
+
 # buildifier: disable=function-docstring
 def _clippy_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
@@ -110,7 +119,7 @@ def _clippy_aspect_impl(target, ctx):
     else:
         outputs, info = output_files(_MNEMONIC, target, ctx, sibling)
 
-    if len(files_to_lint) == 0 or not crate_info:
+    if len(files_to_lint) == 0 or not crate_info or _has_skip_tag(ctx.rule):
         noop_lint_action(ctx, outputs)
         return [info]
 

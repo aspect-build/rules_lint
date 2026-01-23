@@ -69,6 +69,10 @@ clippy_test(
 clippy_test(
     name = "clippy_warning_lib",
     srcs = ["//src:warning_lib"],
+    # Expected to fail based on current content of the file.
+    # Clippy itself doesn't fail, but the test expects the output to be empty.
+    # Normally you'd fix the file instead of tagging this test.
+    tags = ["manual"],
 )
 
 clippy_test(
@@ -78,12 +82,12 @@ clippy_test(
 
 machine_clippy_report(
     name = "machine_clippy_report",
-    src = "//src:binary_with_warning_and_error",
+    src = "//src:warning_lib",
 )
 
 report_test(
     name = "clippy_machine_output_test",
     expected_tool = "clippy",
-    expected_uri = "src/warning_and_error.rs",
+    expected_uri = "src/warning_lib.rs",
     report = "machine_clippy_report",
 )
