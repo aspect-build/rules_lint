@@ -66,7 +66,7 @@ axl_archive_dep(
     name = "aspect_rules_lint",
     urls = ["https://github.com/aspect-build/rules_lint/releases/download/${TAG}/rules_lint-${TAG}.tar.gz"],
     integrity = "${INTEGRITY}",
-    strip_prefix = "rules_lint-${TAG}",
+    strip_prefix = "rules_lint-${TAG:1}",
     dev = True,
     auto_use_tasks = True,
 )
