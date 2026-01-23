@@ -185,7 +185,7 @@ def _parse_to_sarif_action(ctx, rustc_diagnostics_file, sarif_output):
         # Ref: https://github.com/aspect-build/rules_js/tree/dbb5af0d2a9a2bb50e4cf4a96dbc582b27567155?tab=readme-ov-file#running-nodejs-programs
         env = {
             "BAZEL_BINDIR": ".",
-        }
+        },
     )
 
 DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_test"]
@@ -246,6 +246,7 @@ References:
     }
     return aspect(
         fragments = ["cpp"],
+        attr_aspects = ["deps"],
         implementation = _clippy_aspect_impl,
         attrs = patcher_attrs | attrs,
         toolchains =

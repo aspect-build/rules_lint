@@ -12,10 +12,9 @@ clippy_test(
 clippy_test(
     name = "clippy_ok_binary_with_bad_dep",
     srcs = ["//src:ok_binary_with_bad_dep"],
-    # TODO: This test is supposed to fail, why does it pass?
     # Expected to fail based on current content of the file.
     # Normally you'd fix the file instead of tagging this test.
-    # tags = ["manual"],
+    tags = ["manual"],
 )
 
 clippy_test(
