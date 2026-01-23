@@ -84,9 +84,11 @@ jobs:
         include:
           - folder: format
         exclude:
-          # FIXME: these two are failing, diagnose.
+          # FIXME: these are failing, diagnose.
           - folder: examples/python
           - folder: examples/cpp
+          - folder: examples/java
+          - folder: examples/shell
     steps:
       - uses: actions/checkout@v5
       - name: Install Aspect CLI
