@@ -39,6 +39,10 @@ clippy = lint_clippy_aspect(
 
 Now your targets will be linted with clippy.
 If you wish a target to be excluded from linting, you can give them the `noclippy` tag.
+If you wish a clippy lint exception to fail the build, please enable the `--@aspect_rules_lint//lint:fail_on_violation` flag.
+
+Please note that the aspect will propagate to all transitive Rust dependencies of your
+`rust_library`, `rust_binary`, and `rust_test` targets.
 
 Please watch issue https://github.com/aspect-build/rules_lint/issues/385 for updates on this behavior.
 """
