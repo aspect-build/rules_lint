@@ -30,8 +30,12 @@ This example demonstrates how to set up formatting and linting for Rust code usi
 See `src/` for example Rust files:
 
 - `ok_binary.rs` - A simple Rust binary with no linting issues
+- `ok_test.rs` - A simple Rust test with no linting issues
 - `bad_binary.rs` - A Rust binary with intentional Clippy violations
 - `bad_lib.rs` - A Rust library with intentional Clippy violations
+- `bad_test.rs` - A Rust test with intentional Clippy violations
+- `warning_lib.rs` - A Rust library with an intentional Clippy non-fatal warning
+- `warning_and_error.rs` - A Rust library with an intentional Clippy warning and an intentional Clippy error
 
 ## Excluding Targets from Linting
 

@@ -1,1 +1,2 @@
 build:lint --aspects=//tools/lint:linters.bzl%clippy
+test --@aspect_rules_lint//lint:fail_on_violation
