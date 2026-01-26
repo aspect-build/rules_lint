@@ -201,7 +201,7 @@ def _parse_to_sarif_action(ctx, rustc_diagnostics_file, sarif_output):
         },
     )
 
-DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_test"]
+DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_shared_library", "rust_test"]
 
 def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS):
     """A factory function to create a linter aspect.
