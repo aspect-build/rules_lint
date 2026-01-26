@@ -118,6 +118,11 @@ function diagnosticsToSarif(diagnostics) {
  * Assumes the file paths referenced in diagnostics are relative to the bindir.
  * Will write the new file contents to disk.
  *
+ * Please note that only the machine-applicable suggestions are applied.
+ * Suggestions that may or many not be correct are ignored.
+ * For more information about suggestion applicability, see the rustc documentation about suggestions:
+ * - Ref: https://rustc-dev-guide.rust-lang.org/diagnostics.html?highlight=Applicabilit#suggestions
+ *
  * @param diagnostics
  * @return void
  */
@@ -169,10 +174,25 @@ function applyReplacementsToFile([path_to_fix, unsorted_replacements]) {
   const fileContents = fs.readFileSync(path_to_fix); // No encoding because we want a buffer that we can replace.
   const replacements = sortReplacements(unsorted_replacements, fileContents);
 
-  let fixedContents = fileContents;
+  let fixedContents = Buffer.from("");
+  let prev_end = 0;
   for (const span of replacements) {
-    fixedContents = replaceByteRange(fixedContents, span.byte_start, span.byte_end, span.suggested_replacement);
+    const replacementBuffer =
+        Buffer.isBuffer(span.suggested_replacement)
+            ? replacement
+            : Buffer.from(span.suggested_replacement);
+
+    fixedContents = Buffer.concat([
+        fixedContents,
+        fileContents.slice(prev_end, span.byte_start),
+        replacementBuffer,
+    ]);
+    prev_end = span.byte_end;
   }
+  fixedContents = Buffer.concat([
+      fixedContents,
+      fileContents.slice(prev_end),
+  ])
 
   // Write file contents to disk
   try {
@@ -312,28 +332,6 @@ function getRelatedLocations(diagnostic) {
 }
 
 /**
- * Replace `[start..end]` in `buffer` with `replacement`, and return the resulting buffer.
- *
- * @param {Buffer} buffer
- * @param {number} start
- * @param {number} end
- * @param {string | Buffer} replacement
- * @return Buffer
- */
-function replaceByteRange(buffer, start, end, replacement) {
-  const replacementBuffer =
-      Buffer.isBuffer(replacement)
-          ? replacement
-          : Buffer.from(replacement);
-
-  return Buffer.concat([
-    buffer.slice(0, start),
-    replacementBuffer,
-    buffer.slice(end),
-  ]);
-}
-
-/**
  * Sort fixes according to the logic in rustfix
  *   Ref: https://github.com/rust-lang/cargo/blob/master/crates/rustfix/src/replace.rs#L143-L150
  *
@@ -354,37 +352,50 @@ function sortReplacements(spans, fileContents) {
     console.assert(start <= end, `span ends before it starts: ${JSON.stringify(span)}`);
     console.assert(end <= fileContents.length, `span ends after file end: ${JSON.stringify(span)}`)
 
-    let insertion_point = replacements.findIndex((replacement) => {
+    /**
+     * Re-implementation of Rust's partition point:
+     * https://doc.rust-lang.org/std/primitive.slice.html#method.partition_point
+     * @template ELEM
+     * @param {ELEM[]} elems
+     * @param {(ELEM) => bool} predicate
+     * @return {number}
+     */
+    function partitionPoint(elems, predicate) {
+      let idx = elems.findLastIndex(predicate);
+      return idx + 1;
+    }
+
+    let insertionPoint = partitionPoint(replacements, (replacement) => {
       return (replacement.byte_start < start ||
           (replacement.byte_start === start && replacement.byte_end < end)
       )
     });
 
     // If we did not find a proper insertion point, insert at the end of the replacement queue.
-    if (insertion_point === -1) {
-      insertion_point = replacements.length;
+    if (insertionPoint === -1) {
+      insertionPoint = replacements.length;
     }
 
     // Reject if the change starts before the previous one ends.
-    const previousReplacementIdx = insertion_point - 1;
+    const previousReplacementIdx = insertionPoint - 1;
     if (previousReplacementIdx >= 0) {
       const previousReplacement = replacements[previousReplacementIdx];
       if (start < previousReplacement.byte_end) {
-        contine
+        continue
       }
     }
 
     // Reject if the change ends after the next one starts,
     // or if this is an insert and there's already an insert there.
-    if (0 <= insertion_point < replacements.length) {
-      const nextReplacement = replacements[insertion_point];
+    if (0 <= insertionPoint && insertionPoint < replacements.length) {
+      const nextReplacement = replacements[insertionPoint];
       const areTheSameRange = start === nextReplacement.byte_start && end === nextReplacement.byte_end;
       if (end > nextReplacement.byte_start || areTheSameRange) {
         continue
       }
     }
 
-    replacements.splice(insertion_point, 0, span);
+    replacements.splice(insertionPoint, 0, span);
   }
 
   return replacements;

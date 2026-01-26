@@ -6,5 +6,14 @@
 -    println!("{}", "Hello World");
 +    println!("Hello World");
  
+     // Almost complete range
+     // https://rust-lang.github.io/rust-clippy/stable/index.html#almost_complete_range
+@@ -9,7 +9,7 @@
+     // Nested warnings:
+     // - Bool assert comparisons: https://rust-lang.github.io/rust-clippy/stable/index.html#bool_assert_comparison
+     // - Format in format args: https://rust-lang.github.io/rust-clippy/stable/index.html#format_in_format_args
+-    assert_eq!(format!("{}", format!("{}", "hello")).is_empty(), false);
++    assert!(!format!("{}", format!("{}", "hello")).is_empty());
+ 
      // Will fail clippy because of the missing comma
      let _missing_comma = &[
