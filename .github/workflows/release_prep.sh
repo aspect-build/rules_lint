@@ -57,8 +57,8 @@ Add this to your `MODULE.bazel` file:
 bazel_dep(name = "aspect_rules_lint", version = "${TAG:1}")
 \`\`\`
 
-This repo also provides a `lint` task for the Aspect CLI.
-Add this to your `MODULE.aspect` file:
+This repo also provides a \`lint\` task for the [Aspect CLI].
+Add this to your \`MODULE.aspect\` file:
 
 \`\`\`starlark
 # AXL dependencies; see https://github.com/aspect-extensions
@@ -75,4 +75,6 @@ axl_archive_dep(
 Then, follow the install instructions for
 - linting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/linting.md
 - formatting: https://github.com/aspect-build/rules_lint/blob/${TAG}/docs/formatting.md
+
+[Aspect CLI]: https://docs.aspect.build/cli
 EOF
