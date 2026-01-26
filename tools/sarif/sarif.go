@@ -91,6 +91,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%AIn\ %f\ line\ %l:`,
 			`%C%.%#(%trror):\ %m%Z`,
 			`%C%.%#(%tarning):\ %m%Z`,
+			`%C%.%#(%tnfo):\ %m%Z`,
 			`%C%.%#`,
 		}
 	case "AspectRulesLintStylelint":
