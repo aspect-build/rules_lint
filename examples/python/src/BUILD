@@ -30,6 +30,11 @@ py_library(
     srcs = ["uses_eval.py"],
 )
 
+py_library(
+    name = "uses_pickle",
+    srcs = ["uses_pickle.py"],
+)
+
 filegroup(
     name = "unused_import_pyi",
     srcs = ["unused_import.pyi"],
@@ -44,5 +49,6 @@ filegroup(
         ":unused_import",
         ":uses_dependency",
         ":uses_eval",
+        ":uses_pickle",
     ],
 )

@@ -29,38 +29,38 @@ Linters which are not language-specific:
 
 - [keep-sorted]
 
-| Language               | Formatter                 | Linter(s)                                  |
-| ---------------------- | ------------------------- | ------------------------------------------ |
-| C / C++                | [clang-format]            | [clang-tidy] or [cppcheck]                 |
-| CUE                    | [cue fmt]                 |                                            |
-| Cuda                   | [clang-format]            |                                            |
-| CSS, Less, Sass        | [Prettier]                | [Stylelint]                                |
-| Go                     | [gofmt] or [gofumpt]      |                                            |
-| Gherkin                | [prettier-plugin-gherkin] |                                            |
-| GraphQL                | [Prettier]                |                                            |
-| HCL (Hashicorp Config) | [terraform] fmt           |                                            |
-| HTML                   | [Prettier]                |                                            |
-| JSON                   | [Prettier]                |                                            |
-| Java                   | [google-java-format]      | [pmd] , [Checkstyle], [Spotbugs]           |
-| JavaScript             | [Prettier]                | [ESLint]                                   |
-| HTML templates         | [djlint]                  |                                            |
-| Jsonnet                | [jsonnetfmt]              |                                            |
-| Kotlin                 | [ktfmt]                   | [ktlint]                                   |
-| Markdown               | [Prettier]                | [Vale]                                     |
-| Protocol Buffer        | [buf]                     | [buf lint]                                 |
-| Python                 | [ruff]                    | [bandit], [flake8], [pylint], [ruff], [ty] |
-| Ruby                   |                           | [RuboCop], [Standard]                      |
-| Rust                   | [rustfmt]                 | [clippy]                                   |
-| SQL                    | [prettier-plugin-sql]     |                                            |
-| Scala                  | [scalafmt]                |                                            |
-| Shell                  | [shfmt]                   | [shellcheck]                               |
-| Starlark               | [Buildifier]              |                                            |
-| Swift                  | [SwiftFormat] (1)         |                                            |
-| TOML                   | [taplo]                   |                                            |
-| TSX                    | [Prettier]                | [ESLint]                                   |
-| TypeScript             | [Prettier]                | [ESLint]                                   |
-| YAML                   | [yamlfmt]                 | [yamllint]                                 |
-| XML                    | [prettier/plugin-xml]     |                                            |
+| Language               | Formatter                 | Linter(s)                                             |
+| ---------------------- | ------------------------- | ----------------------------------------------------- |
+| C / C++                | [clang-format]            | [clang-tidy] or [cppcheck]                            |
+| CUE                    | [cue fmt]                 |                                                       |
+| Cuda                   | [clang-format]            |                                                       |
+| CSS, Less, Sass        | [Prettier]                | [Stylelint]                                           |
+| Go                     | [gofmt] or [gofumpt]      |                                                       |
+| Gherkin                | [prettier-plugin-gherkin] |                                                       |
+| GraphQL                | [Prettier]                |                                                       |
+| HCL (Hashicorp Config) | [terraform] fmt           |                                                       |
+| HTML                   | [Prettier]                |                                                       |
+| JSON                   | [Prettier]                |                                                       |
+| Java                   | [google-java-format]      | [pmd], [Checkstyle], [Spotbugs]                       |
+| JavaScript             | [Prettier]                | [ESLint]                                              |
+| HTML templates         | [djlint]                  |                                                       |
+| Jsonnet                | [jsonnetfmt]              |                                                       |
+| Kotlin                 | [ktfmt]                   | [ktlint]                                              |
+| Markdown               | [Prettier]                | [Vale]                                                |
+| Protocol Buffer        | [buf]                     | [buf lint]                                            |
+| Python                 | [ruff]                    | [bandit], [flake8], [pylint], [semgrep], [ruff], [ty] |
+| Ruby                   |                           | [RuboCop], [Standard]                                 |
+| Rust                   | [rustfmt]                 | [clippy]                                              |
+| SQL                    | [prettier-plugin-sql]     |                                                       |
+| Scala                  | [scalafmt]                |                                                       |
+| Shell                  | [shfmt]                   | [shellcheck]                                          |
+| Starlark               | [Buildifier]              |                                                       |
+| Swift                  | [SwiftFormat] (1)         |                                                       |
+| TOML                   | [taplo]                   |                                                       |
+| TSX                    | [Prettier]                | [ESLint]                                              |
+| TypeScript             | [Prettier]                | [ESLint]                                              |
+| YAML                   | [yamlfmt]                 | [yamllint]                                            |
+| XML                    | [prettier/plugin-xml]     |                                                       |
 
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
@@ -87,6 +87,7 @@ Linters which are not language-specific:
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
 [rubocop]: https://docs.rubocop.org/
+[semgrep]: https://semgrep.dev/
 [standard]: https://github.com/standardrb/standard
 [ruff]: https://docs.astral.sh/ruff/
 [ty]: https://docs.astral.sh/ty/
