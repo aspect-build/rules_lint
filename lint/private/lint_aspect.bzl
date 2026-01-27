@@ -54,7 +54,7 @@ def should_visit(rule, allow_kinds, allow_filegroup_tags = []):
 
 OUTFILE_FORMAT = "{label}.{mnemonic}.{suffix}"
 
-def output_files(mnemonic, target, ctx, sibling = None):
+def output_files(mnemonic, target, ctx, sibling = None, files_to_lint = None):
     """Declare linter output files.
 
     Args:
@@ -63,65 +63,116 @@ def output_files(mnemonic, target, ctx, sibling = None):
         ctx: the aspect context
         sibling: optional File to declare outputs as siblings of, placing them in
             the same directory as the sibling file.
+        files_to_lint: optional list of files, if provided one output will be created per file
 
     Returns:
-        tuple of struct() of output files, and the OutputGroupInfo provider that the rule should return
+        tuple of struct() of output files, and the OutputGroupInfo provider that the rule should return when files_to_lint is None
+        tuple of list of struct() of output files, and the OutputGroupInfo provider when files_to_lint is provided
     """
-    human_out = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "out"), sibling = sibling)
+    human_outputs = []
+    machine_outputs = []
 
-    # NB: named ".report" as there are existing callers depending on that
-    machine_out = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report"), sibling = sibling)
+    def _declare_outputs(suffix = ""):
+        """Helper function to declare the outputs"""
+        human_out = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name + suffix, mnemonic = mnemonic, suffix = "out"), sibling = sibling)
 
-    if ctx.attr._options[LintOptionsInfo].fail_on_violation:
-        # Fail on violation means the exit code is reported to Bazel as the action result
-        human_exit_code = None
-        machine_exit_code = None
-    else:
-        # The exit codes should instead be provided as action outputs so the build succeeds.
-        # Downstream tooling like `aspect lint` will be responsible for reading the exit codes
-        # and interpreting them.
-        human_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "out.exit_code"), sibling = sibling)
-        machine_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "report.exit_code"), sibling = sibling)
+        # NB: named ".report" as there are existing callers depending on that
+        machine_out = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name + suffix, mnemonic = mnemonic, suffix = "report"), sibling = sibling)
 
-    human_outputs = [f for f in [human_out, human_exit_code] if f]
-    machine_outputs = [f for f in [machine_out, machine_exit_code] if f]
-    return struct(
-        human = struct(
-            out = human_out,
-            exit_code = human_exit_code,
-        ),
-        machine = struct(
-            out = machine_out,
-            exit_code = machine_exit_code,
-        ),
-    ), OutputGroupInfo(
+        if ctx.attr._options[LintOptionsInfo].fail_on_violation:
+            # Fail on violation means the exit code is reported to Bazel as the action result
+            human_exit_code = None
+            machine_exit_code = None
+        else:
+            # The exit codes should instead be provided as action outputs so the build succeeds.
+            # Downstream tooling like `aspect lint` will be responsible for reading the exit codes
+            # and interpreting them.
+            human_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name + suffix, mnemonic = mnemonic, suffix = "out.exit_code"), sibling = sibling)
+            machine_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name + suffix, mnemonic = mnemonic, suffix = "report.exit_code"), sibling = sibling)
+
+        human_outputs = [f for f in [human_out, human_exit_code] if f]
+        machine_outputs = [f for f in [machine_out, machine_exit_code] if f]
+        return struct(
+            human = struct(
+                out = human_out,
+                exit_code = human_exit_code,
+            ),
+            machine = struct(
+                out = machine_out,
+                exit_code = machine_exit_code,
+            ),
+        ), human_outputs, machine_outputs
+
+    if files_to_lint == None:
+        s, human_outputs, machine_outputs = _declare_outputs()
+        return s, OutputGroupInfo(
+            rules_lint_human = depset(human_outputs),
+            rules_lint_machine = depset(machine_outputs),
+            # Always cause the action to execute, even if the output isn't requested
+            _validation = depset(human_outputs[0:1]),
+        )
+
+    s_out = []
+    validation_set = []
+    for f in files_to_lint:
+        f_s, f_human_outputs, f_machine_outputs = _declare_outputs("_rules_lint/" + f.short_path)
+        s_out.append(f_s)
+        human_outputs += f_human_outputs
+        machine_outputs += f_machine_outputs
+        validation_set.append(f_human_outputs[0])
+
+    return s_out, OutputGroupInfo(
         rules_lint_human = depset(human_outputs),
         rules_lint_machine = depset(machine_outputs),
         # Always cause the action to execute, even if the output isn't requested
-        _validation = depset([human_out]),
+        _validation = depset(validation_set),
     )
 
-def patch_file(mnemonic, target, ctx, sibling = None):
-    patch = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "patch"), sibling = sibling)
-    return patch, OutputGroupInfo(rules_lint_patch = depset([patch]))
+def patch_file(mnemonic, target, ctx, sibling = None, files_to_lint = None):
+    if files_to_lint == None:
+        patch = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "patch"), sibling = sibling)
+        return patch, OutputGroupInfo(rules_lint_patch = depset([patch]))
+    patches = []
+    for f in files_to_lint:
+        patches.append(ctx.actions.declare_file(OUTFILE_FORMAT.format(
+            label = target.label.name + "_rules_lint/" + f.short_path,
+            mnemonic = mnemonic,
+            suffix = "patch",
+        ), sibling = sibling))
+    return patches, OutputGroupInfo(rules_lint_patch = depset(patches))
 
 # If we return multiple OutputGroupInfo from a rule implementation, only one will get used.
 # So we need a separate function to return both.
 # buildifier: disable=function-docstring
-def patch_and_output_files(*args):
-    patch, _ = patch_file(*args)
-    outputs, _ = output_files(*args)
-    human_outputs = [f for f in [outputs.human.out, outputs.human.exit_code] if f]
-    machine_outputs = [f for f in [outputs.machine.out, outputs.machine.exit_code] if f]
-    return struct(
-        human = outputs.human,
-        machine = outputs.machine,
-        patch = patch,
-    ), OutputGroupInfo(
-        rules_lint_human = depset(human_outputs),
-        rules_lint_machine = depset(machine_outputs),
-        rules_lint_patch = depset([patch]),
-    )
+def patch_and_output_files(mnemonic, target, ctx, sibling = None, files_to_lint = None):
+    patch, _ = patch_file(mnemonic, target, ctx, sibling = sibling, files_to_lint = files_to_lint)
+    outputs, _ = output_files(mnemonic, target, ctx, sibling = sibling, files_to_lint = files_to_lint)
+    if files_to_lint == None:
+        human_outputs = [f for f in [outputs.human.out, outputs.human.exit_code] if f]
+        machine_outputs = [f for f in [outputs.machine.out, outputs.machine.exit_code] if f]
+        return struct(
+            human = outputs.human,
+            machine = outputs.machine,
+            patch = patch,
+        ), OutputGroupInfo(
+            rules_lint_human = depset(human_outputs),
+            rules_lint_machine = depset(machine_outputs),
+            rules_lint_patch = depset([patch]),
+        )
+    human_outputs = [f for o in outputs for f in [o.human.out, o.human.exit_code] if f]
+    machine_outputs = [f for o in outputs for f in [o.machine.out, o.machine.exit_code] if f]
+    return [
+        struct(
+            human = o.human,
+            machine = o.machine,
+            patch = p,
+        )
+        for o, p in zip(outputs, patch)
+    ], OutputGroupInfo(
+            rules_lint_human = depset(human_outputs),
+            rules_lint_machine = depset(machine_outputs),
+            rules_lint_patch = depset(patch),
+        )
 
 def filter_srcs(rule):
     if "lint-genfiles" in rule.attr.tags:
