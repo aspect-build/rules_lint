@@ -52,11 +52,24 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
     args.add("check")
     args.add("--force-exclude")
 
+    # Enable verbose output if debug mode is enabled
+    if ctx.attr._options[LintOptionsInfo].debug:
+        args.add("--vvv")
+
     # Add all source files to be linted
     args.add_all(srcs)
 
     ## Ty's color output is turned off for non-interactive invocations
     args.add("--color", "always")
+
+    # Add config file flags based on the config file type
+    for config_file in config:
+        if config_file.basename == "pyproject.toml":
+            # For pyproject.toml, pass the directory with --project
+            args.add("--project", config_file.dirname)
+        else:
+            # For ty.toml or other config files, pass the full path with --config-file
+            args.add("--config-file", config_file.path)
 
     # Build a script that adds --extra-search-path only for directories that exist
     # Some pip package directories may not exist, so we check first
@@ -114,7 +127,7 @@ def _ty_aspect_impl(target, ctx):
         for dep in ctx.rule.attr.deps:
             if PyInfo in dep:
                 transitive_sources.append(dep[PyInfo].transitive_sources)
-
+                transitive_sources.append(dep[PyInfo].transitive_pyi_files)
                 # Collect imports from pip packages for extra search paths
                 for import_path in dep[PyInfo].imports.to_list():
                     if import_path == ctx.workspace_name:
@@ -127,6 +140,7 @@ def _ty_aspect_impl(target, ctx):
         for src in ctx.rule.attr.srcs:
             if PyInfo in src:
                 transitive_sources.append(src[PyInfo].transitive_sources)
+                transitive_sources.append(src[PyInfo].transitive_pyi_files)
                 for import_path in src[PyInfo].imports.to_list():
                     import_paths["external/" + import_path] = True
 
