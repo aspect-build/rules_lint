@@ -342,6 +342,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
             exit_code = exit_code,
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{{label}}:{} with clang-tidy".format(srcs[0].basename),
+            patch_cfg_name = "{}_rules_lint/{}".format(ctx.label.name, srcs[0].short_path),
         )
     else:
         # Use run_shell for lint mode
