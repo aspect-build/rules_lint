@@ -341,7 +341,8 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
             stdout = stdout,
             exit_code = exit_code,
             mnemonic = _MNEMONIC,
-            progress_message = "Linting %{label} with clang-tidy",
+            progress_message = "Linting %{{label}}:{} with clang-tidy".format(srcs[0].basename),
+            patch_cfg_name = "{}_rules_lint/{}".format(ctx.label.name, srcs[0].short_path),
         )
     else:
         # Use run_shell for lint mode
@@ -367,7 +368,7 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
             arguments = [executable._clang_tidy.path] + clang_tidy_args + ["--", compiler_args_obj],
             env = env,
             mnemonic = _MNEMONIC,
-            progress_message = "Linting %{label} with clang-tidy",
+            progress_message = "Linting %{{label}}:{} with clang-tidy".format(srcs[0].basename),
         )
 
 # buildifier: disable=function-docstring
@@ -386,29 +387,31 @@ def _clang_tidy_aspect_impl(target, ctx):
                                    [implementation_dep[CcInfo].compilation_context for implementation_dep in ctx.rule.attr.implementation_deps],
         )
 
-    if ctx.attr._options[LintOptionsInfo].fix:
-        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
-    else:
-        outputs, info = output_files(_MNEMONIC, target, ctx)
-
     if len(files_to_lint) == 0:
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
         noop_lint_action(ctx, outputs)
         return [info]
 
-    clang_tidy_action(
-        ctx,
-        compilation_context,
-        ctx.executable,
-        files_to_lint,
-        outputs.human.out,
-        outputs.human.exit_code,
-        patch = getattr(outputs, "patch", None),
-    )
+    if ctx.attr._options[LintOptionsInfo].fix:
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx, files_to_lint = files_to_lint)
+    else:
+        outputs, info = output_files(_MNEMONIC, target, ctx, files_to_lint = files_to_lint)
 
-    # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    clang_tidy_action(ctx, compilation_context, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code)
-    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
+    for output, file in zip(outputs, files_to_lint):
+        clang_tidy_action(
+            ctx,
+            compilation_context,
+            ctx.executable,
+            [file],
+            output.human.out,
+            output.human.exit_code,
+            patch = getattr(output, "patch", None),
+        )
+
+        # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
+        raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name + "_rules_lint/" + file.short_path, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+        clang_tidy_action(ctx, compilation_context, ctx.executable, [file], raw_machine_report, output.machine.exit_code)
+        parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, output.machine.out)
     return [info]
 
 DEFAULT_RULE_KINDS = ["cc_binary", "cc_library"]

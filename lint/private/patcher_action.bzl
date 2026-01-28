@@ -22,7 +22,8 @@ def run_patcher(
         env = None,
         mnemonic = None,
         progress_message = None,
-        patch_cfg_suffix = "patch_cfg"):
+        patch_cfg_suffix = "patch_cfg",
+        patch_cfg_name = None):
     """Run the linter in a sandbox, in a mode where it applies fixes to source files it reads.
 
     Collects the edits made to the sandbox into a patch file.
@@ -43,10 +44,13 @@ def run_patcher(
         mnemonic: action mnemonic
         progress_message: action progress message
         patch_cfg_suffix: suffix for the patch config file name (default: "patch_cfg")
+        patch_cfg_name: patch config file name minus the suffix (default: ctx.label.name)
     """
 
     # Create a patch config file to pass arguments to the patcher.mjs script
-    patch_cfg = ctx.actions.declare_file("_{}.{}".format(ctx.label.name, patch_cfg_suffix))
+    if patch_cfg_name == None:
+        patch_cfg_name = ctx.label.name
+    patch_cfg = ctx.actions.declare_file("_{}.{}".format(patch_cfg_name, patch_cfg_suffix))
 
     # Build patch config dictionary
     patch_cfg_dict = {
