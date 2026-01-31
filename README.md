@@ -52,7 +52,7 @@ Linters which are not language-specific:
 | Ruby                   |                           | [RuboCop], [Standard]                      |
 | Rust                   | [rustfmt]                 | [clippy]                                   |
 | SQL                    | [prettier-plugin-sql]     |                                            |
-| Scala                  | [scalafmt]                |                                            |
+| Scala                  | [scalafmt]                | [scalafix]                                 |
 | Shell                  | [shfmt]                   | [shellcheck]                               |
 | Starlark               | [Buildifier]              |                                            |
 | Swift                  | [SwiftFormat] (1)         |                                            |
@@ -86,6 +86,7 @@ Linters which are not language-specific:
 [gofumpt]: https://github.com/mvdan/gofumpt
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
+[scalafix]: https://scalacenter.github.io/scalafix/
 [rubocop]: https://docs.rubocop.org/
 [standard]: https://github.com/standardrb/standard
 [ruff]: https://docs.astral.sh/ruff/

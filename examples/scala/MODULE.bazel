@@ -1,8 +1,9 @@
-"Bazel dependencies for Scala formatting example"
+"Bazel dependencies for Scala formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "rules_jvm_external", version = "6.5")
 bazel_dep(name = "rules_java", version = "8.5.0")
+bazel_dep(name = "rules_scala", version = "7.1.6")
 bazel_dep(name = "bazel_skylib", version = "1.4.2")
 
 local_path_override(
@@ -10,10 +11,27 @@ local_path_override(
     path = "../..",
 )
 
+# Configure Scala version - must match rules_scala's expected version
+scala_config = use_extension(
+    "@rules_scala//scala/extensions:config.bzl",
+    "scala_config",
+)
+scala_config.settings(scala_version = "2.13.17")
+
+# Load Scala dependency toolchains
+scala_deps = use_extension(
+    "@rules_scala//scala/extensions:deps.bzl",
+    "scala_deps",
+)
+scala_deps.scala()
+
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
     artifacts = [
-        "org.scalameta:scalafmt-cli_2.13:3.7.14",
+        "org.scalameta:scalafmt-cli_2.13:3.9.10",
+        # scalafix-cli is published for specific Scala versions
+        # Use 2.13.18 which has version 0.14.5 available on Maven Central
+        "ch.epfl.scala:scalafix-cli_2.13.18:0.14.5",
     ],
     lock_file = "@//:maven_install.json",
     repositories = [
@@ -22,3 +40,6 @@ maven.install(
     ],
 )
 use_repo(maven, "maven")
+
+# Register custom toolchain with SemanticDB enabled for semantic linting rules
+register_toolchains("//tools/scala:semanticdb_toolchain")
