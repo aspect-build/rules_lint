@@ -49,34 +49,33 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
     # Wire command-line options, see
     # `ty help check` to see available options
     args = ctx.actions.args()
-    args.add("check")
-    args.add("--force-exclude")
 
     # Add all source files to be linted
     args.add_all(srcs)
 
-    ## Ty's color output is turned off for non-interactive invocations
-    args.add("--color", "always")
-
     # Build a script that adds --extra-search-path only for directories that exist
     # Some pip package directories may not exist, so we check first
-    extra_search_path_script = "EXTRA_SEARCH_PATHS=''\n"
+    # Pass --extra-search-path via a @param file, as there might be many of them
+    extra_search_path_script = """PARAM_FILE="$(mktemp)"
+"""
+
     for path in extra_search_paths:
         extra_search_path_script += """if [ -d "{path}" ]; then
-  EXTRA_SEARCH_PATHS="$EXTRA_SEARCH_PATHS --extra-search-path {path}"
+  echo "--extra-search-path" >> "$PARAM_FILE"
+  echo "{path}" >> "$PARAM_FILE"
 fi
 """.format(path = path)
 
     if exit_code:
         command = """{extra_search_path_script}
-{ty} $@ $EXTRA_SEARCH_PATHS >{stdout}
+{ty} check --force-exclude --color always @"$PARAM_FILE" $@ >{stdout}
 echo $? >{exit_code}
 """
         outputs.append(exit_code)
     else:
         # Create empty file on success, as Bazel expects one
         command = """{extra_search_path_script}
-{ty} $@ $EXTRA_SEARCH_PATHS && touch {stdout}
+{ty} check --force-exclude --color always @"$PARAM_FILE" $@ && touch {stdout}
 """
 
     ctx.actions.run_shell(
