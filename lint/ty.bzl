@@ -20,7 +20,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintTy"
 
-def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, env = {}, extra_search_paths = []):
+def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, env = {}, extra_search_paths = [], color = True):
     """Run ty as an action under Bazel.
 
     ty supports persistent configuration files at both the project- and user-level
@@ -42,6 +42,7 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
             https://docs.astral.sh/ty/reference/exit-codes/
         env: environment variables for ty
         extra_search_paths: list of paths to add as --extra-search-path for third-party module resolution
+        color: whether to enable color output (--color always) or disable it (--color never)
     """
     inputs = depset(srcs + config, transitive = [transitive_srcs])
     outputs = [stdout]
@@ -49,8 +50,6 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
     # Wire command-line options, see
     # `ty help check` to see available options
     args = ctx.actions.args()
-    args.add("check")
-    args.add("--force-exclude")
 
     # Enable verbose output if debug mode is enabled
     if ctx.attr._options[LintOptionsInfo].debug:
@@ -58,9 +57,6 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
 
     # Add all source files to be linted
     args.add_all(srcs)
-
-    ## Ty's color output is turned off for non-interactive invocations
-    args.add("--color", "always")
 
     # Add config file flags based on the config file type
     for config_file in config:
@@ -73,23 +69,29 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
 
     # Build a script that adds --extra-search-path only for directories that exist
     # Some pip package directories may not exist, so we check first
-    extra_search_path_script = "EXTRA_SEARCH_PATHS=''\n"
+    # Pass --extra-search-path via a @param file, as there might be many of them
+    extra_search_path_script = """PARAM_FILE="$(mktemp)"
+"""
+
     for path in extra_search_paths:
         extra_search_path_script += """if [ -d "{path}" ]; then
-  EXTRA_SEARCH_PATHS="$EXTRA_SEARCH_PATHS --extra-search-path {path}"
+  echo "--extra-search-path" >> "$PARAM_FILE"
+  echo "{path}" >> "$PARAM_FILE"
 fi
 """.format(path = path)
 
+    color_flag = "--color always" if color else "--color never"
+
     if exit_code:
         command = """{extra_search_path_script}
-{ty} $@ $EXTRA_SEARCH_PATHS >{stdout}
+{ty} check --force-exclude {color_flag} @"$PARAM_FILE" $@ >{stdout}
 echo $? >{exit_code}
 """
         outputs.append(exit_code)
     else:
         # Create empty file on success, as Bazel expects one
         command = """{extra_search_path_script}
-{ty} $@ $EXTRA_SEARCH_PATHS && touch {stdout}
+{ty} check --force-exclude {color_flag} @"$PARAM_FILE" $@ && touch {stdout}
 """
 
     ctx.actions.run_shell(
@@ -100,6 +102,7 @@ echo $? >{exit_code}
             stdout = stdout.path,
             exit_code = exit_code.path if exit_code else "",
             extra_search_path_script = extra_search_path_script,
+            color_flag = color_flag,
         ),
         arguments = [args],
         mnemonic = _MNEMONIC,
@@ -159,7 +162,7 @@ def _ty_aspect_impl(target, ctx):
     ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env, extra_search_paths = extra_search_paths)
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code, extra_search_paths = extra_search_paths)
+    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code, extra_search_paths = extra_search_paths, color = False)
 
     # Ideally we'd just use {"TY_OUTPUT_FORMAT": "sarif"} however it prints absolute paths; see https://github.com/astral-sh/ruff/issues/14985
     # This issue should also be resolved when the issue from ruff is fixed.
