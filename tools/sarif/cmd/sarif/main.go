@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/aspect-build/rules_lint/tools/sarif"
@@ -24,7 +23,7 @@ func main() {
 	}
 
 	// Read the lint report
-	report, err := ioutil.ReadFile(*inFile)
+	report, err := os.ReadFile(*inFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading input file: %v\n", err)
 		os.Exit(1)
@@ -38,7 +37,7 @@ func main() {
 	}
 
 	// Write the SARIF JSON to output file
-	if err := ioutil.WriteFile(*outFile, []byte(sarifJsonString), 0644); err != nil {
+	if err := os.WriteFile(*outFile, []byte(sarifJsonString), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
 		os.Exit(1)
 	}

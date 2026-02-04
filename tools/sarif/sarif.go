@@ -30,12 +30,6 @@ import (
 	"github.com/reviewdog/reviewdog/parser"
 )
 
-type testStruct struct {
-	label    string
-	mnemonic string
-	report   string
-}
-
 func mnemonicPrettyName(mnemonic string) string {
 	return strings.Replace(mnemonic, "AspectRulesLint", "", 1)
 }
@@ -48,8 +42,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	}
 
 	if len(mnemonic) == 0 {
-		fmt.Sprintf("Undefined linter mnemonic for target %s\n", label)
-		return "", nil
+		return "", fmt.Errorf("Undefined linter mnemonic for target %s\n", label)
 	}
 
 	var fm []string
@@ -64,7 +57,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	case "AspectRulesLintPMD":
 		// TODO: upstream to https://github.com/reviewdog/errorformat/issues/62
 		fm = []string{`%f:%l:\\t%m`}
-  case "AspectRulesLintPylint":
+	case "AspectRulesLintPylint":
 		fm = []string{`%f:%l:%c: %m`}
 	case "AspectRulesLintRuff":
 		fm = []string{
@@ -106,7 +99,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%I%f:%l:%c: [info] %m`,
 		}
 	default:
-		fmt.Sprintf("No format string for linter mnemonic %s from target %s\n", mnemonic, label)
+		return "", fmt.Errorf("No format string for linter mnemonic %s from target %s\n", mnemonic, label)
 	}
 
 	if len(fm) == 0 {
@@ -169,7 +162,7 @@ func determineRelativePath(path string, label string) string {
 	}
 	relative_path := re.FindSubmatch([]byte(path))
 
-	if relative_path != nil && len(relative_path) == 2 {
+	if len(relative_path) == 2 {
 		return string(relative_path[1])
 	}
 
