@@ -50,7 +50,7 @@ def find_changed_files(out, process, base_ref: str = "origin/main"):
     merge_base = spawn_with_output(out, process
         .command("git").args(["merge-base", "HEAD", base_ref]))
     return spawn_with_output(out, process
-        .command("git").args(["diff", "--name-only", merge_base]))
+        .command("git").args(["diff", "--diff-filter=d", "--name-only", merge_base]))
 
 # buildifier: disable=function-docstring
 def build_formatter(ctx: TaskContext) -> str:
