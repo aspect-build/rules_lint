@@ -80,27 +80,41 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
 fi
 """.format(path = path)
 
+    # Create the shell script content
     if exit_code:
-        command = """{extra_search_path_script}
-{ty} $@ $EXTRA_SEARCH_PATHS >{stdout}
+        script_content = """{extra_search_path_script}
+{ty} "$@" $EXTRA_SEARCH_PATHS >{stdout}
 echo $? >{exit_code}
-"""
+""".format(
+            ty = executable.path,
+            stdout = stdout.path,
+            exit_code = exit_code.path,
+            extra_search_path_script = extra_search_path_script,
+        )
         outputs.append(exit_code)
     else:
         # Create empty file on success, as Bazel expects one
-        command = """{extra_search_path_script}
-{ty} $@ $EXTRA_SEARCH_PATHS && touch {stdout}
-"""
-
-    ctx.actions.run_shell(
-        inputs = inputs,
-        outputs = outputs,
-        command = command.format(
+        script_content = """{extra_search_path_script}
+{ty} "$@" $EXTRA_SEARCH_PATHS && touch {stdout}
+""".format(
             ty = executable.path,
             stdout = stdout.path,
-            exit_code = exit_code.path if exit_code else "",
             extra_search_path_script = extra_search_path_script,
-        ),
+        )
+
+    # Declare and write the shell script file
+    # Use the stdout file name to ensure uniqueness across multiple ty_action calls
+    script_file = ctx.actions.declare_file("{}_script.sh".format(stdout.basename.replace(".", "_")))
+    ctx.actions.write(
+        output = script_file,
+        content = script_content,
+        is_executable = True,
+    )
+
+    ctx.actions.run_shell(
+        inputs = depset([script_file], transitive = [inputs]),
+        outputs = outputs,
+        command = "{script} \"$@\"".format(script = script_file.path),
         arguments = [args],
         mnemonic = _MNEMONIC,
         env = env,
