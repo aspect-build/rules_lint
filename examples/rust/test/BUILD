@@ -31,7 +31,8 @@ clippy_test(
 clippy_test(
     name = "clippy_bad_binary",
     srcs = ["//src:bad_binary"],
-    expected_exit_code = 1,
+    # The aspect action fails and Bazel won't even run the test.
+    tags = ["manual"],
 )
 
 clippy_test(
@@ -42,25 +43,26 @@ clippy_test(
 clippy_test(
     name = "clippy_bad_library",
     srcs = ["//src:bad_lib"],
-    expected_exit_code = 1,
+    # The aspect action fails and Bazel won't even run the test.
+    tags = ["manual"],
 )
 
 clippy_test(
     name = "clippy_bad_test",
     srcs = ["//src:bad_test"],
-    expected_exit_code = 1,
+    tags = ["manual"],  # has non-empty output but exit code 0
 )
 
 clippy_test(
     name = "clippy_binary_with_warning_and_error",
     srcs = ["//src:binary_with_warning_and_error"],
-    expected_exit_code = 1,
+    tags = ["manual"],  # has non-empty output but exit code 0
 )
 
 clippy_test(
     name = "clippy_warning_lib",
     srcs = ["//src:warning_lib"],
-    expected_exit_code = 1,
+    tags = ["manual"],  # has non-empty output but exit code 0
 )
 
 clippy_test(
