@@ -2,9 +2,9 @@ package src
 
 import (
 	// keep-sorted start
-	"fmt"
-	"os"
 	"strings"
+	"os"
+	"fmt"
 	// keep-sorted end
 )
 

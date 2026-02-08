@@ -165,6 +165,7 @@ bzl_library(
     deps = [
         "//lint/private:lint_aspect",
         "//lint/private:patcher_action",
+        "@jq.bzl//jq",
     ],
 )
 

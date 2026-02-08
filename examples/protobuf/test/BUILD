@@ -8,9 +8,7 @@ package(default_visibility = ["//visibility:public"])
 buf_test(
     name = "buf",
     srcs = ["//src:foo_proto"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 machine_buf_report(

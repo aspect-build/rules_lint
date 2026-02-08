@@ -64,7 +64,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	case "AspectRulesLintPMD":
 		// TODO: upstream to https://github.com/reviewdog/errorformat/issues/62
 		fm = []string{`%f:%l:\\t%m`}
-  case "AspectRulesLintPylint":
+	case "AspectRulesLintPylint":
 		fm = []string{`%f:%l:%c: %m`}
 	case "AspectRulesLintRuff":
 		fm = []string{
@@ -105,6 +105,8 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%W%f:%l:%c: [warning] %m`,
 			`%I%f:%l:%c: [info] %m`,
 		}
+	case "AspectRulesLintKeepSorted":
+		fm = []string{`%f:%l:%e:%m`}
 	default:
 		fmt.Sprintf("No format string for linter mnemonic %s from target %s\n", mnemonic, label)
 	}

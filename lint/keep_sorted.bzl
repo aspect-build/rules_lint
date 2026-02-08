@@ -27,7 +27,8 @@ Now you can add `// keep-sorted start` / `// keep-sorted end` lines to your libr
 following the documentation at https://github.com/google/keep-sorted#usage.
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files")
+load("@jq.bzl//jq:jq.bzl", "jq_lib")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintKeepSorted"
@@ -114,7 +115,11 @@ def _keep_sorted_aspect_impl(target, ctx):
         options = color_options,
         patch = getattr(outputs, "patch", None),
     )
-    keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, outputs.machine.out, outputs.machine.exit_code)
+    raw_json_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_json_report"))
+    keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, raw_json_report, outputs.machine.exit_code)
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    jq_lib.jq_action(ctx, [raw_json_report], ".[] | [.path, .lines.start, .lines.end, .message] | join(\":\")", raw_machine_report, ["--raw-output"])
+    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
 def lint_keep_sorted_aspect(binary):
@@ -140,5 +145,7 @@ def lint_keep_sorted_aspect(binary):
             ),
         },
         toolchains = [
+            "@jq.bzl//jq/toolchain:type",
+            OPTIONAL_SARIF_PARSER_TOOLCHAIN,
         ],
     )

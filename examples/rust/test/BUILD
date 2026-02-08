@@ -1,3 +1,4 @@
+# buildifier: disable=bzl-visibility
 load("@aspect_rules_lint//lint/private:machine_report_testing.bzl", "report_test")
 load("//test:machine_output.bzl", "machine_clippy_report")
 load("//tools/lint:linters.bzl", "clippy_test")
@@ -12,9 +13,7 @@ clippy_test(
 clippy_test(
     name = "clippy_ok_binary_with_bad_dep",
     srcs = ["//src:ok_binary_with_bad_dep"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 clippy_test(
@@ -32,9 +31,7 @@ clippy_test(
 clippy_test(
     name = "clippy_bad_binary",
     srcs = ["//src:bad_binary"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 clippy_test(
@@ -45,34 +42,25 @@ clippy_test(
 clippy_test(
     name = "clippy_bad_library",
     srcs = ["//src:bad_lib"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 clippy_test(
     name = "clippy_bad_test",
     srcs = ["//src:bad_test"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 clippy_test(
     name = "clippy_binary_with_warning_and_error",
     srcs = ["//src:binary_with_warning_and_error"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 clippy_test(
     name = "clippy_warning_lib",
     srcs = ["//src:warning_lib"],
-    # Expected to fail based on current content of the file.
-    # Clippy itself doesn't fail, but the test expects the output to be empty.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 clippy_test(
