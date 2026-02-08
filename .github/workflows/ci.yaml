@@ -39,7 +39,7 @@ jobs:
       - name: "List folders with bats tests"
         id: set-bats-tests
         run: |
-          bats_tests=$(find . -name '*.bats' -path '*/test/*' | sed 's|/test/.*||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          bats_tests=$(find * -name '*.bats' -path '*/test/*' 2>/dev/null | sed 's|/test/.*||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "bats-tests=$bats_tests" >> "$GITHUB_OUTPUT"
           echo "Listed bats folders: $bats_tests"
   test:

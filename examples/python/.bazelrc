@@ -2,3 +2,4 @@ build:lint --aspects=//tools/lint:linters.bzl%ruff
 build:lint --aspects=//tools/lint:linters.bzl%flake8
 build:lint --aspects=//tools/lint:linters.bzl%pylint
 build:lint --aspects=//tools/lint:linters.bzl%ty
+common --incompatible_enable_proto_toolchain_resolution
