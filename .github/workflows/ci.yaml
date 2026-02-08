@@ -17,9 +17,10 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
-  list-examples:
+  prepare:
     runs-on: ubuntu-latest
     outputs:
+      all-examples: ${{ steps.set-all-examples-matrix.outputs.matrix }}
       format-matrix: ${{ steps.set-format-matrix.outputs.matrix }}
       test-matrix: ${{ steps.set-test-matrix.outputs.matrix }}
       lint-matrix: ${{ steps.set-lint-matrix.outputs.matrix }}
@@ -32,6 +33,12 @@ jobs:
           # Allow 503 Service Unavailable when rate limited
           args: --accept '200..=204,503' --base ${{ github.workspace }} --verbose --no-progress './**/*.md' './**/*.html'
           fail: false # sigh
+      - name: "List all examples"
+        id: set-all-examples-matrix
+        run: |
+          folders=$(find examples -type d -mindepth 1 -maxdepth 1 | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "matrix=$folders" >> "$GITHUB_OUTPUT"
+          echo "Generated all examples matrix: $folders"
       - name: "List examples that have a tools/format folder"
         id: set-format-matrix
         run: |
@@ -51,13 +58,13 @@ jobs:
           echo "matrix=$folders" >> "$GITHUB_OUTPUT"
           echo "Generated test matrix: $folders"
   format:
-    needs: list-examples
+    needs: prepare
     # Our version of clang-format has some deps that aren't satisfiable on newer ubuntu yet
     runs-on: ${{ matrix.folder == 'examples/cpp' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
-        folder: ${{ fromJson(needs.list-examples.outputs.format-matrix) }}
+        folder: ${{ fromJson(needs.prepare.outputs.format-matrix) }}
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
@@ -75,12 +82,12 @@ jobs:
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
   integration-test:
-    needs: list-examples
+    needs: prepare
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        folder: ${{ fromJson(needs.list-examples.outputs.test-matrix) }}
+        folder: ${{ fromJson(needs.prepare.outputs.test-matrix) }}
         include:
           - folder: format
         exclude:
@@ -121,12 +128,12 @@ jobs:
         working-directory: ${{ matrix.folder }}
         run: bats ./test
   lint:
-    needs: list-examples
+    needs: prepare
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        folder: ${{ fromJson(needs.list-examples.outputs.lint-matrix) }}
+        folder: ${{ fromJson(needs.prepare.outputs.lint-matrix) }}
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0
@@ -145,9 +152,22 @@ jobs:
             --@aspect_rules_lint//lint:fix \
             //...
   test:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJson(needs.prepare.outputs.all-examples) }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: bazel-contrib/setup-bazel@0.15.0
+        with: *bazelrc
+      - run: bazel test //...
+        working-directory: ${{ matrix.folder }}
+  test-root:
     strategy:
       matrix:
-        # Linux is tested on Aspect Workflows
+        # Root module is tested on Linux on Aspect Workflows (Buildkite)
         os:
           - macos-latest
           # TODO(alex): lots of places are missing windows...
@@ -158,7 +178,7 @@ jobs:
           - 9.x
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.8.0
         with:
           repository-cache: ${{ inputs.mount_bazel_caches }}
@@ -166,8 +186,6 @@ jobs:
             common --announce_rc
             common --color=yes
       - name: Test
-        # Reduce time on macos runners by testing one example
-        working-directory: examples/java
         env:
           USE_BAZEL_VERSION: ${{ matrix.version }}
         run: bazel test //...
