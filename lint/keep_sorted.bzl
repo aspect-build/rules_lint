@@ -27,6 +27,7 @@ Now you can add `// keep-sorted start` / `// keep-sorted end` lines to your libr
 following the documentation at https://github.com/google/keep-sorted#usage.
 """
 
+load("@jq.bzl//jq:jq.bzl", "jq_lib")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
@@ -88,28 +89,6 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
             progress_message = "Linting %{label} with KeepSorted",
         )
 
-def _process_json_output_action(ctx, json_output, output):
-    jq = ctx.toolchains["@jq.bzl//jq/toolchain:type"].jqinfo.bin
-
-    args = ctx.actions.args()
-    args.add("-r")
-    args.add(".[] | [.path, .lines.start, .lines.end, .message] | join(\":\")")
-    args.add(json_output.path)
-
-    ctx.actions.run_shell(
-        inputs = [json_output],
-        outputs = [output],
-        tools = [jq],
-        command = "{jq} \"$@\" > {output}".format(
-            jq = jq.path,
-            json_output = json_output.path,
-            output = output.path,
-        ),
-        arguments = [args],
-        mnemonic = _MNEMONIC + "ProcessJsonOutput",
-        progress_message = "Processing %{label} KeepSorted JSON output",
-    )
-
 def _keep_sorted_aspect_impl(target, ctx):
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
@@ -139,7 +118,7 @@ def _keep_sorted_aspect_impl(target, ctx):
     raw_json_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_json_report"))
     keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, raw_json_report, outputs.machine.exit_code)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    _process_json_output_action(ctx, raw_json_report, raw_machine_report)
+    jq_lib.jq_action(ctx, [raw_json_report], ".[] | [.path, .lines.start, .lines.end, .message] | join(\":\")", raw_machine_report, ["--raw-output"])
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 

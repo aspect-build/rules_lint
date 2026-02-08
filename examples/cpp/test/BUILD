@@ -16,17 +16,13 @@ load(
 clang_tidy_test(
     name = "clang_tidy",
     srcs = ["//src:hello_cc"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 cppcheck_test(
     name = "cppcheck",
     srcs = ["//src:hello_cc"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 machine_clang_tidy_report(

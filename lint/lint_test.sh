@@ -20,10 +20,10 @@ function assert_output_empty() {
   fi
 }
 
-function assert_exit_code_zero() {
+function assert_exit_code() {
   exit_code=$(cat $(rlocation "$1"))
   output_file=$(rlocation "$2")
-  if [[ "$exit_code" != "0" ]]; then
+  if [[ "$exit_code" != "{{expected_exit_code}}" ]]; then
     cat $output_file
     exit 1
   fi

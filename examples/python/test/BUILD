@@ -79,30 +79,25 @@ ruff_test(
 bandit_test(
     name = "bandit",
     srcs = ["//src:uses_eval"],
-    # Expected to fail.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 flake8_test(
     name = "flake8",
     srcs = ["//src:unused_import"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 pylint_test(
     name = "pylint",
     srcs = ["//src:unused_import"],
-    # Expected to fail based on current content of the file.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 ty_test(
     name = "ty_should_fail_unsupported_operator",
     srcs = ["//src:unsupported_operator"],
-    # Expected to fail based on current content of the file.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 machine_bandit_report(

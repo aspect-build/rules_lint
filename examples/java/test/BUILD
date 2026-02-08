@@ -33,15 +33,14 @@ pmd_test(
 pmd_test(
     name = "pmd",
     srcs = ["//src:foo"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    # We don't have any PMD errors in this file
+    expected_exit_code = 0,
 )
 
 checkstyle_test(
     name = "checkstyle",
     srcs = ["//src:bar"],
-    tags = ["manual"],
+    expected_exit_code = 5,
 )
 
 machine_pmd_report(

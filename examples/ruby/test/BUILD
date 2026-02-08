@@ -16,17 +16,13 @@ load(
 rubocop_test(
     name = "rubocop",
     srcs = ["//src:hello_ruby"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 standardrb_test(
     name = "standardrb",
     srcs = ["//src:hello_ruby"],
-    # Expected to fail based on current content of the file.
-    # Normally you'd fix the file instead of tagging this test.
-    tags = ["manual"],
+    expected_exit_code = 1,
 )
 
 machine_rubocop_report(
