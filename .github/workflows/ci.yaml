@@ -20,85 +20,82 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      all-examples: ${{ steps.set-all-examples-matrix.outputs.matrix }}
-      format-matrix: ${{ steps.set-format-matrix.outputs.matrix }}
-      test-matrix: ${{ steps.set-test-matrix.outputs.matrix }}
-      lint-matrix: ${{ steps.set-lint-matrix.outputs.matrix }}
+      all-examples: ${{ steps.set-matrices.outputs.all-examples }}
     steps:
       - uses: actions/checkout@v5
-      - name: Verify bcr patches
+      - name: Verify BCR patches
         run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
-      - uses: lycheeverse/lychee-action@v2
+      - name: Check for broken links
+        uses: lycheeverse/lychee-action@v2
         with:
           # Allow 503 Service Unavailable when rate limited
           args: --accept '200..=204,503' --base ${{ github.workspace }} --verbose --no-progress './**/*.md' './**/*.html'
           fail: false # sigh
       - name: "List all examples"
-        id: set-all-examples-matrix
+        id: set-matrices
         run: |
-          folders=$(find examples -type d -mindepth 1 -maxdepth 1 | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "matrix=$folders" >> "$GITHUB_OUTPUT"
-          echo "Generated all examples matrix: $folders"
-      - name: "List examples that have a tools/format folder"
-        id: set-format-matrix
-        run: |
-          folders=$(find examples -type d -path "*/tools/format" | sed 's|/tools/format||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "matrix=$folders" >> "$GITHUB_OUTPUT"
-          echo "Generated format matrix: $folders"
-      - name: "List examples that have a tools/lint folder"
-        id: set-lint-matrix
-        run: |
-          folders=$(find examples -type d -path "*/tools/lint" | sed 's|/tools/lint||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "matrix=$folders" >> "$GITHUB_OUTPUT"
-          echo "Generated lint matrix: $folders"
-      - name: "Find all examples that have test/*.bats files"
-        id: set-test-matrix
-        run: |
-          folders=$(find examples -name "*.bats" -path "*/test/*" | sed 's|/test/.*||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "matrix=$folders" >> "$GITHUB_OUTPUT"
-          echo "Generated test matrix: $folders"
-  format:
+          echo "all-examples=$(find examples -type d -mindepth 1 -maxdepth 1 | sort | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> "$GITHUB_OUTPUT"
+  test:
     needs: prepare
     # Our version of clang-format has some deps that aren't satisfiable on newer ubuntu yet
     runs-on: ${{ matrix.folder == 'examples/cpp' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
-        folder: ${{ fromJson(needs.prepare.outputs.format-matrix) }}
+        folder: ${{ fromJson(needs.prepare.outputs.all-examples) }}
+        include:
+          - folder: format
     steps:
       - uses: actions/checkout@v5
+      - name: Check folder capabilities
+        id: check
+        run: |
+          (
+            echo "has_format=$([ -d '${{ matrix.folder }}/tools/format' ] && echo true || echo false)"
+            echo "has_lint=$([ -d '${{ matrix.folder }}/tools/lint' ] && echo true || echo false)"
+            if [ '${{ matrix.folder }}' = 'format' ]; then
+              run_tests=true
+            elif [ -n "$(find '${{ matrix.folder }}' -name '*.bats' -path '*/test/*' 2>/dev/null | head -1)" ]; then
+              case '${{ matrix.folder }}' in
+                examples/python|examples/cpp|examples/java|examples/shell) run_tests=false ;;  # FIXME: failing, diagnose
+                *) run_tests=true ;;
+              esac
+            else
+              run_tests=false
+            fi
+            echo "run_tests=$run_tests"
+          ) >> "$GITHUB_OUTPUT"
       - uses: bazel-contrib/setup-bazel@0.15.0
-        with: &bazelrc
+        with:
           bazelrc: |
             common     --show_progress_rate_limit=60
             common     --show_timestamps
             build:lint --no@aspect_rules_lint//lint:color
-      # Permit this gross non-hermetic dependency
+      # Permit this gross non-hermetic dependency (for format step on cpp)
       - if: matrix.folder == 'examples/cpp'
         run: sudo apt-get update && sudo apt-get install -y libtinfo5
       # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
+      - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs' || matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/python' || matrix.folder == 'examples/java' || matrix.folder == 'examples/shell' || matrix.folder == 'format'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
-      - run: bazel run //tools/format
+      - if: matrix.folder != 'format'
+        name: Test
+        run: bazel test //...
         working-directory: ${{ matrix.folder }}
-  integration-test:
-    needs: prepare
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        folder: ${{ fromJson(needs.prepare.outputs.test-matrix) }}
-        include:
-          - folder: format
-        exclude:
-          # FIXME: these are failing, diagnose.
-          - folder: examples/python
-          - folder: examples/cpp
-          - folder: examples/java
-          - folder: examples/shell
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install Aspect CLI
+      - if: steps.check.outputs.has_format == 'true'
+        name: Format
+        run: bazel run //tools/format
+        working-directory: ${{ matrix.folder }}
+      - if: steps.check.outputs.has_lint == 'true'
+        name: Lint
+        working-directory: ${{ matrix.folder }}
+        run: |
+          bazel build --config=lint --output_groups=rules_lint_human //...
+          bazel build --config=lint \
+            --output_groups=rules_lint_patch \
+            --@aspect_rules_lint//lint:fix \
+            //...
+      - if: steps.check.outputs.run_tests == 'true'
+        name: Install Aspect CLI
         uses: jaxxstorm/action-install-gh-release@v2.1.0
         with:
           repo: aspect-build/aspect-cli
@@ -109,61 +106,24 @@ jobs:
           arch: x86_64
           chmod: 0755
           extension-matching: disable
-      - name: Setup bats
+      - if: steps.check.outputs.run_tests == 'true'
+        name: Setup bats
         uses: mig4/setup-bats@v1
         with:
           bats-version: "1.8.2"
-      - name: Setup bats helpers
+      - if: steps.check.outputs.run_tests == 'true'
+        name: Setup bats helpers
         uses: brokenpip3/setup-bats-libs@0.0.3
         with:
           support-path: /usr/lib/bats/bats-support
           support-version: "0.3.0"
           assert-path: /usr/lib/bats/bats-assert
           assert-version: "2.1.0"
-      # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/java' || matrix.folder == 'examples/shell'  || matrix.folder == 'examples/kotlin' || matrix.folder == 'format'
-        run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
-
-      - name: "Integration test"
+      - if: steps.check.outputs.run_tests == 'true'
+        name: Integration test
         working-directory: ${{ matrix.folder }}
         run: bats ./test
-  lint:
-    needs: prepare
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        folder: ${{ fromJson(needs.prepare.outputs.lint-matrix) }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: bazel-contrib/setup-bazel@0.15.0
-        with: *bazelrc
-      # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs' || matrix.folder == 'examples/python'
-        run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
 
-      - name: Lint
-        working-directory: ${{ matrix.folder }}
-        run: |
-          bazel build --config=lint --output_groups=rules_lint_human //...
-
-          bazel build --config=lint \
-            --output_groups=rules_lint_patch \
-            --@aspect_rules_lint//lint:fix \
-            //...
-  test:
-    needs: prepare
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        folder: ${{ fromJson(needs.prepare.outputs.all-examples) }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: bazel-contrib/setup-bazel@0.15.0
-        with: *bazelrc
-      - run: bazel test //...
-        working-directory: ${{ matrix.folder }}
   test-root:
     strategy:
       matrix:
