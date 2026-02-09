@@ -27,9 +27,9 @@ eslint = lint_eslint_aspect(
 )
 ```
 
-### With ts_project <=3.2.0
+### With ts_project prior to version 3.2.0
 
-Prior to [commit 5e25e91]https://github.com/aspect-build/rules_ts/commit/5e25e91420947e3a81938d8eb076803e5cf51fe2)
+Prior to [commit 5e25e91](https://github.com/aspect-build/rules_ts/commit/5e25e91420947e3a81938d8eb076803e5cf51fe2)
 the rule produced by the `ts_project` macro and a custom `transpiler` expanded the macro to
 multiple targets, including changing the default target to `js_library`.
 
