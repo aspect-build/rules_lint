@@ -80,7 +80,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
     inputs = srcs + config
     if patch != None:
         # Use run_patcher for fix mode
-        args_list = ["check", "--fix", "--force-exclude"] + [s.path for s in srcs]
+        args_list = ["check", "--fix", "--force-exclude", "--quiet"] + [s.path for s in srcs]
         run_patcher(
             ctx,
             ctx.executable,
@@ -101,6 +101,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
         args = ctx.actions.args()
         args.add("check")
         args.add("--force-exclude")
+        args.add("--quiet")
         args.add_all(srcs)
 
         if exit_code:
