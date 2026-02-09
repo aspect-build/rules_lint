@@ -100,6 +100,10 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 		}
 	case "AspectRulesLintKeepSorted":
 		fm = []string{`%f:%l:%e:%m`}
+	case "AspectRulesLintRuboCop":
+		fm = []string{
+			`%f:%l:%c: %m`,
+		}
 	default:
 		return "", fmt.Errorf("No format string for linter mnemonic %s from target %s\n", mnemonic, label)
 	}
