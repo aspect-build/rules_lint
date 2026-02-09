@@ -11,7 +11,7 @@ filegroup(
 )
 ```
 
-or use a `markdown_library` rule such as the one in <https://github.com/dwtj/dwtj_rules_markdown>.
+or use a `markdown_library` rule such as the one in [dwtj_rules_markdown](https://github.com/dwtj/dwtj_rules_markdown).
 Aspect plans to provide support for Markdown in [configure]() so these rules can be automatically
 maintained rather than requiring developers to write them by hand.
 
