@@ -34,6 +34,8 @@ load("@aspect_rules_lint//lint:clippy.bzl", "lint_clippy_aspect")
 
 clippy = lint_clippy_aspect(
     config = Label("//:.clippy.toml"),
+    # Any clippy flags as needed like "-DWarnings".
+    clippy_flags = ["-Dwarnings"],
 )
 ```
 
