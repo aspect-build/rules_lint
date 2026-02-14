@@ -213,7 +213,7 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS, clippy_flags = [
     Args:
         config (File): Label of the desired Clippy configuration file to use. Reference: https://doc.rust-lang.org/clippy/configuration.html
         rule_kinds (List[str]): List of rule kinds to lint. Defaults to {default_rule_kinds}.
-        clippy_flags (List[str]): Extra clippy/rustc lint flags (e.g. `-Dwarnings`, `-Aclippy::style`) appended after the default `-Wwarnings`.
+        clippy_flags (List[str]): Extra clippy/rustc lint flags (e.g. `-Dwarnings`, `-Aclippy::style`).
     """.format(default_rule_kinds = DEFAULT_RULE_KINDS)
     attrs = {
         "_options": attr.label(
