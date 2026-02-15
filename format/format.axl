@@ -95,7 +95,7 @@ def impl(ctx: TaskContext) -> int:
     format_args = []
     if not ctx.args.all_files:
         changed_files = find_changed_files(out, ctx.std.process)
-        out.write("Formatting changed files:\n%s" % changed_files)
+        out.write("Formatting changed files:\n%s\n" % changed_files)
         format_args = changed_files.split("\n")
 
     exit = bazel_run(
