@@ -76,6 +76,6 @@ format_test(
         "(special_char)/[square]/hello.md",
         "(special_char)/[square]/hello.ts",
     ],
-    javascript = ":prettier",
-    markdown = ":prettier",
+    javascript = "//tools/format:prettier",
+    markdown = "//tools/format:prettier",
 )
