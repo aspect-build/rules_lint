@@ -20,7 +20,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintTy"
 
-def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, env = {}, extra_search_paths = []):
+def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, env = {}, extra_search_paths = [], output_format = "full"):
     """Run ty as an action under Bazel.
 
     ty supports persistent configuration files at both the project- and user-level
@@ -42,6 +42,7 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
             https://docs.astral.sh/ty/reference/exit-codes/
         env: environment variables for ty
         extra_search_paths: list of paths to add as --extra-search-path for third-party module resolution
+        output_format: optional format for diagnostics (e.g. "concise" for parseable one-per-line; matches sarif.go %f:%l:%c: %m)
     """
     inputs = depset(srcs + config, transitive = [transitive_srcs])
     outputs = [stdout]
@@ -55,6 +56,9 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
     # Enable verbose output if debug mode is enabled
     if ctx.attr._options[LintOptionsInfo].debug:
         args.add("--vvv")
+
+    # Output format: concise is one-per-line (file:line:col: message), parseable by sarif.go
+    args.add("--output-format", output_format)
 
     # Add all source files to be linted
     args.add_all(srcs)
@@ -128,6 +132,7 @@ def _ty_aspect_impl(target, ctx):
             if PyInfo in dep:
                 transitive_sources.append(dep[PyInfo].transitive_sources)
                 transitive_sources.append(dep[PyInfo].transitive_pyi_files)
+
                 # Collect imports from pip packages for extra search paths
                 for import_path in dep[PyInfo].imports.to_list():
                     if import_path == ctx.workspace_name:
@@ -159,7 +164,7 @@ def _ty_aspect_impl(target, ctx):
     ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env, extra_search_paths = extra_search_paths)
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code, extra_search_paths = extra_search_paths)
+    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code, extra_search_paths = extra_search_paths, output_format = "concise")
 
     # Ideally we'd just use {"TY_OUTPUT_FORMAT": "sarif"} however it prints absolute paths; see https://github.com/astral-sh/ruff/issues/14985
     # This issue should also be resolved when the issue from ruff is fixed.

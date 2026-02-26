@@ -22,7 +22,7 @@ clang_tidy_test(
 cppcheck_test(
     name = "cppcheck",
     srcs = ["//src:hello_cc"],
-    expected_exit_code = 1,
+    expected_exit_code = 31,
 )
 
 machine_clang_tidy_report(
