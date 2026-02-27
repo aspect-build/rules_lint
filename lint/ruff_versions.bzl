@@ -1,5 +1,24 @@
 "This file is automatically updated by mirror_ruff.sh"
 RUFF_VERSIONS = {
+    "0.15.4": {
+        "aarch64-apple-darwin": "2d63cc9fd12c9cc3b524563bbeb50470cf3f68f3194002228a417a53a2a56164",
+        "aarch64-pc-windows-msvc": "7de874b0d667fe04c2cd15629c19baff6dfff55e1fd99dfb14cb9850b09e7a20",
+        "aarch64-unknown-linux-gnu": "7e436cedadb1bac0166448b05c0b5d69bb1d7879b0b26696bfc198ebdffb7b2f",
+        "aarch64-unknown-linux-musl": "f34909dacbebaf3773ececc0d321e0fa0599729e9b4570f1dbcec91b4c435913",
+        "arm-unknown-linux-musleabihf": "c6b3dfa714d8f2b27db1339b9730d2ff41cff513069c2980870dc1db0c8e6267",
+        "armv7-unknown-linux-gnueabihf": "98c3f14394f9300a66c5415b7daf71959fc72be40ad5654cd5f90e9049eeb328",
+        "armv7-unknown-linux-musleabihf": "1469ec15b7c7a918bc2f34ece38549f5ab77b535c65e1fe983ec167f6afa9966",
+        "i686-pc-windows-msvc": "6c3090b5724dd664b742165fb2dc92b1a8e3c19e84122dab1d2e121982fe1c62",
+        "i686-unknown-linux-gnu": "db95fc72c326f8712a02bdf980f42cccd9745ed2de2f6a8ae02f5be123691707",
+        "i686-unknown-linux-musl": "e54933995834a628dbaeeec26ec96ef506cbeb673c91666f08be36fd07658503",
+        "powerpc64le-unknown-linux-gnu": "b7c3eb76a448e47df049ec721af91c5f5972f9dc6583c3bc6583a9d29c932a2b",
+        "riscv64gc-unknown-linux-gnu": "7f1816df2f56e606a17d39c405295ede5c068566630e9112964ffd3977050d0a",
+        "s390x-unknown-linux-gnu": "934a870f75f006fc9c151f9d65d604bb78ecf8ca8c3f3b9eba2b3c1464116808",
+        "x86_64-apple-darwin": "f40e16784c867b60850fbe96a2cccd123589c90d6db71ad8ade62efdeabccc84",
+        "x86_64-pc-windows-msvc": "ca4db783ce3a1b942e67aa4002ca9f3c6ff1b150a85cb4ca1345c4299ad12a0f",
+        "x86_64-unknown-linux-gnu": "6e24501f753416bc84456383ccf62239889ab9fec8318549db9bee791612bd85",
+        "x86_64-unknown-linux-musl": "e39111195ef761569773562209bbb7f943c834c961f2c1ed28e2126a15c4cd35",
+    },
     "0.15.2": {
         "aarch64-apple-darwin": "59a3a08a077e81d0fd99566604556687b834edb2da34a69522cfb5168a07123b",
         "aarch64-pc-windows-msvc": "8cbc83ae19c8653aa7d2127dc70e20730b0c93cb4cd9f1284c1d3973390c253d",
