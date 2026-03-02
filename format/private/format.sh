@@ -179,15 +179,15 @@ function ls-files {
         # TODO: determine which staged changes we should format; avoid formatting unstaged changes
         # TODO: try to format only modified regions of the file (where supported)
         files=$(git ls-files -t --cached --modified --other --exclude-standard "${patterns[@]}" "${patterns[@]/#/*/}" | grep -v ^S | cut -f2- -d' ' | {
-          grep -vE \
-            "^$(git ls-files --deleted)$" \
+          grep -vFxf \
+            <(git ls-files --deleted) \
           || true;
         })
 
         if [ -n "$shebang_re" ]; then
             for candidate in $(git ls-files -t --cached --modified --other --exclude-standard | grep -v ^S | cut -f2- -d' ' | grep -v '\.' | {
-                grep -vE \
-                "^$(git ls-files --deleted)$" \
+                grep -vFxf \
+                <(git ls-files --deleted) \
                 || true;
             }); do
                 [ -f "$candidate" ] || continue
