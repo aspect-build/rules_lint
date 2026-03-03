@@ -1,0 +1,113 @@
+"""SARIF (Static Analysis Results Interchange Format) Parsing Utilities
+
+Provides generic SARIF parsing and diagnostic extraction.
+GitHub-specific formatting (review comments, annotations) lives in axel-f/sarif.axl.
+"""
+
+
+def parse_sarif(content):
+    """
+    Parse SARIF JSON content.
+
+    Args:
+        content: SARIF JSON string
+
+    Returns:
+        Parsed SARIF dict
+    """
+    return json.decode(content)
+
+
+def parse_sarif_diagnostics(content):
+    """
+    Extract structured diagnostics from SARIF content.
+
+    Walks runs[].results[].locations[] and returns a flat list of diagnostic dicts.
+
+    Args:
+        content: SARIF JSON string
+
+    Returns:
+        List of dicts: [{"tool": str, "severity": str, "file": str, "line": int, "rule_id": str, "message": str}]
+    """
+    sarif = json.decode(content)
+    diagnostics = []
+
+    for run in sarif.get("runs", []):
+        tool = run.get("tool", {})
+        driver = tool.get("driver", {})
+        tool_name = driver.get("name", "Unknown")
+
+        for result in run.get("results", []):
+            severity = result.get("level", "warning")
+            rule_id = result.get("ruleId", "")
+            message_obj = result.get("message", {})
+            message = message_obj.get("text", "")
+
+            locations = result.get("locations", [])
+            if not locations:
+                diagnostics.append({
+                    "tool": tool_name,
+                    "severity": severity,
+                    "file": "",
+                    "line": 0,
+                    "rule_id": rule_id,
+                    "message": message,
+                })
+                continue
+
+            for location in locations:
+                physical = location.get("physicalLocation")
+                if not physical:
+                    continue
+
+                artifact = physical.get("artifactLocation", {})
+                path = artifact.get("uri", "")
+
+                region = physical.get("region", {})
+                line = region.get("startLine", 0)
+
+                diagnostics.append({
+                    "tool": tool_name,
+                    "severity": severity,
+                    "file": path,
+                    "line": line,
+                    "rule_id": rule_id,
+                    "message": message,
+                })
+
+    return diagnostics
+
+
+def get_sarif_summary(sarif):
+    """
+    Generate a summary of SARIF results.
+
+    Args:
+        sarif: Parsed SARIF dict (or JSON string)
+
+    Returns:
+        dict with counts by level and tool
+    """
+    if type(sarif) == "string":
+        sarif = json.decode(sarif)
+
+    summary = {
+        "total": 0,
+        "by_level": {},
+        "by_tool": {},
+    }
+
+    for run in sarif.get("runs", []):
+        tool = run.get("tool", {})
+        driver = tool.get("driver", {})
+        tool_name = driver.get("name", "Unknown")
+
+        for result in run.get("results", []):
+            summary["total"] += 1
+
+            level = result.get("level", "warning")
+            summary["by_level"][level] = summary["by_level"].get(level, 0) + 1
+            summary["by_tool"][tool_name] = summary["by_tool"].get(tool_name, 0) + 1
+
+    return summary
