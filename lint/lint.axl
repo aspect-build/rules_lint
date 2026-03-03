@@ -31,8 +31,11 @@ def impl(ctx: TaskContext) -> int:
     # echo > nohup.out; nohup aspect lint ; cat nohup.out
     flags.append("--output_groups=rules_lint_" + (
         "human" if ctx.std.io.stdout.is_tty else "machine"))
+    flags.extend(ctx.args.bazel_flag)
+
     build = ctx.bazel.build(
         flags = flags,
+        startup_flags = list(ctx.args.bazel_startup_flag),
         build_events = True,
         *(ctx.args.targets or ["//..."])
     )
@@ -70,5 +73,7 @@ lint = task(
     args = {
         "fix": args.boolean(),
         "targets": args.positional(minimum = 0),
+        "bazel_flag": args.string_list(),
+        "bazel_startup_flag": args.string_list(),
     },
 )
