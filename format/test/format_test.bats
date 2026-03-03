@@ -9,13 +9,13 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_JavaScript_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write examples/nodejs/eslint.config.mjs"
-    assert_output --partial "+ prettier --write examples/nodejs/src/(special_char)/[square]/hello.ts examples/nodejs/src/file-dep.ts examples/nodejs/src/file.ts"
-    assert_output --partial "+ prettier --write examples/nodejs/src/hello.tsx"
-    assert_output --partial "+ prettier --write examples/nodejs/src/hello.vue"
-    assert_output --partial "+ prettier --write .bcr/metadata.template.json"
-    assert_output --partial "+ prettier --write examples/nodejs/.swcrc"
-    assert_output --partial "+ prettier --write examples/other_formatters/src/config.json5"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/eslint.config.mjs"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/(special_char)/[square]/hello.ts examples/nodejs/src/file-dep.ts examples/nodejs/src/file.ts"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/hello.tsx"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/hello.vue"
+    assert_output --partial "+ prettier --write --log-level=warn .bcr/metadata.template.json"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/.swcrc"
+    assert_output --partial "+ prettier --write --log-level=warn examples/other_formatters/src/config.json5"
 }
 
 # File arguments: will filter with find
@@ -46,23 +46,23 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Markdown_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write .bcr/README.md CONTRIBUTING.md README.md"
+    assert_output --partial "+ prettier --write --log-level=warn .bcr/README.md CONTRIBUTING.md README.md"
 }
 
 @test "should run prettier on XML" {
     run bazel run //format/test:format_XML_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write examples/java/checkstyle-suppressions.xml"
+    assert_output --partial "+ prettier --write --log-level=warn examples/java/checkstyle-suppressions.xml"
 }
 
 @test "should run prettier on CSS" {
     run bazel run //format/test:format_CSS_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write examples/nodejs/src/clean.css examples/nodejs/src/hello.css"
-    assert_output --partial "+ prettier --write examples/nodejs/src/hello.less"
-    assert_output --partial "+ prettier --write examples/nodejs/src/hello.scss"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/clean.css examples/nodejs/src/hello.css"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/hello.less"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/hello.scss"
 }
 
 @test "should run cue fmt on CUE" {
@@ -76,21 +76,21 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_HTML_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write examples/nodejs/src/index.html"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/index.html"
 }
 
 @test "should run prettier on GraphQL" {
     run bazel run //format/test:format_GraphQL_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write examples/other_formatters/src/hello.graphql"
+    assert_output --partial "+ prettier --write --log-level=warn examples/other_formatters/src/hello.graphql"
 }
 
 @test "should run prettier on SQL" {
     run bazel run //format/test:format_SQL_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write examples/sql/src/hello.sql"
+    assert_output --partial "+ prettier --write --log-level=warn examples/sql/src/hello.sql"
 }
 
 @test "should run ruff on Python" {
@@ -206,7 +206,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Gherkin_with_prettier
     assert_success
 
-    assert_output --partial "+ prettier --write examples/other_formatters/src/hello.feature"
+    assert_output --partial "+ prettier --write --log-level=warn examples/other_formatters/src/hello.feature"
 }
 
 @test "should run fantomas on F#" {
