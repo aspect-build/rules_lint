@@ -67,13 +67,24 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
             # For ty.toml or other config files, pass the full path with --config-file
             args.add("--config-file", config_file.path)
 
+    # In cases where a type can be found in both a stub and "normal" code, make sure the stub is preferred.
+    # See https://github.com/astral-sh/ty/issues/1967
+    stub_search_paths = []
+    code_search_paths = []
+
+    for p in extra_search_paths:
+        if "_types_" in p or "_stubs" in p:
+            stub_search_paths.append(p)
+        else:
+            code_search_paths.append(p)
+
     # Build a script that adds --extra-search-path only for directories that exist
     # Some pip package directories may not exist, so we check first
     # Pass --extra-search-path via a @param file, as there might be many of them
     extra_search_path_script = """PARAM_FILE="$(mktemp)"
 """
 
-    for path in extra_search_paths:
+    for path in stub_search_paths + code_search_paths:
         extra_search_path_script += """if [ -d "{path}" ]; then
   echo "--extra-search-path" >> "$PARAM_FILE"
   echo "{path}" >> "$PARAM_FILE"
