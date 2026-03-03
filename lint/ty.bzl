@@ -46,17 +46,6 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
     inputs = depset(srcs + config, transitive = [transitive_srcs])
     outputs = [stdout]
 
-    stub_paths = []
-    normal_paths = []
-
-    for p in extra_search_paths:
-        if "_types_" in p or "_stubs" in p:
-            stub_paths.append(p)
-        else:
-            normal_paths.append(p)
-
-    extra_search_paths = stub_paths + normal_paths
-
     # Wire command-line options, see
     # `ty help check` to see available options
     args = ctx.actions.args()
@@ -82,10 +71,21 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
             # For ty.toml or other config files, pass the full path with --config-file
             args.add("--config-file", config_file.path)
 
+    # In cases where a type can be found in both a stub and "normal" code, make sure the stub is preferred.
+    # See https://github.com/astral-sh/ty/issues/1967
+    stub_search_paths = []
+    code_search_paths = []
+
+    for p in extra_search_paths:
+        if "_types_" in p or "_stubs" in p:
+            stub_search_paths.append(p)
+        else:
+            code_search_paths.append(p)
+
     # Build a script that adds --extra-search-path only for directories that exist
     # Some pip package directories may not exist, so we check first
     extra_search_path_script = "EXTRA_SEARCH_PATHS=''\n"
-    for path in extra_search_paths:
+    for path in stub_search_paths + code_search_paths:
         extra_search_path_script += """if [ -d "{path}" ]; then
   EXTRA_SEARCH_PATHS="$EXTRA_SEARCH_PATHS --extra-search-path {path}"
 fi
