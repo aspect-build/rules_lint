@@ -78,8 +78,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
         stdout: output file containing stdout of Vale
         exit_code: output file containing Vale exit code.
             If None, then fail the build when Vale exits non-zero.
-        template: an optional template file to use for the Vale command.
-        output: the value for the --output flag
+        output: the value for the --output flag. May be a string like 'line', 'JSON', 'CLI', or a File of a template to use: https://vale.sh/docs/templates
         env: environment variables for vale
     """
     inputs = srcs + [config]
@@ -95,9 +94,9 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
     args = ctx.actions.args()
     args.add_all(srcs)
     args.add_all(["--config", config])
-    if template:
-        inputs.append(template)
-        args.add_all(["--output", template.path])
+    if type(output) == File:
+        inputs.append(output)
+        args.add_all(["--output", output.path])
     else:
         args.add_all(["--output", output])
     outputs = [stdout]
