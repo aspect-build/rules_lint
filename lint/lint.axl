@@ -72,16 +72,13 @@ def parse_diff_output(output):
     return files
 
 
-# ChangedFilesProvider
-ChangedFilesProvider = record(
-    get_changed_files = field(typing.Callable[[TaskContext, dict], list]),
-    # Returns: [{"file": "path/to/file.py", "lines": [0, 4, 9]}, ...]
-    # lines = 0-based line numbers of added lines only
-    # Empty list = no change context available
-)
+def _git_diff(ctx, state):
+    """Default get_diff implementation using `git diff HEAD~1`.
 
-
-def _git_diff_get_changed_files(ctx, state):
+    Returns: [{"file": "path/to/file.py", "lines": [0, 4, 9]}, ...]
+    lines = 0-based line numbers of added lines only.
+    Empty list = no change context available.
+    """
     result = ctx.std.process.command("git") \
         .args(["diff", "HEAD~1", "--unified=0"]) \
         .current_dir(ctx.std.env.current_dir()) \
@@ -90,105 +87,94 @@ def _git_diff_get_changed_files(ctx, state):
         return []  # no previous commit or not a git repo
     return parse_diff_output(result.stdout)
 
-GitDiffProvider = ChangedFilesProvider(
-    get_changed_files = _git_diff_get_changed_files,
-)
+
+# Filter functions — (all_diagnostics, state) -> relevant_diagnostics
+def _filter_all(diagnostics, state):
+    return diagnostics
+
+def _filter_changeset(diagnostics, state):
+    """Filter to ONLY diagnostics from changed files.
+
+    This means lint results from unchanged files are completely excluded —
+    they will not be surfaced to lint_end hooks or affect the exit code.
+    If no changed file context is available, returns [] (nothing considered).
+    """
+    changed_files = state.get("changed_files", [])
+    if not changed_files:
+        return []  # no change context → treat as no relevant diagnostics
+    changed_paths = {cf["file"]: True for cf in changed_files}
+    return [d for d in diagnostics if d["file"] in changed_paths]
+
 
 Strategy = record(
-    needs_machine = field(bool, False),
-    setup = field(typing.Callable[[TaskContext, dict], None]),
-    process = field(typing.Callable[[TaskContext, dict, str], None]),  # str = SARIF filepath
-    finish = field(typing.Callable[[TaskContext, dict], int]),         # returns exit code
+    filter              = field(typing.Callable[[list, dict], list]),
+    # (all_diagnostics, state) -> relevant_diagnostics
+    fail_on_severity    = field(str | None, "error"),
+    # None = never fail on severity; "error" = fail if any diagnostic has severity "error"
+    fail_on_linter_error = field(bool, False),
+    # True = also fail if any linter exited non-zero (state["raw_exit_code"] != 0)
 )
 
 
 # Built-in strategies
-def _soft_setup(ctx, state):
-    state["diagnostics"] = []
-
-def _soft_process(ctx, state, filepath):
-    content = ctx.std.fs.read_to_string(filepath)
-    state["diagnostics"].extend(parse_sarif_diagnostics(content))
-
-def _soft_finish(ctx, state):
-    return 0
-
 StrategySoft = Strategy(
-    needs_machine = True,
-    setup = _soft_setup,
-    process = _soft_process,
-    finish = _soft_finish,
+    filter              = _filter_all,
+    fail_on_severity    = None,    # never fails
+    fail_on_linter_error = False,
 )
-
-
-def _hard_setup(ctx, state):
-    state["diagnostics"] = []
-
-def _hard_process(ctx, state, filepath):
-    content = ctx.std.fs.read_to_string(filepath)
-    state["diagnostics"].extend(parse_sarif_diagnostics(content))
-
-def _hard_finish(ctx, state):
-    for diag in state["diagnostics"]:
-        if diag["severity"] == "error":
-            return 1
-    if state.get("raw_exit_code", 0) != 0:
-        return 1
-    return 0
 
 StrategyHard = Strategy(
-    needs_machine = True,
-    setup = _hard_setup,
-    process = _hard_process,
-    finish = _hard_finish,
+    filter              = _filter_all,
+    fail_on_severity    = "error",
+    fail_on_linter_error = True,   # also fail if linter exits non-zero
 )
-
-
-def _hold_the_line_setup(ctx, state):
-    state["diagnostics"] = []
-    state["changed_files"] = ctx.config.changed_files_provider.get_changed_files(ctx, state)
-
-def _hold_the_line_process(ctx, state, filepath):
-    content = ctx.std.fs.read_to_string(filepath)
-    state["diagnostics"].extend(parse_sarif_diagnostics(content))
-
-def _hold_the_line_finish(ctx, state):
-    changed_files = state.get("changed_files", [])
-    if not changed_files:
-        return 0  # no change context available
-
-    changed_paths = {}
-    for cf in changed_files:
-        changed_paths[cf["file"]] = True
-
-    for diag in state["diagnostics"]:
-        if diag["severity"] == "error" and diag["file"] in changed_paths:
-            return 1
-
-    return 0
 
 StrategyHoldTheLine = Strategy(
-    needs_machine = True,
-    setup = _hold_the_line_setup,
-    process = _hold_the_line_process,
-    finish = _hold_the_line_finish,
+    filter              = _filter_changeset,
+    fail_on_severity    = "error",
+    fail_on_linter_error = False,
 )
 
 
-LintConfig = spec(
-    strategy = attr(Strategy, StrategyHoldTheLine),
-    changed_files_provider = attr(ChangedFilesProvider, GitDiffProvider),
+LintFragment = fragment(
+    strategy               = attr(Strategy, StrategyHoldTheLine),
+    get_diff = attr(typing.Callable[[TaskContext, dict], list], _git_diff),
+    # (ctx, state) -> [{"file": str, "lines": [int]}]
+
+    # Lifecycle hooks — lists of callables, composable via .append()
+    lint_start  = attr(list[typing.Callable[[TaskContext, dict], None]], []),
+    # Called once before the build.
+
+    lint_report = attr(list[typing.Callable[[TaskContext, dict, str], None]], []),
+    # Called per SARIF file as it arrives during the build stream.
+    # Signature: (ctx, state, sarif_filepath)
+    # Receives RAW, unfiltered data from one linter at a time.
+    # Use for streaming comment posting, progress reporting, etc.
+    # Hooks that need to respect the changeset filter must consult
+    # state["changed_files"] or state["changed_lines"] themselves.
+
+    lint_end    = attr(list[typing.Callable[[TaskContext, dict, list], None]], []),
+    # Called once after all reports, receives strategy-filtered diagnostics.
+    # Signature: (ctx, state, relevant_diagnostics)
+    # For StrategyHoldTheLine: relevant_diagnostics contains ONLY diagnostics
+    # from changed files — unchanged-file issues are excluded entirely.
+    # Use for grouped review posting, summary output, stale-comment cleanup.
 )
 
 # buildifier: disable=function-docstring
 def impl(ctx: TaskContext) -> int:
     state = {}
-    strategy = ctx.config.strategy
+    lint_fragment = ctx.fragments[LintFragment]
+    strategy = lint_fragment.strategy
 
-    # 1. Setup
-    strategy.setup(ctx, state)
+    # 1. Fetch changed files (needed by filter_changeset)
+    state["changed_files"] = lint_fragment.get_diff(ctx, state)
 
-    # 2. Build flags
+    # 2. lint_start hooks
+    for hook in lint_fragment.lint_start:
+        hook(ctx, state)
+
+    # 3. Build flags (always include machine output for SARIF processing)
     flags = [
         "--config=lint",
         "--remote_download_regex='.*AspectRulesLint.*'",
@@ -200,18 +186,19 @@ def impl(ctx: TaskContext) -> int:
     # echo > nohup.out; nohup aspect lint ; cat nohup.out
     flags.append("--output_groups=rules_lint_" + (
         "human" if ctx.std.io.stdout.is_tty else "machine"))
-    if strategy.needs_machine:
-        flags.append("--output_groups=rules_lint_machine")
+    flags.append("--output_groups=rules_lint_machine")
 
-    # 3. Build
+    # 4. Build + stream events
     build = ctx.bazel.build(
         flags = flags,
         build_events = True,
         *(ctx.args.targets or ["//..."])
     )
-    github_output = ctx.std.env.var("GITHUB_OUTPUT")
+    all_diagnostics = []
     exit_code = 0
     patches = []
+    github_output = ctx.std.env.var("GITHUB_OUTPUT")
+
     for event in build.build_events():
         if not ctx.args.quiet and event.kind == "workspace_status":
             print("Running workspace_status command...")
@@ -224,12 +211,13 @@ def impl(ctx: TaskContext) -> int:
             for file in event.payload.files:
                 filepath = file.file.removeprefix("file://")
                 if file.name.endswith(".out"):
-                    generated = ctx.std.fs.read_to_string(filepath)
-                    ctx.std.io.stderr.write(generated)
+                    ctx.std.io.stderr.write(ctx.std.fs.read_to_string(filepath))
                 if file.name.endswith(".report"):
                     report = ctx.std.fs.read_to_string(filepath)
                     if "sarif-" in report:
-                        strategy.process(ctx, state, filepath)
+                        all_diagnostics.extend(parse_sarif_diagnostics(report))
+                        for hook in lint_fragment.lint_report:
+                            hook(ctx, state, filepath)
                         continue
                     ctx.std.io.stdout.write(report)
                     if github_output:
@@ -239,29 +227,39 @@ def impl(ctx: TaskContext) -> int:
                 if file.name.endswith(".exit_code"):
                     if int(ctx.std.fs.read_to_string(filepath).rstrip()) != 0:
                         exit_code = 1
+
     state["raw_exit_code"] = exit_code
 
-    # 4. Wait for build
+    # 5. Wait for build
     if not build.wait().success:
         state["build_failed"] = True
 
-    # 5. Apply patches
+    # 6. Apply patches
     if ctx.args.fix:
         for patch in patches:
             ctx.std.process.command("patch").arg("-p1").arg("--input=" + patch) \
                 .current_dir(ctx.std.env.current_dir()).spawn().wait()
 
-    # 6. Finish — strategy determines lint exit code
-    strategy_exit_code = strategy.finish(ctx, state)
+    # 7. Apply strategy filter → relevant diagnostics for reporting and exit code
+    relevant = strategy.filter(all_diagnostics, state)
 
-    # Build failure always overrides
+    # 8. lint_end hooks receive filtered diagnostics
+    for hook in lint_fragment.lint_end:
+        hook(ctx, state, relevant)
+
+    # 9. Determine exit code
     if state.get("build_failed"):
         return 1
-    return strategy_exit_code
+    if strategy.fail_on_severity:
+        if any([d["severity"] == strategy.fail_on_severity for d in relevant]):
+            return 1
+    if strategy.fail_on_linter_error and state.get("raw_exit_code", 0) != 0:
+        return 1
+    return 0
 
 lint = task(
     implementation = impl,
-    config = LintConfig,
+    fragments = [LintFragment],
     args = {
         "quiet": args.boolean(default = False),
         "fix": args.boolean(),
