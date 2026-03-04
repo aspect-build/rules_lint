@@ -2,6 +2,12 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
+genrule(
+    name = "generated_input",
+    outs = ["generated_file"],
+    cmd = "echo 'THIS IS GENERATED' > $@",
+)
+
 rust_library(
     name = "bad_lib",
     srcs = ["bad_lib.rs"],
@@ -57,6 +63,22 @@ rust_test(
 rust_binary(
     name = "ok_binary",
     srcs = ["ok_binary.rs"],
+    edition = "2021",
+    visibility = [
+        "//src:__pkg__",
+        "//test:__pkg__",
+    ],
+)
+
+# If a rust_binary/rust_library depends on a input that is a generated
+# file it will copy all the inputs to the Bazel bin folder.
+# See: https://github.com/bazelbuild/rules_rust/blob/74bd3d15f33c6133c84bf4348225cbc7ac206f51/rust/private/utils.bzl#L857
+#
+# This is causes a problem with rules_lint when run with --fix
+rust_binary(
+    name = "ok_binary_with_generated_inputs",
+    srcs = ["ok_binary.rs"],
+    compile_data = [":generated_input"],
     edition = "2021",
     visibility = [
         "//src:__pkg__",
