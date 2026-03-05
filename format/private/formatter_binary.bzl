@@ -52,7 +52,7 @@ CHECK_FLAGS = {
     "buildifier": "-mode=check",
     "cue-fmt": "fmt --check",
     "swiftformat": "--lint",
-    "prettier": "--check",
+    "prettier": "--check --log-level=warn",
     "ruff": "format --check --force-exclude --diff",
     "shfmt": "--diff --apply-ignore",
     "java-format": "--set-exit-if-changed --dry-run",
@@ -77,7 +77,7 @@ FIX_FLAGS = {
     "cue-fmt": "fmt",
     "djlint": "--format-css --format-js --reformat",
     "swiftformat": "",
-    "prettier": "--write",
+    "prettier": "--write --log-level=warn",
     # Force exclusions in the configuration file to be honored even when file paths are supplied
     # as command-line arguments; see
     # https://github.com/astral-sh/ruff/discussions/5857#discussioncomment-6583943

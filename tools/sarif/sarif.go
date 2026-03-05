@@ -68,7 +68,8 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 		}
 	case "AspectRulesLintBuf":
 		fm = []string{
-			`--buf-plugin_out: %f:%l:%c:%m`,
+			`%E--buf-plugin_out: %f:%l:%c:%m`,
+			`%-Z%r`,
 		}
 	case "AspectRulesLintVale":
 		fm = []string{`%f:%l:%c:%m`}

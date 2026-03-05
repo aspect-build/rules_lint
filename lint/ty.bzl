@@ -67,13 +67,24 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
             # For ty.toml or other config files, pass the full path with --config-file
             args.add("--config-file", config_file.path)
 
+    # In cases where a type can be found in both a stub and "normal" code, make sure the stub is preferred.
+    # See https://github.com/astral-sh/ty/issues/1967
+    stub_search_paths = []
+    code_search_paths = []
+
+    for p in extra_search_paths:
+        if "_types_" in p or "_stubs" in p:
+            stub_search_paths.append(p)
+        else:
+            code_search_paths.append(p)
+
     # Build a script that adds --extra-search-path only for directories that exist
     # Some pip package directories may not exist, so we check first
     # Pass --extra-search-path via a @param file, as there might be many of them
     extra_search_path_script = """PARAM_FILE="$(mktemp)"
 """
 
-    for path in extra_search_paths:
+    for path in stub_search_paths + code_search_paths:
         extra_search_path_script += """if [ -d "{path}" ]; then
   echo "--extra-search-path" >> "$PARAM_FILE"
   echo "{path}" >> "$PARAM_FILE"
@@ -81,17 +92,31 @@ fi
 """.format(path = path)
 
     color_flag = "--color always" if color else "--color never"
+    command = """
+{extra_search_path_script}
+readonly TMP_OUT=$(mktemp)
+
+{ty} check --force-exclude {color_flag} @"$PARAM_FILE" $@ > "$TMP_OUT" 2>&1
+RET=$?
+
+if [ "$RET" -eq 0 ]; then
+    touch {stdout}
+else
+    cp "$TMP_OUT" {stdout}
+fi
+"""
 
     if exit_code:
-        command = """{extra_search_path_script}
-{ty} check --force-exclude {color_flag} @"$PARAM_FILE" $@ >{stdout}
-echo $? >{exit_code}
-"""
         outputs.append(exit_code)
+        command += """
+echo "$RET" > {exit_code}
+"""
     else:
-        # Create empty file on success, as Bazel expects one
-        command = """{extra_search_path_script}
-{ty} check --force-exclude {color_flag} @"$PARAM_FILE" $@ && touch {stdout}
+        command += """
+if [ "$RET" -ne 0 ]; then
+    cat "$TMP_OUT" >&2
+    exit "$RET"
+fi
 """
 
     ctx.actions.run_shell(
