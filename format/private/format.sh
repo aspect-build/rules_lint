@@ -142,7 +142,7 @@ function ls-files {
       'SCSS') patterns=('*.scss') ;;
       'Scala') patterns=('*.scala' '*.kojo' '*.sbt' '*.sc') ;;
       'Shell') patterns=('.bash_aliases' '.bash_functions' '.bash_history' '.bash_logout' '.bash_profile' '.bashrc' '.cshrc' '.flaskenv' '.kshrc' '.login' '.profile' '.zlogin' '.zlogout' '.zprofile' '.zshenv' '.zshrc' '9fs' 'PKGBUILD' 'bash_aliases' 'bash_logout' 'bash_profile' 'bashrc' 'cshrc' 'gradlew' 'kshrc' 'login' 'man' 'profile' 'zlogin' 'zlogout' 'zprofile' 'zshenv' 'zshrc' '*.sh' '*.bash' '*.bats' '*.cgi' '*.command' '*.fcgi' '*.ksh' '*.sh.in' '*.tmux' '*.tool' '*.trigger' '*.zsh' '*.zsh-theme') ;;
-      'Starlark') patterns=('BUCK' 'BUILD' 'BUILD.bazel' 'MODULE.bazel' '*.MODULE.bazel' 'Tiltfile' 'WORKSPACE' 'WORKSPACE.bazel' '*.axl' '*.bzl' '*.star') ;;
+      'Starlark') patterns=('BUCK' 'BUILD' 'BUILD.bazel' '*.bazel' 'MODULE.bazel' '*.MODULE.bazel' 'Tiltfile' 'WORKSPACE' 'WORKSPACE.bazel' '*.axl' '*.bzl' '*.star') ;;
       'Swift') patterns=('*.swift') ;;
       'TSX') patterns=('*.tsx') ;;
       'TypeScript') patterns=('*.ts' '*.cts' '*.mts') ;;
@@ -164,6 +164,11 @@ function ls-files {
         echo >&2 "Internal error: unknown language $language"
         exit 1
         ;;
+    esac
+
+    exclusions=()
+    case "$language" in
+      'Starlark') exclusions=('*.lock.bazel') ;;
     esac
 
     shebang_re=
@@ -222,6 +227,24 @@ function ls-files {
           )
         fi
         files=$(find "$@" "${find_args[@]}")
+    fi
+
+    # Apply exclusion patterns using bash glob matching
+    if [ ${#exclusions[@]} -gt 0 ] && [ -n "$files" ]; then
+        filtered_files=""
+        while IFS= read -r file; do
+            excluded=false
+            for exclusion in "${exclusions[@]}"; do
+                if [[ "$file" == $exclusion ]]; then
+                    excluded=true
+                    break
+                fi
+            done
+            if [[ -n "$file" && "$excluded" == false ]]; then
+                filtered_files+="${file}"$'\n'
+            fi
+        done <<< "$files"
+        files="${filtered_files%$'\n'}"  # Remove trailing newline
     fi
 
     if [[ ${disable_git_attribute_checks:-} == true ]]; then
