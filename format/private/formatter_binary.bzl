@@ -34,6 +34,7 @@ TOOLS = {
     "Gherkin": "prettier",
     "F#": "fantomas",
     "C#": "csharpier",
+    "Pkl": "pkl",
 }
 
 # Provided to make install more convenient
@@ -69,6 +70,7 @@ CHECK_FLAGS = {
     "rustfmt": "--check",
     "fantomas": "--check",
     "csharpier": "check",
+    "pkl": "format --silent",
 }
 
 # Flags to pass each tool when running in default mode
@@ -100,6 +102,7 @@ FIX_FLAGS = {
     "rustfmt": "",
     "fantomas": "",
     "csharpier": "format",
+    "pkl": "format --write",
 }
 
 def to_attribute_name(lang):

@@ -222,3 +222,10 @@ bats_load_library "bats-assert"
 
     assert_output --partial "+ csharpier format examples/csharp/src/hello.cs"
 }
+
+@test "should run pkl on Pkl" {
+    run bazel run //format/test:format_Pkl_with_pkl
+    assert_success
+
+    assert_output --partial "pkl format --write examples/pkl/src/cats.pkl"
+}

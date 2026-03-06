@@ -47,6 +47,7 @@ Linters which are not language-specific:
 | Jsonnet                | [jsonnetfmt]              |                                            |
 | Kotlin                 | [ktfmt]                   | [ktlint]                                   |
 | Markdown               | [Prettier]                | [Vale]                                     |
+| Pkl                    | [pkl]                     |                                            |
 | Protocol Buffer        | [buf]                     | [buf lint]                                 |
 | Python                 | [ruff]                    | [bandit], [flake8], [pylint], [ruff], [ty] |
 | Ruby                   |                           | [RuboCop], [Standard]                      |
@@ -79,6 +80,7 @@ Linters which are not language-specific:
 [ktlint]: https://github.com/pinterest/ktlint
 [buildifier]: https://github.com/keith/buildifier-prebuilt
 [djlint]: https://djlint.com/
+[pkl]: https://pkl-lang.org/index.html
 [prettier-plugin-sql]: https://github.com/un-ts/prettier
 [prettier-plugin-gherkin]: https://github.com/mapado/prettier-plugin-gherkin
 [prettier/plugin-xml]: https://github.com/prettier/plugin-xml
