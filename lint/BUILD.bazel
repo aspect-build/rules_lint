@@ -154,6 +154,16 @@ bzl_library(
 )
 
 bzl_library(
+    name = "groovy",
+    srcs = ["groovy.bzl"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
+        "@aspect_rules_js//js:libs",
+    ],
+)
+
+bzl_library(
     name = "pylint",
     srcs = ["pylint.bzl"],
     deps = ["//lint/private:lint_aspect"],

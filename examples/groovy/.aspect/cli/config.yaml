@@ -1,0 +1,4 @@
+---
+lint:
+  aspects:
+    - //tools/lint:aspects.bzl%groovy

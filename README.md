@@ -37,6 +37,7 @@ Linters which are not language-specific:
 | CSS, Less, Sass        | [Prettier]                | [Stylelint]                                |
 | Go                     | [gofmt] or [gofumpt]      |                                            |
 | Gherkin                | [prettier-plugin-gherkin] |                                            |
+| Groovy                 |                           | [npm-groovy-lint]                          |
 | GraphQL                | [Prettier]                |                                            |
 | HCL (Hashicorp Config) | [terraform] fmt           |                                            |
 | HTML                   | [Prettier]                |                                            |
@@ -84,6 +85,7 @@ Linters which are not language-specific:
 [prettier/plugin-xml]: https://github.com/prettier/plugin-xml
 [gofmt]: https://pkg.go.dev/cmd/gofmt
 [gofumpt]: https://github.com/mvdan/gofumpt
+[npm-groovy-lint]: https://www.npmjs.com/package/npm-groovy-lint
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
 [rubocop]: https://docs.rubocop.org/
