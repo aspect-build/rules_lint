@@ -87,6 +87,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
             inputs = inputs,
             args = args_list,
             files_to_diff = [s.path for s in srcs],
+            patch_cfg_env = env,
             patch_out = patch,
             tools = [executable],
             stdout = stdout,
