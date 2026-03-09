@@ -37,20 +37,19 @@ def bazel_run(ctx: TaskContext, entrypoint: str, args: list[str]) -> std.process
         .spawn()
 
 # buildifier: disable=function-docstring
-def spawn_with_output(out, command: std.process.Command):
-    spawn = command.stdout("piped").spawn().wait_with_output()
+def spawn_git_with_output(out, process, args: list[str]):
+    spawn = process.command("git").args(args).stdout("piped").spawn().wait_with_output()
     if not spawn.status.success:
-        out.write("\x1b[0;31mERROR\x1b[0m: git exited with code %d\n" % spawn.status.code)
+        out.write("\x1b[0;31mERROR\x1b[0m: 'git %s' failed (exit %d)\n" % (" ".join(args), spawn.status.code))
         fail(spawn.stderr)
 
     return spawn.stdout.strip()
 
 # buildifier: disable=function-docstring
-def find_changed_files(out, process, base_ref: str = "origin/main"):
-    merge_base = spawn_with_output(out, process
-        .command("git").args(["merge-base", "HEAD", base_ref]))
-    return spawn_with_output(out, process
-        .command("git").args(["diff", "--diff-filter=d", "--name-only", merge_base]))
+def find_changed_files(out, process, base_ref: str, merge_base: str | None):
+    diff_base = merge_base if merge_base else spawn_git_with_output(out, process, ["merge-base", "HEAD", base_ref])
+
+    return spawn_git_with_output(out, process, ["diff", "--diff-filter=d", "--name-only", diff_base])
 
 # buildifier: disable=function-docstring
 def build_formatter(ctx: TaskContext) -> str:
@@ -98,7 +97,7 @@ def impl(ctx: TaskContext) -> int:
 
     format_args = []
     if not ctx.args.all_files:
-        changed_files = find_changed_files(out, ctx.std.process, ctx.args.base_ref)
+        changed_files = find_changed_files(out, ctx.std.process, ctx.args.base_ref, ctx.args.merge_base)
         out.write("Formatting changed files:\n%s\n" % changed_files)
         format_args = changed_files.split("\n")
 
@@ -118,6 +117,7 @@ format = task(
     args = {
         "all_files": args.boolean(default = False),
         "base_ref": args.string(default = "origin/main"),
+        "merge_base": args.string(),
         "formatter_target": args.string(default = "//tools/format"),
         "bazel_flag": args.string_list(),
         "bazel_startup_flag": args.string_list(),
