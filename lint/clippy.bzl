@@ -49,14 +49,14 @@ Please note that the aspect will propagate to all transitive Rust dependencies o
 Please watch issue https://github.com/aspect-build/rules_lint/issues/385 for updates on this behavior.
 """
 
-load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
+load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS")
 load("@rules_rust//rust:defs.bzl", "rust_clippy_action")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClippy"
 
-def _parse_wrapper_output_into_files(ctx, outputs, raw_process_wrapper_wrapper_output, fail_on_violation):
+def _parse_wrapper_output_into_files(ctx, outputs, raw_process_wrapper_wrapper_output):
     arguments = [
         raw_process_wrapper_wrapper_output.path,
         outputs.human.out.path,
@@ -66,6 +66,17 @@ def _parse_wrapper_output_into_files(ctx, outputs, raw_process_wrapper_wrapper_o
     ]
     command = """
 exit_code=$(head -n 1 $1)
+if [ "$exit_code" -eq 0 ]; then
+    # clippy exits with 0 (no error) with `-Wwarnings` (`-Dwarnings` is required
+    # to treat warnings as errors.  However, we want `fail_on_violation` to fail
+    # the build in case of warnings, too.
+    # We thus have to explicitly search for warnings in clippy's output message.
+    warning_count="$(grep -m1 -oP '\\d+(?= warnings emitted)' "$1")"
+    if [ -n "$warning_count" ] && [ "$warning_count" -ne 0 ]; then
+        exit_code=1
+    fi
+fi
+
 output=$(tail -n +2 $1)
 if [[ "${output}" != "" ]]; then
     echo "${output}" > $2
@@ -74,20 +85,16 @@ else
 fi
 """
 
-    if fail_on_violation:
-        command += """
-echo "${output}" >&2
-exit "${exit_code}"
-"""
-    else:
-        command += """
-echo "${exit_code}" > $3
-echo "${exit_code}" > $4
-"""
+    if outputs.human.exit_code and outputs.machine.exit_code:
         arguments.append(outputs.human.exit_code.path)
         arguments.append(outputs.machine.exit_code.path)
         outs.append(outputs.human.exit_code)
         outs.append(outputs.machine.exit_code)
+        command += """
+echo "${exit_code}" > $3
+echo "${exit_code}" > $4
+echo "${output}" >&2
+"""
 
     ctx.actions.run_shell(
         command = command,
@@ -136,8 +143,6 @@ def _clippy_aspect_impl(target, ctx):
         "-Wwarnings",
     ] + ctx.attr._clippy_flags
 
-    fail_on_violation = ctx.attr._options[LintOptionsInfo].fail_on_violation
-
     raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling)
     raw_rustc_json_diagnostics = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "rustc_json_diagnostics"), sibling = sibling)
     raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling)
@@ -154,7 +159,7 @@ def _clippy_aspect_impl(target, ctx):
         clippy_diagnostics_file = raw_rustc_json_diagnostics,
     )
 
-    _parse_wrapper_output_into_files(ctx, outputs, raw_output, fail_on_violation)
+    _parse_wrapper_output_into_files(ctx, outputs, raw_output)
     _parse_to_sarif_action(ctx, raw_rustc_json_diagnostics, outputs.machine.out)
 
     if patch_file != None:
@@ -168,12 +173,11 @@ def _run_patcher(ctx, srcs, rustc_diagnostics_file, patch_file):
         # This path is relative to the execroot, we must relativize it to the bindir.
         "../../../" + rustc_diagnostics_file.path,
     ]
-    srcs_inputs = copy_files_to_bin_actions(ctx, srcs)
 
     run_patcher(
         ctx,
         ctx.executable,
-        inputs = [rustc_diagnostics_file] + srcs_inputs,
+        inputs = [rustc_diagnostics_file] + srcs,
         args = args,
         tools = [ctx.executable._rustc_diagnostic_parser],
         files_to_diff = [s.path for s in srcs],
