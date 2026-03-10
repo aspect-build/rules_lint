@@ -2,7 +2,7 @@
 
 Typical usage:
 
-First, fetch `bandit[sarif]` package via your standard requirements file and pip calls.
+First, fetch `bandit[sarif]` package via your standard requirements file and python rules (pip, uv, etc).
 
 Note that the `sarif` extra is **required** for machine output and the `toml` extra
 is recommended to enable `pyproject.toml` support, see examples.
@@ -136,7 +136,7 @@ def lint_bandit_aspect(
     """A factory function to create a linter aspect.
 
     Args:
-        binary: a bandit executable. Can be obtained from pypi like so:
+        binary: a bandit executable. Obtain from pypi like so:
 
             load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 

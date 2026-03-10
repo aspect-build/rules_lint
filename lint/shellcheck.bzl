@@ -26,7 +26,7 @@ def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, o
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the shellcheck program
+        executable: label of the shellcheck program
         srcs: bash files to be linted
         config: label of the .shellcheckrc file
         stdout: output file containing stdout of shellcheck

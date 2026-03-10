@@ -124,7 +124,7 @@ def rubocop_action(
     This means that a change to any config file invalidates the action cache
     entries for ALL RuboCop actions.
 
-    However this is needed because RuboCop's logic for selecting the
+    However, this is important because RuboCop's logic for selecting the
     appropriate config needs to traverse the directory hierarchy.
 
     Args:
