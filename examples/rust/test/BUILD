@@ -11,6 +11,11 @@ clippy_test(
 )
 
 clippy_test(
+    name = "clippy_ok_binary_with_generated_inputs",
+    srcs = ["//src:ok_binary_with_generated_inputs"],
+)
+
+clippy_test(
     name = "clippy_ok_binary_with_bad_dep",
     srcs = ["//src:ok_binary_with_bad_dep"],
     expected_exit_code = 1,
