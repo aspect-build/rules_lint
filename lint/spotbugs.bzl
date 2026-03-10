@@ -42,7 +42,7 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the Spotbugs program
+        executable: label of the Spotbugs program
         srcs: jar to be linted
         target: target to be linted
         exclude_filter: label of the spotbugs-exclude.xml file

@@ -32,7 +32,7 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the ty program
+        executable: label of the ty program
         srcs: python files to be linted
         transitive_srcs: depset of transitive Python sources from dependencies
         config: labels of ty config files (pyproject.toml, ty.toml)

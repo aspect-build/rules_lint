@@ -71,7 +71,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the Vale program
+        executable: label of the Vale program
         srcs: markdown files to be linted
         styles: a directory containing vale extensions, following https://vale.sh/docs/topics/styles/
         config: label of the .vale.ini file, see https://vale.sh/docs/vale-cli/structure/#valeini

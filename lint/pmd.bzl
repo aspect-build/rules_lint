@@ -38,7 +38,7 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, option
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the PMD program
+        executable: label of the PMD program
         srcs: java files to be linted
         rulesets: list of labels of the PMD ruleset files
         stdout: output file to generate
@@ -108,7 +108,7 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
     """A factory function to create a linter aspect.
 
     Attrs:
-        binary: a PMD executable. Can be obtained from rules_java like so:
+        binary: a PMD executable. Obtain from rules_java like so:
 
             java_binary(
                 name = "pmd",
