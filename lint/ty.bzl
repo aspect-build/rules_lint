@@ -158,9 +158,10 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(dep[PyInfo].transitive_pyi_files)
                 # Collect imports from pip packages for extra search paths
                 for import_path in dep[PyInfo].imports.to_list():
-                    if import_path == ctx.workspace_name:
-                        continue
-                    import_paths["external/" + import_path] = True
+                    if import_path == ctx.workspace_name or import_path == ".":
+                        import_paths[ctx.bin_dir.path] = True
+                    else:
+                        import_paths["external/" + import_path] = True
 
     # When srcs contain labels to other targets (e.g., genrules that produce .py files),
     # we need to collect their transitive sources for proper type resolution
@@ -170,7 +171,10 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(src[PyInfo].transitive_sources)
                 transitive_sources.append(src[PyInfo].transitive_pyi_files)
                 for import_path in src[PyInfo].imports.to_list():
-                    import_paths["external/" + import_path] = True
+                    if import_path == ctx.workspace_name or import_path == ".":
+                        import_paths[ctx.bin_dir.path] = True
+                    else:
+                        import_paths["external/" + import_path] = True
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)
