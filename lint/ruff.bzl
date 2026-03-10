@@ -104,6 +104,8 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
         args.add("--force-exclude")
         args.add("--quiet")
         args.add_all(srcs)
+        if not env.get("FORCE_COLOR"):
+            args.add("--output-format=concise")
 
         if exit_code:
             command = "{ruff} $@ >{stdout}; echo $? >" + exit_code.path
