@@ -128,7 +128,7 @@ function ls-files {
       'JSON') patterns=('.all-contributorsrc' '.arcconfig' '.auto-changelog' '.c8rc' '.htmlhintrc' '.imgbotconfig' '.nycrc' '.tern-config' '.tern-project' '.watchmanconfig' 'Pipfile.lock' 'composer.lock' 'deno.lock' 'flake.lock' 'mcmod.info' '*.json' '*.4DForm' '*.4DProject' '*.avsc' '*.geojson' '*.gltf' '*.har' '*.ice' '*.JSON-tmLanguage' '*.jsonl' '*.mcmeta' '*.tfstate' '*.tfstate.backup' '*.topojson' '*.webapp' '*.webmanifest' '*.yy' '*.yyp') ;;
       'JSON with Comments') patterns=( '*.jsonc' '*.code-snippets' '*.code-workspace' '*.sublime-build' '*.sublime-commands' '*.sublime-completions' '*.sublime-keymap' '*.sublime-macro' '*.sublime-menu' '*.sublime-mousemap' '*.sublime-project' '*.sublime-settings' '*.sublime-theme' '*.sublime-workspace' '*.sublime_metrics' '*.sublime_session' '.babelrc' '.devcontainer.json' '.eslintrc.json' '.jscsrc' '.jshintrc' '.jslintrc' '.swcrc' 'api-extractor.json' 'devcontainer.json' 'jsconfig.json' 'language-configuration.json' 'tsconfig.json' 'tslint.json') ;;
       'JSON5') patterns=('*.json5') ;;
-      'Java') patterns=('*.java' '*.jav' '*.jsh') ;;
+      'Java') patterns=('*.java') ;;
       'JavaScript') patterns=('Jakefile' '*.js' '*._js' '*.bones' '*.cjs' '*.es' '*.es6' '*.frag' '*.gs' '*.jake' '*.javascript' '*.jsb' '*.jscad' '*.jsfl' '*.jslib' '*.jsm' '*.jspre' '*.jss' '*.jsx' '*.mjs' '*.njs' '*.pac' '*.sjs' '*.ssjs' '*.xsjs' '*.xsjslib') ;;
       'HTML Jinja') patterns=('*.html.jinja' '*.html.j2' '*.html.jinja2') ;;
       'Jsonnet') patterns=('*.jsonnet' '*.libsonnet') ;;
