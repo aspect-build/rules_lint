@@ -66,7 +66,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintVale"
 
-def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None, output = "CLI", env = {}):
+def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None, output = "CLI", template = None, env = {}):
     """Run Vale as an action under Bazel.
 
     Args:
@@ -78,7 +78,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
         stdout: output file containing stdout of Vale
         exit_code: output file containing Vale exit code.
             If None, then fail the build when Vale exits non-zero.
-        output: the value for the --output flag
+        output: the value for the --output flag. May be a string like 'line', 'JSON', 'CLI', or a File of a template to use: https://vale.sh/docs/templates
         env: environment variables for vale
     """
     inputs = srcs + [config]
@@ -94,7 +94,11 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
     args = ctx.actions.args()
     args.add_all(srcs)
     args.add_all(["--config", config])
-    args.add_all(["--output", output])
+    if type(output) == File:
+        inputs.append(output)
+        args.add_all(["--output", output.path])
+    else:
+        args.add_all(["--output", output])
     outputs = [stdout]
 
     if exit_code:
@@ -133,7 +137,7 @@ def _vale_aspect_impl(target, ctx):
         styles = ctx.files._styles[0]
         if not styles.is_directory:
             fail("Styles should be a directory containing installed styles")
-    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.out, outputs.human.exit_code, env = color_env)
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.out, outputs.human.exit_code, env = color_env, template = ctx.file._template)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, raw_machine_report, outputs.machine.exit_code, output = "line")
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
@@ -143,7 +147,7 @@ def _vale_aspect_impl(target, ctx):
 # Users might want to try https://github.com/dwtj/dwtj_rules_markdown but we expect many won't
 # want to take that dependency.
 # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
-def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule_kinds = ["markdown_library"], filegroup_tags = ["markdown", "lint-with-vale"]):
+def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule_kinds = ["markdown_library"], filegroup_tags = ["markdown", "lint-with-vale"], template = None):
     """A factory function to create a linter aspect."""
     return aspect(
         implementation = _vale_aspect_impl,
@@ -171,6 +175,10 @@ def lint_vale_aspect(binary, config, styles = Label("//lint:empty_styles"), rule
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_template": attr.label(
+                allow_single_file = [".tmpl"],
+                default = template,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
