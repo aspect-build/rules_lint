@@ -27,6 +27,5 @@ format_multirun(
     html_jinja = ":djlint",
     javascript = ":prettier",  # javascript includes JSON, JSON5, TypeScript, TSX, and Vue
     jsonnet = "@aspect_rules_lint//format:jsonnetfmt",
-    starlark = "@buildifier_prebuilt//:buildifier",
     visibility = ["//:__subpackages__"],
 )
