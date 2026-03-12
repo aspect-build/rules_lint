@@ -23,6 +23,7 @@ Each example is self-contained and shows:
 - `markdown/` - Markdown formatting with Prettier; linting with Vale
 - `proto/` - Protocol Buffer formatting and linting with Buf
 - `starlark/` - Starlark formatting with Buildifier; linting with Buildifier
+- `qml/` - QML formatting with qmlformat; linting with qmllint
 
 ## Multi-language Example
 

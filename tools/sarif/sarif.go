@@ -104,6 +104,13 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%W%f:%l:%c: [warning] %m`,
 			`%I%f:%l:%c: [info] %m`,
 		}
+	case "AspectRulesLintQmllint":
+		fm = []string{
+			`%EError: %f:%l:%c: %m`,
+			`%WWarning: %f:%l:%c: %m`,
+			`%IInfo: %f:%l:%c: %m`,
+			`%-G%.%#`,
+		}
 	case "AspectRulesLintKeepSorted":
 		fm = []string{`%f:%l:%e:%m`}
 	case "AspectRulesLintTy":
