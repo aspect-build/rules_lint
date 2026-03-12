@@ -22,6 +22,7 @@ Each example is self-contained and shows:
 - `yaml/` - YAML formatting with yamlfmt; linting with Yamllint
 - `markdown/` - Markdown formatting with Prettier; linting with Vale
 - `proto/` - Protocol Buffer formatting and linting with Buf
+- `qml/` - QML formatting with qmlformat; linting with qmllint
 
 ## Multi-language Example
 
