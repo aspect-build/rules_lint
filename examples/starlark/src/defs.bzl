@@ -2,5 +2,5 @@
 
 def bad_macro():
     deps = []
-    deps.append(":dep")
+    deps += [":dep"]
     return deps
