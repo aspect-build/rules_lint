@@ -26,9 +26,6 @@ The `qml` tag is used for both formatting and linting in this example.
 - See `tools/lint/linters.bzl` for how to set up the linter aspect
 
 The linter example uses `.qmllint.ini` to promote `UnusedImports` from an informational diagnostic to a warning so the lint test fails on the sample file.
-It also sets `MaxWarnings=0` so that warning-level diagnostics cause a non-zero exit code.
-
-5. Run formatting and linting with `aspect format` and `aspect lint`
 
 ## Example Code
 

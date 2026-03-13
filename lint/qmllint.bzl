@@ -30,50 +30,77 @@ providing a custom `rule_kinds` list that matches your QML rules.
 """
 
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintQmllint"
 
-def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None):
+def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patch = None):
     """Run qmllint as an action under Bazel.
 
     Args:
         ctx: The Bazel action context.
         executable: The qmllint executable to run.
         srcs: The source files to lint.
-        config: An optional configuration file for qmllint.
+        config: A configuration file to pass to qmllint.
         stdout: The file to write the human-readable report to.
         exit_code: An optional file to write the exit code to. If not provided, the action will not capture the exit code.
+        patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
-    inputs = list(srcs)
-    if config:
-        inputs.append(config)
+    inputs = srcs + [config]
 
-    outputs = [stdout]
-    args = ctx.actions.args()
-    args.add_all(srcs)
-
-    if exit_code:
-        command = "{qmllint} $@ > {stdout} 2>&1; echo $? > {exit_code}".format(
-            qmllint = executable.path,
-            stdout = stdout.path,
-            exit_code = exit_code.path,
+    if patch != None:
+        wrapper = ctx.actions.declare_file(ctx.label.name + ".qmllint_wrapper.sh")
+        args_list = [s.path for s in srcs]
+        ctx.actions.write(
+            output = wrapper,
+            content = """#!/bin/bash
+"{qmllint}" --fix "$@"
+"{qmllint}" --max-warnings=0 "$@" 2>&1
+""".format(qmllint = executable.path),
+            is_executable = True,
         )
-        outputs.append(exit_code)
+
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = inputs,
+            args = args_list,
+            files_to_diff = [s.path for s in srcs],
+            patch_out = patch,
+            tools = [executable],
+            stdout = stdout,
+            exit_code = exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with qmllint",
+        )
     else:
-        command = "{qmllint} $@ > {stdout} 2>&1".format(
-            qmllint = executable.path,
-            stdout = stdout.path,
-        )
+        outputs = [stdout]
+        args = ctx.actions.args()
+        args.add_all(srcs)
+        args.add("--max-warnings=0") # Fail if any warnings are found
 
-    ctx.actions.run_shell(
-        inputs = inputs,
-        outputs = outputs,
-        arguments = [args],
-        tools = [executable],
-        command = command,
-        mnemonic = _MNEMONIC,
-        progress_message = "Linting %{label} with qmllint",
-    )
+        if exit_code:
+            command = "{qmllint} $@ > {stdout}; echo $? > {exit_code}".format(
+                qmllint = executable.path,
+                stdout = stdout.path,
+                exit_code = exit_code.path,
+            )
+            outputs.append(exit_code)
+        else:
+            command = "{qmllint} $@ > {stdout} 2>&1".format(
+                qmllint = executable.path,
+                stdout = stdout.path,
+            )
+
+        ctx.actions.run_shell(
+            inputs = inputs,
+            outputs = outputs,
+            arguments = [args],
+            tools = [executable],
+            command = command,
+            mnemonic = _MNEMONIC,
+            progress_message = "Linting %{label} with qmllint",
+        )
 
 # buildifier: disable=function-docstring
 def _qmllint_aspect_impl(target, ctx):
@@ -94,6 +121,7 @@ def _qmllint_aspect_impl(target, ctx):
         ctx.file._config_file,
         outputs.human.out,
         outputs.human.exit_code,
+        patch = getattr(outputs, "patch", None),
     )
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
@@ -104,6 +132,7 @@ def _qmllint_aspect_impl(target, ctx):
         ctx.file._config_file,
         raw_machine_report,
         outputs.machine.exit_code,
+        patch = getattr(outputs, "patch", None),
     )
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
@@ -114,7 +143,7 @@ def lint_qmllint_aspect(binary, config, rule_kinds = [], filegroup_tags = ["qml"
 
     return aspect(
         implementation = _qmllint_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
