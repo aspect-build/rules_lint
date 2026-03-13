@@ -162,7 +162,10 @@ bzl_library(
 bzl_library(
     name = "qmllint",
     srcs = ["qmllint.bzl"],
-    deps = ["//lint/private:lint_aspect"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
+    ],
 )
 
 bzl_library(
