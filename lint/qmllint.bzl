@@ -49,16 +49,25 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
     inputs = srcs + [config]
 
     if patch != None:
-        files = [src.path for src in srcs]
-        args_list = ["--fix"] + files
+        wrapper = ctx.actions.declare_file(ctx.label.name + ".qmllint_wrapper.sh")
+        files = [s.path for s in srcs]
+        ctx.actions.write(
+            output = wrapper,
+            content = """#!/bin/bash
+"{qmllint}" --fix "$@"
+"{qmllint}" --max-warnings=0 "$@" 2>&1
+""".format(qmllint = executable.path),
+            is_executable = True,
+        )
+
         run_patcher(
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args_list,
+            args = files,
             files_to_diff = files,
             patch_out = patch,
-            tools = [executable],
+            tools = [wrapper, executable],
             stdout = stdout,
             exit_code = exit_code,
             mnemonic = _MNEMONIC,
