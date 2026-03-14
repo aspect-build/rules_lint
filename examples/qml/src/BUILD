@@ -11,5 +11,5 @@ filegroup(
 format_test(
     name = "format_files_test",
     srcs = ["Main.qml"],
-    qml = "//tools/format:pyside6-qmlformat",
+    qml = "//tools/format:qmlformat",
 )
