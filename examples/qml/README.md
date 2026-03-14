@@ -12,7 +12,7 @@ This example demonstrates how to set up formatting and linting for QML files usi
 
 - **qmllint** - Qt's linter for QML files
 
-Both tools are invoked through the PySide wrappers `pyside6-qmlformat` and `pyside6-qmllint`.
+Both tools are invoked through the PySide wrappers `qmlformat` and `qmllint`.
 The `qml` tag is used for both formatting and linting in this example.
 
 ## Setup
