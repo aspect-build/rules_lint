@@ -80,12 +80,8 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
         outputs = [stdout]
 
         if exit_code:
+            command = "{buildifier} $@ >{stdout} 2>&1; echo $? > " + exit_code.path
             outputs.append(exit_code)
-            command = "{buildifier} $@ >{stdout} 2>&1; echo $? > {exit_code}".format(
-                buildifier = executable.path,
-                stdout = stdout.path,
-                exit_code = exit_code.path,
-            )
         else:
             command = "{buildifier} $@ && touch {stdout}"
 
@@ -94,7 +90,7 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
             outputs = outputs,
             tools = [executable],
             arguments = [args],
-            command = command,
+            command = command.format(buildifier = executable.path, stdout = stdout.path),
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with Buildifier",
         )
