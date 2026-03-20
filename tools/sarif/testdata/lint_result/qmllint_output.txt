@@ -1,0 +1,3 @@
+Warning: src/Main.qml:2:1: Unused import [unused-imports]
+import QtQuick.Controls
+^^^^^^
