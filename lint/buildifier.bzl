@@ -87,10 +87,7 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
                 exit_code = exit_code.path,
             )
         else:
-            command = "{buildifier} $@ >{stdout} 2>&1".format(
-                buildifier = executable.path,
-                stdout = stdout.path,
-            )
+            command = "{buildifier} $@ && touch {stdout}"
 
         ctx.actions.run_shell(
             inputs = srcs,
