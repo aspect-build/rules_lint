@@ -80,24 +80,17 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
         args.add("--max-warnings=0")  # Fail if any warnings are found
 
         if exit_code:
-            command = "{qmllint} $@ > {stdout} 2>&1; echo $? > {exit_code}".format(
-                qmllint = executable.path,
-                stdout = stdout.path,
-                exit_code = exit_code.path,
-            )
+            command = "{qmllint} $@ > {stdout} 2>&1; echo $? > " + exit_code.path
             outputs.append(exit_code)
         else:
-            command = "{qmllint} $@ > {stdout} 2>&1".format(
-                qmllint = executable.path,
-                stdout = stdout.path,
-            )
+            command = "{qmllint} $@ && touch {stdout}"
 
         ctx.actions.run_shell(
             inputs = inputs,
             outputs = outputs,
             arguments = [args],
             tools = [executable],
-            command = command,
+            command = command.format(qmllint = executable.path, stdout = stdout.path),
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with qmllint",
         )
