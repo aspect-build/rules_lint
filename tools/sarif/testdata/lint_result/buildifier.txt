@@ -1,0 +1,2 @@
+src/defs.bzl:5: list-append: Prefer using ".append()" to adding a single element list. NOTE: This does not work if the target is a select, hence this warning can safely be ignored or suppressed. (https://github.com/bazelbuild/buildtools/blob/main/WARNINGS.md#list-append)
+src/custom.star:5: list-append: Prefer using ".append()" to adding a single element list. NOTE: This does not work if the target is a select, hence this warning can safely be ignored or suppressed. (https://github.com/bazelbuild/buildtools/blob/main/WARNINGS.md#list-append)
