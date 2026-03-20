@@ -1,3 +1,5 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
 package(default_visibility = ["//:__subpackages__"])
 
 # Used instead of py_console_script_binary to avoid an extra error log
