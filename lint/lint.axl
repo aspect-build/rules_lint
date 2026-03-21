@@ -72,7 +72,7 @@ lint = task(
     implementation = impl,
     args = {
         "fix": args.boolean(),
-        "targets": args.positional(minimum = 0),
+        "targets": args.positional(minimum = 0, maximum = 65536),
         "bazel_flag": args.string_list(),
         "bazel_startup_flag": args.string_list(),
     },
