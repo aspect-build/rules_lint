@@ -62,6 +62,7 @@ vale = lint_vale_aspect(
 ```
 """
 
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintVale"
@@ -137,7 +138,7 @@ def _vale_aspect_impl(target, ctx):
         styles = ctx.files._styles[0]
         if not styles.is_directory:
             fail("Styles should be a directory containing installed styles")
-    output = ctx.file._template if ctx.files._template else "CLI"
+    output = ctx.file._template if hasattr(ctx.attr, "_template") and ctx.files._template else "CLI"
     vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.out, outputs.human.exit_code, env = color_env, output = output)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, raw_machine_report, outputs.machine.exit_code, output = "line")
@@ -149,38 +150,55 @@ def _vale_aspect_impl(target, ctx):
 # want to take that dependency.
 # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
 def lint_vale_aspect(binary, config, template = None, styles = Label("//lint:empty_styles"), rule_kinds = ["markdown_library"], filegroup_tags = ["markdown", "lint-with-vale"]):
-    """A factory function to create a linter aspect."""
+    """A factory function to create a linter aspect.
+
+    Args:
+        binary: a Vale executable, typically fetched by the `tools.vale()` module extension.
+        config: the label of the `.vale.ini` file used by Vale.
+        template: an optional label of a `.tmpl` file passed to `vale --output`.
+        styles: a label of a directory containing installed Vale styles.
+        rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect.
+        filegroup_tags: filegroups tagged with these tags will also be visited by the aspect.
+
+    Returns:
+        An aspect definition for Vale.
+    """
+    extra_attrs = {}
+    if template:
+        extra_attrs["_template"] = attr.label(
+            allow_single_file = [".tmpl"],
+            default = template,
+        )
     return aspect(
         implementation = _vale_aspect_impl,
-        attrs = {
-            "_options": attr.label(
-                default = "//lint:options",
-                providers = [LintOptionsInfo],
-            ),
-            "_vale": attr.label(
-                default = binary,
-                executable = True,
-                cfg = "exec",
-            ),
-            "_config": attr.label(
-                allow_single_file = True,
-                mandatory = True,
-                doc = "Config file",
-                default = config,
-            ),
-            "_styles": attr.label(
-                default = styles,
-            ),
-            "_filegroup_tags": attr.string_list(
-                default = filegroup_tags,
-            ),
-            "_rule_kinds": attr.string_list(
-                default = rule_kinds,
-            ),
-            "_template": attr.label(
-                allow_single_file = [".tmpl"],
-                default = template,
-            ),
-        },
+        attrs = dicts.add(
+            {
+                "_options": attr.label(
+                    default = "//lint:options",
+                    providers = [LintOptionsInfo],
+                ),
+                "_vale": attr.label(
+                    default = binary,
+                    executable = True,
+                    cfg = "exec",
+                ),
+                "_config": attr.label(
+                    allow_single_file = True,
+                    mandatory = True,
+                    doc = "Config file",
+                    default = config,
+                ),
+                "_styles": attr.label(
+                    default = styles,
+                ),
+                "_filegroup_tags": attr.string_list(
+                    default = filegroup_tags,
+                ),
+                "_rule_kinds": attr.string_list(
+                    default = rule_kinds,
+                ),
+            },
+            extra_attrs,
+        ),
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
     )
