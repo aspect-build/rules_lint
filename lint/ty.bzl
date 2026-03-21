@@ -136,6 +136,26 @@ fi
         tools = [executable],
     )
 
+def _resolve_import_path(import_path, workspace_name):
+    """Map a PyInfo import path to the correct execroot-relative search path.
+
+    Workspace-internal paths start with the workspace name (e.g. "_main/pkg/src")
+    and live directly under the execroot — they must NOT be prefixed with "external/".
+    External paths (pip packages) live under "external/" in the execroot.
+
+    Args:
+        import_path: an entry from PyInfo.imports
+        workspace_name: ctx.workspace_name (e.g. "_main")
+
+    Returns:
+        The corrected path string, or None if the path should be skipped.
+    """
+    if import_path == workspace_name:
+        return None
+    if import_path.startswith(workspace_name + "/"):
+        return import_path[len(workspace_name) + 1:]
+    return "external/" + import_path
+
 # buildifier: disable=function-docstring
 def _ty_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
@@ -144,10 +164,10 @@ def _ty_aspect_impl(target, ctx):
     # Collect transitive sources from dependencies using the standard PyInfo provider.
     transitive_sources = []
 
-    # Collect import paths from PyInfo for third-party dependencies (pip packages).
-    # These paths are used with --extra-search-path to help ty find external modules.
-    # Import paths from pip packages look like "rules_python~~pip~pip_39_pathspec/site-packages"
-    # and need to be prefixed with "external/" to form the actual path in the execroot.
+    # Collect import paths from PyInfo for --extra-search-path.
+    # _resolve_import_path maps each entry to the correct execroot-relative path:
+    #   - pip packages get an "external/" prefix
+    #   - workspace-internal paths get the workspace name stripped
     import_paths = {}
 
     # Collect from deps attribute using PyInfo
@@ -156,11 +176,10 @@ def _ty_aspect_impl(target, ctx):
             if PyInfo in dep:
                 transitive_sources.append(dep[PyInfo].transitive_sources)
                 transitive_sources.append(dep[PyInfo].transitive_pyi_files)
-                # Collect imports from pip packages for extra search paths
                 for import_path in dep[PyInfo].imports.to_list():
-                    if import_path == ctx.workspace_name:
-                        continue
-                    import_paths["external/" + import_path] = True
+                    resolved = _resolve_import_path(import_path, ctx.workspace_name)
+                    if resolved:
+                        import_paths[resolved] = True
 
     # When srcs contain labels to other targets (e.g., genrules that produce .py files),
     # we need to collect their transitive sources for proper type resolution
@@ -170,7 +189,9 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(src[PyInfo].transitive_sources)
                 transitive_sources.append(src[PyInfo].transitive_pyi_files)
                 for import_path in src[PyInfo].imports.to_list():
-                    import_paths["external/" + import_path] = True
+                    resolved = _resolve_import_path(import_path, ctx.workspace_name)
+                    if resolved:
+                        import_paths[resolved] = True
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)
