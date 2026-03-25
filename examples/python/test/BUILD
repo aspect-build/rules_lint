@@ -8,6 +8,7 @@ load(
     "//tools/lint:linters.bzl",
     "bandit_test",
     "flake8_test",
+    "pydoclint_test",
     "pylint_test",
     "ruff_test",
     "ty_test",
@@ -16,6 +17,7 @@ load(
     ":machine_output.bzl",
     "machine_bandit_report",
     "machine_flake8_report",
+    "machine_pydoclint_report",
     "machine_pylint_report",
     "machine_ruff_report",
     "machine_ty_report",
@@ -36,6 +38,7 @@ filegroup(
     name = "generated_py_filegroup",
     srcs = ["generated.py"],
     tags = [
+        "lint-with-pydoclint",
         "lint-with-pylint",
         "lint-with-ruff",
     ],
@@ -71,6 +74,16 @@ pylint_test(
     srcs = [":generated_py_filegroup"],
 )
 
+pydoclint_test(
+    name = "pydoclint_should_ignore_generated",
+    srcs = [":generated_py"],
+)
+
+pydoclint_test(
+    name = "pydoclint_should_ignore_generated_filegroup",
+    srcs = [":generated_py_filegroup"],
+)
+
 ruff_test(
     name = "ruff_should_ignore_excluded",
     srcs = [":excluded_py"],
@@ -91,6 +104,12 @@ flake8_test(
 pylint_test(
     name = "pylint",
     srcs = ["//src:unused_import"],
+    expected_exit_code = 1,
+)
+
+pydoclint_test(
+    name = "pydoclint",
+    srcs = ["//src:missing_doc_arg"],
     expected_exit_code = 1,
 )
 
@@ -179,4 +198,16 @@ report_test(
     expected_tool = "Pylint",
     expected_uri = "src/unused_import.py",
     report = "machine_pylint_report",
+)
+
+machine_pydoclint_report(
+    name = "machine_pydoclint_report",
+    src = "//src:missing_doc_arg",
+)
+
+report_test(
+    name = "pydoclint_machine_output_test",
+    expected_tool = "Pydoclint",
+    expected_uri = "src/missing_doc_arg.py",
+    report = "machine_pydoclint_report",
 )
