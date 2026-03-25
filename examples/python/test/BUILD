@@ -148,6 +148,15 @@ report_test(
     report = "machine_ty_report",
 )
 
+# Regression test for https://github.com/aspect-build/rules_lint/issues/728
+# The dep //src/python_lib:py_dependency uses `imports = ["."]`, which puts
+# "_main/src/python_lib" in PyInfo.imports. ty must resolve this as a
+# workspace-internal path, not an external one.
+ty_test(
+    name = "ty_should_resolve_workspace_dep_with_imports",
+    srcs = ["//src:uses_dependency_correctly"],
+)
+
 machine_flake8_report(
     name = "machine_flake8_report",
     src = "//src:unused_import",
