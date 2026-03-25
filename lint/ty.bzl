@@ -136,7 +136,7 @@ fi
         tools = [executable],
     )
 
-def _resolve_import_path(import_path, workspace_name):
+def _resolve_import_path(import_path, workspace_name, bin_dir_path):
     """Map a PyInfo import path to the correct execroot-relative search path.
 
     Workspace-internal paths start with the workspace name (e.g. "_main/pkg/src")
@@ -146,12 +146,13 @@ def _resolve_import_path(import_path, workspace_name):
     Args:
         import_path: an entry from PyInfo.imports
         workspace_name: ctx.workspace_name (e.g. "_main")
+        bin_dir_path: ctx.bin_dir.path
 
     Returns:
         The corrected path string, or None if the path should be skipped.
     """
-    if import_path == workspace_name:
-        return None
+    if import_path == workspace_name or import_path == ".":
+        return bin_dir_path
     if import_path.startswith(workspace_name + "/"):
         return import_path[len(workspace_name) + 1:]
     return "external/" + import_path
@@ -177,7 +178,7 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(dep[PyInfo].transitive_sources)
                 transitive_sources.append(dep[PyInfo].transitive_pyi_files)
                 for import_path in dep[PyInfo].imports.to_list():
-                    resolved = _resolve_import_path(import_path, ctx.workspace_name)
+                    resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
                     if resolved:
                         import_paths[resolved] = True
 
@@ -189,7 +190,7 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(src[PyInfo].transitive_sources)
                 transitive_sources.append(src[PyInfo].transitive_pyi_files)
                 for import_path in src[PyInfo].imports.to_list():
-                    resolved = _resolve_import_path(import_path, ctx.workspace_name)
+                    resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
                     if resolved:
                         import_paths[resolved] = True
 
