@@ -20,7 +20,7 @@ buildifier = lint_buildifier_aspect(
 
 The aspect visits `bzl_library` targets by default. To lint files such as
 `BUILD.bazel`, `MODULE.bazel`, or custom Starlark files, add `tags = ["starlark"]`
-to a target that lists those files in `srcs`.
+or `tags = ["lint-with-buildifier"]` to a target that lists those files in `srcs`.
 
 ```starlark
 filegroup(
