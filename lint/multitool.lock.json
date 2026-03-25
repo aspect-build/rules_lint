@@ -4,41 +4,41 @@
     "binaries": [
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.5/ruff-aarch64-unknown-linux-musl.tar.gz",
+        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.7/ruff-aarch64-unknown-linux-musl.tar.gz",
         "file": "ruff-aarch64-unknown-linux-musl/ruff",
-        "sha256": "ae22fb3b6ad85cff59abf147d572d266397f42b73e51e6d55dba56fb3430fe1d",
+        "sha256": "a6e07403e1a2287ba87676e1e9fd3c6f392d2042ed4eb0ca83cda9d549926bfa",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.5/ruff-x86_64-unknown-linux-musl.tar.gz",
+        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.7/ruff-x86_64-unknown-linux-musl.tar.gz",
         "file": "ruff-x86_64-unknown-linux-musl/ruff",
-        "sha256": "da9b5c8ba7a789fe3bcf6287ea58ccbac9328a711b7674681706106e7580a836",
+        "sha256": "a70f33ff907cbd05cd3fdcdd3c5dde828123295aaf46b4011e82dce8f806c3cc",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.5/ruff-aarch64-apple-darwin.tar.gz",
+        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.7/ruff-aarch64-apple-darwin.tar.gz",
         "file": "ruff-aarch64-apple-darwin/ruff",
-        "sha256": "f39400f9504c940fa4eb46b02e2d4889a9f86b81ce4c57bda02ea3568894d094",
+        "sha256": "e573cdb504fce521af501cc16b7018fb6560ac0e7af5d05056c942b3a1ad5a79",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.5/ruff-x86_64-apple-darwin.tar.gz",
+        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.7/ruff-x86_64-apple-darwin.tar.gz",
         "file": "ruff-x86_64-apple-darwin/ruff",
-        "sha256": "1e01b0d6354f14dac0f4de7a89488d18e00f8aa37ce3635b55bcaf1357b2a375",
+        "sha256": "2cff55e19e759addc871a8ed13cca38a3ad576d483fd2092b8072bad972ecfa0",
         "os": "macos",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.5/ruff-x86_64-pc-windows-msvc.zip",
+        "url": "https://github.com/astral-sh/ruff/releases/download/0.15.7/ruff-x86_64-pc-windows-msvc.zip",
         "file": "ruff.exe",
-        "sha256": "9b71926a755bdefa151b7579cd5e19840e9df0ab2828c762241f1b773882d939",
+        "sha256": "2971a4d16a6b20efc2e51c1f4290ae5d4a85935bb964eb298c9b73f682160379",
         "os": "windows",
         "cpu": "x86_64"
       }
@@ -84,41 +84,41 @@
     "binaries": [
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.21/ty-aarch64-unknown-linux-musl.tar.gz",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.25/ty-aarch64-unknown-linux-musl.tar.gz",
         "file": "ty-aarch64-unknown-linux-musl/ty",
-        "sha256": "f27d653477059c9f0823ce428cc09af424c3c0cf665ed129f0e531aaa79403b9",
+        "sha256": "b9082648555b5ca68ee92cc4acb56ef117cb4338c01b9a5e777b27fe8faf98a2",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.21/ty-x86_64-unknown-linux-musl.tar.gz",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.25/ty-x86_64-unknown-linux-musl.tar.gz",
         "file": "ty-x86_64-unknown-linux-musl/ty",
-        "sha256": "27d3430000e4b73297472c7fa11c6f36bbedd2a1b1cb295fde2cb632a12418fc",
+        "sha256": "1d7dba98206d6fa3b90c8a616cd4e18dc902d9e9e549aa6cfc28ddbb5bdd16dc",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.21/ty-aarch64-apple-darwin.tar.gz",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.25/ty-aarch64-apple-darwin.tar.gz",
         "file": "ty-aarch64-apple-darwin/ty",
-        "sha256": "b35b5ec1a6f3f2b69fb659d172d4db522d6f34a378e2f50ae5896c04c4891d32",
+        "sha256": "24270c55b2a8661cbba18745bb47a06bd36987face4f199ae24dc1fb14cc0e4b",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.21/ty-x86_64-apple-darwin.tar.gz",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.25/ty-x86_64-apple-darwin.tar.gz",
         "file": "ty-x86_64-apple-darwin/ty",
-        "sha256": "291b293c58dcfc0373139eec3b3086c66ec97d080075f69273a89992a3e79b80",
+        "sha256": "da5907ce45757b84ac5a172a5e8972995a134813091978114ae01031d514420b",
         "os": "macos",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.21/ty-x86_64-pc-windows-msvc.zip",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.25/ty-x86_64-pc-windows-msvc.zip",
         "file": "ty.exe",
-        "sha256": "7ba2c9ecc8beff6eef59ca31721ba57cd06e057d97e03fb328075ff6bda7fd57",
+        "sha256": "0d5c1cbb1a9b98203790d32b2c212dc0d5f07f4f371ce218028d53265aa77ed8",
         "os": "windows",
         "cpu": "x86_64"
       }
