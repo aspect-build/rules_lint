@@ -114,7 +114,7 @@ jobs:
           assert-path: /usr/lib/bats/bats-assert
           assert-version: "2.1.0"
       # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/java' || matrix.folder == 'examples/shell'  || matrix.folder == 'examples/kotlin' || matrix.folder == 'format' || matrix.folder == 'examples/qml'
+      - if: matrix.folder == 'examples/java' || matrix.folder == 'examples/shell'  || matrix.folder == 'examples/kotlin' || matrix.folder == 'format'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
 
       - name: "Integration test"
@@ -132,7 +132,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.15.0
         with: *bazelrc
       # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs' || matrix.folder == 'examples/python' || matrix.folder == 'examples/qml'
+      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
 
       - name: Lint
