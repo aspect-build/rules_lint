@@ -13,6 +13,7 @@ This example demonstrates how to set up formatting and linting for Python code u
 - **Ruff** - Fast Python linter (can catch many issues)
 - **Pylint** - Comprehensive Python linter
 - **Flake8** - Style guide enforcement
+- **Pydoclint** - Docstring/signature consistency checks
 - **Ty** - Type checker
 
 ## Setup
@@ -31,6 +32,7 @@ This example demonstrates how to set up formatting and linting for Python code u
 The `src/` directory contains example Python files with intentional violations:
 
 - `unused_import.py` - Contains unused import and format string violations
+- `missing_doc_arg.py` - Contains a docstring/signature mismatch for pydoclint
 - `unsupported_operator.py` - Contains type error (unsupported operator)
 - `call_non_callable.py` - Contains call to non-callable (ignored in ty.toml)
 - `uses_dependency.py` - Demonstrates transitive dependency linting
@@ -42,4 +44,4 @@ The `src/` directory contains example Python files with intentional violations:
 - `src/subdir/ruff.toml` - Path-based Ruff configuration that ignores F401 (unused imports) in subdirectory
 - `.pylintrc` - Pylint configuration
 - `.flake8` - Flake8 configuration
-- `ty.toml` - Ty type checker configuration
+- `pyproject.toml` - Bandit, Pydoclint, and Ty configuration

@@ -10,7 +10,7 @@ Each example is self-contained and shows:
 
 ## Structure
 
-- `python/` - Python formatting with Ruff; linting with Ruff, Flake8, or Pylint
+- `python/` - Python formatting with Ruff; linting with Ruff, Bandit, Flake8, Pydoclint, Pylint, or Ty
 - `typescript/` - TypeScript/JavaScript formatting with Prettier; linting with ESLint
 - `java/` - Java formatting with Google Java Format; linting with PMD, Checkstyle, or SpotBugs
 - `rust/` - Rust formatting with rustfmt; linting with Clippy

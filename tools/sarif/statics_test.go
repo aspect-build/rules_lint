@@ -59,6 +59,9 @@ var shellcheck_output_2 string
 //go:embed testdata/lint_result/stylelint_output.txt
 var stylelint_output string
 
+//go:embed testdata/lint_result/pydoclint_output.txt
+var pydoclint_output string
+
 type LintResult struct {
 	Label    string
 	Mnemonic string
