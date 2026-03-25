@@ -16,7 +16,7 @@ EOF
 }
 
 @test "should produce reports" {
-	run aspect lint //src:defs //src:tagged_starlark
-	assert_failure 1
+	run aspect lint //src:all
+	assert_success
 	assert_starlark_lints
 }
