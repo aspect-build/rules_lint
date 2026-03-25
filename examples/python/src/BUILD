@@ -30,6 +30,12 @@ py_library(
     srcs = ["uses_eval.py"],
 )
 
+py_library(
+    name = "uses_dependency_correctly",
+    srcs = ["uses_dependency_correctly.py"],
+    deps = ["//src/python_lib:py_dependency"],
+)
+
 filegroup(
     name = "unused_import_pyi",
     srcs = ["unused_import.pyi"],

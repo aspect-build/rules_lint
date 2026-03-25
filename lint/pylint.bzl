@@ -2,7 +2,7 @@
 
 Typical usage:
 
-First, fetch the pylint package via your standard requirements file and pip calls.
+First, fetch the pylint package via your standard requirements file and python rules (pip, uv, etc).
 
 Then, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
 
@@ -104,7 +104,7 @@ def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", 
     """A factory function to create a linter aspect.
 
     Args:
-        binary: a pylint executable. Can be obtained from rules_python like so:
+        binary: a pylint executable. Obtain from rules_python like so:
 
             load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 

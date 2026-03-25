@@ -60,14 +60,14 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
     This means that a change to any config file invalidates the action cache entries for ALL
     ruff actions.
 
-    However this is needed because:
+    However, this is important because:
 
     1. ruff has an `extend` field, so it may need to read more than one config file
     2. ruff's logic for selecting the appropriate config needs to read the file content to detect a `[tool.ruff]` section.
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the ruff program
+        executable: label of the ruff program
         srcs: python files to be linted
         config: labels of ruff config files (pyproject.toml, ruff.toml, or .ruff.toml)
         stdout: output file of linter results to generate
@@ -87,6 +87,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
             inputs = inputs,
             args = args_list,
             files_to_diff = [s.path for s in srcs],
+            patch_cfg_env = env,
             patch_out = patch,
             tools = [executable],
             stdout = stdout,
@@ -103,6 +104,8 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
         args.add("--force-exclude")
         args.add("--quiet")
         args.add_all(srcs)
+        if not env.get("FORCE_COLOR"):
+            args.add("--output-format=concise")
 
         if exit_code:
             command = "{ruff} $@ >{stdout}; echo $? >" + exit_code.path

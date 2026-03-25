@@ -49,7 +49,6 @@ Please note that the aspect will propagate to all transitive Rust dependencies o
 Please watch issue https://github.com/aspect-build/rules_lint/issues/385 for updates on this behavior.
 """
 
-load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
 load("@rules_rust//rust:defs.bzl", "rust_clippy_action")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
@@ -168,7 +167,25 @@ def _run_patcher(ctx, srcs, rustc_diagnostics_file, patch_file):
         # This path is relative to the execroot, we must relativize it to the bindir.
         "../../../" + rustc_diagnostics_file.path,
     ]
-    srcs_inputs = copy_files_to_bin_actions(ctx, srcs)
+
+    # Use ctx.actions.symlink instead of copy_files_to_bin_actions so that the
+    # aspect creates the same action type (SymlinkAction) as rules_rust does when
+    # a target has generated inputs. rules_rust symlinks all source files to the
+    # bin directory in that case, and Bazel resolves shareable action conflicts
+    # only when the action keys match — which requires identical action types.
+    # See: https://github.com/bazelbuild/rules_rust/blob/74bd3d15f33c6133c84bf4348225cbc7ac206f51/rust/private/utils.bzl#L857
+    srcs_inputs = []
+    for src in srcs:
+        if src.is_source:
+            # Strip the package prefix to get the path relative to the package,
+            # so declare_file places the output at bazel-out/.../bin/<package>/<relative>.
+            package_prefix = ctx.label.package + "/"
+            relative_path = src.short_path[len(package_prefix):] if src.short_path.startswith(package_prefix) else src.short_path
+            bin_file = ctx.actions.declare_file(relative_path)
+            ctx.actions.symlink(output = bin_file, target_file = src)
+            srcs_inputs.append(bin_file)
+        else:
+            srcs_inputs.append(src)
 
     run_patcher(
         ctx,
@@ -269,7 +286,6 @@ References:
         implementation = _clippy_aspect_impl,
         attrs = patcher_attrs | attrs,
         toolchains =
-            COPY_FILE_TO_BIN_TOOLCHAINS +
             [
                 Label("@rules_rust//rust:toolchain_type"),
                 "@bazel_tools//tools/cpp:toolchain_type",

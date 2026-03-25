@@ -2,7 +2,7 @@
 
 Typical usage:
 
-First, fetch the flake8 package via your standard requirements file and pip calls.
+First, fetch the flake8 package via your standard requirements file and python rules (pip, uv, etc).
 
 Then, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
 
@@ -37,7 +37,7 @@ def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None, optio
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the flake8 program
+        executable: label of the flake8 program
         srcs: python files to be linted
         config: label of the flake8 config file (setup.cfg, tox.ini, or .flake8)
         stdout: output file containing stdout of flake8
@@ -97,7 +97,7 @@ def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"])
     """A factory function to create a linter aspect.
 
     Attrs:
-        binary: a flake8 executable. Can be obtained from rules_python like so:
+        binary: a flake8 executable. Obtain from rules_python like so:
 
             load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 

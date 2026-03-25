@@ -128,7 +128,7 @@ def standardrb_action(
     This means that a change to any config file invalidates the action cache
     entries for ALL Standard Ruby actions.
 
-    However this is needed because Standard Ruby's logic for selecting the
+    However, this is important because Standard Ruby's logic for selecting the
     appropriate config needs to traverse the directory hierarchy.
 
     Args:
