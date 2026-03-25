@@ -8,6 +8,11 @@ filegroup(
     tags = ["qml"],
 )
 
+filegroup(
+    name = "all",
+    srcs = [":qml"],
+)
+
 format_test(
     name = "format_files_test",
     srcs = ["Main.qml"],
