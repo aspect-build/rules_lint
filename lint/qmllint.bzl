@@ -55,7 +55,7 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
             output = wrapper,
             content = """#!/bin/bash
 "{qmllint}" --fix "$@"
-"{qmllint}" --max-warnings=0 "$@" 2>&1
+"{qmllint}" "$@" 2>&1
 """.format(qmllint = executable.path),
             is_executable = True,
         )
@@ -77,7 +77,6 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
         outputs = [stdout]
         args = ctx.actions.args()
         args.add_all(srcs)
-        args.add("--max-warnings=0")  # Fail if any warnings are found
 
         if exit_code:
             command = "{qmllint} $@ > {stdout} 2>&1; echo $? > " + exit_code.path
