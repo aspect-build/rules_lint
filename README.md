@@ -55,7 +55,7 @@ Linters which are not language-specific:
 | SQL                    | [prettier-plugin-sql]     |                                            |
 | Scala                  | [scalafmt]                |                                            |
 | Shell                  | [shfmt]                   | [shellcheck]                               |
-| Starlark               | [Buildifier]              |                                            |
+| Starlark               | [Buildifier]              | [Buildifier]                               |
 | Swift                  | [SwiftFormat] (1)         |                                            |
 | TOML                   | [taplo]                   |                                            |
 | TSX                    | [Prettier]                | [ESLint]                                   |
@@ -121,7 +121,7 @@ Follow instructions from the release you wish to use:
 
 ## Usage
 
-Formatting and Linting are inherently different, which leads to differences in how they are used in rules_lint. It is best concieved as two rulesets in one.
+Formatting and Linting are inherently different, which leads to differences in how they are used in rules_lint. It is best conceived as two rulesets in one.
 
 | Formatter                                                         | Linter                                                 |
 | ----------------------------------------------------------------- | ------------------------------------------------------ |

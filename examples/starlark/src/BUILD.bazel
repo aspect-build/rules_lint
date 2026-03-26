@@ -1,0 +1,29 @@
+load("@bazel_lib//:bzl_library.bzl", "bzl_library")
+
+package(default_visibility = ["//visibility:public"])
+
+bzl_library(
+    name = "defs",
+    srcs = ["defs.bzl"],
+)
+
+filegroup(
+    name = "tagged_starlark",
+    srcs = ["custom.star"],
+    tags = ["starlark"],
+)
+
+filegroup(
+    name = "clean_starlark",
+    srcs = ["clean.star"],
+    tags = ["starlark"],
+)
+
+filegroup(
+    name = "all",
+    srcs = [
+        ":clean_starlark",
+        ":defs",
+        ":tagged_starlark",
+    ],
+)
