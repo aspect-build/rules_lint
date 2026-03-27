@@ -100,6 +100,13 @@ bats_load_library "bats-assert"
     assert_output --partial "+ ruff format --force-exclude examples/python/app/__main__.py examples/python/app/app_test.py"
 }
 
+@test "should run qmlformat on QML" {
+    run bazel run //format/test:format_QML_with_qmlformat
+    assert_success
+
+    assert_output --partial "+ qmlformat --inplace examples/qml/src/Main.qml"
+}
+
 @test "should run taplo on TOML" {
     run bazel run //format/test:format_TOML_with_taplo
     assert_success

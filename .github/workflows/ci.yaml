@@ -132,7 +132,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.15.0
         with: *bazelrc
       # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs' || matrix.folder == 'examples/python'
+      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
 
       - name: Lint
