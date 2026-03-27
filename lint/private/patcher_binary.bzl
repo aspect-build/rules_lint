@@ -1,5 +1,7 @@
-"Workaround https://github.com/bazelbuild/bazel/issues/14009 to support older Bazels"
+"""Workaround https://github.com/bazelbuild/bazel/issues/14009 to support Bazel prior to 8.3 & 9
 
+TODO(3.0): when we drop support for Bazel 7 and 8.2, we can simplify this.
+"""
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("@bazel_features//:features.bzl", "bazel_features")
 
