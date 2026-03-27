@@ -17,6 +17,7 @@ def patcher_binary(name):
             name = diff_bin_copy,
             outs = ["diff_bin"],
             cmd = "cp $(DIFF_BIN) $(location :diff_bin)",
+            executable = True,
             toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
         )
         data.append(diff_bin_copy)
