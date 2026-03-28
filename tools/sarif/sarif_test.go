@@ -50,6 +50,21 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(19)))
 	})
 
+	t.Run("processes pydoclint output -> sarif correctly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		sarifJsonString, _ := ToSarifJsonString("//src:missing_doc_arg", "AspectRulesLintPydoclint", pydoclint_output)
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs)).To(Equal(1))
+		g.Expect(sarifJson.Runs[0].Tool.Driver.Name).To(Equal("Pydoclint"))
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(2))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("DOC101: Function `documented_add`: Docstring contains fewer arguments than in function signature."))
+		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(ContainSubstring("DOC103:"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/missing_doc_arg.py"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(4)))
+	})
+
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
