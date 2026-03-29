@@ -17,6 +17,7 @@ write_file(
     name = "generated_dependency_file",
     out = "generated_dependency.py",
     content = [
+        "error: int = 'str'",
         "def greet(name: str) -> str:",
         "    return f\"Hello, {name}!\"",
     ],
