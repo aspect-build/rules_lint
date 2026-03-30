@@ -50,6 +50,11 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	// NB: Switch is on the MNEMONIC declared in rules_lint
 	// Helpful link for building custom fm strings: https://vimdoc.sourceforge.net/htmldoc/quickfix.html#errorformat
 	switch mnemonic {
+	case "AspectRulesLintBuildifier":
+		fm = []string{
+			`%f:%l:%c: %m`,
+			`%f:%l: %m`,
+		}
 	case "AspectRulesLintESLint":
 		fm = fmts.DefinedFmts()["eslint-compact"].Errorformat
 	case "AspectRulesLintFlake8":
@@ -98,6 +103,13 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%E%f:%l:%c: [error] %m`,
 			`%W%f:%l:%c: [warning] %m`,
 			`%I%f:%l:%c: [info] %m`,
+		}
+	case "AspectRulesLintQmllint":
+		fm = []string{
+			`%EError: %f:%l:%c: %m`,
+			`%WWarning: %f:%l:%c: %m`,
+			`%IInfo: %f:%l:%c: %m`,
+			`%-G%.%#`,
 		}
 	case "AspectRulesLintKeepSorted":
 		fm = []string{`%f:%l:%e:%m`}

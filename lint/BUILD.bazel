@@ -142,6 +142,15 @@ bzl_library(
 )
 
 bzl_library(
+    name = "buildifier",
+    srcs = ["buildifier.bzl"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
+    ],
+)
+
+bzl_library(
     name = "lint_test",
     srcs = ["lint_test.bzl"],  # keep
     deps = ["@bazel_lib//lib:paths"],
@@ -157,6 +166,15 @@ bzl_library(
     name = "pylint",
     srcs = ["pylint.bzl"],
     deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
+    name = "qmllint",
+    srcs = ["qmllint.bzl"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
+    ],
 )
 
 bzl_library(
@@ -263,6 +281,7 @@ bzl_library(
         ":vale_library",
         ":vale_versions",
         "//lint/private:lint_aspect",
+        "@bazel_skylib//lib:dicts",
     ],
 )
 

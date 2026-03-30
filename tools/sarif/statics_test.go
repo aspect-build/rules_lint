@@ -59,6 +59,12 @@ var shellcheck_output_2 string
 //go:embed testdata/lint_result/stylelint_output.txt
 var stylelint_output string
 
+// go:embed testdata/lint_result/buildifier_output.txt
+var buildifier_output string
+
+//go:embed testdata/lint_result/qmllint_output.txt
+var qmllint_output string
+
 type LintResult struct {
 	Label    string
 	Mnemonic string

@@ -47,14 +47,16 @@ Linters which are not language-specific:
 | Jsonnet                | [jsonnetfmt]              |                                            |
 | Kotlin                 | [ktfmt]                   | [ktlint]                                   |
 | Markdown               | [Prettier]                | [Vale]                                     |
+| Pkl                    | [pkl]                     |                                            |
 | Protocol Buffer        | [buf]                     | [buf lint]                                 |
 | Python                 | [ruff]                    | [bandit], [flake8], [pylint], [ruff], [ty] |
+| QML                    | [qmlformat]               | [qmllint]                                  |
 | Ruby                   |                           | [RuboCop], [Standard]                      |
 | Rust                   | [rustfmt]                 | [clippy]                                   |
 | SQL                    | [prettier-plugin-sql]     |                                            |
 | Scala                  | [scalafmt]                |                                            |
 | Shell                  | [shfmt]                   | [shellcheck]                               |
-| Starlark               | [Buildifier]              |                                            |
+| Starlark               | [Buildifier]              | [Buildifier]                               |
 | Swift                  | [SwiftFormat] (1)         |                                            |
 | TOML                   | [taplo]                   |                                            |
 | TSX                    | [Prettier]                | [ESLint]                                   |
@@ -79,6 +81,7 @@ Linters which are not language-specific:
 [ktlint]: https://github.com/pinterest/ktlint
 [buildifier]: https://github.com/keith/buildifier-prebuilt
 [djlint]: https://djlint.com/
+[pkl]: https://pkl-lang.org/index.html
 [prettier-plugin-sql]: https://github.com/un-ts/prettier
 [prettier-plugin-gherkin]: https://github.com/mapado/prettier-plugin-gherkin
 [prettier/plugin-xml]: https://github.com/prettier/plugin-xml
@@ -91,6 +94,8 @@ Linters which are not language-specific:
 [ruff]: https://docs.astral.sh/ruff/
 [ty]: https://docs.astral.sh/ty/
 [pylint]: https://pylint.readthedocs.io/en/stable/
+[qmlformat]: https://doc.qt.io/qt-6/qtqml-tooling-qmlformat.html
+[qmllint]: https://doc.qt.io/qt-6/qtqml-tooling-qmllint.html
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
 [taplo]: https://taplo.tamasfe.dev/
@@ -119,7 +124,7 @@ Follow instructions from the release you wish to use:
 
 ## Usage
 
-Formatting and Linting are inherently different, which leads to differences in how they are used in rules_lint. It is best concieved as two rulesets in one.
+Formatting and Linting are inherently different, which leads to differences in how they are used in rules_lint. It is best conceived as two rulesets in one.
 
 | Formatter                                                         | Linter                                                 |
 | ----------------------------------------------------------------- | ------------------------------------------------------ |

@@ -135,8 +135,11 @@ function ls-files {
       'Kotlin') patterns=('*.kt' '*.ktm' '*.kts') ;;
       'Less') patterns=('*.less') ;;
       'Markdown') patterns=('contents.lr' '*.md' '*.livemd' '*.markdown' '*.mdown' '*.mdwn' '*.mkd' '*.mkdn' '*.mkdown' '*.ronn' '*.scd' '*.workbook') ;;
+      'Pkl') patterns=('*.pkl' 'PklProject') ;;
       'Protocol Buffer') patterns=('*.proto') ;;
       'Python') patterns=('.gclient' 'DEPS' 'SConscript' 'SConstruct' 'wscript' '*.py' '*.cgi' '*.fcgi' '*.gyp' '*.gypi' '*.lmi' '*.py3' '*.pyde' '*.pyi' '*.pyp' '*.pyt' '*.pyw' '*.rpy' '*.spec' '*.tac' '*.wsgi' '*.xpy') ;;
+      # GitHub Linguist also groups .qbs with QML, but qmlformat only supports .qml files.
+      'QML') patterns=('*.qml') ;;
       'Rust') patterns=('*.rs' '*.rs.in') ;;
       'SQL') patterns=('*.sql' '*.cql' '*.ddl' '*.inc' '*.mysql' '*.prc' '*.tab' '*.udf' '*.viw') ;;
       'SCSS') patterns=('*.scss') ;;
@@ -349,4 +352,3 @@ if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
         done
     fi
 fi
-
