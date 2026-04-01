@@ -38,7 +38,7 @@ Linters which are not language-specific:
 | Go                     | [gofmt] or [gofumpt]      |                                                         |
 | Gherkin                | [prettier-plugin-gherkin] |                                                         |
 | GraphQL                | [Prettier]                |                                                         |
-| HCL (Hashicorp Config) | [terraform] fmt           |                                                         |
+| HCL (Hashicorp Config) | [terraform] fmt           | [tflint]                                                |
 | HTML                   | [Prettier]                |                                                         |
 | JSON                   | [Prettier]                |                                                         |
 | Java                   | [google-java-format]      | [pmd] , [Checkstyle], [Spotbugs]                        |
@@ -76,6 +76,7 @@ Linters which are not language-specific:
 [eslint]: https://eslint.org/
 [swiftformat]: https://github.com/nicklockwood/SwiftFormat
 [terraform]: https://github.com/hashicorp/terraform
+[tflint]: https://github.com/terraform-linters/tflint
 [buf]: https://docs.buf.build/format/usage
 [keep-sorted]: https://github.com/google/keep-sorted
 [ktfmt]: https://github.com/facebook/ktfmt
