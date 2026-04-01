@@ -1,0 +1,2 @@
+src/missing_doc_arg.py:4: DOC101: Function `documented_add`: Docstring contains fewer arguments than in function signature.
+src/missing_doc_arg.py:4: DOC103: Function `documented_add`: Docstring arguments are different from function arguments. (Or could be other formatting issues: https://jsh9.github.io/pydoclint/violation_codes.html#notes-on-doc103 ). Arguments in the function signature but not in the docstring: [extra: int].

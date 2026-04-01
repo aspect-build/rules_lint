@@ -64,6 +64,8 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 		fm = []string{`%f:%l:\\t%m`}
 	case "AspectRulesLintPylint":
 		fm = []string{`%f:%l:%c: %m`}
+	case "AspectRulesLintPydoclint":
+		fm = []string{`%f:%l: %m`}
 	case "AspectRulesLintRuff":
 		fm = []string{
 			// %E forces a multiline error severity message. There is no forced single line error message
