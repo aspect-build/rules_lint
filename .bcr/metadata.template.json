@@ -2,10 +2,19 @@
   "homepage": "https://github.com/aspect-build/rules_lint",
   "maintainers": [
     {
-      "email": "alex@aspect.build",
-      "github": "alexeagle",
-      "name": "Alex Eagle",
-      "github_user_id": 47395
+      "email": "jesse@aspect.build",
+      "github": "JesseTatasciore",
+      "name": "Jesse Tatasciore"
+    },
+    {
+      "email": "sahin@aspect.build",
+      "github": "thesayyn",
+      "name": "Şahin Yort"
+    },
+    {
+      "email": "jason@aspect.build",
+      "github": "jbedard",
+      "name": "Jason Bedard"
     }
   ],
   "repository": ["github:aspect-build/rules_lint"],
