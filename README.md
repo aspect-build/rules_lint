@@ -50,7 +50,7 @@ Linters which are not language-specific:
 | Pkl                    | [pkl]                     |                                                         |
 | Protocol Buffer        | [buf]                     | [buf lint]                                              |
 | Python                 | [ruff]                    | [bandit], [flake8], [pydoclint], [pylint], [ruff], [ty] |
-| QML                    | [qmlformat]               | [qmllint]                                            |
+| QML                    | [qmlformat]               | [qmllint]                                               |
 | Ruby                   |                           | [RuboCop], [Standard]                                   |
 | Rust                   | [rustfmt]                 | [clippy]                                                |
 | SQL                    | [prettier-plugin-sql]     |                                                         |
@@ -58,7 +58,7 @@ Linters which are not language-specific:
 | Shell                  | [shfmt]                   | [shellcheck]                                            |
 | Starlark               | [Buildifier]              | [Buildifier]                                            |
 | Swift                  | [SwiftFormat] (1)         |                                                         |
-| TOML                   | [taplo]                   |                                                         |
+| TOML                   | [taplo]                   | [taplo]                                                 |
 | TSX                    | [Prettier]                | [ESLint]                                                |
 | TypeScript             | [Prettier]                | [ESLint]                                                |
 | YAML                   | [yamlfmt]                 | [yamllint]                                              |

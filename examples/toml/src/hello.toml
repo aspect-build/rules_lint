@@ -1,0 +1,6 @@
+[project]
+name = "rules_lint"
+version = "0.1.0"
+
+[project.metadata]
+languages = ["bazel", "toml"]
