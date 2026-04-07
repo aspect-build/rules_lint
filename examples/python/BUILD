@@ -36,3 +36,16 @@ pip_compile(
     requirements_in = "pyproject.toml",
     requirements_txt = "requirements.txt",
 )
+
+
+write_file(
+    name = "root_py_code_generator",
+    out = "generated.py",
+    content = ["import os"],
+)
+
+py_library(name = "root_generated",
+           srcs = ["//:generated.py"],
+           imports = ["."],
+           visibility = ["//visibility:public"],
+)
