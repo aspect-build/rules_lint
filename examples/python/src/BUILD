@@ -41,6 +41,12 @@ py_library(
     deps = ["//src/python_lib:py_dependency"],
 )
 
+py_library(
+    name = "uses_generated_dependency_correctly",
+    srcs = ["uses_generated_dependency_correctly.py"],
+    deps = ["//:generated_dependency"],
+)
+
 filegroup(
     name = "unused_import_pyi",
     srcs = ["unused_import.pyi"],

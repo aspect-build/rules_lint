@@ -176,6 +176,11 @@ ty_test(
     srcs = ["//src:uses_dependency_correctly"],
 )
 
+ty_test(
+    name = "ty_should_resolve_generated_dep",
+    srcs = ["//src:uses_generated_dependency_correctly"],
+)
+
 machine_flake8_report(
     name = "machine_flake8_report",
     src = "//src:unused_import",
