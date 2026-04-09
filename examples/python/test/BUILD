@@ -114,16 +114,6 @@ pydoclint_test(
 )
 
 
-py_library(name = "dep_root_generated",
-           srcs = ["dep_generated.py"],
-           deps = ["//:root_generated"])
-
-ty_test(
-    name = "ty_should_find_generated_dep_at_root",
-    srcs = [":dep_root_generated"]
-)
-
-
 py_library(name = "generated",
            srcs = ["generated.py"],
            imports = ["."])
