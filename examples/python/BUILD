@@ -36,4 +36,3 @@ pip_compile(
     requirements_in = "pyproject.toml",
     requirements_txt = "requirements.txt",
 )
-
