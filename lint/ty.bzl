@@ -141,21 +141,24 @@ def _resolve_import_path(import_path, workspace_name, bin_dir_path):
 
     Workspace-internal paths start with the workspace name (e.g. "_main/pkg/src")
     and live directly under the execroot — they must NOT be prefixed with "external/".
+    if they're generated, then it will be relative to bazel bin dir
     External paths (pip packages) live under "external/" in the execroot.
 
     Args:
         import_path: an entry from PyInfo.imports
         workspace_name: ctx.workspace_name (e.g. "_main")
-        bin_dir_path: ctx.bin_dir.path
+        bin_dir_path: ctx.bin_dir.path, used for generated file path
 
     Returns:
-        The corrected path string, or None if the path should be skipped.
+        The corrected path string list (some of them might not exist)
     """
     if import_path == workspace_name or import_path == ".":
-        return bin_dir_path
+        return [bin_dir_path]
     if import_path.startswith(workspace_name + "/"):
-        return import_path[len(workspace_name) + 1:]
-    return "external/" + import_path
+        rel = import_path[len(workspace_name) + 1:]
+        return [rel, bin_dir_path + "/" + rel]
+    external_rel = "external/" + import_path
+    return [external_rel, bin_dir_path + "/" + external_rel]
 
 # buildifier: disable=function-docstring
 def _ty_aspect_impl(target, ctx):
@@ -179,8 +182,8 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(dep[PyInfo].transitive_pyi_files)
                 for import_path in dep[PyInfo].imports.to_list():
                     resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
-                    if resolved:
-                        import_paths[resolved] = True
+                    for e in resolved:
+                        import_paths[e] = True
 
     # When srcs contain labels to other targets (e.g., genrules that produce .py files),
     # we need to collect their transitive sources for proper type resolution
@@ -191,8 +194,8 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(src[PyInfo].transitive_pyi_files)
                 for import_path in src[PyInfo].imports.to_list():
                     resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
-                    if resolved:
-                        import_paths[resolved] = True
+                    for e in resolved:
+                        import_paths[e] = True
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)
