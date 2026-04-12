@@ -16,6 +16,9 @@ src/unused_import.py:22:6: W1302: Invalid format string (bad-format-string)
 src/unused_import.py:18:0: W0611: Unused import os (unused-import)
 EOF
 
+	# pydoclint
+	assert_output --partial "src/missing_doc_arg.py:4: DOC101: Function \\`documented_add\\`: Docstring contains fewer arguments than in function signature."
+
 	# Ty
 	echo <<"EOF" | assert_output --partial
 error[unsupported-operator]: Operator `+` is unsupported between objects of type `Literal[10]` and `Literal["test"]`

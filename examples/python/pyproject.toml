@@ -13,6 +13,7 @@ dependencies = [
     "bandit[sarif,toml]",
     "djlint",
     "flake8",
+    "pydoclint",
     "pylint",
     "yamllint",
     "pytest",
@@ -27,3 +28,6 @@ exclude = ['test/excluded.py']
 # See https://docs.astral.sh/ty/reference/configuration/
 [tool.ty.rules]
 call-non-callable = "ignore"
+
+[tool.pydoclint]
+style = "google"

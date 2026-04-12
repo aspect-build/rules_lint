@@ -32,7 +32,7 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the ty program
+        executable: label of the ty program
         srcs: python files to be linted
         transitive_srcs: depset of transitive Python sources from dependencies
         config: labels of ty config files (pyproject.toml, ty.toml)
@@ -136,6 +136,30 @@ fi
         tools = [executable],
     )
 
+def _resolve_import_path(import_path, workspace_name, bin_dir_path):
+    """Map a PyInfo import path to the correct execroot-relative search path.
+
+    Workspace-internal paths start with the workspace name (e.g. "_main/pkg/src")
+    and live directly under the execroot — they must NOT be prefixed with "external/".
+    if they're generated, then it will be relative to bazel bin dir
+    External paths (pip packages) live under "external/" in the execroot.
+
+    Args:
+        import_path: an entry from PyInfo.imports
+        workspace_name: ctx.workspace_name (e.g. "_main")
+        bin_dir_path: ctx.bin_dir.path, used for generated file path
+
+    Returns:
+        The corrected path string list (some of them might not exist)
+    """
+    if import_path == workspace_name or import_path == ".":
+        return [bin_dir_path]
+    if import_path.startswith(workspace_name + "/"):
+        rel = import_path[len(workspace_name) + 1:]
+        return [rel, bin_dir_path + "/" + rel]
+    external_rel = "external/" + import_path
+    return [external_rel, bin_dir_path + "/" + external_rel]
+
 # buildifier: disable=function-docstring
 def _ty_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
@@ -144,10 +168,10 @@ def _ty_aspect_impl(target, ctx):
     # Collect transitive sources from dependencies using the standard PyInfo provider.
     transitive_sources = []
 
-    # Collect import paths from PyInfo for third-party dependencies (pip packages).
-    # These paths are used with --extra-search-path to help ty find external modules.
-    # Import paths from pip packages look like "rules_python~~pip~pip_39_pathspec/site-packages"
-    # and need to be prefixed with "external/" to form the actual path in the execroot.
+    # Collect import paths from PyInfo for --extra-search-path.
+    # _resolve_import_path maps each entry to the correct execroot-relative path:
+    #   - pip packages get an "external/" prefix
+    #   - workspace-internal paths get the workspace name stripped
     import_paths = {}
 
     # Collect from deps attribute using PyInfo
@@ -156,11 +180,10 @@ def _ty_aspect_impl(target, ctx):
             if PyInfo in dep:
                 transitive_sources.append(dep[PyInfo].transitive_sources)
                 transitive_sources.append(dep[PyInfo].transitive_pyi_files)
-                # Collect imports from pip packages for extra search paths
                 for import_path in dep[PyInfo].imports.to_list():
-                    if import_path == ctx.workspace_name:
-                        continue
-                    import_paths["external/" + import_path] = True
+                    resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
+                    for e in resolved:
+                        import_paths[e] = True
 
     # When srcs contain labels to other targets (e.g., genrules that produce .py files),
     # we need to collect their transitive sources for proper type resolution
@@ -170,7 +193,9 @@ def _ty_aspect_impl(target, ctx):
                 transitive_sources.append(src[PyInfo].transitive_sources)
                 transitive_sources.append(src[PyInfo].transitive_pyi_files)
                 for import_path in src[PyInfo].imports.to_list():
-                    import_paths["external/" + import_path] = True
+                    resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
+                    for e in resolved:
+                        import_paths[e] = True
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)

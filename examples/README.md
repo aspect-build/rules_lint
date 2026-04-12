@@ -10,7 +10,7 @@ Each example is self-contained and shows:
 
 ## Structure
 
-- `python/` - Python formatting with Ruff; linting with Ruff, Flake8, or Pylint
+- `python/` - Python formatting with Ruff; linting with Ruff, Bandit, Flake8, Pydoclint, Pylint, or Ty
 - `typescript/` - TypeScript/JavaScript formatting with Prettier; linting with ESLint
 - `java/` - Java formatting with Google Java Format; linting with PMD, Checkstyle, or SpotBugs
 - `rust/` - Rust formatting with rustfmt; linting with Clippy
@@ -22,6 +22,8 @@ Each example is self-contained and shows:
 - `yaml/` - YAML formatting with yamlfmt; linting with Yamllint
 - `markdown/` - Markdown formatting with Prettier; linting with Vale
 - `proto/` - Protocol Buffer formatting and linting with Buf
+- `starlark/` - Starlark formatting with Buildifier; linting with Buildifier
+- `qml/` - QML formatting with qmlformat; linting with qmllint
 
 ## Multi-language Example
 

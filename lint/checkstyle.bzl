@@ -38,7 +38,7 @@ def checkstyle_action(ctx, executable, srcs, config, data, stdout, exit_code = N
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the Checkstyle program
+        executable: label of the Checkstyle program
         srcs: java files to be linted
         config: label of the checkstyle.xml file
         data: labels of additional xml files such as suppressions.xml
@@ -112,7 +112,7 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
     """A factory function to create a linter aspect.
 
     Attrs:
-        binary: a Checkstyle executable. Can be obtained from rules_java like so:
+        binary: a Checkstyle executable. Obtain from rules_java like so:
 
             java_binary(
                 name = "checkstyle",

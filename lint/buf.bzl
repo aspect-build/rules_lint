@@ -104,7 +104,7 @@ def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
     """A factory function to create a linter aspect.
 
     Args:
-        config: label of the the buf.yaml file
+        config: label of the buf.yaml file
         toolchain: override the default toolchain of the protoc-gen-buf-lint tool
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
     """

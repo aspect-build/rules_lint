@@ -20,6 +20,11 @@ py_library(
 )
 
 py_library(
+    name = "missing_doc_arg",
+    srcs = ["missing_doc_arg.py"],
+)
+
+py_library(
     name = "uses_dependency",
     srcs = ["uses_dependency.py"],
     deps = ["//src/python_lib:py_dependency"],
@@ -28,6 +33,18 @@ py_library(
 py_library(
     name = "uses_eval",
     srcs = ["uses_eval.py"],
+)
+
+py_library(
+    name = "uses_dependency_correctly",
+    srcs = ["uses_dependency_correctly.py"],
+    deps = ["//src/python_lib:py_dependency"],
+)
+
+py_library(
+    name = "uses_generated_dependency_correctly",
+    srcs = ["uses_generated_dependency_correctly.py"],
+    deps = ["//:generated_dependency"],
 )
 
 filegroup(
@@ -40,6 +57,7 @@ filegroup(
     name = "all",
     srcs = [
         ":call_non_callable",
+        ":missing_doc_arg",
         ":unsupported_operator",
         ":unused_import",
         ":uses_dependency",

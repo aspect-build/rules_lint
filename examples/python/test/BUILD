@@ -8,6 +8,7 @@ load(
     "//tools/lint:linters.bzl",
     "bandit_test",
     "flake8_test",
+    "pydoclint_test",
     "pylint_test",
     "ruff_test",
     "ty_test",
@@ -16,6 +17,7 @@ load(
     ":machine_output.bzl",
     "machine_bandit_report",
     "machine_flake8_report",
+    "machine_pydoclint_report",
     "machine_pylint_report",
     "machine_ruff_report",
     "machine_ty_report",
@@ -36,6 +38,7 @@ filegroup(
     name = "generated_py_filegroup",
     srcs = ["generated.py"],
     tags = [
+        "lint-with-pydoclint",
         "lint-with-pylint",
         "lint-with-ruff",
     ],
@@ -71,6 +74,16 @@ pylint_test(
     srcs = [":generated_py_filegroup"],
 )
 
+pydoclint_test(
+    name = "pydoclint_should_ignore_generated",
+    srcs = [":generated_py"],
+)
+
+pydoclint_test(
+    name = "pydoclint_should_ignore_generated_filegroup",
+    srcs = [":generated_py_filegroup"],
+)
+
 ruff_test(
     name = "ruff_should_ignore_excluded",
     srcs = [":excluded_py"],
@@ -92,6 +105,36 @@ pylint_test(
     name = "pylint",
     srcs = ["//src:unused_import"],
     expected_exit_code = 1,
+)
+
+pydoclint_test(
+    name = "pydoclint",
+    srcs = ["//src:missing_doc_arg"],
+    expected_exit_code = 1,
+)
+
+
+py_library(name = "generated",
+           srcs = ["generated.py"],
+           imports = ["."])
+
+py_library(name = "dep_generated",
+           srcs = ["dep_generated.py"],
+           deps = [":generated"])
+
+ty_test(
+    name = "ty_should_find_generated_dep",
+    srcs = [":dep_generated"]
+)
+
+py_library(name = "dep_ext_generated",
+           srcs = ["dep_generated.py"],
+           deps = ["@ext_mod//src:generated"]
+)
+
+ty_test(
+    name = "ty_should_find_ext_generated_dep",
+    srcs = [":dep_ext_generated"]
 )
 
 ty_test(
@@ -148,6 +191,20 @@ report_test(
     report = "machine_ty_report",
 )
 
+# Regression test for https://github.com/aspect-build/rules_lint/issues/728
+# The dep //src/python_lib:py_dependency uses `imports = ["."]`, which puts
+# "_main/src/python_lib" in PyInfo.imports. ty must resolve this as a
+# workspace-internal path, not an external one.
+ty_test(
+    name = "ty_should_resolve_workspace_dep_with_imports",
+    srcs = ["//src:uses_dependency_correctly"],
+)
+
+ty_test(
+    name = "ty_should_resolve_generated_dep",
+    srcs = ["//src:uses_generated_dependency_correctly"],
+)
+
 machine_flake8_report(
     name = "machine_flake8_report",
     src = "//src:unused_import",
@@ -170,4 +227,16 @@ report_test(
     expected_tool = "Pylint",
     expected_uri = "src/unused_import.py",
     report = "machine_pylint_report",
+)
+
+machine_pydoclint_report(
+    name = "machine_pydoclint_report",
+    src = "//src:missing_doc_arg",
+)
+
+report_test(
+    name = "pydoclint_machine_output_test",
+    expected_tool = "Pydoclint",
+    expected_uri = "src/missing_doc_arg.py",
+    report = "machine_pydoclint_report",
 )

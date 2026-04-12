@@ -1,22 +1,9 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
+load(":patcher_binary.bzl", "patcher_binary")
 
 package(default_visibility = ["//lint:__subpackages__"])
 
-js_binary(
-    name = "patcher",
-    data = ["@rules_diff//diff/toolchain/diff:resolved"],
-    entry_point = "patcher.mjs",
-    env = {
-        "DIFF_BIN": "$(rlocationpath @rules_diff//diff/toolchain/diff:resolved)",
-    },
-    log_level = select({
-        "@aspect_rules_lint//lint:debug.enabled": "debug",
-        "//conditions:default": "error",
-    }),
-    # Because aspect visibility rules are not on by default.
-    visibility = ["//visibility:public"],
-)
+patcher_binary(name = "patcher")
 
 bzl_library(
     name = "lint_aspect",

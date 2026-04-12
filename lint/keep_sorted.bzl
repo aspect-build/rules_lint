@@ -38,7 +38,7 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the the keep-sorted program
+        executable: label of the keep-sorted program
         srcs: files to be linted
         stdout: output file containing stdout
         exit_code: output file containing exit code

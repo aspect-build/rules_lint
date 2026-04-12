@@ -33,7 +33,9 @@ with_entries(select(.key | IN(
 
 # Convert values to filenames and extensions with star prefix
 | with_entries(.value = (
-    .value.filenames + (.value.extensions | map("*" + .))
+    if .key == "Java" then ["*.java"]
+    else .value.filenames + (.value.extensions | map("*" + .))
+    end
 ))
 
 # Render each language as a line in a Bash case statement, e.g.
