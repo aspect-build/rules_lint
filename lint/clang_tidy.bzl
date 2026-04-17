@@ -40,6 +40,7 @@ clang_tidy = lint_clang_tidy_aspect(
 load("@bazel_skylib//rules/directory:providers.bzl", "DirectoryInfo")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
+load("@rules_cc//cc:defs.bzl", "CcInfo", "cc_common")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
@@ -455,6 +456,7 @@ def lint_clang_tidy_aspect(
             passes these as -isystem. Change this to False to pass these as -I, which allows clang-tidy to regard
             them as regular header files.
         verbose: print debug messages including clang-tidy command lines being invoked.
+        rule_kinds: which target kinds should be visited automatically
     """
 
     if type(global_config) == "string":
