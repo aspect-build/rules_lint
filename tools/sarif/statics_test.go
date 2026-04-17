@@ -68,6 +68,9 @@ var qmllint_output string
 //go:embed testdata/lint_result/pydoclint_output.txt
 var pydoclint_output string
 
+//go:embed testdata/lint_result/cppcheck_output.txt
+var cppcheck_output string
+
 type LintResult struct {
 	Label    string
 	Mnemonic string
