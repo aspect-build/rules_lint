@@ -1,0 +1,4 @@
+/some_absolute_path/sandbox/linux-sandbox/1/execroot/_main/src/hello.cc:10:5: error: Memory leak: ptr [memleak]
+    int *ptr = new int;
+    ^
+/some_absolute_path/sandbox/linux-sandbox/1/execroot/_main/src/hello.cc:15:3: warning: Variable 'x' is assigned a value that is never used. [unreadVariable]
