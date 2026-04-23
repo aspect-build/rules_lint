@@ -301,6 +301,31 @@ def _get_compiler_args(ctx, compilation_context, srcs):
     args.extend(_prefixed(compilation_context.quote_includes.to_list(), "-iquote"))
     args.extend(_prefixed(compilation_context.system_includes.to_list(), _angle_includes_option(ctx)))
     args.extend(_prefixed(compilation_context.external_includes.to_list(), "-isystem"))
+
+    # A hermetic clang-tidy resolves its own libc++ and Clang builtins
+    # via binary-relative search, but cannot find platform SDK headers
+    # (e.g. macOS Xcode SDK: wchar.h, stdlib.h, stdint.h).  Pass
+    # -isysroot so the Clang frontend locates them without injecting
+    # individual include dirs that risk mixing incompatible header
+    # versions (see https://github.com/llvm/llvm-project/issues/63890).
+    #
+    # cc_toolchain.sysroot is often None on macOS (Bazel treats the
+    # Xcode SDK as the default sysroot), so fall back to deriving the
+    # SDK root from built_in_include_directories when targeting macOS.
+    # Fixes: https://github.com/aspect-build/rules_lint/issues/566
+    cc_toolchain = find_cpp_toolchain(ctx)
+    sysroot = cc_toolchain.sysroot
+    if not sysroot and ctx.target_platform_has_constraint(
+        ctx.attr._macos_constraint[platform_common.ConstraintValueInfo],
+    ):
+        for d in cc_toolchain.built_in_include_directories:
+            idx = d.find("MacOSX.sdk/")
+            if idx != -1:
+                sysroot = d[:idx + len("MacOSX.sdk")]
+                break
+    if sysroot:
+        args.extend(["-isysroot", sysroot])
+
     return args
 
 def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code, patch = None):
@@ -505,6 +530,7 @@ def lint_clang_tidy_aspect(
                 cfg = "exec",
             ),
             "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
+            "_macos_constraint": attr.label(default = Label("@platforms//os:macos")),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
