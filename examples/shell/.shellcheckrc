@@ -4,6 +4,8 @@ enable=quote-safe-variables
 # Turn on warnings for unassigned uppercase variables
 enable=check-unassigned-uppercase
 
+# Permit following `source` statements into sh_library deps.
+external-sources=true
+
 # Allow [ ! -z foo ] instead of suggesting -n
 disable=SC2236
-

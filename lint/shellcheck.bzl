@@ -19,7 +19,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintShellCheck"
 
-def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
+def shellcheck_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, options = []):
     """Run shellcheck as an action under Bazel.
 
     Based on https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md
@@ -28,6 +28,7 @@ def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, o
         ctx: Bazel Rule or Aspect evaluation context
         executable: label of the shellcheck program
         srcs: bash files to be linted
+        transitive_srcs: depset of sourced shell files required for source resolution
         config: label of the .shellcheckrc file
         stdout: output file containing stdout of shellcheck
         exit_code: output file containing shellcheck exit code.
@@ -35,7 +36,7 @@ def shellcheck_action(ctx, executable, srcs, config, stdout, exit_code = None, o
             See https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#return-values
         options: additional command-line options, see https://github.com/koalaman/shellcheck/blob/master/shellcheck.hs#L95
     """
-    inputs = srcs + [config]
+    inputs = depset(srcs + [config], transitive = [transitive_srcs])
 
     # Wire command-line options, see
     # https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#options
@@ -69,6 +70,15 @@ def _shellcheck_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
+    transitive_sources = []
+    if hasattr(ctx.rule.attr, "deps"):
+        # rules_shell exposes sh_library sources through target.files.
+        # Provide those files as action inputs so ShellCheck can resolve `source`
+        # statements without linting deps as separate command-line arguments.
+        for dep in ctx.rule.attr.deps:
+            transitive_sources.append(dep.files)
+    transitive_srcs = depset(transitive = transitive_sources)
+
     files_to_lint = filter_srcs(ctx.rule)
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
@@ -86,11 +96,11 @@ def _shellcheck_aspect_impl(target, ctx):
     # So we must run an action to generate the report separately from an action that writes the human-readable report.
     if hasattr(outputs, "patch"):
         discard_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
-        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"])
+        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, transitive_srcs, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"])
 
-    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options + config_options)
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, transitive_srcs, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options + config_options)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, config_options)
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, transitive_srcs, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, config_options)
 
     # Shellcheck does not have a SARIF output format built-in.
     # We could use https://crates.io/crates/shellcheck-sarif but don't want to introduce a Rust dependency.
