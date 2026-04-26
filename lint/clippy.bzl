@@ -2,22 +2,22 @@
 
 Typical usage:
 
-First, install `rules_rust` into your repository, on at least version 0.67.0: https://bazelbuild.github.io/rules_rust/.
+First, install `rules_rs` into your repository, which provisions `rules_rust` for Clippy integration.
 For instance:
 
 ```starlark
 // MODULE.bazel
-bazel_dep(name = "rules_rust", version = "0.67.0")
+bazel_dep(name = "rules_rs", version = "0.0.59")
 
-rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(
+toolchains = use_extension("@rules_rs//rs/experimental/toolchains:module_extension.bzl", "toolchains")
+toolchains.toolchain(
     edition = "2021",
-    versions = ["1.75.0"],
+    version = "1.92.0",
 )
-use_repo(rust, "rust_toolchains")
+use_repo(toolchains, "default_rust_toolchains")
 
 register_toolchains(
-    "@rust_toolchains//:all",
+    "@default_rust_toolchains//:all",
 )
 ```
 
@@ -55,45 +55,73 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClippy"
 
-def _parse_wrapper_output_into_files(ctx, outputs, raw_process_wrapper_wrapper_output, fail_on_violation):
+ClippyInfo = provider(
+    doc = "Internal clippy lint results.",
+    fields = {
+        "raw_exit_codes": "depset of raw clippy process exit code files for this target and its dependencies",
+    },
+)
+
+def _parse_clippy_output_into_files(ctx, outputs, raw_clippy_output, raw_clippy_exit_code, dep_raw_exit_codes, fail_on_violation):
     arguments = [
-        raw_process_wrapper_wrapper_output.path,
+        raw_clippy_output.path,
+        raw_clippy_exit_code.path,
         outputs.human.out.path,
     ]
     outs = [
         outputs.human.out,
     ]
     command = """
-exit_code=$(head -n 1 $1)
-output=$(tail -n +2 $1)
-if [[ "${output}" != "" ]]; then
-    echo "${output}" > $2
+raw_exit_code=$(cat "$2")
+if [[ -s "$1" ]]; then
+    cp "$1" "$3"
+    if [[ "${raw_exit_code}" == 0 ]]; then
+        exit_code=1
+    else
+        exit_code="${raw_exit_code}"
+    fi
 else
-    touch $2
+    touch "$3"
+    exit_code="${raw_exit_code}"
 fi
 """
 
+    dep_exit_code_start = 4 if fail_on_violation else 6
+    command += """
+for dep_exit_code_file in "${@:%s}"; do
+    dep_exit_code=$(cat "${dep_exit_code_file}")
+    if [[ "${dep_exit_code}" != 0 ]]; then
+        exit_code="${dep_exit_code}"
+    fi
+done
+""" % dep_exit_code_start
+
     if fail_on_violation:
         command += """
-echo "${output}" >&2
-exit "${exit_code}"
+if [[ "${exit_code}" != 0 ]]; then
+    cat "$3" >&2
+    exit "${exit_code}"
+fi
 """
     else:
         command += """
-echo "${exit_code}" > $3
 echo "${exit_code}" > $4
+echo "${exit_code}" > $5
 """
         arguments.append(outputs.human.exit_code.path)
         arguments.append(outputs.machine.exit_code.path)
         outs.append(outputs.human.exit_code)
         outs.append(outputs.machine.exit_code)
 
+    arguments.extend([f.path for f in dep_raw_exit_codes])
+
     ctx.actions.run_shell(
         command = command,
         arguments = arguments,
         inputs = [
-            raw_process_wrapper_wrapper_output,
-        ],
+            raw_clippy_output,
+            raw_clippy_exit_code,
+        ] + dep_raw_exit_codes,
         outputs = outs,
     )
 
@@ -102,12 +130,21 @@ _CLIPPY_SKIP_TAG = "noclippy"
 def _has_skip_tag(rule):
     return _CLIPPY_SKIP_TAG in rule.attr.tags
 
+def _dep_raw_exit_code_depsets(rule):
+    dep_raw_exit_codes = []
+    if hasattr(rule.attr, "deps"):
+        for dep in rule.attr.deps:
+            if ClippyInfo in dep:
+                dep_raw_exit_codes.append(dep[ClippyInfo].raw_exit_codes)
+    return dep_raw_exit_codes
+
 # buildifier: disable=function-docstring
 def _clippy_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
-    clippy_bin = ctx.toolchains[Label("@rules_rust//rust:toolchain_type")].clippy_driver
+    rust_toolchain = ctx.toolchains[Label("@rules_rust//rust:toolchain_type")]
+    clippy_bin = rust_toolchain.clippy_driver
 
     files_to_lint = filter_srcs(ctx.rule)
 
@@ -126,7 +163,10 @@ def _clippy_aspect_impl(target, ctx):
 
     if len(files_to_lint) == 0 or not crate_info or _has_skip_tag(ctx.rule):
         noop_lint_action(ctx, outputs)
-        return [info]
+        return [
+            info,
+            ClippyInfo(raw_exit_codes = depset(transitive = _dep_raw_exit_code_depsets(ctx.rule))),
+        ]
 
     clippy_flags = [
         # If we don't pass any clippy options, rules_rust will (rightly) default to -Dwarnings, which turns all warnings into errors.
@@ -137,29 +177,33 @@ def _clippy_aspect_impl(target, ctx):
 
     fail_on_violation = ctx.attr._options[LintOptionsInfo].fail_on_violation
 
-    raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling)
+    raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_clippy_output_human"), sibling = sibling)
+    raw_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_clippy_exit_code"), sibling = sibling)
     raw_rustc_json_diagnostics = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "rustc_json_diagnostics"), sibling = sibling)
-    raw_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_process_wrapper_wrapper_output_human"), sibling = sibling)
 
     rust_clippy_action.action(
         ctx,
         clippy_executable = clippy_bin,
-        process_wrapper = ctx.executable._process_wrapper_wrapper,
         crate_info = crate_info,
         config = ctx.file._config_file,
         output = raw_output,
+        captured_exit_code_file = raw_exit_code,
         cap_at_warnings = False,
         extra_clippy_flags = clippy_flags,
         clippy_diagnostics_file = raw_rustc_json_diagnostics,
     )
 
-    _parse_wrapper_output_into_files(ctx, outputs, raw_output, fail_on_violation)
+    dep_raw_exit_code_depsets = _dep_raw_exit_code_depsets(ctx.rule)
+    _parse_clippy_output_into_files(ctx, outputs, raw_output, raw_exit_code, depset(transitive = dep_raw_exit_code_depsets).to_list(), fail_on_violation)
     _parse_to_sarif_action(ctx, raw_rustc_json_diagnostics, outputs.machine.out)
 
     if patch_file != None:
         _run_patcher(ctx, files_to_lint, raw_rustc_json_diagnostics, patch_file)
 
-    return [info]
+    return [
+        info,
+        ClippyInfo(raw_exit_codes = depset([raw_exit_code], transitive = dep_raw_exit_code_depsets)),
+    ]
 
 def _run_patcher(ctx, srcs, rustc_diagnostics_file, patch_file):
     args = [
@@ -246,12 +290,6 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS, clippy_flags = [
         ),
         "_clippy_flags": attr.string_list(
             default = clippy_flags,
-        ),
-        "_process_wrapper_wrapper": attr.label(
-            doc = "A wrapper around the rules_rust process wrapper. See @aspect_rules_lint//lint/rust:process_wrapper_wrapper.sh for motivation and documentation.",
-            default = Label("//lint/rust:process_wrapper_wrapper"),
-            executable = True,
-            cfg = "exec",
         ),
         "_rustc_sarif_parser": attr.label(
             doc = """A binary that can convert JSON rustc diagnostics into SARIF.
