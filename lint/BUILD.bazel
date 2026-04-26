@@ -20,6 +20,11 @@ alias(
 )
 
 alias(
+    name = "tflint_bin",
+    actual = "@multitool//tools/tflint",
+)
+
+alias(
     name = "ty_bin",
     actual = "@multitool//tools/ty",
 )
@@ -272,6 +277,17 @@ bzl_library(
         "@aspect_rules_js//js:libs",
         "@bazel_lib//lib:copy_to_bin",
     ],
+)
+
+bzl_library(
+    name = "tflint",
+    srcs = ["tflint.bzl"],
+    deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
+    name = "tflint_plugins",
+    srcs = ["tflint_plugins.bzl"],
 )
 
 bzl_library(
