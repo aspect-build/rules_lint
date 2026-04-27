@@ -153,7 +153,7 @@ jobs:
           # TODO(alex): lots of places are missing windows...
           # - windows-latest
         version:
-          - 8.5.0
+          - 7.7.0
           - 9.x
     runs-on: ${{ matrix.os }}
     steps:
