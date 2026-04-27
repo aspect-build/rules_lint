@@ -2,12 +2,14 @@
 
 Typical usage:
 
-First, install `rules_rs` into your repository, which provisions `rules_rust` for Clippy integration.
+First, install `rules_rs` into your repository, which provisions Clippy integration.
 For instance:
 
 ```starlark
 // MODULE.bazel
 bazel_dep(name = "rules_rs", version = "0.0.62")
+bazel_dep(name = "llvm", version = "0.7.5")
+bazel_dep(name = "platforms", version = "1.0.0")
 
 toolchains = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
 toolchains.toolchain(
@@ -18,6 +20,36 @@ use_repo(toolchains, "default_rust_toolchains")
 
 register_toolchains(
     "@default_rust_toolchains//:all",
+    "@llvm//toolchain:all",
+)
+```
+
+Then set explicit host platforms for operating systems with ABI choices:
+
+```bazelrc
+# .bazelrc
+common --enable_platform_specific_config
+common:linux --host_platform=//platforms:local_gnu
+common:linux --@llvm//config:experimental_stub_libgcc_s=True
+common:windows --host_platform=//platforms:local_windows_msvc
+```
+
+```starlark
+# platforms/BUILD.bazel
+platform(
+    name = "local_gnu",
+    constraint_values = [
+        "@llvm//constraints/libc:gnu.2.28",
+    ],
+    parents = ["@platforms//host"],
+)
+
+platform(
+    name = "local_windows_msvc",
+    constraint_values = [
+        "@rules_rs//rs/platforms/constraints:windows_msvc",
+    ],
+    parents = ["@platforms//host"],
 )
 ```
 
@@ -63,11 +95,10 @@ ClippyInfo = provider(
 )
 
 def _parse_clippy_output_into_files(ctx, outputs, raw_clippy_output, raw_clippy_exit_code, dep_raw_exit_codes, fail_on_violation):
-    arguments = [
-        raw_clippy_output.path,
-        raw_clippy_exit_code.path,
-        outputs.human.out.path,
-    ]
+    args = ctx.actions.args()
+    args.add(raw_clippy_output)
+    args.add(raw_clippy_exit_code)
+    args.add(outputs.human.out)
     outs = [
         outputs.human.out,
     ]
@@ -108,20 +139,20 @@ fi
 echo "${exit_code}" > $4
 echo "${exit_code}" > $5
 """
-        arguments.append(outputs.human.exit_code.path)
-        arguments.append(outputs.machine.exit_code.path)
+        args.add(outputs.human.exit_code)
+        args.add(outputs.machine.exit_code)
         outs.append(outputs.human.exit_code)
         outs.append(outputs.machine.exit_code)
 
-    arguments.extend([f.path for f in dep_raw_exit_codes])
+    args.add_all(dep_raw_exit_codes)
 
     ctx.actions.run_shell(
         command = command,
-        arguments = arguments,
-        inputs = [
+        arguments = [args],
+        inputs = depset([
             raw_clippy_output,
             raw_clippy_exit_code,
-        ] + dep_raw_exit_codes,
+        ], transitive = [dep_raw_exit_codes]),
         outputs = outs,
     )
 
@@ -131,12 +162,13 @@ def _has_skip_tag(rule):
     return _CLIPPY_SKIP_TAG in rule.attr.tags
 
 def _dep_raw_exit_code_depsets(rule):
-    dep_raw_exit_codes = []
     if hasattr(rule.attr, "deps"):
-        for dep in rule.attr.deps:
-            if ClippyInfo in dep:
-                dep_raw_exit_codes.append(dep[ClippyInfo].raw_exit_codes)
-    return dep_raw_exit_codes
+        return [
+            dep[ClippyInfo].raw_exit_codes
+            for dep in rule.attr.deps
+            if ClippyInfo in dep
+        ]
+    return []
 
 # buildifier: disable=function-docstring
 def _clippy_aspect_impl(target, ctx):
@@ -194,7 +226,7 @@ def _clippy_aspect_impl(target, ctx):
     )
 
     dep_raw_exit_code_depsets = _dep_raw_exit_code_depsets(ctx.rule)
-    _parse_clippy_output_into_files(ctx, outputs, raw_output, raw_exit_code, depset(transitive = dep_raw_exit_code_depsets).to_list(), fail_on_violation)
+    _parse_clippy_output_into_files(ctx, outputs, raw_output, raw_exit_code, depset(transitive = dep_raw_exit_code_depsets), fail_on_violation)
     _parse_to_sarif_action(ctx, raw_rustc_json_diagnostics, outputs.machine.out)
 
     if patch_file != None:

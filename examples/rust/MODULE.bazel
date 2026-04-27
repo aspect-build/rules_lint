@@ -1,8 +1,10 @@
 "Bazel dependencies for Rust formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "rules_rs", version = "0.0.62")
 bazel_dep(name = "jq.bzl", version = "0.4.0")
+bazel_dep(name = "llvm", version = "0.7.5")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_rs", version = "0.0.62")
 
 local_path_override(
     module_name = "aspect_rules_lint",
@@ -22,4 +24,5 @@ use_repo(toolchains, "default_rust_toolchains")
 
 register_toolchains(
     "@default_rust_toolchains//:all",
+    "@llvm//toolchain:all",
 )

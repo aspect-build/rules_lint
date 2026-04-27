@@ -68,6 +68,10 @@ register_toolchains("@sarif_parser_toolchains//:all")
 
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.1.0", dev_dependency = True)
 bazel_dep(name = "protobuf", version = "33.4", dev_dependency = True)
+single_version_override(
+    module_name = "protobuf",
+    version = "33.4",
+)
 
 # To allow /tools to be built from source
 bazel_dep(
