@@ -54,14 +54,14 @@ See the [react example](https://github.com/bazelbuild/examples/blob/b498bb106b20
 """
 
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_files_to_bin_actions")
+load("//lint/private:js_linter_inputs.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_or_reuse_bin_inputs")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintESLint"
 
-def _gather_inputs(ctx, srcs, files):
-    inputs = copy_files_to_bin_actions(ctx, srcs)
+def _gather_inputs(ctx, target, srcs, files):
+    inputs = copy_or_reuse_bin_inputs(ctx, target, srcs)
 
     js_inputs = ctx.attr._config_files + getattr(ctx.rule.attr, "deps", []) + files
 
@@ -90,7 +90,7 @@ def _gather_inputs(ctx, srcs, files):
         )
     return depset(inputs, transitive = [js_inputs])
 
-def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "stylish", env = {}, patch = None):
+def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "stylish", env = {}, patch = None, target = None):
     """Create a Bazel Action that spawns an eslint process.
 
     Adapter for wrapping Bazel around
@@ -106,6 +106,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
         format: value for eslint `--format` CLI flag
         env: environment variables for eslint
         patch: output file for patch (optional). If provided, uses run_patcher instead of run/run_shell.
+        target: the aspect target, used to reuse bin-tree inputs already produced by the target
     """
     file_inputs = [ctx.attr._workaround_17660]
 
@@ -127,7 +128,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
         run_patcher(
             ctx,
             executable,
-            inputs = _gather_inputs(ctx, srcs, file_inputs),
+            inputs = _gather_inputs(ctx, target, srcs, file_inputs),
             args = args_list,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
@@ -154,7 +155,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
 
         if not exit_code:
             ctx.actions.run_shell(
-                inputs = _gather_inputs(ctx, srcs, file_inputs),
+                inputs = _gather_inputs(ctx, target, srcs, file_inputs),
                 outputs = [stdout],
                 tools = [executable._eslint],
                 arguments = [args],
@@ -173,7 +174,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
             args.add_all(["--output-file", stdout.short_path])
 
             ctx.actions.run(
-                inputs = _gather_inputs(ctx, srcs, file_inputs),
+                inputs = _gather_inputs(ctx, target, srcs, file_inputs),
                 outputs = [stdout, exit_code],
                 executable = executable._eslint,
                 arguments = [args],
@@ -210,11 +211,12 @@ def _eslint_aspect_impl(target, ctx):
         format = ctx.attr._stylish_formatter,
         env = color_env,
         patch = getattr(outputs, "patch", None),
+        target = target,
     )
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    eslint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, format = ctx.attr._compact_formatter)
+    eslint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, format = ctx.attr._compact_formatter, target = target)
 
     # We could probably use https://www.npmjs.com/package/@microsoft/eslint-formatter-sarif instead.
     # However it probably requires the user to install this and pass it to us.
