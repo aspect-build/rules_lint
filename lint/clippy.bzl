@@ -7,9 +7,9 @@ For instance:
 
 ```starlark
 // MODULE.bazel
-bazel_dep(name = "rules_rs", version = "0.0.59")
+bazel_dep(name = "rules_rs", version = "0.0.62")
 
-toolchains = use_extension("@rules_rs//rs/experimental/toolchains:module_extension.bzl", "toolchains")
+toolchains = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
 toolchains.toolchain(
     edition = "2021",
     version = "1.92.0",

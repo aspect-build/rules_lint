@@ -36,9 +36,9 @@ bazel_dep(name = "rules_java", version = "7.0.6")
 bazel_dep(name = "rules_cc", version = "0.2.0")
 
 # Needed in the root because we use the run_clippy action in our aspect impl
-bazel_dep(name = "rules_rs", version = "0.0.60")
+bazel_dep(name = "rules_rs", version = "0.0.62")
 
-rules_rust = use_extension("@rules_rs//rs/experimental:rules_rust.bzl", "rules_rust")
+rules_rust = use_extension("@rules_rs//rs:rules_rust.bzl", "rules_rust")
 use_repo(rules_rust, "rules_rust")
 
 # Needed in the root because we dereference ProtoInfo in our aspect impl

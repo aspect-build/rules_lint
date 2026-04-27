@@ -1,14 +1,7 @@
 "Bazel dependencies for Rust formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "rules_rs", version = "0.0.59")
-archive_override(
-    module_name = "rules_rs",
-    integrity = "sha256-xpdmNxzGnLuNF8QLFJ3FUgoeHNGmnwQYpoe+w5eeZjo=",
-    strip_prefix = "rules_rs-f3ba751d7c92c5da37c58914bd5bd6774ee82999",
-    urls = ["https://github.com/hermeticbuild/rules_rs/archive/f3ba751d7c92c5da37c58914bd5bd6774ee82999.tar.gz"],
-)
-
+bazel_dep(name = "rules_rs", version = "0.0.62")
 bazel_dep(name = "jq.bzl", version = "0.4.0")
 
 local_path_override(
@@ -16,11 +9,11 @@ local_path_override(
     path = "../..",
 )
 
-rules_rust = use_extension("@rules_rs//rs/experimental:rules_rust.bzl", "rules_rust")
+rules_rust = use_extension("@rules_rs//rs:rules_rust.bzl", "rules_rust")
 use_repo(rules_rust, "rules_rust")
 
 # Rust toolchain
-toolchains = use_extension("@rules_rs//rs/experimental/toolchains:module_extension.bzl", "toolchains")
+toolchains = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
 toolchains.toolchain(
     edition = "2021",
     version = "1.92.0",
