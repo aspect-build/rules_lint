@@ -12,20 +12,35 @@ load(
 
 COPY_FILE_TO_BIN_TOOLCHAINS = _COPY_FILE_TO_BIN_TOOLCHAINS
 
+def _bin_file_candidates(target):
+    if target == None:
+        return []
+
+    files = []
+    if JsInfo in target:
+        files.extend(target[JsInfo].sources.to_list())
+
+    if DefaultInfo in target:
+        files.extend(target[DefaultInfo].files.to_list())
+
+    if OutputGroupInfo in target:
+        output_groups = target[OutputGroupInfo]
+        if hasattr(output_groups, "_action_inputs"):
+            files.extend(output_groups._action_inputs.to_list())
+
+    return files
+
 def copy_or_reuse_bin_inputs(ctx, target, srcs):
     """Return bin-tree inputs for JS tools without duplicating target copy actions.
 
-    When the target provides JsInfo, its `sources` depset already contains the
-    bin-tree mirror of the target's srcs (produced by e.g. ts_project's own
-    copy-to-bin action). Reusing those files avoids declaring a second
-    CopyFile action with conflicting execution_info, which fails analysis on
-    bazel-lib >= 3.1.0.
+    When the target provides bin-tree files through JsInfo, DefaultInfo, or
+    OutputGroupInfo, reuse those files instead of declaring a second CopyFile
+    action for the same source.
     """
     bin_files = {}
-    if target != None and JsInfo in target:
-        for f in target[JsInfo].sources.to_list():
-            if not f.is_source:
-                bin_files[f.short_path] = f
+    for f in _bin_file_candidates(target):
+        if not f.is_source and f.short_path not in bin_files:
+            bin_files[f.short_path] = f
 
     inputs = []
     to_copy = []
