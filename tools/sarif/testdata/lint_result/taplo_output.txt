@@ -1,0 +1,15 @@
+error: invalid TOML
+  ┌─ src/invalid.toml:1:5
+  │
+1 │ [foo
+  │ ╭────^
+2 │ key = "value"
+  │ ╰^ expected "]"
+
+error: conflicting keys
+  ┌─ src/bad.toml:3:1
+  │
+2 │ name = "rules_lint"
+  │ - duplicate found here
+3 │ name = "duplicate"
+  │ ^ duplicate key

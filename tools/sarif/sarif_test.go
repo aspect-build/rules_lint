@@ -50,6 +50,25 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(19)))
 	})
 
+	t.Run("processes taplo output -> sarif correctly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		sarifJsonString, _ := ToSarifJsonString("//src:toml", "AspectRulesLintTaplo", taplo_output)
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs)).To(Equal(1))
+		g.Expect(sarifJson.Runs[0].Tool.Driver.Name).To(Equal("Taplo"))
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(2))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("invalid TOML"))
+		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(Equal("conflicting keys"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/invalid.toml"))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/bad.toml"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(1)))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(3)))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Column).To(Equal(int32(5)))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Column).To(Equal(int32(0)))
+	})
+
 	t.Run("processes pydoclint output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
@@ -64,7 +83,6 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/missing_doc_arg.py"))
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(4)))
 	})
-
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
