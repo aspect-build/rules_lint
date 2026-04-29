@@ -1,11 +1,23 @@
 "Bazel dependencies for YAML formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
+
+bazel_dep(name = "gazelle", version = "0.43.0", dev_dependency = True)
+
 bazel_dep(name = "rules_python", version = "0.26.0")
 
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "../..",
+)
+
+rules_lint_go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
+rules_lint_go_deps.gazelle_override(
+    build_file_generation = "clean",
+    directives = [
+        "gazelle:proto disable",
+    ],
+    path = "github.com/reviewdog/reviewdog",
 )
 
 python_version = "3.9"

@@ -1,6 +1,9 @@
 "Bazel dependencies for Rust formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
+
+bazel_dep(name = "gazelle", version = "0.43.0", dev_dependency = True)
+
 bazel_dep(name = "jq.bzl", version = "0.4.0")
 bazel_dep(name = "llvm", version = "0.7.5")
 bazel_dep(name = "platforms", version = "1.0.0")
@@ -9,6 +12,15 @@ bazel_dep(name = "rules_rs", version = "0.0.62")
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "../..",
+)
+
+rules_lint_go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
+rules_lint_go_deps.gazelle_override(
+    build_file_generation = "clean",
+    directives = [
+        "gazelle:proto disable",
+    ],
+    path = "github.com/reviewdog/reviewdog",
 )
 
 rules_rust = use_extension("@rules_rs//rs:rules_rust.bzl", "rules_rust")

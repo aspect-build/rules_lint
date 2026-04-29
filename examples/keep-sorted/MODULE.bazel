@@ -1,12 +1,21 @@
 "Bazel dependencies for keep-sorted lint example"
 
 bazel_dep(name = "aspect_rules_lint")
+bazel_dep(name = "gazelle", version = "0.43.0")
 bazel_dep(name = "rules_go", version = "0.52.0")
-bazel_dep(name = "gazelle", version = "0.41.0")
 
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "../..",
+)
+
+rules_lint_go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
+rules_lint_go_deps.gazelle_override(
+    build_file_generation = "clean",
+    directives = [
+        "gazelle:proto disable",
+    ],
+    path = "github.com/reviewdog/reviewdog",
 )
 
 # Go SDK

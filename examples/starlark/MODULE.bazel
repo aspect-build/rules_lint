@@ -4,7 +4,18 @@ bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "bazel_lib", version = "3.0.0")
 bazel_dep(name = "buildifier_prebuilt", version = "8.5.1")
 
+bazel_dep(name = "gazelle", version = "0.43.0", dev_dependency = True)
+
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "../..",
+)
+
+rules_lint_go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
+rules_lint_go_deps.gazelle_override(
+    build_file_generation = "clean",
+    directives = [
+        "gazelle:proto disable",
+    ],
+    path = "github.com/reviewdog/reviewdog",
 )
