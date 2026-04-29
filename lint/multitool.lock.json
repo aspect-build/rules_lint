@@ -84,41 +84,41 @@
     "binaries": [
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.32/ty-aarch64-unknown-linux-musl.tar.gz",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.33/ty-aarch64-unknown-linux-musl.tar.gz",
         "file": "ty-aarch64-unknown-linux-musl/ty",
-        "sha256": "de848acf867991f495dc346f5d12a7ac470af3ac464fdad7aff22fb8ee931a17",
+        "sha256": "6d24c789204226586bf7aa49da6254a2fcfde2660b0b2d0cf99ef6ea18c1edb2",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.32/ty-x86_64-unknown-linux-musl.tar.gz",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.33/ty-x86_64-unknown-linux-musl.tar.gz",
         "file": "ty-x86_64-unknown-linux-musl/ty",
-        "sha256": "cc58ee952aa551a0cbca495a43325b093dfcb180f0b314bf2c71068d37833b9e",
+        "sha256": "5e11c6883a73c379eda3481ed4766f34a30b7a0c2a3bc3653afb95bb74a4b7f7",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.32/ty-aarch64-apple-darwin.tar.gz",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.33/ty-aarch64-apple-darwin.tar.gz",
         "file": "ty-aarch64-apple-darwin/ty",
-        "sha256": "6b03b94d8c2ddcb5db67e6c863ef3c72b83fbcb973e0ff3a4c6daa4352dad009",
+        "sha256": "df13913f8b082675788a8b10d05b0f6d0f076be2d777a1315a468c3a882e791c",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.32/ty-x86_64-apple-darwin.tar.gz",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.33/ty-x86_64-apple-darwin.tar.gz",
         "file": "ty-x86_64-apple-darwin/ty",
-        "sha256": "766e205ec3a23181be11a0437e8bd941d03dbe0bcfb897e8538faa07e7ad6ab2",
+        "sha256": "9e856908e2de49d5c319c68594846c70165a621b42071c53019a01ae9a125b0e",
         "os": "macos",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/astral-sh/ty/releases/download/0.0.32/ty-x86_64-pc-windows-msvc.zip",
+        "url": "https://github.com/astral-sh/ty/releases/download/0.0.33/ty-x86_64-pc-windows-msvc.zip",
         "file": "ty.exe",
-        "sha256": "4d39959e4cf2e4527305a1eb78f2282593b6b66b02bd173aa92004f7ddfe8d09",
+        "sha256": "47bdb807dd298561b09f5f9d986243e1b9796e439cd5a0cfc002d063beceed6c",
         "os": "windows",
         "cpu": "x86_64"
       }
