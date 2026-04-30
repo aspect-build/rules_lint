@@ -48,9 +48,10 @@ Linters which are not language-specific:
 | Kotlin                 | [ktfmt]                   | [ktlint]                                                |
 | Markdown               | [Prettier]                | [Vale]                                                  |
 | Pkl                    | [pkl]                     |                                                         |
+| PowerShell             |                           | [PSScriptAnalyzer]                                      |
 | Protocol Buffer        | [buf]                     | [buf lint]                                              |
 | Python                 | [ruff]                    | [bandit], [flake8], [pydoclint], [pylint], [ruff], [ty] |
-| QML                    | [qmlformat]               | [qmllint]                                            |
+| QML                    | [qmlformat]               | [qmllint]                                               |
 | Ruby                   |                           | [RuboCop], [Standard]                                   |
 | Rust                   | [rustfmt]                 | [clippy]                                                |
 | SQL                    | [prettier-plugin-sql]     |                                                         |
@@ -107,6 +108,7 @@ Linters which are not language-specific:
 [vale]: https://vale.sh/
 [yamlfmt]: https://github.com/google/yamlfmt
 [yamllint]: https://yamllint.readthedocs.io/en/stable/
+[psscriptanalyzer]: https://github.com/PowerShell/PSScriptAnalyzer
 [rustfmt]: https://rust-lang.github.io/rustfmt
 [stylelint]: https://stylelint.io
 [clippy]: https://github.com/rust-lang/rust-clippy
