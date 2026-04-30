@@ -72,7 +72,13 @@ register_toolchains("@sarif_parser_toolchains//:all")
 ####### Dev dependencies ########
 
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.1.0", dev_dependency = True)
-bazel_dep(name = "protobuf", version = "33.4", dev_dependency = True)
+bazel_dep(name = "protobuf", version = "33.3.bcr.1", dev_dependency = True)
+
+# Keep reviewdog's Go deps on the protobuf release their generated code expects.
+single_version_override(
+    module_name = "protobuf",
+    version = "33.3.bcr.1",
+)
 
 # To allow /tools to be built from source
 bazel_dep(
@@ -100,20 +106,6 @@ go_deps = use_extension(
     dev_dependency = IS_RELEASE,
 )
 go_deps.from_file(go_mod = "//:go.mod")
-
-go_deps_overrides = use_extension(
-    "@gazelle//:extensions.bzl",
-    "go_deps",
-    dev_dependency = True,
-)
-go_deps_overrides.gazelle_override(
-    build_file_generation = "clean",
-    directives = [
-        "gazelle:proto disable",
-    ],
-    path = "github.com/reviewdog/reviewdog",
-)
-
 use_repo(
     go_deps,
     "com_github_onsi_gomega",

@@ -3,12 +3,15 @@
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "aspect_rules_py", version = "1.8.4")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
-
-bazel_dep(name = "gazelle", version = "0.43.0", dev_dependency = True)
-
 bazel_dep(name = "rules_python", version = "1.8.1")
 bazel_dep(name = "rules_uv", version = "0.88.0")
 bazel_dep(name = "ext_mod")
+
+# Keep reviewdog's Go deps on the protobuf release their generated code expects.
+single_version_override(
+    module_name = "protobuf",
+    version = "33.3.bcr.1",
+)
 
 local_path_override(
     module_name = "aspect_rules_lint",
@@ -18,15 +21,6 @@ local_path_override(
 local_path_override(
     module_name = "ext_mod",
     path = "ext_mod",
-)
-
-rules_lint_go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
-rules_lint_go_deps.gazelle_override(
-    build_file_generation = "clean",
-    directives = [
-        "gazelle:proto disable",
-    ],
-    path = "github.com/reviewdog/reviewdog",
 )
 
 python_version = "3.9"

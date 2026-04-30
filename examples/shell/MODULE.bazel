@@ -1,21 +1,15 @@
 "Bazel dependencies for Shell formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
-
-bazel_dep(name = "gazelle", version = "0.43.0", dev_dependency = True)
-
 bazel_dep(name = "rules_shell", version = "0.5.0")
+
+# Keep reviewdog's Go deps on the protobuf release their generated code expects.
+single_version_override(
+    module_name = "protobuf",
+    version = "33.3.bcr.1",
+)
 
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "../..",
-)
-
-rules_lint_go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
-rules_lint_go_deps.gazelle_override(
-    build_file_generation = "clean",
-    directives = [
-        "gazelle:proto disable",
-    ],
-    path = "github.com/reviewdog/reviewdog",
 )
