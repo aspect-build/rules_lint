@@ -70,7 +70,7 @@ jobs:
       - if: matrix.folder == 'examples/cpp'
         run: sudo apt-get update && sudo apt-get install -y libtinfo5
       # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
+      - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs' || matrix.folder == 'examples/rust'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
@@ -132,7 +132,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.15.0
         with: *bazelrc
       # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
+      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs' || matrix.folder == 'examples/rust'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
 
       - name: Lint

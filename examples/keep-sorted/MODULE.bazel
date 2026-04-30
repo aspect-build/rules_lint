@@ -4,6 +4,12 @@ bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "rules_go", version = "0.52.0")
 bazel_dep(name = "gazelle", version = "0.41.0")
 
+# Keep reviewdog's Go deps on the protobuf release their generated code expects.
+single_version_override(
+    module_name = "protobuf",
+    version = "33.3.bcr.1",
+)
+
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "../..",

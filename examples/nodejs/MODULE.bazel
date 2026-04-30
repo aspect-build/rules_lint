@@ -5,7 +5,18 @@ bazel_dep(name = "aspect_rules_js", version = "2.0.0")
 bazel_dep(name = "aspect_rules_swc", version = "2.0.0")
 bazel_dep(name = "aspect_rules_ts", version = "3.0.0")
 bazel_dep(name = "bazel_lib", version = "3.0.0")
+single_version_override(
+    module_name = "bazel_lib",
+    version = "3.0.0",
+)
+
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
+
+# Keep reviewdog's Go deps on the protobuf release their generated code expects.
+single_version_override(
+    module_name = "protobuf",
+    version = "33.3.bcr.1",
+)
 
 local_path_override(
     module_name = "aspect_rules_lint",
