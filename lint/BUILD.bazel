@@ -134,10 +134,10 @@ bzl_library(
     name = "eslint",
     srcs = ["eslint.bzl"],
     deps = [
+        "//lint/private:js_linter_inputs",
         "//lint/private:lint_aspect",
         "//lint/private:patcher_action",
         "@aspect_rules_js//js:libs",
-        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 
@@ -267,10 +267,10 @@ bzl_library(
     name = "stylelint",
     srcs = ["stylelint.bzl"],
     deps = [
+        "//lint/private:js_linter_inputs",
         "//lint/private:lint_aspect",
         "//lint/private:patcher_action",
         "@aspect_rules_js//js:libs",
-        "@bazel_lib//lib:copy_to_bin",
     ],
 )
 

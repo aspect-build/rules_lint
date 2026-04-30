@@ -118,7 +118,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	case "AspectRulesLintTy":
 		fm = []string{
 			`%Eerror%m`,
-			`%C\\ \\ -->\\ %f:%l:%c`,
+			`%C\\ %#-->\\ %f:%l:%c`,
 			`%-G%.%#`,
 		}
 	default:

@@ -11,6 +11,15 @@ bzl_library(
 )
 
 bzl_library(
+    name = "js_linter_inputs",
+    srcs = ["js_linter_inputs.bzl"],
+    deps = [
+        "@aspect_rules_js//js:providers",
+        "@bazel_lib//lib:copy_to_bin",
+    ],
+)
+
+bzl_library(
     name = "patcher_action",
     srcs = ["patcher_action.bzl"],
 )
