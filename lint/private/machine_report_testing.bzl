@@ -30,6 +30,17 @@ def report_test(name, report, expected_tool, expected_uri):
         filter2 = "\"%s\"" % expected_uri,
     )
 
+def report_results_count_test(name, report, expected_count):
+    """Test the number of SARIF results in a machine-readable report."""
+
+    jq_test(
+        name = name,
+        file1 = report,
+        file2 = report,
+        filter1 = "(.runs[].results // []) | length",
+        filter2 = str(expected_count),
+    )
+
 def _machine_report(ctx):
     """Implementation for machine report rules that extract SARIF reports from linted targets."""
     files = ctx.attr.src[OutputGroupInfo].rules_lint_machine.to_list()
