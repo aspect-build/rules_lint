@@ -18,6 +18,12 @@ Usage:
     aspect lint --fix
 """
 
+def _has_lint_results(report: str) -> bool:
+    normalized = report
+    for whitespace in [" ", "\n", "\r", "\t"]:
+        normalized = normalized.replace(whitespace, "")
+    return '"results":[{' in normalized
+
 # buildifier: disable=function-docstring
 def impl(ctx: TaskContext) -> int:
     flags = [
@@ -51,7 +57,7 @@ def impl(ctx: TaskContext) -> int:
                     ctx.std.io.stderr.write(generated)
                 if file.name.endswith(".report"):
                     report = ctx.std.fs.read_to_string(filepath)
-                    if '"results": [' in report:
+                    if _has_lint_results(report):
                         ctx.std.io.stdout.write(report)
                         if github_output:
                             ctx.std.fs.write(github_output, "lint-report=" + filepath)

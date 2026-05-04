@@ -1,6 +1,5 @@
 class Controller {
-    func printme() {
+    func  printme() {
         print("Hello, World!")
     }
 }
-
