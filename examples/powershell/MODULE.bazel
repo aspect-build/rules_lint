@@ -1,0 +1,10 @@
+"Bazel dependencies for PowerShell linting example"
+
+bazel_dep(name = "aspect_rules_lint")
+local_path_override(
+    module_name = "aspect_rules_lint",
+    path = "../..",
+)
+
+repos = use_extension("//tools:repositories.bzl", "repos")
+use_repo(repos, "converttosarif", "psscriptanalyzer", "pwsh")
