@@ -264,6 +264,12 @@ bzl_library(
 )
 
 bzl_library(
+    name = "taplo",
+    srcs = ["taplo.bzl"],
+    deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
     name = "stylelint",
     srcs = ["stylelint.bzl"],
     deps = [
