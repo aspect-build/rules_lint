@@ -286,7 +286,7 @@ function run-format {
   local args="$1" && shift
   local TIMEFORMAT="Formatted ${lang} in %lR"
 
-  local files=$(ls-files "$lang" $@)
+  local files=$(ls-files "$lang" "$@")
   if [ -n "$files" ] && [ -n "$bin" ]; then
     case "$lang" in
       'Protocol Buffer')

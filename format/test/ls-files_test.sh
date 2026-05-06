@@ -92,6 +92,23 @@ go=$(ls-files Go src.go)
     exit 1
 }
 
+# when a path argument contains spaces (e.g. a Go template directory like
+# 'foo/{{ .X }}/bar.tf'), the path must reach `find` as a single argument
+# instead of being word-split into 'foo/{{', '.X', '}}/bar.tf'.
+mkdir -p 'templated/{{ .X }}'
+touch 'templated/{{ .X }}/file.tf'
+git add .
+git commit --all --message 'add templated tf path'
+tf=$(ls-files Terraform 'templated/{{ .X }}/file.tf' 2>/tmp/ls-files-stderr)
+[[ "$tf" == 'templated/{{ .X }}/file.tf' ]] || {
+    echo >&2 -e "expected ls-files to return the templated tf path, was\n$tf"
+    exit 1
+}
+[[ ! -s /tmp/ls-files-stderr ]] || {
+    echo >&2 -e "expected no stderr from ls-files, was\n$(cat /tmp/ls-files-stderr)"
+    exit 1
+}
+
 # sparse-checkout should be supported
 mkdir tree1 tree2
 touch tree1/src.js tree2/src.js
