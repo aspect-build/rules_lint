@@ -1,2 +1,7 @@
+common --enable_platform_specific_config
+common:linux --host_platform=//platforms:local_gnu
+common:linux --@llvm//config:experimental_stub_libgcc_s=True
+common:windows --host_platform=//platforms:local_windows_msvc
+
 build:lint --aspects=//tools/lint:linters.bzl%clippy
 test --@aspect_rules_lint//lint:fail_on_violation

@@ -2,7 +2,7 @@
 
 module(
     name = "aspect_rules_lint",
-    bazel_compatibility = [">=7.6.0"],
+    bazel_compatibility = [">=7.7.0"],
     compatibility_level = 1,
 )
 
@@ -25,6 +25,11 @@ bazel_dep(name = "aspect_rules_js", version = "1.40.0")
 bazel_dep(name = "aspect_tools_telemetry", version = "0.3.3")
 bazel_dep(name = "bazel_features", version = "1.0.0")
 bazel_dep(name = "bazel_lib", version = "3.0.0")
+single_version_override(
+    module_name = "bazel_lib",
+    version = "3.0.0",
+)
+
 bazel_dep(name = "bazel_skylib", version = "1.8.1")
 bazel_dep(name = "diff.bzl", version = "0.5.1")
 bazel_dep(name = "jq.bzl", version = "0.6.0")
@@ -36,7 +41,10 @@ bazel_dep(name = "rules_java", version = "7.0.6")
 bazel_dep(name = "rules_cc", version = "0.2.0")
 
 # Needed in the root because we use the run_clippy action in our aspect impl
-bazel_dep(name = "rules_rust", version = "0.67.0")
+bazel_dep(name = "rules_rs", version = "0.0.62")
+
+rules_rust = use_extension("@rules_rs//rs:rules_rust.bzl", "rules_rust")
+use_repo(rules_rust, "rules_rust")
 
 # Needed in the root because we dereference ProtoInfo in our aspect impl
 bazel_dep(name = "rules_proto", version = "7.1.0")
@@ -64,7 +72,13 @@ register_toolchains("@sarif_parser_toolchains//:all")
 ####### Dev dependencies ########
 
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.1.0", dev_dependency = True)
-bazel_dep(name = "protobuf", version = "33.4", dev_dependency = True)
+bazel_dep(name = "protobuf", version = "33.3.bcr.1", dev_dependency = True)
+
+# Keep reviewdog's Go deps on the protobuf release their generated code expects.
+single_version_override(
+    module_name = "protobuf",
+    version = "33.3.bcr.1",
+)
 
 # To allow /tools to be built from source
 bazel_dep(
