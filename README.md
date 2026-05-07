@@ -35,6 +35,7 @@ Linters which are not language-specific:
 | CUE                    | [cue fmt]                 |                                                         |
 | Cuda                   | [clang-format]            |                                                         |
 | CSS, Less, Sass        | [Prettier]                | [Stylelint]                                             |
+| F#                     | [Fantomas]                |                                                         |
 | Go                     | [gofmt] or [gofumpt]      |                                                         |
 | Gherkin                | [prettier-plugin-gherkin] |                                                         |
 | GraphQL                | [Prettier]                |                                                         |
@@ -67,6 +68,7 @@ Linters which are not language-specific:
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
 [bandit]: https://bandit.readthedocs.io/en/latest/
+[Fantomas]: https://fsprojects.github.io/fantomas/
 [flake8]: https://flake8.pycqa.org/en/latest/index.html
 [pydoclint]: https://jsh9.github.io/pydoclint/
 [pmd]: https://docs.pmd-code.org/latest/index.html
