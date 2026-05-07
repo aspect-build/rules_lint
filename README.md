@@ -50,14 +50,14 @@ Linters which are not language-specific:
 | Pkl                    | [pkl]                     |                                                         |
 | Protocol Buffer        | [buf]                     | [buf lint]                                              |
 | Python                 | [ruff]                    | [bandit], [flake8], [pydoclint], [pylint], [ruff], [ty] |
-| QML                    | [qmlformat]               | [qmllint]                                            |
+| QML                    | [qmlformat]               | [qmllint]                                               |
 | Ruby                   |                           | [RuboCop], [Standard]                                   |
 | Rust                   | [rustfmt]                 | [clippy]                                                |
 | SQL                    | [prettier-plugin-sql]     |                                                         |
 | Scala                  | [scalafmt]                |                                                         |
 | Shell                  | [shfmt]                   | [shellcheck]                                            |
 | Starlark               | [Buildifier]              | [Buildifier]                                            |
-| Swift                  | [SwiftFormat] (1)         |                                                         |
+| Swift                  | [SwiftFormat] (1)         | [SwiftLint] (1)                                         |
 | TOML                   | [taplo]                   |                                                         |
 | TSX                    | [Prettier]                | [ESLint]                                                |
 | TypeScript             | [Prettier]                | [ESLint]                                                |
@@ -75,6 +75,7 @@ Linters which are not language-specific:
 [buf lint]: https://buf.build/docs/lint/overview
 [eslint]: https://eslint.org/
 [swiftformat]: https://github.com/nicklockwood/SwiftFormat
+[swiftlint]: https://github.com/realm/SwiftLint
 [terraform]: https://github.com/hashicorp/terraform
 [buf]: https://docs.buf.build/format/usage
 [keep-sorted]: https://github.com/google/keep-sorted

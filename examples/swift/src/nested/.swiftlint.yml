@@ -1,0 +1,4 @@
+strict: true
+
+only_rules:
+  - force_unwrapping

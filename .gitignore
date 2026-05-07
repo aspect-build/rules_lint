@@ -1,4 +1,5 @@
 bazel-*
+.DS_Store
 .bazelrc.user
 .idea/
 .ijwb/
