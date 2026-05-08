@@ -46,6 +46,7 @@ format_multirun(
     fsharp = ":mock_fantomas.sh",
     gherkin = ":mock_prettier.sh",
     go = ":mock_gofmt.sh",
+    go_module = ":mock_modfmt.sh",
     graphql = ":mock_prettier.sh",
     html = ":mock_prettier.sh",
     html_jinja = ":mock_djlint.sh",
