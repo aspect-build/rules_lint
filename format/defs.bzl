@@ -190,14 +190,14 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             srcs = srcs,
         )
 
-    fix_target_package, fix_target_basename = _parse_fix_target(fix_target)
+    fix_label = native.package_relative_label(fix_target) if fix_target else None
 
     for lang, toolname, tool_label, target_name, custom_args in _tools_loop(name, kwargs):
         fix_target_label = None
-        if fix_target_basename:
+        if fix_label:
             fix_target_label = "//{}:{}_{}_with_{}".format(
-                fix_target_package,
-                fix_target_basename,
+                fix_label.package,
+                fix_label.name,
                 lang.replace(" ", "_"),
                 toolname,
             )
@@ -221,35 +221,6 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
         tests = test_targets,
         tags = tags,
     )
-
-def _parse_fix_target(fix_target):
-    """Parse a fix_target string into (package, basename).
-
-    Accepts:
-      - None or "": returns (None, None)
-      - "name" or ":name": same-package, returns (native.package_name(), "name")
-      - "//pkg:name": returns ("pkg", "name")
-      - "//pkg": returns ("pkg", basename(pkg))
-      - "//:name": returns ("", "name")
-
-    External-repo labels (starting with "@") are rejected — the FIX_TARGET is
-    used in a `bazel run` suggestion that should target the user's own workspace.
-    """
-    if not fix_target:
-        return None, None
-    if fix_target.startswith("@"):
-        fail("fix_target must be a label in the current workspace, got: {}".format(fix_target))
-    if fix_target.startswith("//"):
-        rest = fix_target[2:]
-        if ":" in rest:
-            pkg, _, basename = rest.partition(":")
-        else:
-            pkg = rest
-            basename = rest.rsplit("/", 1)[-1]
-        return pkg, basename
-    if fix_target.startswith(":"):
-        return native.package_name(), fix_target[1:]
-    return native.package_name(), fix_target
 
 def _tools_loop(name, kwargs):
     result = []
