@@ -20,7 +20,7 @@ load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
 
-def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args = None):
+def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args = None, fix_target_label = None):
     if mode not in ["check", "fix", "test"]:
         fail("Invalid mode", mode)
 
@@ -46,7 +46,11 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_
         ("env" if mode == "test" else "environment"): {
             # NB: can't use str(Label(target_name)) here because bzlmod makes it
             # the apparent repository, starts with @@aspect_rules_lint~override
-            "FIX_TARGET": "//{}:{}".format(native.package_name(), target_name),
+            # For test mode, FIX_TARGET should point at the companion
+            # format_multirun's fix command (when provided), not at the test
+            # target itself — otherwise the failure message tells users to
+            # `bazel run` the test, which is not the fixer.
+            "FIX_TARGET": fix_target_label or "//{}:{}".format(native.package_name(), target_name),
             "tool": "$(rlocationpaths %s)" % tool_label,
             "lang": lang,
             "flags": flags,
@@ -139,7 +143,7 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
         **common_attrs
     )
 
-def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable_git_attribute_checks = False, tags = [], **kwargs):
+def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable_git_attribute_checks = False, tags = [], fix_target = None, **kwargs):
     """Create test for the given formatters.
 
     Intended to be used with `bazel test` to verify files are formatted.
@@ -156,6 +160,10 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             This mode causes the test to be non-hermetic and it cannot be cached. Read the documentation in /docs/formatting.md.
         disable_git_attribute_checks: Set to True to disable honoring .gitattributes filters
         tags: tags to apply to generated targets. In 'no_sandbox' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.
+        fix_target: label of the companion [format_multirun](#format_multirun) target. May be a target
+            name in the same package (e.g. `"format"`) or a full label (e.g. `"//tools/format:format"`).
+            When set, the test's failure message points users at the per-language fix command of that
+            target (e.g. `format_Go_with_gofmt`) instead of the test target itself.
         **kwargs: attributes named for each language; see [languages](#languages).
             Additionally supports custom arguments via {language}_fix_args and {language}_check_args
             to override default formatter flags. Test mode uses check_args when specified.
@@ -182,8 +190,18 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             srcs = srcs,
         )
 
+    fix_target_package, fix_target_basename = _parse_fix_target(fix_target)
+
     for lang, toolname, tool_label, target_name, custom_args in _tools_loop(name, kwargs):
-        attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test", disable_git_attribute_checks, custom_args)
+        fix_target_label = None
+        if fix_target_basename:
+            fix_target_label = "//{}:{}_{}_with_{}".format(
+                fix_target_package,
+                fix_target_basename,
+                lang.replace(" ", "_"),
+                toolname,
+            )
+        attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test", disable_git_attribute_checks, custom_args, fix_target_label = fix_target_label)
         if srcs_label:
             attrs["data"] = [tool_label, srcs_label]
             attrs["args"] = ["$(locations {})".format(srcs_label)]
@@ -203,6 +221,35 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
         tests = test_targets,
         tags = tags,
     )
+
+def _parse_fix_target(fix_target):
+    """Parse a fix_target string into (package, basename).
+
+    Accepts:
+      - None or "": returns (None, None)
+      - "name" or ":name": same-package, returns (native.package_name(), "name")
+      - "//pkg:name": returns ("pkg", "name")
+      - "//pkg": returns ("pkg", basename(pkg))
+      - "//:name": returns ("", "name")
+
+    External-repo labels (starting with "@") are rejected — the FIX_TARGET is
+    used in a `bazel run` suggestion that should target the user's own workspace.
+    """
+    if not fix_target:
+        return None, None
+    if fix_target.startswith("@"):
+        fail("fix_target must be a label in the current workspace, got: {}".format(fix_target))
+    if fix_target.startswith("//"):
+        rest = fix_target[2:]
+        if ":" in rest:
+            pkg, _, basename = rest.partition(":")
+        else:
+            pkg = rest
+            basename = rest.rsplit("/", 1)[-1]
+        return pkg, basename
+    if fix_target.startswith(":"):
+        return native.package_name(), fix_target[1:]
+    return native.package_name(), fix_target
 
 def _tools_loop(name, kwargs):
     result = []
