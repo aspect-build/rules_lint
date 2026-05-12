@@ -216,7 +216,8 @@ def noop_lint_action(ctx, outputs):
         command = " && ".join(commands),
     )
 
-OPTIONAL_SARIF_PARSER_TOOLCHAIN = config_common.toolchain_type("@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type", mandatory = False)
+SARIF_PARSER_TOOLCHAIN = Label("@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type")
+OPTIONAL_SARIF_PARSER_TOOLCHAIN = config_common.toolchain_type(SARIF_PARSER_TOOLCHAIN, mandatory = False)
 
 def parse_to_sarif_action(ctx, mnemonic, raw_machine_report, sarif_out):
     """Translate a machine-readable report to SARIF format by running our Go tool sarif.go.
@@ -227,7 +228,8 @@ def parse_to_sarif_action(ctx, mnemonic, raw_machine_report, sarif_out):
         raw_machine_report: the raw machine-readable report
         sarif_out: the SARIF output file
     """
-    if not ctx.toolchains["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"]:
+    sarif_parser_toolchain = ctx.toolchains[SARIF_PARSER_TOOLCHAIN]
+    if not sarif_parser_toolchain:
         ctx.actions.symlink(output = sarif_out, target_file = raw_machine_report)
         return
 
@@ -243,6 +245,6 @@ def parse_to_sarif_action(ctx, mnemonic, raw_machine_report, sarif_out):
         arguments = [args],
         mnemonic = "AspectRulesLintParseToSarif",
         progress_message = "Parsing machine-readable report to SARIF for %{label}",
-        executable = ctx.toolchains["@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type"].sarif_parser_info.bin,
-        toolchain = "@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type",
+        executable = sarif_parser_toolchain.sarif_parser_info.bin,
+        toolchain = SARIF_PARSER_TOOLCHAIN,
     )
