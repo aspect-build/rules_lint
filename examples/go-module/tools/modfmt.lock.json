@@ -1,0 +1,38 @@
+{
+  "modfmt": {
+    "binaries": [
+      {
+        "kind": "archive",
+        "url": "https://github.com/joshdk/modfmt/releases/download/v0.4.0/modfmt-linux-arm64.tar.gz",
+        "file": "modfmt",
+        "sha256": "ba6a960b905e206bda2e79ceb355354884c5d83256f26623102b0882044b7964",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/joshdk/modfmt/releases/download/v0.4.0/modfmt-linux-amd64.tar.gz",
+        "file": "modfmt",
+        "sha256": "d9083a268ecd92bfb29c8e15d900d880ace825341e219e19f1e0cc372eef6223",
+        "os": "linux",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/joshdk/modfmt/releases/download/v0.4.0/modfmt-darwin-arm64.tar.gz",
+        "file": "modfmt",
+        "sha256": "5f9b461b5ecd96cf129f465f01cf0e3bb170b1cff73f84901d89668d831820a2",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/joshdk/modfmt/releases/download/v0.4.0/modfmt-darwin-amd64.tar.gz",
+        "file": "modfmt",
+        "sha256": "2529427c5be83731bd89cf6b47ad620c14555bc76c61f24722eac9aaa47ed496",
+        "os": "macos",
+        "cpu": "x86_64"
+      }
+    ]
+  }
+}

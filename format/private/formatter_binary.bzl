@@ -36,6 +36,7 @@ TOOLS = {
     "F#": "fantomas",
     "C#": "csharpier",
     "Pkl": "pkl",
+    "Go Module": "modfmt",
 }
 
 # Provided to make install more convenient
@@ -73,6 +74,7 @@ CHECK_FLAGS = {
     "fantomas": "--check",
     "csharpier": "check",
     "pkl": "format --silent",
+    "modfmt": "-c",
 }
 
 # Flags to pass each tool when running in default mode
@@ -106,6 +108,7 @@ FIX_FLAGS = {
     "fantomas": "",
     "csharpier": "format",
     "pkl": "format --write",
+    "modfmt": "-w",
 }
 
 def to_attribute_name(lang):
