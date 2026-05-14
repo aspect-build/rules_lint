@@ -30,7 +30,7 @@ The file name must be suffixed by either `.clippy.toml` or `clippy.toml`, otherw
 Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
 
 ```starlark
-load("@aspect_rules_lint//lint:clippy.bzl", "lint_clippy_aspect")
+load("@aspect_rules_lint_rules_rust//:clippy.bzl", "lint_clippy_aspect")
 
 clippy = lint_clippy_aspect(
     config = Label("//:.clippy.toml"),
@@ -49,9 +49,9 @@ Please note that the aspect will propagate to all transitive Rust dependencies o
 Please watch issue https://github.com/aspect-build/rules_lint/issues/385 for updates on this behavior.
 """
 
+load("@aspect_rules_lint//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
+load("@aspect_rules_lint//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 load("@rules_rust//rust:defs.bzl", "rust_clippy_action")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
-load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClippy"
 
@@ -234,7 +234,7 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS, clippy_flags = [
     """.format(default_rule_kinds = DEFAULT_RULE_KINDS)
     attrs = {
         "_options": attr.label(
-            default = "//lint:options",
+            default = "@aspect_rules_lint//lint:options",
             providers = [LintOptionsInfo],
         ),
         "_config_file": attr.label(
@@ -248,8 +248,8 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS, clippy_flags = [
             default = clippy_flags,
         ),
         "_process_wrapper_wrapper": attr.label(
-            doc = "A wrapper around the rules_rust process wrapper. See @aspect_rules_lint//lint/rust:process_wrapper_wrapper.sh for motivation and documentation.",
-            default = Label("//lint/rust:process_wrapper_wrapper"),
+            doc = "A wrapper around the rules_rust process wrapper. See @aspect_rules_lint_rules_rust//:process_wrapper_wrapper for motivation and documentation.",
+            default = Label("//:process_wrapper_wrapper"),
             executable = True,
             cfg = "exec",
         ),
@@ -262,7 +262,7 @@ In particular, cargo diagnostics _may contain_ rustc diagnostics, but they don't
 References:
 - Rustc diagnostic format: https://doc.rust-lang.org/beta/rustc/json.html#diagnostics
 """,
-            default = Label("//lint/rust:cli"),
+            default = Label("//:cli"),
             executable = True,
             cfg = "exec",
         ),
@@ -275,7 +275,7 @@ In particular, cargo diagnostics _may contain_ rustc diagnostics, but they don't
 References:
 - Rustc diagnostic format: https://doc.rust-lang.org/beta/rustc/json.html#diagnostics
 """,
-            default = Label("//lint/rust:cli"),
+            default = Label("//:cli"),
             executable = True,
             cfg = "exec",
         ),
