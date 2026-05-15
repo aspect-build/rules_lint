@@ -35,13 +35,16 @@ fi
 # Capture raw output here; statistics get filtered into $out_file below.
 raw_out_file=$(mktemp)
 # include stderr in output file; it contains some of the diagnostics
-command="$clang_tidy $@ $file > $raw_out_file 2>&1"
+# NB: do NOT collapse "$@" into a single string and eval it — args containing
+# shell metacharacters such as `__attribute__((deprecated))` then get re-parsed
+# by the shell ("syntax error near unexpected token `('"). Run clang-tidy
+# directly with "$@" so each argument is preserved verbatim.
 if [[ -n $CLANG_TIDY__VERBOSE ]]; then
     echo "$@"
     echo "cwd: " `pwd`
-    echo $command
+    echo "$clang_tidy $@ > $raw_out_file 2>&1"
 fi
-eval $command
+"$clang_tidy" "$@" > "$raw_out_file" 2>&1
 exit_code=$?
 # Drop clang-tidy summary statistics (e.g. "N warnings generated.") that it
 # prints even on a clean, exit-0 run thus tripping in fail_on_violation mode.
