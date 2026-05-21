@@ -180,10 +180,15 @@ def _ty_aspect_impl(target, ctx):
             if PyInfo in dep:
                 transitive_sources.append(dep[PyInfo].transitive_sources)
                 transitive_sources.append(dep[PyInfo].transitive_pyi_files)
-                for import_path in dep[PyInfo].imports.to_list():
-                    resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
-                    for e in resolved:
-                        import_paths[e] = True
+                imports = dep[PyInfo].imports.to_list()
+                if imports:
+                    for import_path in imports:
+                        resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
+                        for e in resolved:
+                            import_paths[e] = True
+                elif dep.label.workspace_root:
+                    import_paths[dep.label.workspace_root] = True
+                    import_paths[ctx.bin_dir.path + "/" + dep.label.workspace_root] = True
 
     # When srcs contain labels to other targets (e.g., genrules that produce .py files),
     # we need to collect their transitive sources for proper type resolution
@@ -192,10 +197,15 @@ def _ty_aspect_impl(target, ctx):
             if PyInfo in src:
                 transitive_sources.append(src[PyInfo].transitive_sources)
                 transitive_sources.append(src[PyInfo].transitive_pyi_files)
-                for import_path in src[PyInfo].imports.to_list():
-                    resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
-                    for e in resolved:
-                        import_paths[e] = True
+                imports = src[PyInfo].imports.to_list()
+                if imports:
+                    for import_path in imports:
+                        resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
+                        for e in resolved:
+                            import_paths[e] = True
+                elif src.label.workspace_root:
+                    import_paths[src.label.workspace_root] = True
+                    import_paths[ctx.bin_dir.path + "/" + src.label.workspace_root] = True
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)
