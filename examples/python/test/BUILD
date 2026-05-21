@@ -137,6 +137,18 @@ ty_test(
     srcs = [":dep_ext_generated"]
 )
 
+py_library(name = "dep_bcr",
+           srcs = ["dep_bcr.py"],
+           deps = ["@abseil-py//absl/testing:absltest"]
+)
+
+ty_test(
+    name = "ty_should_find_bcr_dep",
+    srcs = [":dep_bcr"]
+)
+
+
+
 ty_test(
     name = "ty_should_fail_unsupported_operator",
     srcs = ["//src:unsupported_operator"],
