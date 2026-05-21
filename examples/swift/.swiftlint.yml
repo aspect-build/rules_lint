@@ -1,0 +1,4 @@
+strict: true
+
+only_rules:
+  - function_name_whitespace

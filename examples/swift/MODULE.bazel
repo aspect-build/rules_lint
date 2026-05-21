@@ -1,4 +1,4 @@
-"Bazel dependencies for Swift formatting example"
+"Bazel dependencies for Swift formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
 local_path_override(
@@ -10,3 +10,8 @@ local_path_override(
 format_tools = use_extension("@aspect_rules_lint//format:extensions.bzl", "tools")
 format_tools.swiftformat()
 use_repo(format_tools, "swiftformat", "swiftformat_mac")
+
+# Swift linter tools
+lint_tools = use_extension("@aspect_rules_lint//lint:extensions.bzl", "tools")
+lint_tools.swiftlint()
+use_repo(lint_tools, "swiftlint_binary")

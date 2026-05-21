@@ -1,0 +1,5 @@
+build:lint --aspects=//tools/lint:linters.bzl%swiftlint
+build:lint --aspects=//tools/lint:linters.bzl%swiftlint_nested_config
+build:lint --aspects=//tools/lint:linters.bzl%swiftlint_nested_deeper_nearest_config
+build:lint --aspects=//tools/lint:linters.bzl%swiftlint_nested_without_declared_config
+build:lint --aspects=//tools/lint:linters.bzl%swiftlint_nested_fix_config

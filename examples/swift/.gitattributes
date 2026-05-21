@@ -1,0 +1,3 @@
+# Keep the intentional SwiftLint fixtures stable when running aspect format.
+src/lintme.swift rules-lint-ignored
+src/nested_fix/lintme.swift rules-lint-ignored

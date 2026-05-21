@@ -6,7 +6,10 @@ load("//lint/private:lint_aspect.bzl", "lint_options")
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(glob(["*.bzl"]) + ["lint_test.sh"])
+exports_files(glob(["*.bzl"]) + [
+    "empty_swiftlint.yml",
+    "lint_test.sh",
+])
 
 # Aliases for the built-in linters
 alias(
@@ -261,6 +264,15 @@ bzl_library(
     name = "shellcheck",
     srcs = ["shellcheck.bzl"],
     deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
+    name = "swiftlint",
+    srcs = ["swiftlint.bzl"],
+    deps = [
+        "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
+    ],
 )
 
 bzl_library(

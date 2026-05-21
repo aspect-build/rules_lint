@@ -1,0 +1,13 @@
+[
+  {
+    "violation": {
+      "ruleIdentifier": "function_name_whitespace",
+      "severity": "error",
+      "reason": "Too many spaces between 'func' and function name",
+      "ruleDescription": "There should be consistent whitespace before and after function names and generic parameters.",
+      "ruleName": "Function Name Whitespace",
+      "location": { "file": "src/lintme.swift", "character": 9, "line": 2 }
+    },
+    "text": "    func  printme() {"
+  }
+]

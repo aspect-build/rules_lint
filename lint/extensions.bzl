@@ -62,6 +62,22 @@ def _lint_extension_impl(mctx):
                 url = "https://github.com/pinterest/ktlint/releases/download/1.2.1/ktlint",
                 executable = True,
             )
+        for r in mod.tags.swiftlint:
+            http_archive(
+                name = r.name,
+                build_file_content = _public_build_file_content("\n".join([
+                    """alias(
+    name = "swiftlint",
+    actual = select({
+        "@bazel_tools//src/conditions:linux_x86_64": "SwiftLintBinary.artifactbundle/linux/amd64/swiftlint",
+        "@bazel_tools//src/conditions:linux_aarch64": "SwiftLintBinary.artifactbundle/linux/arm64/swiftlint",
+        "@bazel_tools//src/conditions:darwin": "SwiftLintBinary.artifactbundle/macos/swiftlint",
+    }),
+)""",
+                ])),
+                sha256 = "12befab676fc972ffde2ec295d016d53c3a85f64aabd9c7fee0032d681e307e9",
+                urls = ["https://github.com/realm/SwiftLint/releases/download/0.63.2/SwiftLintBinary.artifactbundle.zip"],
+            )
         for r in mod.tags.spotbugs:
             http_archive(
                 name = r.name,
@@ -110,6 +126,7 @@ tools = module_extension(
         "cppcheck": tag_class(attrs = {"linux": attr.string(default = "cppcheck_linux"), "macos": attr.string(default = "cppcheck_macos")}),
         "spotbugs": tag_class(attrs = {"name": attr.string(default = "spotbugs")}),
         "ktlint": tag_class(attrs = {"name": attr.string(default = "com_github_pinterest_ktlint")}),
+        "swiftlint": tag_class(attrs = {"name": attr.string(default = "swiftlint_binary")}),
         "pmd": tag_class(attrs = {"name": attr.string(default = "net_sourceforge_pmd")}),
         "checkstyle": tag_class(attrs = {"name": attr.string(default = "com_puppycrawl_tools_checkstyle")}),
         "vale": tag_class(attrs = {"name": attr.string(default = "vale"), "tag": attr.string(default = VALE_VERSIONS.keys()[0])}),

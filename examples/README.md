@@ -24,6 +24,7 @@ Each example is self-contained and shows:
 - `proto/` - Protocol Buffer formatting and linting with Buf
 - `starlark/` - Starlark formatting with Buildifier; linting with Buildifier
 - `qml/` - QML formatting with qmlformat; linting with qmllint
+- `swift/` - Swift formatting with SwiftFormat; linting with SwiftLint
 
 ## Multi-language Example
 
