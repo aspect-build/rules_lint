@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Verify bcr patches
         run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
-      - uses: lycheeverse/lychee-action@v2
+      - uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
         with:
           # Allow 503 Service Unavailable when rate limited
           args: --accept '200..=204,503' --base ${{ github.workspace }} --verbose --no-progress './**/*.md' './**/*.html'
@@ -60,7 +60,7 @@ jobs:
         folder: ${{ fromJson(needs.list-examples.outputs.format-matrix) }}
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.15.0
+      - uses: bazel-contrib/setup-bazel@4fd964a13a440a8aeb0be47350db2fc640f19ca8 # 0.15.0
         with: &bazelrc
           bazelrc: |
             common     --show_progress_rate_limit=60
@@ -129,7 +129,7 @@ jobs:
         folder: ${{ fromJson(needs.list-examples.outputs.lint-matrix) }}
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.15.0
+      - uses: bazel-contrib/setup-bazel@4fd964a13a440a8aeb0be47350db2fc640f19ca8 # 0.15.0
         with: *bazelrc
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
@@ -159,7 +159,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
-      - uses: bazel-contrib/setup-bazel@0.8.0
+      - uses: bazel-contrib/setup-bazel@5058960dd06f5d8a632474352b134ea36648e626 # 0.8.0
         with:
           repository-cache: ${{ inputs.mount_bazel_caches }}
           bazelrc: |
