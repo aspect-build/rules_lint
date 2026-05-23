@@ -35,7 +35,9 @@ Linters which are not language-specific:
 | CUE                    | [cue fmt]                 |                                                         |
 | Cuda                   | [clang-format]            |                                                         |
 | CSS, Less, Sass        | [Prettier]                | [Stylelint]                                             |
+| F#                     | [Fantomas]                |                                                         |
 | Go                     | [gofmt] or [gofumpt]      |                                                         |
+| Go Module              | [modfmt]                  |                                                         |
 | Gherkin                | [prettier-plugin-gherkin] |                                                         |
 | GraphQL                | [Prettier]                |                                                         |
 | HCL (Hashicorp Config) | [terraform] fmt           |                                                         |
@@ -67,6 +69,7 @@ Linters which are not language-specific:
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
 [bandit]: https://bandit.readthedocs.io/en/latest/
+[Fantomas]: https://fsprojects.github.io/fantomas/
 [flake8]: https://flake8.pycqa.org/en/latest/index.html
 [pydoclint]: https://jsh9.github.io/pydoclint/
 [pmd]: https://docs.pmd-code.org/latest/index.html
@@ -88,6 +91,7 @@ Linters which are not language-specific:
 [prettier/plugin-xml]: https://github.com/prettier/plugin-xml
 [gofmt]: https://pkg.go.dev/cmd/gofmt
 [gofumpt]: https://github.com/mvdan/gofumpt
+[modfmt]: https://github.com/joshdk/modfmt
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
 [rubocop]: https://docs.rubocop.org/

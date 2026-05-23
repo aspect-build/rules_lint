@@ -80,6 +80,16 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 		}
 	case "AspectRulesLintVale":
 		fm = []string{`%f:%l:%c:%m`}
+	case "AspectRulesLintCppCheck":
+		fm = []string{
+			`%f:%l:%c: %trror: %m`,
+			`%f:%l:%c: %tarning: %m`,
+			`%f:%l:%c: %tyle: %m`,
+			`%f:%l:%c: %terformance: %m`,
+			`%f:%l:%c: %tortability: %m`,
+			`%f:%l:%c: %tnformation: %m`,
+			`%-G%.%#`,
+		}
 	case "AspectRulesLintClangTidy":
 		fm = []string{
 			`%f:%l:%c: %trror: %m`,

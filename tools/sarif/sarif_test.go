@@ -65,6 +65,22 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(4)))
 	})
 
+	t.Run("processes cppcheck output -> sarif correctly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		sarifJsonString, _ := ToSarifJsonString("//src:hello_cc", "AspectRulesLintCppCheck", cppcheck_output)
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs)).To(Equal(1))
+		g.Expect(sarifJson.Runs[0].Tool.Driver.Name).To(Equal("CppCheck"))
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(2))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("Memory leak: ptr [memleak]"))
+		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(Equal("Variable 'x' is assigned a value that is never used. [unreadVariable]"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/hello.cc"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(10)))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(15)))
+	})
+
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 

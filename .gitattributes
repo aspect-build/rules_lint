@@ -5,6 +5,8 @@
 
 # Don't include examples in the distribution artifact, to reduce size.
 examples export-ignore
+lint/rules_rust export-ignore
+lint/rules_rust/** export-ignore
 
 # Substitution for the _VERSION_PRIVATE placeholder
 tools/version.bzl export-subst

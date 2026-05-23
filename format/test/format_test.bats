@@ -236,3 +236,10 @@ bats_load_library "bats-assert"
 
     assert_output --partial "pkl format --write examples/pkl/src/cats.pkl"
 }
+
+@test "should run modfmt on Go Module" {
+    run bazel run //format/test:format_Go_Module_with_modfmt
+    assert_success
+
+    assert_output --partial "+ modfmt -w examples/go-module/go.mod"
+}
