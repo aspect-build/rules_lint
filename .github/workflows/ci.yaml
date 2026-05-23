@@ -92,7 +92,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install Aspect CLI
-        uses: jaxxstorm/action-install-gh-release@v2.1.0
+        uses: jaxxstorm/action-install-gh-release@6096f2a2bbfee498ced520b6922ac2c06e990ed2 # v2.1.0
         with:
           repo: aspect-build/aspect-cli
           tag: v2026.4.2
@@ -103,11 +103,11 @@ jobs:
           chmod: 0755
           extension-matching: disable
       - name: Setup bats
-        uses: mig4/setup-bats@v1
+        uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1
         with:
           bats-version: "1.8.2"
       - name: Setup bats helpers
-        uses: brokenpip3/setup-bats-libs@0.0.3
+        uses: brokenpip3/setup-bats-libs@adb596631d41c8e1da2466833a66ed2c321a4157 # 0.0.3
         with:
           support-path: /usr/lib/bats/bats-support
           support-version: "0.3.0"
