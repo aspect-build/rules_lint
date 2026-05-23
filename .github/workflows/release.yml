@@ -44,7 +44,7 @@ jobs:
           mkdir -p ${{ env.DEST }}
           bazel --bazelrc=.github/workflows/ci.bazelrc \
             run --config=release //tools/release:copy_release_artifacts
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: go-binaries
           path: binaries/
@@ -52,7 +52,7 @@ jobs:
 
   release:
     needs: build
-    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@a841d62420f41a87a601fb331f3c2c2cc088506e # v7.2.3
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@e5ab8fc4c23cb13783fad499e8bd865fd9f6d669 # v7.6.0
     with:
       prerelease: false
       release_files: |
