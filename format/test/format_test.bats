@@ -31,7 +31,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Starlark_with_buildifier
     assert_success
 
-    assert_output --partial "+ buildifier -mode=fix BUILD.bazel"
+    assert_output --partial "buildifier -mode=fix .aspect/config.axl"
     assert_output --partial "format/private/BUILD.bazel"
 }
 
@@ -199,7 +199,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_YAML_with_yamlfmt
     assert_success
 
-    assert_output --partial "+ yamlfmt .aspect/workflows/config.yaml"
+    assert_output --partial "+ yamlfmt .bcr/presubmit.yml"
 }
 
 @test "should run rustfmt on Rust" {

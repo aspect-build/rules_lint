@@ -1,5 +1,9 @@
 # Run linters and formatters under Bazel
 
+> [!NOTE]
+> This repository uses the [Aspect CLI](https://github.com/aspect-build/aspect-cli) for CI and local development.
+> See the [docs](https://docs.aspect.build/cli/overview) and [install instructions](https://docs.aspect.build/cli/install) to get started.
+
 This ruleset integrates linting and formatting as first-class concepts under Bazel.
 
 Features:
