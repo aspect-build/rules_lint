@@ -9,7 +9,7 @@ function assert_cpp_lints() {
 }
 
 @test "should produce reports" {
-	run aspect lint //src:all
+	run aspect lint --bazel-flag=--config=lint --bazel-flag=--output_groups=rules_lint_human -- //src/...
 	assert_success
 	assert_cpp_lints
 }

@@ -1,0 +1,18 @@
+"""Aspect CLI configuration."""
+
+load("@aspect//feature/artifacts.axl", "ArtifactUpload")
+load("@aspect//traits.axl", "BazelTrait")
+
+def config(ctx: ConfigContext):
+    is_ci = bool(ctx.std.env.var("CI"))
+
+    if is_ci:
+        ctx.traits[BazelTrait].extra_flags.extend([
+            "--config=ci",
+        ])
+
+    # Enable artifact uploads for testlogs, profile, and BEP.
+    # upload_test_logs="failed" — only the logs from failing tests are useful.
+    ctx.features[ArtifactUpload].args.upload_test_logs = "failed"
+    ctx.features[ArtifactUpload].args.upload_profile = True
+    ctx.features[ArtifactUpload].args.upload_bep = True

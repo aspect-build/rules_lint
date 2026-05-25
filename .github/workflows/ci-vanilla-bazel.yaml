@@ -1,20 +1,21 @@
-name: CI
+name: CI - Vanilla Bazel
 
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for release branches
   push:
     branches: [main, 1.x]
   pull_request:
     branches: [main, 1.x]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 concurrency:
-  # Cancel previous actions from the same PR or branch except 'main' branch.
-  # See https://docs.github.com/en/actions/using-jobs/using-concurrency and https://docs.github.com/en/actions/learn-github-actions/contexts for more info.
-  group: concurrency-group::${{ github.workflow }}::${{ github.event.pull_request.number > 0 && format('pr-{0}', github.event.pull_request.number) || github.ref_name }}${{ github.ref_name == 'main' && format('::{0}', github.run_id) || ''}}
-  cancel-in-progress: ${{ github.ref_name != 'main' }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+    id-token: write
+
+env:
+  INSTALL_ASPECT_LAUNCHER_VERSION: 2026.22.3
 
 jobs:
   list-examples:
@@ -92,16 +93,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install Aspect CLI
-        uses: jaxxstorm/action-install-gh-release@6096f2a2bbfee498ced520b6922ac2c06e990ed2 # v2.1.0
-        with:
-          repo: aspect-build/aspect-cli
-          tag: v2026.4.2
-          asset-name: aspect-cli
-          rename-to: aspect
-          platform: unknown-linux
-          arch: x86_64
-          chmod: 0755
-          extension-matching: disable
+        run: curl -fsSL https://install.aspect.build | bash -s -- "$INSTALL_ASPECT_LAUNCHER_VERSION"
       - name: Setup bats
         uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1
         with:
