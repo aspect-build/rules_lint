@@ -1,0 +1,48 @@
+name: CI - Aspect Workflows
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    id-token: write
+
+env:
+    ASPECT_API_TOKEN: ${{ secrets.ASPECT_API_TOKEN }}
+    INSTALL_ASPECT_LAUNCHER_VERSION: 2026.22.3
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
+
+jobs:
+    test:
+        name: test (${{ matrix.workspace.path }}, ${{ matrix.bazel.id }})
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                workspace:
+                - { path: ".", slug: "root" }
+                bazel:
+                - { id: "bazel-7", version: "7.x", flags: "" }
+                - { id: "bazel-8", version: "8.x", flags: "" }
+                - { id: "bazel-9", version: "9.x", flags: "" }
+        env:
+            USE_BAZEL_VERSION: ${{ matrix.bazel.version }}
+        steps:
+            - uses: actions/checkout@v6
+            - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
+              with:
+                bazelisk-cache: true
+                disk-cache: ${{ github.workflow }}-test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }}
+                repository-cache: true
+                external-cache: true
+            - name: Test
+              working-directory: ${{ matrix.workspace.path }}
+              run: |
+                curl -fsSL https://install.aspect.build | bash -s -- "$INSTALL_ASPECT_LAUNCHER_VERSION"
+                aspect test --task-key=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} ${{ matrix.bazel.flags }} -- //...
