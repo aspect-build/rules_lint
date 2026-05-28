@@ -13,11 +13,14 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
   { echo>&2 "ERROR: runfiles.bash initializer cannot find $f. An executable rule may have forgotten to expose it in the runfiles, or the binary may require RUNFILES_DIR to be set."; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v3 ---
 
-if [[ -n "$BUILD_WORKSPACE_DIRECTORY" ]]; then
-  # Needed for the rustfmt binary wrapper in rules_rust; see
-  # https://github.com/aspect-build/rules_lint/pull/327
-  unset BUILD_WORKING_DIRECTORY
-  cd $BUILD_WORKSPACE_DIRECTORY
+if [[ -n "$BUILD_WORKING_DIRECTORY" ]]; then
+  # Prefer the invocation directory when set (aspect-cli and `bazel run` both
+  # set this to where the user ran the command from). File paths in $@ are
+  # relative to this directory. BUILD_WORKSPACE_DIRECTORY is still set (to
+  # the Bazel workspace root) for tools like rustfmt that need it.
+  cd "$BUILD_WORKING_DIRECTORY"
+elif [[ -n "$BUILD_WORKSPACE_DIRECTORY" ]]; then
+  cd "$BUILD_WORKSPACE_DIRECTORY"
 elif [[ -n "$TEST_WORKSPACE" ]]; then
   if [[ -n "$WORKSPACE" ]]; then
     WORKSPACE_PATH="$(dirname "$(realpath ${WORKSPACE})")"
