@@ -20,7 +20,7 @@ EOF
 }
 
 @test "should produce reports" {
-	run aspect lint --bazel-flag=--config=lint --bazel-flag=--output_groups=rules_lint_human -- //src/...
+	run aspect lint --bazel-flag=--config=lint -- //src/...
 	assert_success
 	assert_ruby_lints
 }

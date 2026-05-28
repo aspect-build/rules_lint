@@ -15,7 +15,7 @@ permissions:
     id-token: write
 
 env:
-  INSTALL_ASPECT_LAUNCHER_VERSION: 2026.22.11
+  INSTALL_ASPECT_LAUNCHER_VERSION: 2026.22.17
 
 jobs:
   list-examples:
