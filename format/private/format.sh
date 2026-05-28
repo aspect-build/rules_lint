@@ -13,11 +13,13 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
   { echo>&2 "ERROR: runfiles.bash initializer cannot find $f. An executable rule may have forgotten to expose it in the runfiles, or the binary may require RUNFILES_DIR to be set."; exit 1; }; f=; set -e
 # --- end runfiles.bash initialization v3 ---
 
-if [[ -n "$BUILD_WORKSPACE_DIRECTORY" ]]; then
-  # Needed for the rustfmt binary wrapper in rules_rust; see
-  # https://github.com/aspect-build/rules_lint/pull/327
-  unset BUILD_WORKING_DIRECTORY
-  cd $BUILD_WORKSPACE_DIRECTORY
+# Prefer BUILD_WORKING_DIRECTORY so git ls-files scopes to the invoking subtree
+# and all paths stay CWD-relative. The previous unset BUILD_WORKING_DIRECTORY
+# (#327) was wrong — see https://github.com/aspect-build/rules_lint/pull/882.
+if [[ -n "${BUILD_WORKING_DIRECTORY:-}" ]]; then
+  cd "$BUILD_WORKING_DIRECTORY"
+elif [[ -n "${BUILD_WORKSPACE_DIRECTORY:-}" ]]; then
+  cd "$BUILD_WORKSPACE_DIRECTORY"
 elif [[ -n "$TEST_WORKSPACE" ]]; then
   if [[ -n "$WORKSPACE" ]]; then
     WORKSPACE_PATH="$(dirname "$(realpath ${WORKSPACE})")"
