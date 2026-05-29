@@ -17,7 +17,7 @@ setup() {
     assert_success
 
     assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/eslint.config.mjs"
-    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/(special_char)/[square]/hello.ts examples/nodejs/src/file-dep.ts examples/nodejs/src/file.ts"
+    assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/(special_char)/[square]/hello.ts examples/nodejs/src/biome_bad.ts examples/nodejs/src/biome_clean.ts examples/nodejs/src/file-dep.ts examples/nodejs/src/file.ts examples/nodejs/src/subdir/test.ts"
     assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/hello.tsx"
     assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/hello.vue"
     assert_output --partial "+ prettier --write --log-level=warn .bcr/metadata.template.json"
