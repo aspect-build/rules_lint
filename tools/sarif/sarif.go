@@ -38,7 +38,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	regex := regexp.MustCompile(`^{\s+"\$schema":.+sarif`)
 	// If it's already in SARIF format, just return it
 	if regex.Match([]byte(report)) {
-		return report, nil
+		return normalizeSarifUris(label, report)
 	}
 
 	if len(mnemonic) == 0 {
@@ -241,6 +241,38 @@ func rubocopJsonToSarif(label, mnemonic, report string) (sarifJsonString string,
 	return sarifJsonString, nil
 }
 
+func normalizeSarifUris(label, report string) (string, error) {
+	var sarif map[string]any
+	if err := json.Unmarshal([]byte(report), &sarif); err != nil {
+		return "", err
+	}
+	normalizeSarifValueUris(label, sarif)
+	normalized, err := json.Marshal(sarif)
+	if err != nil {
+		return "", err
+	}
+	return string(normalized), nil
+}
+
+func normalizeSarifValueUris(label string, value any) {
+	switch v := value.(type) {
+	case map[string]any:
+		for key, child := range v {
+			if key == "uri" {
+				if uri, ok := child.(string); ok {
+					v[key] = determineRelativePath(uri, label)
+				}
+				continue
+			}
+			normalizeSarifValueUris(label, child)
+		}
+	case []any:
+		for _, child := range v {
+			normalizeSarifValueUris(label, child)
+		}
+	}
+}
+
 // We expect relative paths when processing lint output and therefore need to convert any absolute paths.
 // Assumptions we make when determining the relative paths:
 //   - The linter is running on the host, so the path will have an 'execroot' segment
@@ -257,6 +289,16 @@ func determineRelativePath(path string, label string) string {
 	if bazel_package != "" {
 		re = regexp.MustCompile(`\/execroot\/[^\/]+\/(` + bazel_package + `\/.*)$`)
 	}
+
+	binRe := regexp.MustCompile(`\/execroot\/[^\/]+\/bazel-out\/[^\/]+\/bin\/(.*)$`)
+	if bazel_package != "" {
+		binRe = regexp.MustCompile(`\/execroot\/[^\/]+\/bazel-out\/[^\/]+\/bin\/(` + bazel_package + `\/.*)$`)
+	}
+	binRelativePath := binRe.FindSubmatch([]byte(path))
+	if len(binRelativePath) == 2 {
+		return string(binRelativePath[1])
+	}
+
 	relative_path := re.FindSubmatch([]byte(path))
 
 	if len(relative_path) == 2 {

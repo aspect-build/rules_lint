@@ -7,9 +7,11 @@ This example demonstrates how to set up formatting and linting for Node.js ecosy
 ### Formatters
 
 - **Prettier** - Code formatter for JavaScript, TypeScript, CSS, LESS, SCSS, HTML, and Markdown
+- **Biome** - Optional JavaScript and TypeScript formatter using custom formatter args
 
 ### Linters
 
+- **Biome** - JavaScript and TypeScript linter
 - **ESLint** - JavaScript and TypeScript linter
 - **Stylelint** - CSS linter
 - **Vale** - Markdown linter
@@ -39,9 +41,11 @@ The `src/` directory contains example files with intentional violations:
 - `hello.scss` - SCSS file (SASS CSS preprocessor)
 - `index.html` - HTML file
 - `README.md` - Markdown file with Vale violations
+- `biome_bad.ts`, `biome_clean.ts` - TypeScript files for Biome linting and formatting
 
 ## Configuration Files
 
+- `biome.json` - Biome configuration
 - `eslint.config.mjs` - ESLint configuration
 - `stylelint.config.mjs` - Stylelint configuration
 - `.vale.ini` - Vale configuration for Markdown

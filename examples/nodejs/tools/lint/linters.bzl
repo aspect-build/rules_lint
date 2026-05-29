@@ -1,9 +1,17 @@
 "Define Node.js linter aspects"
 
+load("@aspect_rules_lint//lint:biome.bzl", "lint_biome_aspect")
 load("@aspect_rules_lint//lint:eslint.bzl", "lint_eslint_aspect")
 load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
 load("@aspect_rules_lint//lint:stylelint.bzl", "lint_stylelint_aspect")
 load("@aspect_rules_lint//lint:vale.bzl", "lint_vale_aspect")
+
+biome = lint_biome_aspect(
+    binary = Label("//tools/lint:biome"),
+    configs = [Label("//:biome.json")],
+)
+
+biome_test = lint_test(aspect = biome)
 
 eslint = lint_eslint_aspect(
     binary = Label("//tools/lint:eslint"),

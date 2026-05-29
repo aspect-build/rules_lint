@@ -41,6 +41,18 @@ filegroup(
     tags = ["markdown"],
 )
 
+filegroup(
+    name = "biome_bad",
+    srcs = ["biome_bad.ts"],
+    tags = ["lint-with-biome"],
+)
+
+filegroup(
+    name = "biome_clean",
+    srcs = ["biome_clean.ts"],
+    tags = ["lint-with-biome"],
+)
+
 ts_project(
     name = "ts_dep",
     srcs = ["file-dep.ts"],
@@ -78,4 +90,11 @@ format_test(
     ],
     javascript = ":prettier",
     markdown = ":prettier",
+)
+
+format_test(
+    name = "format_biome_js_test",
+    srcs = ["biome_clean.ts"],
+    javascript = "//tools/format:biome",
+    javascript_check_args = ["format"],
 )

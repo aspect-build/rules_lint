@@ -48,7 +48,7 @@ Linters which are not language-specific:
 | HTML                   | [Prettier]                |                                                         |
 | JSON                   | [Prettier]                |                                                         |
 | Java                   | [google-java-format]      | [pmd] , [Checkstyle], [Spotbugs]                        |
-| JavaScript             | [Prettier]                | [ESLint]                                                |
+| JavaScript             | [Prettier]                | [Biome], [ESLint]                                       |
 | HTML templates         | [djlint]                  |                                                         |
 | Jsonnet                | [jsonnetfmt]              |                                                         |
 | Kotlin                 | [ktfmt]                   | [ktlint]                                                |
@@ -71,6 +71,7 @@ Linters which are not language-specific:
 | XML                    | [prettier/plugin-xml]     |                                                         |
 
 [prettier]: https://prettier.io
+[biome]: https://biomejs.dev/
 [google-java-format]: https://github.com/google/google-java-format
 [bandit]: https://bandit.readthedocs.io/en/latest/
 [Fantomas]: https://fsprojects.github.io/fantomas/
