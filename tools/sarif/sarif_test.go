@@ -81,6 +81,50 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(15)))
 	})
 
+	t.Run("normalizes native SARIF URIs from Bazel bin tree", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		report := `{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Biome"
+        }
+      },
+      "results": [
+        {
+          "message": {
+            "text": "lint message"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/home/user/.cache/bazel/_bazel_user/7ffd56a6e00ce98f30a5fdb044ac6a0c/execroot/_main/bazel-out/k8-fastbuild/bin/examples/nodejs/src/biome_bad.ts"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`
+
+		sarifJsonString, err := ToSarifJsonString("//examples/nodejs/src:biome_bad", "AspectRulesLintBiome", report)
+		g.Expect(err).NotTo(HaveOccurred())
+		sarifJson, err := toSarifJson(sarifJsonString)
+		g.Expect(err).NotTo(HaveOccurred())
+
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("examples/nodejs/src/biome_bad.ts"))
+	})
+
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 

@@ -36,7 +36,7 @@ func mnemonicPrettyName(mnemonic string) string {
 
 func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonString string, err error) {
 	regex := regexp.MustCompile(`^{\s+"\$schema":.+sarif`)
-	// If it's already in SARIF format, just return it
+	// If it's already in SARIF format, normalize paths before returning it.
 	if regex.Match([]byte(report)) {
 		return normalizeSarifUris(label, report)
 	}
