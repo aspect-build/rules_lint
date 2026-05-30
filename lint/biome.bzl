@@ -144,7 +144,7 @@ def biome_action(ctx, executable, srcs, stdout, exit_code = None, options = [], 
 
 # buildifier: disable=function-docstring
 def _biome_aspect_impl(target, ctx):
-    if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
         return []
 
     files_to_lint = filter_srcs(ctx.rule)
@@ -184,7 +184,7 @@ def _biome_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_biome_aspect(binary, configs = [], rule_kinds = ["js_library", "ts_project", "ts_project_rule"], filegroup_tags = ["lint-with-biome"]):
+def lint_biome_aspect(binary, configs = [], rule_kinds = ["js_library", "ts_project", "ts_project_rule"]):
     """A factory function to create a Biome lint aspect.
 
     Args:
@@ -197,7 +197,6 @@ def lint_biome_aspect(binary, configs = [], rule_kinds = ["js_library", "ts_proj
 
         configs: label(s) of Biome config files
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
-        filegroup_tags: which tags on a `filegroup` indicate that it should be visited by the aspect
     """
 
     if type(configs) == "string":
@@ -217,9 +216,6 @@ def lint_biome_aspect(binary, configs = [], rule_kinds = ["js_library", "ts_proj
             "_config_files": attr.label_list(
                 default = configs,
                 allow_files = True,
-            ),
-            "_filegroup_tags": attr.string_list(
-                default = filegroup_tags,
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,

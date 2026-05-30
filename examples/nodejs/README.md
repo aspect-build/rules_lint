@@ -7,7 +7,7 @@ This example demonstrates how to set up formatting and linting for Node.js ecosy
 ### Formatters
 
 - **Prettier** - Code formatter for JavaScript, TypeScript, CSS, LESS, SCSS, HTML, and Markdown
-- **Biome** - Optional JavaScript and TypeScript formatter using custom formatter args
+- **Biome** - Code formatter for JavaScript, TypeScript, JSX, TSX, JSON, HTML, CSS, and GraphQL
 
 ### Linters
 

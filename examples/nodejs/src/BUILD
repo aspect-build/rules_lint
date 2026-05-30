@@ -41,16 +41,22 @@ filegroup(
     tags = ["markdown"],
 )
 
-filegroup(
+ts_project(
     name = "biome_bad",
     srcs = ["biome_bad.ts"],
-    tags = ["lint-with-biome"],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = ":tsconfig",
+    deps = [],
 )
 
-filegroup(
+ts_project(
     name = "biome_clean",
     srcs = ["biome_clean.ts"],
-    tags = ["lint-with-biome"],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = ":tsconfig",
+    deps = [],
 )
 
 ts_project(
