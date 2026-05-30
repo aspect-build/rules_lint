@@ -67,12 +67,18 @@ def _gather_inputs(ctx, target, srcs):
     )
 
 def _source_paths(srcs, copied_srcs):
+    copied_srcs_by_short_path = {
+        src.short_path: src
+        for src in copied_srcs
+    }
+
     paths = []
-    for i, src in enumerate(srcs):
+    for src in srcs:
         if src.is_source and src.owner.workspace_name == "":
             paths.append(src.path)
         else:
-            paths.append(copied_srcs[i].path)
+            copied_src = copied_srcs_by_short_path.get(src.short_path)
+            paths.append(copied_src.path if copied_src else src.path)
     return paths
 
 def biome_action(ctx, executable, srcs, stdout, exit_code = None, options = [], env = {}, patch = None, target = None):
