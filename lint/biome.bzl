@@ -110,6 +110,7 @@ def biome_action(ctx, executable, srcs, stdout, exit_code = None, options = [], 
             env = env,
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with Biome",
+            patch_cfg_name = "{}.{}".format(ctx.label.name, _MNEMONIC),
         )
         return
 
