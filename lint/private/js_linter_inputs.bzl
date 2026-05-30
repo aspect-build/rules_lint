@@ -29,17 +29,21 @@ def copy_or_reuse_bin_inputs(ctx, target, srcs):
 
     inputs = []
     to_copy = []
+    copy_indexes = []
     for src in srcs:
         if src.is_source:
             bin_file = bin_files.get(src.short_path)
             if bin_file:
                 inputs.append(bin_file)
             else:
+                copy_indexes.append(len(inputs))
+                inputs.append(None)
                 to_copy.append(src)
         else:
             inputs.append(src)
 
     if to_copy:
-        inputs.extend(_copy_files_to_bin_actions(ctx, to_copy))
+        for i, copied in zip(copy_indexes, _copy_files_to_bin_actions(ctx, to_copy)):
+            inputs[i] = copied
 
     return inputs
