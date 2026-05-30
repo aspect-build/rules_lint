@@ -35,7 +35,7 @@ def _config_options(config_files):
         fail("Biome accepts a single config file or directory, got {}".format(config_files))
     if len(config_files) == 0:
         return []
-    return ["--config-path={}".format(config_files[0].dirname)]
+    return ["--config-path={}".format(config_files[0].path)]
 
 def _gather_inputs(ctx, target, srcs):
     copied_srcs = copy_or_reuse_bin_inputs(ctx, target, srcs)
