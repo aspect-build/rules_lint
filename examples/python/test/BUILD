@@ -113,41 +113,44 @@ pydoclint_test(
     expected_exit_code = 1,
 )
 
+py_library(
+    name = "generated",
+    srcs = ["generated.py"],
+    imports = ["."],
+)
 
-py_library(name = "generated",
-           srcs = ["generated.py"],
-           imports = ["."])
-
-py_library(name = "dep_generated",
-           srcs = ["dep_generated.py"],
-           deps = [":generated"])
+py_library(
+    name = "dep_generated",
+    srcs = ["dep_generated.py"],
+    deps = [":generated"],
+)
 
 ty_test(
     name = "ty_should_find_generated_dep",
-    srcs = [":dep_generated"]
+    srcs = [":dep_generated"],
 )
 
-py_library(name = "dep_ext_generated",
-           srcs = ["dep_generated.py"],
-           deps = ["@ext_mod//src:generated"]
+py_library(
+    name = "dep_ext_generated",
+    srcs = ["dep_generated.py"],
+    deps = ["@ext_mod//src:generated"],
 )
 
 ty_test(
     name = "ty_should_find_ext_generated_dep",
-    srcs = [":dep_ext_generated"]
+    srcs = [":dep_ext_generated"],
 )
 
-py_library(name = "dep_bcr",
-           srcs = ["dep_bcr.py"],
-           deps = ["@abseil-py//absl/testing:absltest"]
+py_library(
+    name = "dep_bcr",
+    srcs = ["dep_bcr.py"],
+    deps = ["@abseil-py//absl/testing:absltest"],
 )
 
 ty_test(
     name = "ty_should_find_bcr_dep",
-    srcs = [":dep_bcr"]
+    srcs = [":dep_bcr"],
 )
-
-
 
 ty_test(
     name = "ty_should_fail_unsupported_operator",
