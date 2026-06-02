@@ -2,61 +2,9 @@
 
 Typical usage:
 
-First, install `rules_rs` into your repository, which provisions Clippy integration.
-For instance:
+The rules_lint Clippy integration uses the clippy binary from your configured Rust toolchain.
 
-```starlark
-// MODULE.bazel
-bazel_dep(name = "rules_rs", version = "0.0.83")
-bazel_dep(name = "llvm", version = "0.7.5")
-bazel_dep(name = "platforms", version = "1.0.0")
-
-toolchains = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
-toolchains.toolchain(
-    edition = "2021",
-    version = "1.92.0",
-)
-use_repo(toolchains, "default_rust_toolchains")
-
-register_toolchains(
-    "@default_rust_toolchains//:all",
-    "@llvm//toolchain:all",
-)
-```
-
-Then set explicit host platforms for operating systems with ABI choices:
-
-```bazelrc
-# .bazelrc
-common --enable_platform_specific_config
-common:linux --host_platform=//platforms:local_gnu
-common:linux --@llvm//config:experimental_stub_libgcc_s=True
-common:windows --host_platform=//platforms:local_windows_msvc
-```
-
-```starlark
-# platforms/BUILD.bazel
-platform(
-    name = "local_gnu",
-    constraint_values = [
-        "@llvm//constraints/libc:gnu.2.28",
-    ],
-    parents = ["@platforms//host"],
-)
-
-platform(
-    name = "local_windows_msvc",
-    constraint_values = [
-        "@rules_rs//rs/platforms/constraints:windows_msvc",
-    ],
-    parents = ["@platforms//host"],
-)
-```
-
-This will install a rust toolchain, which includes rustc and clippy.
-Please ignore the `rules_rust` instructions around clippy, as `rules_lint` ignores all `rules_rust` flags.
-
-Next, create a clippy configuration file. We'll assume you've created it in `//:.clippy.toml`.
+First, create a clippy configuration file. We'll assume you've created it in `//:.clippy.toml`.
 The file name must be suffixed by either `.clippy.toml` or `clippy.toml`, otherwise clippy will silently ignore it.
 
 Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
