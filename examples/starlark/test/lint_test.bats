@@ -16,7 +16,7 @@ EOF
 }
 
 @test "should produce reports" {
-	run aspect lint //src:all
+	run aspect lint --bazel-flag=--config=lint -- //src/...
 	assert_success
 	assert_starlark_lints
 }

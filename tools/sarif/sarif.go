@@ -80,6 +80,16 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 		}
 	case "AspectRulesLintVale":
 		fm = []string{`%f:%l:%c:%m`}
+	case "AspectRulesLintCppCheck":
+		fm = []string{
+			`%f:%l:%c: %trror: %m`,
+			`%f:%l:%c: %tarning: %m`,
+			`%f:%l:%c: %tyle: %m`,
+			`%f:%l:%c: %terformance: %m`,
+			`%f:%l:%c: %tortability: %m`,
+			`%f:%l:%c: %tnformation: %m`,
+			`%-G%.%#`,
+		}
 	case "AspectRulesLintClangTidy":
 		fm = []string{
 			`%f:%l:%c: %trror: %m`,
@@ -121,6 +131,8 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%C\\ %#-->\\ %f:%l:%c`,
 			`%-G%.%#`,
 		}
+	case "AspectRulesLintRuboCop", "AspectRulesLintStandardRB":
+		return rubocopJsonToSarif(label, mnemonic, report)
 	default:
 		return "", fmt.Errorf("No format string for linter mnemonic %s from target %s\n", mnemonic, label)
 	}
@@ -159,6 +171,68 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 		if entry.Filename != "" && entry.Text != "" {
 			entry.Filename = determineRelativePath(entry.Filename, label)
 			if err := jsonWriter.Write(entry); err != nil {
+				return "", err
+			}
+		}
+	}
+
+	return sarifJsonString, nil
+}
+
+// rubocopJsonToSarif converts a RuboCop/StandardRB JSON report (--format json) to SARIF.
+// Both linters share the same JSON schema.
+func rubocopJsonToSarif(label, mnemonic, report string) (sarifJsonString string, err error) {
+	var rb struct {
+		Files []struct {
+			Path     string `json:"path"`
+			Offenses []struct {
+				Severity string `json:"severity"`
+				Message  string `json:"message"`
+				CopName  string `json:"cop_name"`
+				Location struct {
+					Line   int `json:"line"`
+					Column int `json:"column"`
+				} `json:"location"`
+			} `json:"offenses"`
+		} `json:"files"`
+	}
+	if err = json.Unmarshal([]byte(report), &rb); err != nil {
+		return "", fmt.Errorf("failed to parse RuboCop JSON: %w", err)
+	}
+
+	var buf bytes.Buffer
+	var jw writer.Writer
+	jw, err = writer.NewSarif(&buf, writer.SarifOption{ToolName: mnemonicPrettyName(mnemonic)})
+	if err != nil {
+		return "", err
+	}
+
+	if bw, ok := jw.(writer.BufWriter); ok {
+		defer func() {
+			if fErr := bw.Flush(); fErr != nil {
+				log.Println(fErr)
+			}
+			sarifJsonString = buf.String()
+		}()
+	}
+
+	for _, f := range rb.Files {
+		for _, o := range f.Offenses {
+			t := rune('W')
+			switch o.Severity {
+			case "error", "fatal":
+				t = 'E'
+			case "convention", "refactor", "info":
+				t = 'I'
+			}
+			entry := &errorformat.Entry{
+				Filename: determineRelativePath(f.Path, label),
+				Lnum:     o.Location.Line,
+				Col:      o.Location.Column,
+				Type:     t,
+				Text:     o.CopName + ": " + o.Message,
+			}
+			if err = jw.Write(entry); err != nil {
 				return "", err
 			}
 		}

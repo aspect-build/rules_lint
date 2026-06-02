@@ -16,6 +16,6 @@ cc_library(
         "xhello-time.h",
     ],
     includes = ["."],
-    local_defines = ["LOCAL_DEFINE_IS_DEFINED=\"a_string\""],
+    local_defines = ["LOCAL_DEFINE_IS_DEFINED=\\\"a_string\\\""],
     visibility = ["//src/cpp/main:__pkg__"],
 )

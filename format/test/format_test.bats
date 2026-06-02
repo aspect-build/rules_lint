@@ -4,6 +4,13 @@
 bats_load_library "bats-support"
 bats_load_library "bats-assert"
 
+setup() {
+    # Run bazel from the workspace root so BUILD_WORKING_DIRECTORY equals
+    # BUILD_WORKSPACE_DIRECTORY. format.sh cds to BUILD_WORKING_DIRECTORY, so
+    # running from a subdirectory would scope git ls-files to that subtree only.
+    cd "$(git rev-parse --show-toplevel)"
+}
+
 # No arguments: will use git ls-files
 @test "should run prettier on javascript using git ls-files" {
     run bazel run //format/test:format_JavaScript_with_prettier
@@ -31,7 +38,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_Starlark_with_buildifier
     assert_success
 
-    assert_output --partial "+ buildifier -mode=fix BUILD.bazel"
+    assert_output --partial "buildifier -mode=fix .aspect/config.axl"
     assert_output --partial "format/private/BUILD.bazel"
 }
 
@@ -199,7 +206,7 @@ bats_load_library "bats-assert"
     run bazel run //format/test:format_YAML_with_yamlfmt
     assert_success
 
-    assert_output --partial "+ yamlfmt .aspect/workflows/config.yaml"
+    assert_output --partial "+ yamlfmt .bcr/presubmit.yml"
 }
 
 @test "should run rustfmt on Rust" {
@@ -235,4 +242,11 @@ bats_load_library "bats-assert"
     assert_success
 
     assert_output --partial "pkl format --write examples/pkl/src/cats.pkl"
+}
+
+@test "should run modfmt on Go Module" {
+    run bazel run //format/test:format_Go_Module_with_modfmt
+    assert_success
+
+    assert_output --partial "+ modfmt -w examples/go-module/go.mod"
 }
