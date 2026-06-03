@@ -2,3 +2,4 @@
 example/
 examples/
 lint/rules_rust/
+lint/rust/

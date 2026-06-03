@@ -7,6 +7,8 @@
 examples export-ignore
 lint/rules_rust export-ignore
 lint/rules_rust/** export-ignore
+lint/rust export-ignore
+lint/rust/** export-ignore
 
 # Substitution for the _VERSION_PRIVATE placeholder
 tools/version.bzl export-subst
