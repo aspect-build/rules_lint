@@ -9,6 +9,49 @@
 **Tech Stack:** Bazel (Starlark aspects), rules_go (`@io_bazel_rules_go`), Go (the static driver binary), rules_multitool (golangci-lint binary provisioning), golangci-lint native SARIF output.
 
 **Reference spec:** `docs/superpowers/specs/2026-06-03-golangci-lint-hermetic-aspect-design.md`
+**Spike findings:** `docs/superpowers/notes/2026-06-03-golangci-spike-findings.md`
+
+---
+
+## Spike findings → design deltas (MUST READ — these override the original task drafts below)
+
+Phase 0 ran and the approach is **viable** (113 real findings produced hermetically,
+no `go list`/network fallback). Four findings change the implementation; the task
+code below has been updated to reflect them:
+
+1. **Stdlib export data is load-bearing.** golangci-lint's `DriverRequest` is
+   `NeedExportFile` only (mode 8767) — it typechecks deps from `ExportFile`, and
+   rules_go's stdlib `.pkg.json` has **0/294** `ExportFile`s, so out of the box it
+   fails with `could not import math/bits (no export data ...)`. **Fix (chosen,
+   fully hermetic):** rules_go's `GoStdLib.libs` provides 294 precompiled `.a`
+   files at `pkg/<GOOS>_<GOARCH>/<importpath>.a`. The aspect stages these as inputs
+   and passes their root dir; the **driver injects `ExportFile` for stdlib packages**
+   by mapping `PkgPath` → `<stdlib_pkg_dir>/<GOOS>_<GOARCH>/<PkgPath>.a`. We do NOT
+   run `go list -export` and do NOT copy the gocache (rejected: a huge,
+   machine-varying input that would defeat cross-machine cache sharing).
+
+2. **The static driver cannot map `./...`/`file=` queries** (that needs `bazel
+   query`). **Fix:** the aspect tells the driver which package ID(s) are roots via
+   env `GOPACKAGESDRIVER_ROOTS` (space-separated bazel labels). The driver returns
+   those as `Roots` regardless of golangci-lint's query args. Each action stages the
+   target's own `.pkg.json` as root + transitive dep `.pkg.json` as non-root.
+
+3. **SARIF URIs are not portable** — CWD-relative with `../` cache traversal, no
+   `originalUriBaseIds`. **Fix:** a post-action URI-rewrite step normalizes paths to
+   workspace-relative (strip the `__BAZEL_WORKSPACE__`-resolved prefix; drop or mark
+   external-dep findings). Required for cross-machine remote-cache hits.
+
+4. **Required env for the action:** `GOPACKAGESDRIVER`, `GOPACKAGESDRIVER_JSON_DIR`,
+   `GOPACKAGESDRIVER_ROOTS`, `GOPACKAGESDRIVER_STDLIB_PKG_DIR`,
+   `GOPACKAGESDRIVER_EXECROOT`, `GOPACKAGESDRIVER_OUTPUT_BASE`,
+   `GOPACKAGESDRIVER_WORKSPACE`, `GOROOT=<output_base>/external/rules_go~~go_sdk~.../`,
+   `GOFLAGS=-mod=mod`, `GOPROXY=off`, `GOCACHE=<sandbox tmp>`,
+   `GOLANGCI_LINT_CACHE=<sandbox tmp>`. Three placeholders to resolve in the driver:
+   `__BAZEL_EXECROOT__`, `__BAZEL_WORKSPACE__`, `__BAZEL_OUTPUT_BASE__`.
+
+A fifth `go_pkg_info_aspect` output group exists beyond the three first noted:
+`go_pkg_driver_stdlib_cache_dir`. We rely on `GoStdLib.libs` (precompiled `.a`)
+rather than that gocache, per finding #1.
 
 ---
 
@@ -297,7 +340,10 @@ func stagedJSONFiles() ([]string, error) {
 	return filepath.Glob(filepath.Join(dir, "*.pkg.json"))
 }
 
-func run(in io.Reader, out io.Writer, queries []string) error {
+// run ignores golangci-lint's query args (the static driver can't run
+// `bazel query` to resolve `./...`). Roots come from GOPACKAGESDRIVER_ROOTS
+// (space-separated bazel labels) set by the aspect. See spike finding #2.
+func run(in io.Reader, out io.Writer, _ []string) error {
 	request, err := ReadDriverRequest(in)
 	if err != nil {
 		return fmt.Errorf("unable to read request: %w", err)
@@ -310,7 +356,18 @@ func run(in io.Reader, out io.Writer, queries []string) error {
 	if err != nil {
 		return fmt.Errorf("unable to load JSON files: %w", err)
 	}
-	resp := driver.GetResponse(queries)
+	// Spike finding #1: stdlib packages have no ExportFile in the rules_go
+	// .pkg.json; golangci-lint typechecks deps from ExportFile only. Inject
+	// the precompiled .a from GOPACKAGESDRIVER_STDLIB_PKG_DIR. Implement
+	// injectStdlibExports to set pkg.ExportFile =
+	//   <STDLIB_PKG_DIR>/<GOOS>_<GOARCH>/<PkgPath>.a
+	// for every Standard package in the registry (read the registry fields
+	// from the vendored packageregistry.go / flatpackage.go).
+	if err := injectStdlibExports(driver); err != nil {
+		return fmt.Errorf("unable to inject stdlib exports: %w", err)
+	}
+	roots := strings.Fields(os.Getenv("GOPACKAGESDRIVER_ROOTS"))
+	resp := driver.GetResponse(roots)
 	data, err := json.Marshal(resp)
 	if err != nil {
 		return fmt.Errorf("unable to marshal response: %w", err)
@@ -329,7 +386,17 @@ func main() {
 }
 ```
 
-> Note: `PathResolverFunc`, `ReadDriverRequest`, `NewJSONPackagesDriver`, and `bazelVersion` come from the vendored files. If `GetResponse(queries)` returns zero packages because golangci-lint's query form (`file=…` or `./...`) does not match the `ID` labels in the JSON, read `packageregistry.go`'s `Match()` and adjust query handling per the Phase 0 findings (e.g. map `./...` → match all roots).
+> Note: `PathResolverFunc`, `ReadDriverRequest`, `NewJSONPackagesDriver`, `bazelVersion`,
+> and the registry/package types come from the vendored files — read them to get
+> exact signatures. You must implement `injectStdlibExports(driver)` (per spike
+> finding #1): iterate the driver's `registry` packages, and for each `Standard`
+> package set `ExportFile = filepath.Join(os.Getenv("GOPACKAGESDRIVER_STDLIB_PKG_DIR"),
+> runtime.GOOS+"_"+runtime.GOARCH, pkg.PkgPath+".a")`. Roots come from
+> `GOPACKAGESDRIVER_ROOTS`, NOT golangci-lint's query args (finding #2).
+> The `main_test.go` in Step 2 must cover BOTH: (a) placeholder resolution, and
+> (b) a stdlib package (e.g. `math/bits`, `Standard:true`) getting its `ExportFile`
+> injected to the expected `.a` path. Add a `GOPACKAGESDRIVER_STDLIB_PKG_DIR` and
+> `GOPACKAGESDRIVER_ROOTS` to the test env, and a stdlib fixture entry.
 
 - [ ] **Step 5: Run the test to verify it passes**
 
@@ -416,6 +483,32 @@ git commit -m "feat(go): provision golangci-lint via multitool"
 - Create: `lint/golangci_lint.bzl`
 
 - [ ] **Step 1: Write the aspect file**
+
+> **Spike-driven requirements (these supersede the draft code block where they conflict):**
+> 1. **Stage stdlib `.a` libs.** Add a hidden attr `_go_stdlib = attr.label(default =
+>    "@io_bazel_rules_go//:stdlib")` and read `ctx.attr._go_stdlib[GoStdLib].libs`
+>    (load `GoStdLib` from `@io_bazel_rules_go//go:def.bzl` or the providers file).
+>    Add those `.a` files to the action inputs. Derive the stdlib pkg dir
+>    (`pkg/<os>_<arch>/`) — its parent `pkg` dir — and pass it as env
+>    `GOPACKAGESDRIVER_STDLIB_PKG_DIR`.
+> 2. **Set the full env** (spike finding #4): `GOPACKAGESDRIVER`,
+>    `GOPACKAGESDRIVER_JSON_DIR`, `GOPACKAGESDRIVER_ROOTS = str(target.label)`,
+>    `GOPACKAGESDRIVER_STDLIB_PKG_DIR`, `GOPACKAGESDRIVER_EXECROOT`/`_OUTPUT_BASE`/
+>    `_WORKSPACE` (use `.` / ctx-derived paths so they resolve in-sandbox),
+>    `GOROOT` (the staged go_sdk root — obtainable from the rules_go go context or
+>    the stdlib `root_file`), `GOFLAGS=-mod=mod`, `GOPROXY=off`, and sandbox-local
+>    `GOCACHE`/`GOLANGCI_LINT_CACHE`/`HOME`.
+> 3. **golangci-lint args:** keep `--config` and `--output.sarif.path`; the trailing
+>    pattern (`./...`) is ignored by the driver but still required by the CLI.
+> 4. **Add a SARIF URI-rewrite action** (finding #3) after the lint action: a small
+>    `run_shell`/tool action that rewrites the SARIF `uri` fields to
+>    workspace-relative and makes the rewritten file the `outputs.machine.out`. Use
+>    the `__BAZEL_WORKSPACE__`-resolved prefix to strip. This is required for
+>    cross-machine remote-cache hits.
+>
+> The block below is the structural starting point; wire the above into it and
+> iterate against a real `bazel build` (Task 5 Step 5) until the buggy package
+> produces findings with relative SARIF URIs.
 
 Create `lint/golangci_lint.bzl`:
 ```starlark
