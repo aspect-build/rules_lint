@@ -5,6 +5,7 @@ package(default_visibility = ["//visibility:public"])
 go_library(
     name = "gopackagesdriver_static_lib",
     srcs = [
+        "build_context.go",
         "driver_request.go",
         "flatpackage.go",
         "json_packages_driver.go",
