@@ -24,6 +24,11 @@ alias(
     actual = "@multitool//tools/ty",
 )
 
+alias(
+    name = "golangci_lint_bin",
+    actual = "@multitool//tools/golangci-lint",
+)
+
 # Used as a default for vale_aspect#styles
 filegroup(
     name = "empty_styles",
