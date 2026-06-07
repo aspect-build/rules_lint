@@ -4,6 +4,13 @@
 bats_load_library "bats-support"
 bats_load_library "bats-assert"
 
+setup() {
+    # Run bazel from the workspace root so BUILD_WORKING_DIRECTORY equals
+    # BUILD_WORKSPACE_DIRECTORY. format.sh cds to BUILD_WORKING_DIRECTORY, so
+    # running from a subdirectory would scope git ls-files to that subtree only.
+    cd "$(git rev-parse --show-toplevel)"
+}
+
 # No arguments: will use git ls-files
 @test "should run prettier on javascript using git ls-files" {
     run bazel run //format/test:format_JavaScript_with_prettier

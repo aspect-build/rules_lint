@@ -15,7 +15,7 @@ permissions:
     id-token: write
 
 env:
-  INSTALL_ASPECT_LAUNCHER_VERSION: 2026.22.3
+  ASPECT_LAUNCHER_VERSION: 2026.22.39
 
 jobs:
   list-examples:
@@ -93,7 +93,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install Aspect CLI
-        run: curl -fsSL https://install.aspect.build | bash -s -- "$INSTALL_ASPECT_LAUNCHER_VERSION"
+        run: curl -fsSL https://install.aspect.build | bash -s -- "$ASPECT_LAUNCHER_VERSION"
       - name: Setup bats
         uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1
         with:

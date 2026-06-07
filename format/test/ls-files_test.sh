@@ -144,3 +144,18 @@ tree2/src.js'
 }
 
 git sparse-checkout disable
+
+# BUILD_WORKING_DIRECTORY scopes ls-files to a subdirectory
+mkdir -p sub
+touch sub/sub.js
+git add sub/sub.js
+git commit --message 'add subdirectory js file'
+(
+  BUILD_WORKSPACE_DIRECTORY="$(pwd)" BUILD_WORKING_DIRECTORY="$(pwd)/sub" \
+    source "$TEST_SRCDIR/_main/format/private/format.sh"
+  sub_js=$(ls-files JavaScript)
+  [[ "$sub_js" == "sub.js" ]] || {
+    echo >&2 -e "expected ls-files to return sub.js when scoped to sub/, was\n$sub_js"
+    exit 1
+  }
+)
