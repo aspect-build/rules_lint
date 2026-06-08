@@ -16,7 +16,7 @@ rules_go's `go_pkg_info_aspect` to obtain each package's pre-computed metadata
 (`.pkg.json`), transitive export data (`.x`), and stdlib archives, then runs the
 real golangci-lint binary against a static, file-reading `GOPACKAGESDRIVER`
 (`//lint/private/gopackagesdriver_static`). No bazel-in-bazel, no network, no
-shared module cache. See `docs/superpowers/notes/2026-06-03-golangci-spike-findings.md`.
+shared module cache.
 """
 
 load("@io_bazel_rules_go//go/private:providers.bzl", "GoStdLib")
