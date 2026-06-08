@@ -89,9 +89,7 @@ def golangci_lint_action(ctx, executable, driver, pkg_info, sdk, stdlib, config,
     args = ctx.actions.args()
     args.add("run")
     args.add("--config", config.path)
-    args.add("--output.sarif.path", sarif.path)
     args.add_all(options)
-    args.add("./...")
 
     env = {
         "GOPACKAGESDRIVER": driver.path,
@@ -137,15 +135,26 @@ def golangci_lint_action(ctx, executable, driver, pkg_info, sdk, stdlib, config,
     # runtime. golangci-lint shells out to `go env` for its build context.
     goroot_prologue = 'export GOROOT="$PWD/' + goroot + '"; export PATH="$GOROOT/bin:$PATH"; '
 
+    # golangci-lint resolves a *relative* --output.sarif.path against its notion
+    # of the workspace root, which under Bazel sandboxing is NOT the sandbox
+    # execroot (it tries to mkdir the real workspace's bazel-out → "operation not
+    # permitted"). Anchor the SARIF output at an absolute $PWD path inside the
+    # sandbox, then copy it to the declared Bazel output. Likewise pass the
+    # package pattern "./..." after the flags. The driver ignores the pattern
+    # (roots come from GOPACKAGESDRIVER_ROOTS), but the CLI requires one.
+    sarif_setup = 'gl_sarif="$PWD/rules_lint_golangci.sarif"; '
+    run_golangci = '"$bin" "$@" --output.sarif.path "$gl_sarif" ./... >' + stdout.path + ' 2>&1'
+    copy_sarif = 'cp "$gl_sarif" ' + sarif.path
+
     # $1 is the golangci-lint binary path; "$@" (after shift) are its args. We
     # avoid str.format here because the shell expansions $@ / $? collide with
     # format's {} fields.
     if exit_code:
         # golangci-lint exits 1 when issues are found; capture rather than fail.
-        command = goroot_prologue + 'bin="$1"; shift; "$bin" "$@" >' + stdout.path + ' 2>&1; echo $? >' + exit_code.path
+        command = goroot_prologue + sarif_setup + 'bin="$1"; shift; ' + run_golangci + '; echo $? >' + exit_code.path + '; ' + copy_sarif
         outputs.append(exit_code)
     else:
-        command = goroot_prologue + 'bin="$1"; shift; "$bin" "$@" >' + stdout.path + ' 2>&1'
+        command = goroot_prologue + sarif_setup + 'bin="$1"; shift; ' + run_golangci + '; ' + copy_sarif
 
     run_args = ctx.actions.args()
     run_args.add(executable.path)
