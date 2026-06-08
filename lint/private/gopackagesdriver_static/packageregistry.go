@@ -87,8 +87,26 @@ func (pr *PackageRegistry) ResolvePaths(prf PathResolverFunc) error {
 // stdlib packages are not part of the JSON file exports as bazel is unaware of
 // them.
 func (pr *PackageRegistry) ResolveImports(overlays map[string][]byte) error {
+	// rules_lint modification: index non-stdlib packages by import path too.
+	// Upstream only resolves stdlib here, relying on every package's JSON
+	// Imports map being pre-populated. But rules_go's go_deps external repos
+	// emit .pkg.json with an empty Imports map, so when such a package is
+	// type-checked from source its non-stdlib imports (e.g. another go_dep)
+	// would be left unresolved ("could not import ..."). Falling back to a
+	// PkgPath index fixes those without affecting packages whose Imports are
+	// already populated (ResolveImports skips imports that are already present).
+	byPkgPath := make(map[string]*packages.Package, len(pr.packagesByID))
+	for _, pkg := range pr.packagesByID {
+		if pkg.PkgPath != "" {
+			byPkgPath[pkg.PkgPath] = pkg
+		}
+	}
+
 	resolve := func(importPath string) *packages.Package {
 		if pkg, ok := pr.stdlib[importPath]; ok {
+			return pkg
+		}
+		if pkg, ok := byPkgPath[importPath]; ok {
 			return pkg
 		}
 
