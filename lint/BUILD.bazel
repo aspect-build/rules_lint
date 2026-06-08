@@ -268,16 +268,18 @@ bzl_library(
     deps = ["//lint/private:lint_aspect"],
 )
 
-# NB: no deps for the loads of @io_bazel_rules_go//go/tools/gopackagesdriver:aspect.bzl
-# and //go/private:providers.bzl — rules_go does not expose bzl_library targets for
-# them, so (as with the ktlint/spotbugs/clang_tidy entries below) we cannot declare
-# them here. The aspect itself loads and runs correctly; only starlark_doc_extract
-# would be incomplete.
-bzl_library(
-    name = "golangci_lint",
-    srcs = ["golangci_lint.bzl"],
-    deps = ["//lint/private:lint_aspect"],
-)
+# Broken:
+# in deps attribute of starlark_doc_extract rule //lint:golangci_lint.doc_extract: missing
+# bzl_library targets for Starlark module(s) @io_bazel_rules_go//go/private:providers.bzl,
+# @io_bazel_rules_go//go/tools/gopackagesdriver:aspect.bzl. rules_go does not expose
+# bzl_library targets for those modules, so (as with ktlint/spotbugs/clang_tidy/cppcheck
+# above/below) we cannot declare this bzl_library. The aspect loads and runs correctly;
+# only starlark_doc_extract is unavailable.
+# bzl_library(
+#     name = "golangci_lint",
+#     srcs = ["golangci_lint.bzl"],
+#     deps = ["//lint/private:lint_aspect"],
+# )
 
 bzl_library(
     name = "stylelint",
