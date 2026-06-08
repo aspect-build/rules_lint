@@ -32,8 +32,10 @@ if [[ -n $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
 else
     out_file=$(mktemp)
 fi
+# Capture raw output here; statistics get filtered into $out_file below.
+raw_out_file=$(mktemp)
 # include stderr in output file; it contains some of the diagnostics
-command="$clang_tidy $@ $file > $out_file 2>&1"
+command="$clang_tidy $@ $file > $raw_out_file 2>&1"
 if [[ -n $CLANG_TIDY__VERBOSE ]]; then
     echo "$@"
     echo "cwd: " `pwd`
@@ -41,6 +43,11 @@ if [[ -n $CLANG_TIDY__VERBOSE ]]; then
 fi
 eval $command
 exit_code=$?
+# Drop clang-tidy summary statistics (e.g. "N warnings generated.") that it
+# prints even on a clean, exit-0 run thus tripping in fail_on_violation mode.
+# Diagnostics are kept.
+grep -Ev '^[0-9]+ (warnings?|errors?)( and [0-9]+ errors?)? generated\.$|^Suppressed [0-9]+ warnings? \(.*\)\.$|^Use -header-filter=.*$|^[0-9]+ warnings? treated as errors$' $raw_out_file > $out_file || true
+rm -f $raw_out_file
 if [[ -z $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
     cat $out_file
 fi
