@@ -104,9 +104,13 @@ def golangci_lint_action(ctx, executable, driver, pkg_info, sdk, stdlib, config,
         "GOPROXY": "off",
         # Dependencies are loaded as export data only (the driver strips their
         # source). x/tools' gcimporter has a data race when decoding export data
-        # concurrently; serialize the loader to avoid "concurrent map read and
-        # map write" crashes. Per-package lint actions are small, so the
-        # single-threaded cost is negligible.
+        # concurrently (golang/go #34895, #67725, #70015); GOMAXPROCS=1 removes
+        # the common multi-core trigger of "concurrent map read and map write"
+        # crashes. NOTE: this is a pragmatic mitigation, not a hard guarantee —
+        # Go's preemptive scheduler can still interleave goroutines under a single
+        # P — but in practice it eliminates the flake, and per-package lint actions
+        # are small so the single-threaded cost is negligible. If flakes ever
+        # resurface, the real fix is upstream serialization in the importer.
         "GOMAXPROCS": "1",
         # Keep tool caches inside the sandbox so the action stays hermetic and
         # machine-independent (no shared GOCACHE / module cache).
@@ -179,14 +183,11 @@ def _normalize_sarif_action(ctx, raw_sarif, normalized_sarif):
     #3). Neither form is portable across machines, which defeats remote-cache
     sharing of the SARIF output.
 
-    This action canonicalizes each `uri`:
-      * The workspace prefix (resolved from __BAZEL_WORKSPACE__, which at runtime
-        is the execroot the linter ran in) is stripped so first-party files
-        become workspace-relative (e.g. `tools/sarif/sarif.go`).
-      * URIs that still escape the workspace (leading `../`, i.e. external-dep
-        sources living in the bazel cache) are left with an `external/` marker
-        prefix collapsed from the `../`, so they are clearly non-local and never
-        masquerade as a first-party path.
+    This action canonicalizes each `uri` by keying on the `/execroot/<repo>/`
+    segment that Bazel always places in the absolute path: everything after it is
+    the workspace-relative path. For the main repo that yields `tools/sarif/sarif.go`;
+    for a dependency it yields `external/...`, which reads as clearly non-local and
+    never masquerades as a first-party path.
 
     Args:
         ctx: aspect evaluation context
@@ -204,11 +205,12 @@ def _normalize_sarif_action(ctx, raw_sarif, normalized_sarif):
         progress_message = "Normalizing golangci-lint SARIF URIs for %{label}",
     )
 
-# A small python3 post-processor. We collapse any leading "../" sequences: a URI
-# that does not escape its anchor is already workspace-relative; one that does
-# (external deps in the cache) is re-rooted under "external/" so it is clearly
-# marked non-local. Empty input (no findings / empty file) yields a minimal
-# valid empty SARIF document.
+# A small python3 post-processor. Each result URI is rewritten to the path
+# following "/execroot/<repo>/" (the portable, workspace-relative path). A URI
+# with no "/execroot/" segment (e.g. non-sandboxed local execution that already
+# emitted a relative path) is returned as-is apart from stripping a leading
+# "./". Empty input (no findings / empty file) yields a minimal valid empty
+# SARIF document.
 _SARIF_NORMALIZE_SCRIPT = """\
 python3 - "{src}" "{dst}" <<'PY'
 import json, os, sys
@@ -239,9 +241,12 @@ def normalize_uri(uri):
         rest = uri[i + len(marker):]          # e.g. "_main/tools/sarif/sarif.go"
         j = rest.find("/")                    # drop the leading "<repo>/" segment
         return rest[j + 1:] if j != -1 else rest
-    # Already-relative or non-Bazel path: just drop "./" and "../" noise.
-    parts = [p for p in uri.split("/") if p not in ("", ".", "..")]
-    return "/".join(parts)
+    # No "/execroot/" segment: non-sandboxed execution that already emitted a
+    # relative path. Return as-is apart from a leading "./" — crucially do NOT
+    # drop ".." segments, which would silently produce a wrong path.
+    if uri.startswith("./"):
+        uri = uri[2:]
+    return uri
 
 for run in doc.get("runs", []):
     for result in run.get("results", []):

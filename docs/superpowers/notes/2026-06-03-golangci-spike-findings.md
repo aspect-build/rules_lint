@@ -201,3 +201,39 @@ the driver, since runtime `bazel query` is explicitly off the table.
 4. Add a SARIF URI-rewrite post-step (workspace-relative for first-party; policy for ext deps).
 5. Decide the query-arg->label scoping in Starlark; the runtime driver should just root on the
    staged first-party package IDs.
+
+---
+
+## Implementation notes (added during build — non-obvious workarounds)
+
+These decisions emerged while implementing the aspect and are recorded here so
+they aren't mistaken for accidents during future maintenance / rules_go re-syncs:
+
+1. **Export-only dependencies.** The driver clears `GoFiles`/`CompiledGoFiles`
+   for every non-root package that has an `ExportFile`. golangci-lint then lints
+   only the target package's source and consumes all deps (stdlib + external) as
+   export data. This is the correct linter model and avoids false typecheck
+   errors for dependency source that imports packages outside the Bazel graph.
+
+2. **`GOMAXPROCS=1` in the lint action.** x/tools' gcimporter has a known data
+   race decoding export data concurrently (golang/go #34895, #67725, #70015).
+   `GOMAXPROCS=1` removes the common multi-core trigger. It is a pragmatic
+   mitigation, not a hard guarantee (Go's preemptive scheduler can still
+   interleave goroutines under one P); revisit with upstream serialization if
+   flakes resurface.
+
+3. **`packageregistry.go` local modification.** `ResolveImports` was extended
+   with a PkgPath fallback so non-stdlib imports of `go_deps` packages (which
+   rules_go emits with empty `Imports` maps) resolve. Marked inline as a
+   "rules_lint modification" — preserve it across rules_go re-syncs.
+
+4. **Static driver `os.Exit(0)` on error.** Mirrors upstream: go/packages falls
+   back to `go list` on a non-zero driver exit, which would break hermeticity.
+   Trade-off: a driver error currently surfaces as an empty response (golangci-lint
+   reports "0 issues"), so a driver bug reads as a false green. Candidate
+   follow-up: emit a synthetic DriverResponse carrying a package-level Error.
+
+5. **SARIF output path.** golangci-lint resolves a relative `--output.sarif.path`
+   against the real workspace (forbidden under sandboxing); the action anchors it
+   at an absolute `$PWD` path and copies to the declared Bazel output. URIs are
+   then normalized to workspace-relative by stripping through `/execroot/<repo>/`.
