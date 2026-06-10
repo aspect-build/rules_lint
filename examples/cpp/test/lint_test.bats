@@ -26,4 +26,19 @@ function assert_cpp_lints() {
 	assert_output --partial "warning:"
 	refute_output --partial "warnings generated"
 	refute_output --partial "Suppressed"
+	refute_output --partial "Use -header-filter"
+}
+
+# Regression for https://github.com/aspect-build/rules_lint/issues/899: when a check
+# is promoted via WarningsAsErrors, clang-tidy appends a "N warning(s) treated as
+# error(s)" summary line (singular "error" for a single promotion). It must be
+# filtered while the real error diagnostic is kept.
+@test "clang-tidy report strips the 'treated as error' summary" {
+	bazel build --aspects=//tools/lint:linters.bzl%clang_tidy --output_groups=rules_lint_human //test:inconsistent_cc
+	report=$(find -L "$(bazel info bazel-bin)/test" -name '*inconsistent*ClangTidy*.out' | head -n 1)
+	run cat "$report"
+	assert_success
+	# the promoted error diagnostic survives, the summary line is filtered out
+	assert_output --partial "error:"
+	refute_output --partial "treated as error"
 }
