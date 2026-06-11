@@ -304,15 +304,16 @@ def _get_compiler_args(ctx, compilation_context, srcs):
     args.extend(_prefixed(compilation_context.external_includes.to_list(), "-isystem"))
 
     # A hermetic clang-tidy resolves its own libc++ and Clang builtins
-    # via binary-relative search, but cannot find platform SDK headers
-    # (e.g. macOS Xcode SDK: wchar.h, stdlib.h, stdint.h).  Pass
-    # -isysroot so the Clang frontend locates them without injecting
+    # via binary-relative search, but not the platform SDK headers
+    # (e.g. macOS Xcode SDK: wchar.h, stdlib.h, stdint.h). Pass
+    # -isysroot so the frontend locates them, rather than injecting
     # individual include dirs that risk mixing incompatible header
-    # versions (see https://github.com/llvm/llvm-project/issues/63890).
+    # versions (https://github.com/llvm/llvm-project/issues/63890).
     #
-    # cc_toolchain.sysroot is often None on macOS (Bazel treats the
-    # Xcode SDK as the default sysroot), so fall back to deriving the
-    # SDK root from built_in_include_directories when targeting macOS.
+    # Apple-style toolchains leave builtin_sysroot unset and deliver
+    # the SDK via an -isysroot flag resolved at action time, so
+    # cc_toolchain.sysroot is empty; recover the SDK root from the
+    # builtin include dirs when targeting macOS.
     # Fixes: https://github.com/aspect-build/rules_lint/issues/566
     cc_toolchain = find_cpp_toolchain(ctx)
     sysroot = cc_toolchain.sysroot
@@ -320,9 +321,9 @@ def _get_compiler_args(ctx, compilation_context, srcs):
         ctx.attr._macos_constraint[platform_common.ConstraintValueInfo],
     ):
         for d in cc_toolchain.built_in_include_directories:
-            idx = d.find("MacOSX.sdk/")
+            idx = d.find(".sdk/")
             if idx != -1:
-                sysroot = d[:idx + len("MacOSX.sdk")]
+                sysroot = d[:idx + len(".sdk")]
                 break
     if sysroot:
         args.extend(["-isysroot", sysroot])
