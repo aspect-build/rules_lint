@@ -33,13 +33,16 @@ else
     out_file=$(mktemp)
 fi
 # include stderr in output file; it contains some of the diagnostics
-command="$clang_tidy $@ $file > $out_file 2>&1"
+# NB: do NOT collapse "$@" into a single string and eval it — args containing
+# shell metacharacters such as `__attribute__((deprecated))` then get re-parsed
+# by the shell ("syntax error near unexpected token `('"). Run clang-tidy
+# directly with "$@" so each argument is preserved verbatim.
 if [[ -n $CLANG_TIDY__VERBOSE ]]; then
     echo "$@"
     echo "cwd: " `pwd`
-    echo $command
+    echo "$clang_tidy $@ > $out_file 2>&1"
 fi
-eval $command
+"$clang_tidy" "$@" > "$out_file" 2>&1
 exit_code=$?
 if [[ -z $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
     cat $out_file
