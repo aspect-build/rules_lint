@@ -46,10 +46,6 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_
         ("env" if mode == "test" else "environment"): {
             # NB: can't use str(Label(target_name)) here because bzlmod makes it
             # the apparent repository, starts with @@aspect_rules_lint~override
-            # For test mode, FIX_TARGET should point at the companion
-            # format_multirun's fix command (when provided), not at the test
-            # target itself — otherwise the failure message tells users to
-            # `bazel run` the test, which is not the fixer.
             "FIX_TARGET": fix_target_label or "//{}:{}".format(native.package_name(), target_name),
             "tool": "$(rlocationpaths %s)" % tool_label,
             "lang": lang,
@@ -195,12 +191,7 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
     for lang, toolname, tool_label, target_name, custom_args in _tools_loop(name, kwargs):
         fix_target_label = None
         if fix_label:
-            fix_target_label = "//{}:{}_{}_with_{}".format(
-                fix_label.package,
-                fix_label.name,
-                lang.replace(" ", "_"),
-                toolname,
-            )
+            fix_target_label = "//{}:{}".format(fix_label.package, _format_target_name(fix_label.name, lang, toolname))
         attrs = _format_attr_factory(target_name, lang, toolname, tool_label, "test", disable_git_attribute_checks, custom_args, fix_target_label = fix_target_label)
         if srcs_label:
             attrs["data"] = [tool_label, srcs_label]
@@ -222,6 +213,10 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
         tags = tags,
     )
 
+def _format_target_name(name, lang, toolname):
+    """Name of the per-language target created by format_multirun and format_test."""
+    return "_".join([name, lang.replace(" ", "_"), "with", toolname])
+
 def _tools_loop(name, kwargs):
     result = []
 
@@ -236,7 +231,7 @@ def _tools_loop(name, kwargs):
             continue
 
         tool_label = kwargs.pop(lang_attribute)
-        target_name = "_".join([name, lang.replace(" ", "_"), "with", toolname])
+        target_name = _format_target_name(name, lang, toolname)
 
         # Extract custom args for this language
         fix_args = kwargs.pop(lang_attribute + "_fix_args", None)
