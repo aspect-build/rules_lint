@@ -1,4 +1,4 @@
-"""API for declaring a Scalafix lint aspect that visits scala_library, scala_binary, and scala_test rules.
+"""API for declaring a Scalafix lint aspect that visits scala_library, scala_binary, and scala test rules.
 
 Scalafix is a linting and refactoring tool for Scala that supports both syntactic and semantic rules.
 See https://scalacenter.github.io/scalafix/
@@ -106,8 +106,11 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
         semanticdb_targetroots: Directories containing .semanticdb files (list of paths)
         sourceroot: Root directory for relative path resolution
     """
+    scala_toolchain = ctx.toolchains["@rules_scala//scala:toolchain_type"]
+
     args = ctx.actions.args()
     args.add_all(options)
+    args.add("--scala-version", scala_toolchain.scala_version)
 
     inputs = list(srcs)
     outputs = [stdout]
@@ -119,12 +122,13 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
 
     # Semantic mode arguments
     if classpath:
-        # Semantic mode: pass classpath and semanticdb info
+        # Semantic mode: pass classpath and, semanticdb info, and scalac options
         args.add("--classpath", ":".join([jar.path for jar in classpath]))
         if semanticdb_targetroots:
             args.add("--semanticdb-targetroots", ":".join(semanticdb_targetroots))
         if sourceroot:
             args.add("--sourceroot", sourceroot)
+        args.add_all(scala_toolchain.scalacopts, before_each = "--scalac-options")
         inputs.extend(classpath)
     else:
         # Syntactic mode: no compilation data needed
@@ -136,6 +140,7 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
     if patch != None:
         # Use run_patcher for fix mode
         args_list = list(options)
+        args_list.extend(["--scala-version", scala_toolchain.scala_version])
         if config:
             args_list.extend(["--config", config.path])
         if classpath:
@@ -144,6 +149,8 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
                 args_list.extend(["--semanticdb-targetroots", ":".join(semanticdb_targetroots)])
             if sourceroot:
                 args_list.extend(["--sourceroot", sourceroot])
+            for opt in scala_toolchain.scalacopts:
+                args_list.extend(["--scalac-options", opt])
         else:
             args_list.append("--syntactic")
 
@@ -294,5 +301,6 @@ def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_b
         }),
         toolchains = [
             OPTIONAL_SARIF_PARSER_TOOLCHAIN,
+             "@rules_scala//scala:toolchain_type",
         ],
     )
