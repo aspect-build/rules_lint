@@ -89,7 +89,7 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintScalafix"
 
-def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, options = [], patch = None, classpath = None, semanticdb_targetroots = None, sourceroot = None):
+def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, options = [], patch = None, classpath = None):
     """Run scalafix as a build action in Bazel.
 
     Args:
@@ -103,8 +103,6 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
         options: additional command-line arguments to scalafix
         patch: output file for patch (optional). If provided, uses run_patcher for fix mode.
         classpath: For semantic rules - transitive compile classpath (list of jars)
-        semanticdb_targetroots: Directories containing .semanticdb files (list of paths)
-        sourceroot: Root directory for relative path resolution
     """
     scala_toolchain = ctx.toolchains["@rules_scala//scala:toolchain_type"]
 
@@ -117,17 +115,12 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
 
     # Add config file
     if config:
-        inputs.append(config)
         args.add("--config", config.path)
+        inputs.append(config)
 
-    # Semantic mode arguments
     if classpath:
-        # Semantic mode: pass classpath and, semanticdb info, and scalac options
+        # Semantic mode: pass classpath and scalac options
         args.add("--classpath", ":".join([jar.path for jar in classpath]))
-        if semanticdb_targetroots:
-            args.add("--semanticdb-targetroots", ":".join(semanticdb_targetroots))
-        if sourceroot:
-            args.add("--sourceroot", sourceroot)
         args.add_all(scala_toolchain.scalacopts, before_each = "--scalac-options")
         inputs.extend(classpath)
     else:
@@ -144,14 +137,12 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
         if config:
             args_list.extend(["--config", config.path])
         if classpath:
+            # Semantic mode: pass classpath and scalac options
             args_list.extend(["--classpath", ":".join([jar.path for jar in classpath])])
-            if semanticdb_targetroots:
-                args_list.extend(["--semanticdb-targetroots", ":".join(semanticdb_targetroots)])
-            if sourceroot:
-                args_list.extend(["--sourceroot", sourceroot])
             for opt in scala_toolchain.scalacopts:
                 args_list.extend(["--scalac-options", opt])
         else:
+            # Syntactic mode: no compilation data needed
             args_list.append("--syntactic")
 
         for src in srcs:
@@ -212,8 +203,6 @@ def _scalafix_aspect_impl(target, ctx):
 
     # Semantic mode: collect classpath and semanticdb metadata
     classpath = None
-    semanticdb_targetroots = None
-    sourceroot = None
 
     if ctx.attr._semantic and JavaInfo in target and SemanticdbInfo in target and target[SemanticdbInfo].semanticdb_enabled:
         # Access classpath from JavaInfo (like spotbugs)
@@ -239,8 +228,6 @@ def _scalafix_aspect_impl(target, ctx):
         color_options,
         patch = getattr(outputs, "patch", None),
         classpath = classpath,
-        semanticdb_targetroots = semanticdb_targetroots,
-        sourceroot = sourceroot,
     )
 
     # Machine-readable output (raw for SARIF conversion)
@@ -253,8 +240,6 @@ def _scalafix_aspect_impl(target, ctx):
         raw_machine_report,
         outputs.machine.exit_code,
         classpath = classpath,
-        semanticdb_targetroots = semanticdb_targetroots,
-        sourceroot = sourceroot,
     )
 
     # Convert to SARIF format
