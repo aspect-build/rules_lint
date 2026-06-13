@@ -1,0 +1,7 @@
+load("//tools/lint:linters.bzl", "scalafix_test")
+
+scalafix_test(
+    name = "app_test",
+    srcs = ["//src:App"],
+    expected_exit_code = 96,
+)

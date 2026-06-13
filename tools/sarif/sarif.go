@@ -176,7 +176,6 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	}
 
 	s := efm.NewScanner(strings.NewReader(report))
-	entriesWritten := 0
 	for s.Scan() {
 		entry := s.Entry()
 		if entry.Filename != "" && entry.Text != "" {
@@ -184,17 +183,15 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			if err := jsonWriter.Write(entry); err != nil {
 				return "", err
 			}
-			entriesWritten++
 		}
 	}
 
-	if entriesWritten == 0 && mnemonic == "AspectRulesLintScalafix" {
+	if mnemonic == "AspectRulesLintScalafix" {
 		for _, entry := range scalafixDiffEntries(report) {
 			entry.Filename = determineRelativePath(entry.Filename, label)
 			if err := jsonWriter.Write(entry); err != nil {
 				return "", err
 			}
-			entriesWritten++
 		}
 	}
 
@@ -296,7 +293,7 @@ func scalafixDiffEntries(report string) []*errorformat.Entry {
 	for _, line := range strings.Split(report, "\n") {
 		if strings.HasPrefix(line, "--- ") {
 			path := strings.TrimSpace(strings.TrimPrefix(line, "--- "))
-			if path == "" || path == "/dev/null" {
+			if path == "" {
 				currentFile = ""
 				continue
 			}
@@ -306,7 +303,7 @@ func scalafixDiffEntries(report string) []*errorformat.Entry {
 		if strings.HasPrefix(line, "+++ ") {
 			if currentFile == "" {
 				path := strings.TrimSpace(strings.TrimPrefix(line, "+++ "))
-				if path != "" && path != "/dev/null" && path != "<expected fix>" {
+				if path != "" && path != "<expected fix>" {
 					currentFile = path
 				}
 			}

@@ -31,7 +31,8 @@ This example demonstrates how to set up formatting and linting for Scala code us
 
 The `src/` directory contains example Scala files:
 
-- `hello.scala` - Simple Scala file that can be formatted
+- `Foo.scala` - Scala library file with formatting and lint fixes
+- `App.scala` - Scala binary file with lint fixes
 
 ## Configuration Files
 

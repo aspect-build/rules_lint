@@ -153,7 +153,7 @@ setup() {
     run bazel run //format/test:format_Scala_with_scalafmt
     assert_success
 
-    assert_output --partial "+ scalafmt --respect-project-filters examples/scala/src/hello.scala"
+    assert_output --partial "+ scalafmt --respect-project-filters examples/scala/src/Foo.scala"
 }
 
 @test "should run gofmt on Go" {
