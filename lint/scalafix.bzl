@@ -131,8 +131,7 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
         args.add("--syntactic")
 
     # Add source files
-    args.add("--files")
-    args.add_all(srcs)
+    args.add_all(srcs, before_each = "--files")
 
     if patch != None:
         # Use run_patcher for fix mode
@@ -147,8 +146,9 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
                 args_list.extend(["--sourceroot", sourceroot])
         else:
             args_list.append("--syntactic")
-        args_list.append("--files")
-        args_list.extend([s.path for s in srcs])
+
+        for src in srcs:
+            args_list.extend(["--files", src.path])
 
         run_patcher(
             ctx,
