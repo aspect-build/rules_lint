@@ -1,32 +1,36 @@
+# Release + publish aspect_rules_lint_rust to the BCR, independently of the
+# root module (own rust-v* version line). Thin trigger over release-module.yaml;
+# to add another module (e.g. lint/rules_rust), copy this file with a new tag
+# prefix / root / name (and add a release_prep.sh case + .bcr/<module>/ templates).
 name: Release Rust lint module
 
 on:
   push:
     tags:
-      - "rust-v*"
+      - "rust-v*.*.*"
+  # In case of problems, let release engineers retry by manually dispatching
+  # the workflow from the GitHub UI
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        required: true
+        type: string
 
 permissions:
+  id-token: write
+  attestations: write
   contents: write
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Create Rust lint module archive
-        id: archive
-        shell: bash
-        run: |
-          version="${GITHUB_REF_NAME#rust-v}"
-          archive="aspect_rules_lint_rust-v${version}.tar.gz"
-          prefix="aspect_rules_lint_rust-${version}/"
-
-          git archive --format=tar --prefix="${prefix}" HEAD:lint/rust \
-            | gzip --no-name > "${archive}"
-
-          echo "path=${archive}" >> "${GITHUB_OUTPUT}"
-      - name: Create GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          ARCHIVE: ${{ steps.archive.outputs.path }}
-        run: gh release create "${GITHUB_REF_NAME}" "${ARCHIVE}" --generate-notes --verify-tag
+    uses: ./.github/workflows/release-module.yaml
+    with:
+      tag_name: ${{ inputs.tag_name || github.ref_name }}
+      tag_prefix: "rust-v"
+      module_root: "lint/rust"
+      module_name: "aspect_rules_lint_rust"
+      # The root workspace's tests don't cover this nested module (it is its
+      # own Bazel workspace, tested by repo CI), so skip the test run.
+      bazel_test_command: "true"
+    secrets:
+      BCR_PUBLISH_TOKEN: ${{ secrets.BCR_PUBLISH_TOKEN }}
