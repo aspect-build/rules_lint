@@ -255,7 +255,7 @@ def _scalafix_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_binary", "scala_test"], semantic = False):
+def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_binary", "scala_test", "scala_junit_test"], semantic = False):
     """A factory function to create a linter aspect.
 
     Args:
