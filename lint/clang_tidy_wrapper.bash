@@ -46,8 +46,15 @@ exit_code=$?
 # Drop clang-tidy summary statistics (e.g. "N warnings generated.") that it
 # prints even on a clean, exit-0 run thus tripping in fail_on_violation mode.
 # Diagnostics are kept.
-grep -Ev '^[0-9]+ (warnings?|errors?)( and [0-9]+ errors?)? generated\.$|^Suppressed [0-9]+ warnings? \(.*\)\.$|^Use -header-filter=.*$|^[0-9]+ warnings? treated as errors?$' $raw_out_file > $out_file || true
+grep -Ev '^[0-9]+ (warnings?|errors?)( and [0-9]+ errors?)? generated\.$|^Suppressed [0-9]+ warnings? \(.*\)\.$|^Use -header-filter=.*$|^[0-9]+ warnings? treated as errors?$' $raw_out_file > $out_file
+grep_status=$?
 rm -f $raw_out_file
+# grep exit >=2 means grep itself failed and $out_file is unreliable; bail
+# before the return-code logic below reads it and reports a false-clean result.
+if [ $grep_status -gt 1 ]; then
+    echo "clang_tidy_wrapper: failed to filter clang-tidy output (grep exit $grep_status)" >&2
+    exit $grep_status
+fi
 if [[ -z $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
     cat $out_file
 fi
