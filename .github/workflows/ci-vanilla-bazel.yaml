@@ -14,9 +14,6 @@ concurrency:
 permissions:
     id-token: write
 
-env:
-  ASPECT_LAUNCHER_VERSION: 2026.22.39
-
 jobs:
   list-examples:
     runs-on: ubuntu-latest
@@ -92,8 +89,7 @@ jobs:
           - folder: examples/shell
     steps:
       - uses: actions/checkout@v6
-      - name: Install Aspect CLI
-        run: curl -fsSL https://install.aspect.build | bash -s -- "$ASPECT_LAUNCHER_VERSION"
+      - uses: aspect-build/setup-aspect@c22a8f64fb38f82f59ce809cd7eb9f8ae096da44 # v2026.23.2
       - name: Setup bats
         uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1
         with:
