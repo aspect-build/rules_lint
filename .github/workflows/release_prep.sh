@@ -28,6 +28,17 @@ tar --create --auto-compress \
 # Delete the placeholder file
 tar --file $ARCHIVE_TMP --delete ${PREFIX}/tools/integrity.bzl
 
+# download-artifact now extracts a single artifact flat into the workspace root
+# rather than into go-binaries/ (actions/download-artifact#455). Move the files
+# back where the glob below and `release_files: go-binaries/*` expect them.
+# This is the root cause that shipped 2.7.0 with an empty integrity dict.
+if compgen -G '*.sha256' >/dev/null; then
+  mkdir -p go-binaries
+  for f in *.sha256; do
+    mv "$f" "${f%.sha256}" go-binaries/
+  done
+fi
+
 mkdir -p ${PREFIX}/tools
 cat >${PREFIX}/tools/integrity.bzl <<EOF
 "Generated during release by release_prep.sh"
