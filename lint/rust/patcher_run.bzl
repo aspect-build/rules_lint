@@ -1,5 +1,7 @@
+load("@aspect_rules_lint//lint/private:patcher_action.bzl", "patcher_attrs", _run_patcher = "run_patcher")
 load("@bazel_lib//lib:expand_make_vars.bzl", _expand_locations = "expand_locations")
-load("//lint/private:patcher_action.bzl", "patcher_attrs", _run_patcher = "run_patcher")
+
+# TODO: Remove this file after aspect_rules_lint includes this patcher_run fix and lint/rust/MODULE.bazel requires that release.
 
 def _repository_relative_path(file):
     if not file.short_path.startswith("../"):
@@ -38,11 +40,9 @@ def _patcher_run_impl(ctx):
 
     data = ctx.files.data
     env = ctx.attr.env
-
     inputs = [
         ctx.executable.tool,
     ] + files_to_diff + data
-
     tool_args = [
         _expand_locations(ctx, arg, ctx.attr.data)
         for arg in ctx.attr.tool_args

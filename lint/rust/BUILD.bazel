@@ -1,6 +1,6 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary", "js_test")
 load("@bazel_lib//lib:diff_test.bzl", "diff_test")
-load("@aspect_rules_lint//lint/private:patcher_run.bzl", "patcher_run")
+load("//:patcher_run.bzl", "patcher_run")
 
 js_library(
     name = "diagnostic-formatter",
@@ -24,8 +24,8 @@ js_run_binary(
     outs = ["got.sarif.out"],
     args = [
         "sarif",
-        "$(rootpath testdata/sarif/clippy.diagnostics)",
-        "$(rootpath got.sarif.out)",
+        "../../../$(execpath testdata/sarif/clippy.diagnostics)",
+        "../../../$(execpath got.sarif.out)",
     ],
     tool = ":cli",
 )
@@ -52,8 +52,8 @@ js_run_binary(
     outs = ["got.human.out"],
     args = [
         "human-readable",
-        "$(rootpath testdata/human/clippy.diagnostics)",
-        "$(rootpath got.human.out)",
+        "../../../$(execpath testdata/human/clippy.diagnostics)",
+        "../../../$(execpath got.human.out)",
     ],
     tool = ":cli",
 )

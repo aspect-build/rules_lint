@@ -25,8 +25,8 @@ js_run_binary(
     outs = ["got.sarif.out"],
     args = [
         "sarif",
-        "$(rootpath testdata/sarif/clippy.diagnostics)",
-        "$(rootpath got.sarif.out)",
+        "../../../$(execpath testdata/sarif/clippy.diagnostics)",
+        "../../../$(execpath got.sarif.out)",
     ],
     tool = ":cli",
 )
@@ -53,8 +53,8 @@ js_run_binary(
     outs = ["got.human.out"],
     args = [
         "human-readable",
-        "$(rootpath testdata/human/clippy.diagnostics)",
-        "$(rootpath got.human.out)",
+        "../../../$(execpath testdata/human/clippy.diagnostics)",
+        "../../../$(execpath got.human.out)",
     ],
     tool = ":cli",
 )
