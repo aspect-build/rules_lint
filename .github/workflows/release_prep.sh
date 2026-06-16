@@ -40,6 +40,30 @@ RELEASED_BINARY_INTEGRITY = $(
 )
 EOF
 
+# Fail the release if any sarif_parser platform the toolchain requires is missing
+# an integrity entry. Without this, a dropped or unbuilt release binary silently
+# produces an incomplete RELEASED_BINARY_INTEGRITY, and the gap only surfaces at
+# `bazel build` time in a consuming repo as
+# "key \"sarif_parser-<platform>\" not found in dictionary" (see #906).
+# The required platforms are the keys of SARIF_PARSER_PLATFORMS.
+missing=()
+for platform in $(grep -oE '^    "[a-z0-9_]+": struct\(' tools/toolchains/sarif_parser_toolchain.bzl | sed -E 's/^    "([^"]+)".*/\1/'); do
+  ext=""
+  [[ "$platform" == windows_* ]] && ext=".exe"
+  key="sarif_parser-${platform}${ext}"
+  if ! grep -q "\"${key}\"" ${PREFIX}/tools/integrity.bzl; then
+    missing+=("$key")
+  fi
+done
+if [[ ${#missing[@]} -gt 0 ]]; then
+  echo "ERROR: release integrity is missing entries for: ${missing[*]}" >&2
+  echo "The go-binaries/ artifact did not contain a .sha256 for every required" >&2
+  echo "sarif_parser platform. Aborting to avoid publishing a broken release." >&2
+  echo "Generated tools/integrity.bzl was:" >&2
+  cat ${PREFIX}/tools/integrity.bzl >&2
+  exit 1
+fi
+
 # Append that generated file back into the archive
 tar --file $ARCHIVE_TMP --append ${PREFIX}/tools/integrity.bzl
 
