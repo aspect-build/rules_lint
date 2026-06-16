@@ -24,9 +24,11 @@ js_run_binary(
     outs = ["got.sarif.out"],
     args = [
         "sarif",
-        "../../../$(execpath testdata/sarif/clippy.diagnostics)",
-        "../../../$(execpath got.sarif.out)",
+        "$(execpath testdata/sarif/clippy.diagnostics)",
+        "$(execpath got.sarif.out)",
     ],
+    # js_run_binary starts in $(BINDIR); $(execpath) is relative to the execroot.
+    chdir = "../../..",
     tool = ":cli",
 )
 
@@ -52,9 +54,10 @@ js_run_binary(
     outs = ["got.human.out"],
     args = [
         "human-readable",
-        "../../../$(execpath testdata/human/clippy.diagnostics)",
-        "../../../$(execpath got.human.out)",
+        "$(execpath testdata/human/clippy.diagnostics)",
+        "$(execpath got.human.out)",
     ],
+    chdir = "../../..",
     tool = ":cli",
 )
 
