@@ -27,9 +27,9 @@ js_run_binary(
         "$(execpath testdata/sarif/clippy.diagnostics)",
         "$(execpath got.sarif.out)",
     ],
-    # js_run_binary starts in $(BINDIR); $(execpath) is relative to the execroot.
-    chdir = "../../..",
+    env = {"BAZEL_BINDIR": "."},
     tool = ":cli",
+    use_execroot_entry_point = False,
 )
 
 js_test(
@@ -57,8 +57,9 @@ js_run_binary(
         "$(execpath testdata/human/clippy.diagnostics)",
         "$(execpath got.human.out)",
     ],
-    chdir = "../../..",
+    env = {"BAZEL_BINDIR": "."},
     tool = ":cli",
+    use_execroot_entry_point = False,
 )
 
 diff_test(
