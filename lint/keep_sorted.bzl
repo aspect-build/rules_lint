@@ -47,14 +47,19 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs
+
+    args = ctx.actions.args()
+    args.add_all(options)
+    args.add("--mode", "fix" if patch != None else "lint")
+    args.add_all(srcs)
+
     if patch != None:
         # Use run_patcher for fix mode
-        args_list = options + ["--mode=fix"] + [s.path for s in srcs]
         run_patcher(
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args_list,
+            args = args,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable],
@@ -67,10 +72,6 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
     else:
         # Use run_shell for lint mode
         outputs = [stdout]
-        args = ctx.actions.args()
-        args.add_all(options)
-        args.add("--mode=lint")
-        args.add_all(srcs)
 
         if exit_code:
             command = "{keep_sorted} $@ >{stdout}; echo $? > " + exit_code.path

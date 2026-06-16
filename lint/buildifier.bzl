@@ -49,7 +49,10 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
     """
     if patch != None:
         wrapper = ctx.actions.declare_file(ctx.label.name + ".buildifier_wrapper.sh")
-        args_list = ["--warnings={}".format(ctx.attr._warnings)] + [s.path for s in srcs]
+        args = ctx.actions.args()
+        args.add("--warnings={}".format(ctx.attr._warnings))
+        args.add_all(srcs)
+
         ctx.actions.write(
             output = wrapper,
             content = """#!/bin/bash
@@ -63,7 +66,7 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
             ctx,
             ctx.executable,
             inputs = srcs,
-            args = args_list,
+            args = args,
             files_to_diff = [src.path for src in srcs],
             patch_out = patch,
             tools = [wrapper, executable],

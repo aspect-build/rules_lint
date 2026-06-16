@@ -78,14 +78,22 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs + config
+
+    args = ctx.actions.args()
+    args.add("check")
+    args.add("--force-exclude")
+    args.add("--quiet")
+
     if patch != None:
         # Use run_patcher for fix mode
-        args_list = ["check", "--fix", "--force-exclude", "--quiet"] + [s.path for s in srcs]
+        args.add("--fix")
+        args.add_all(srcs)
+
         run_patcher(
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args_list,
+            args = args,
             files_to_diff = [s.path for s in srcs],
             patch_cfg_env = env,
             patch_out = patch,
@@ -99,10 +107,6 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
     else:
         # Use run_shell for lint mode
         outputs = [stdout]
-        args = ctx.actions.args()
-        args.add("check")
-        args.add("--force-exclude")
-        args.add("--quiet")
         args.add_all(srcs)
         if not env.get("FORCE_COLOR"):
             args.add("--output-format=concise")
