@@ -1,0 +1,32 @@
+name: Release Rust lint module
+
+on:
+  push:
+    tags:
+      - "rust-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Create Rust lint module archive
+        id: archive
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#rust-v}"
+          archive="aspect_rules_lint_rust-v${version}.tar.gz"
+          prefix="aspect_rules_lint_rust-${version}/"
+
+          git archive --format=tar --prefix="${prefix}" HEAD:lint/rust \
+            | gzip --no-name > "${archive}"
+
+          echo "path=${archive}" >> "${GITHUB_OUTPUT}"
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE: ${{ steps.archive.outputs.path }}
+        run: gh release create "${GITHUB_REF_NAME}" "${ARCHIVE}" --generate-notes --verify-tag

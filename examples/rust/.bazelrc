@@ -1,2 +1,15 @@
 build:lint --aspects=//tools/lint:linters.bzl%clippy
+
 test --@aspect_rules_lint//lint:fail_on_violation
+
+common --enable_platform_specific_config
+common:linux --@llvm//config:experimental_stub_libgcc_s=True
+common:windows --host_platform=//platforms:local_windows_msvc
+
+# Build without the bytes
+common:ci --remote_download_outputs=minimal
+common:ci --nobuild_runfile_links
+
+# Override the preset's `--lockfile_mode=error` on CI since we don't
+# yet commit MODULE.bazel.lock — see .gitignore.
+common:ci --lockfile_mode=off

@@ -81,4 +81,15 @@ fi
 if [[ -n $CLANG_TIDY__VERBOSE ]]; then
     echo exit $exit_code
 fi
+# Surface the captured diagnostics on the action's stderr when we are about
+# to exit non-zero. Without this, fail_on_violation builds report
+# `Linting //x:y failed` with no body — the diagnostic text sits in the
+# .out file (CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE) and never reaches the
+# user. The fatal_error branch above already cats to stdout for
+# clang-diagnostic-error; this covers the warnings-as-errors case
+# (e.g. WarningsAsErrors: "*") where there is no clang-diagnostic-error
+# string in the output.
+if [ $exit_code -ne 0 ] && [ -n "$CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE" ] && [ -s "$out_file" ]; then
+    cat "$out_file" >&2
+fi
 exit $exit_code

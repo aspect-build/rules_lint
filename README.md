@@ -1,5 +1,9 @@
 # Run linters and formatters under Bazel
 
+> [!NOTE]
+> This repository uses the [Aspect CLI](https://github.com/aspect-build/aspect-cli) for CI and local development.
+> See the [docs](https://docs.aspect.build/cli/overview) and [install instructions](https://docs.aspect.build/cli/install) to get started.
+
 This ruleset integrates linting and formatting as first-class concepts under Bazel.
 
 Features:
@@ -37,6 +41,7 @@ Linters which are not language-specific:
 | CSS, Less, Sass        | [Prettier]                | [Stylelint]                                             |
 | F#                     | [Fantomas]                |                                                         |
 | Go                     | [gofmt] or [gofumpt]      |                                                         |
+| Go Module              | [modfmt]                  |                                                         |
 | Gherkin                | [prettier-plugin-gherkin] |                                                         |
 | GraphQL                | [Prettier]                |                                                         |
 | HCL (Hashicorp Config) | [terraform] fmt           |                                                         |
@@ -90,6 +95,7 @@ Linters which are not language-specific:
 [prettier/plugin-xml]: https://github.com/prettier/plugin-xml
 [gofmt]: https://pkg.go.dev/cmd/gofmt
 [gofumpt]: https://github.com/mvdan/gofumpt
+[modfmt]: https://github.com/joshdk/modfmt
 [jsonnetfmt]: https://github.com/google/go-jsonnet
 [scalafmt]: https://scalameta.org/scalafmt
 [rubocop]: https://docs.rubocop.org/

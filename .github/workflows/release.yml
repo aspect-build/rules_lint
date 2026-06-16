@@ -33,7 +33,7 @@ jobs:
     # Go cross-compilation works from linux -> any platform
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build Go Binaries
         env:
           # NB: this variable is read by tools/release/copy_release_artifacts.sh
@@ -44,7 +44,7 @@ jobs:
           mkdir -p ${{ env.DEST }}
           bazel --bazelrc=.github/workflows/ci.bazelrc \
             run --config=release //tools/release:copy_release_artifacts
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: go-binaries
           path: binaries/
@@ -52,7 +52,11 @@ jobs:
 
   release:
     needs: build
-    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.2.3
+    # SLSA trusted-builder reusable workflows MUST be referenced by a semantic
+    # version tag, not a commit SHA: slsa-verifier reads the builder ref from the
+    # provenance and rejects a bare SHA ("unexpected ref type"), which breaks the
+    # release-artifact attestations that BCR's presubmit verifies. Do not SHA-pin.
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.6.0
     with:
       prerelease: false
       release_files: |

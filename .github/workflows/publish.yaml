@@ -22,12 +22,16 @@ on:
 
 jobs:
   publish:
-    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.0.0
+    # SLSA trusted-builder reusable workflows MUST be referenced by a semantic
+    # version tag, not a commit SHA: slsa-verifier reads the builder ref from the
+    # provenance and rejects a bare SHA ("unexpected ref type"), which breaks the
+    # source.json attestation that BCR's presubmit verifies. Do not SHA-pin this.
+    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.2.0
     with:
       draft: false
       tag_name: ${{ inputs.tag_name }}
       # GitHub repository which is a fork of the upstream where the Pull Request will be opened.
-      registry_fork: aspect-build/bazel-central-registry
+      registry_fork: aspect-forks/bazel-central-registry
     permissions:
       attestations: write
       contents: write

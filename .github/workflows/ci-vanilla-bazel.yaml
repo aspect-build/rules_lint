@@ -1,20 +1,18 @@
-name: CI
+name: CI - Vanilla Bazel
 
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for release branches
   push:
     branches: [main, 1.x]
   pull_request:
     branches: [main, 1.x]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 concurrency:
-  # Cancel previous actions from the same PR or branch except 'main' branch.
-  # See https://docs.github.com/en/actions/using-jobs/using-concurrency and https://docs.github.com/en/actions/learn-github-actions/contexts for more info.
-  group: concurrency-group::${{ github.workflow }}::${{ github.event.pull_request.number > 0 && format('pr-{0}', github.event.pull_request.number) || github.ref_name }}${{ github.ref_name == 'main' && format('::{0}', github.run_id) || ''}}
-  cancel-in-progress: ${{ github.ref_name != 'main' }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+    id-token: write
 
 jobs:
   list-examples:
@@ -24,10 +22,10 @@ jobs:
       test-matrix: ${{ steps.set-test-matrix.outputs.matrix }}
       lint-matrix: ${{ steps.set-lint-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Verify bcr patches
         run: patch --dry-run -p1 --fuzz 0 < .bcr/patches/*.patch
-      - uses: lycheeverse/lychee-action@v2
+      - uses: lycheeverse/lychee-action@a8c4c7cb88f0c7386610c35eb25108e448569cb0 # v2.7.0
         with:
           # Allow 503 Service Unavailable when rate limited
           args: --accept '200..=204,503' --base ${{ github.workspace }} --verbose --no-progress './**/*.md' './**/*.html'
@@ -59,8 +57,8 @@ jobs:
       matrix:
         folder: ${{ fromJson(needs.list-examples.outputs.format-matrix) }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: bazel-contrib/setup-bazel@0.15.0
+      - uses: actions/checkout@v6
+      - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
         with: &bazelrc
           bazelrc: |
             common     --show_progress_rate_limit=60
@@ -90,24 +88,14 @@ jobs:
           - folder: examples/java
           - folder: examples/shell
     steps:
-      - uses: actions/checkout@v5
-      - name: Install Aspect CLI
-        uses: jaxxstorm/action-install-gh-release@v2.1.0
-        with:
-          repo: aspect-build/aspect-cli
-          tag: v2026.4.2
-          asset-name: aspect-cli
-          rename-to: aspect
-          platform: unknown-linux
-          arch: x86_64
-          chmod: 0755
-          extension-matching: disable
+      - uses: actions/checkout@v6
+      - uses: aspect-build/setup-aspect@c22a8f64fb38f82f59ce809cd7eb9f8ae096da44 # v2026.23.2
       - name: Setup bats
-        uses: mig4/setup-bats@v1
+        uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1
         with:
           bats-version: "1.8.2"
       - name: Setup bats helpers
-        uses: brokenpip3/setup-bats-libs@0.0.3
+        uses: brokenpip3/setup-bats-libs@adb596631d41c8e1da2466833a66ed2c321a4157 # 0.0.3
         with:
           support-path: /usr/lib/bats/bats-support
           support-version: "0.3.0"
@@ -128,8 +116,8 @@ jobs:
       matrix:
         folder: ${{ fromJson(needs.list-examples.outputs.lint-matrix) }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: bazel-contrib/setup-bazel@0.15.0
+      - uses: actions/checkout@v6
+      - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
         with: *bazelrc
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
@@ -158,8 +146,8 @@ jobs:
           - 9.x
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: bazel-contrib/setup-bazel@0.8.0
+      - uses: actions/checkout@v6
+      - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
         with:
           repository-cache: ${{ inputs.mount_bazel_caches }}
           bazelrc: |
