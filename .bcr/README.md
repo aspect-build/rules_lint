@@ -7,3 +7,14 @@ Bazel Central Registry automatically:
 This folder contains configuration files to automate the publish step.
 See <https://github.com/bazel-contrib/publish-to-bcr/blob/main/templates/README.md>
 for authoritative documentation about these files.
+
+This repo hosts several separately versioned modules. Each module's templates
+live under this folder at the same relative path as the module in the repo:
+
+- `.bcr/` — the root `aspect_rules_lint` module, released from `v*` tags
+- `.bcr/lint/rust/` — the `aspect_rules_lint_rust` module (`lint/rust`),
+  released from `rust-v*` tags
+
+Each release publishes exactly one module: the trigger workflow passes the
+module's root through the `module_roots` input of the publish-to-bcr reusable
+workflow (see `.github/workflows/release-module.yaml`).
