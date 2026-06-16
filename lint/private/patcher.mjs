@@ -47,6 +47,9 @@ async function sync(src, dst, subdir, filesToDiff) {
 
 async function main(args, sandbox) {
   const config = JSON.parse(await fs.promises.readFile(args[0]));
+  const spawnArgs = args.length > 1
+    ? (await fs.promises.readFile(args[1], "utf8")).split(/\r?\n/)
+    : config.args;
 
   debug("sandbox", sandbox);
   debug("config", JSON.stringify(config, null, 2));
@@ -65,11 +68,11 @@ async function main(args, sandbox) {
   );
 
   debug(
-    `spawning linter: ${config.linter} ${config.args.join(
+    `spawning linter: ${config.linter} ${spawnArgs.join(
       " "
     )} (with env ${JSON.stringify(config.env || {})})`
   );
-  const ret = childProcess.spawnSync(config.linter, config.args, {
+  const ret = childProcess.spawnSync(config.linter, spawnArgs, {
     stdio: "inherit",
     cwd: sandbox,
     env: config.env || {},
