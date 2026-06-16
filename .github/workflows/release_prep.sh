@@ -28,10 +28,11 @@ tar --create --auto-compress \
 # Delete the placeholder file
 tar --file $ARCHIVE_TMP --delete ${PREFIX}/tools/integrity.bzl
 
-# download-artifact now extracts a single artifact flat into the workspace root
-# rather than into go-binaries/ (actions/download-artifact#455). Move the files
-# back where the glob below and `release_files: go-binaries/*` expect them.
-# This is the root cause that shipped 2.7.0 with an empty integrity dict.
+# A single uploaded artifact is extracted flat into the workspace root, not into
+# go-binaries/ (actions/download-artifact#455). Move the files into go-binaries/
+# so the integrity glob below and `release_files: go-binaries/*` find them; if
+# they are left in the root the glob matches nothing and the integrity dict is
+# published empty.
 if compgen -G '*.sha256' >/dev/null; then
   mkdir -p go-binaries
   for f in *.sha256; do
@@ -52,10 +53,10 @@ RELEASED_BINARY_INTEGRITY = $(
 EOF
 
 # Fail the release if any sarif_parser platform the toolchain requires is missing
-# an integrity entry. Without this, a dropped or unbuilt release binary silently
-# produces an incomplete RELEASED_BINARY_INTEGRITY, and the gap only surfaces at
-# `bazel build` time in a consuming repo as
-# "key \"sarif_parser-<platform>\" not found in dictionary" (see #906).
+# an integrity entry. A dropped or unbuilt release binary otherwise yields an
+# incomplete RELEASED_BINARY_INTEGRITY that publishes without error; the gap only
+# surfaces later in a consuming repo at `bazel build` time as
+# "key \"sarif_parser-<platform>\" not found in dictionary".
 # The required platforms are the keys of SARIF_PARSER_PLATFORMS.
 missing=()
 for platform in $(grep -oE '^    "[a-z0-9_]+": struct\(' tools/toolchains/sarif_parser_toolchain.bzl | sed -E 's/^    "([^"]+)".*/\1/'); do
