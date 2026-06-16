@@ -28,6 +28,18 @@ tar --create --auto-compress \
 # Delete the placeholder file
 tar --file $ARCHIVE_TMP --delete ${PREFIX}/tools/integrity.bzl
 
+# A single uploaded artifact is extracted flat into the workspace root, not into
+# go-binaries/ (actions/download-artifact#455). Move the files into go-binaries/
+# so the integrity glob below and `release_files: go-binaries/*` find them; if
+# they are left in the root the glob matches nothing and the integrity dict is
+# published empty.
+if compgen -G '*.sha256' >/dev/null; then
+  mkdir -p go-binaries
+  for f in *.sha256; do
+    mv "$f" "${f%.sha256}" go-binaries/
+  done
+fi
+
 mkdir -p ${PREFIX}/tools
 cat >${PREFIX}/tools/integrity.bzl <<EOF
 "Generated during release by release_prep.sh"
@@ -39,6 +51,30 @@ RELEASED_BINARY_INTEGRITY = $(
     --raw-input go-binaries/*.sha256
 )
 EOF
+
+# Fail the release if any sarif_parser platform the toolchain requires is missing
+# an integrity entry. A dropped or unbuilt release binary otherwise yields an
+# incomplete RELEASED_BINARY_INTEGRITY that publishes without error; the gap only
+# surfaces later in a consuming repo at `bazel build` time as
+# "key \"sarif_parser-<platform>\" not found in dictionary".
+# The required platforms are the keys of SARIF_PARSER_PLATFORMS.
+missing=()
+for platform in $(grep -oE '^    "[a-z0-9_]+": struct\(' tools/toolchains/sarif_parser_toolchain.bzl | sed -E 's/^    "([^"]+)".*/\1/'); do
+  ext=""
+  [[ "$platform" == windows_* ]] && ext=".exe"
+  key="sarif_parser-${platform}${ext}"
+  if ! grep -q "\"${key}\"" ${PREFIX}/tools/integrity.bzl; then
+    missing+=("$key")
+  fi
+done
+if [[ ${#missing[@]} -gt 0 ]]; then
+  echo "ERROR: release integrity is missing entries for: ${missing[*]}" >&2
+  echo "The go-binaries/ artifact did not contain a .sha256 for every required" >&2
+  echo "sarif_parser platform. Aborting to avoid publishing a broken release." >&2
+  echo "Generated tools/integrity.bzl was:" >&2
+  cat ${PREFIX}/tools/integrity.bzl >&2
+  exit 1
+fi
 
 # Append that generated file back into the archive
 tar --file $ARCHIVE_TMP --append ${PREFIX}/tools/integrity.bzl
