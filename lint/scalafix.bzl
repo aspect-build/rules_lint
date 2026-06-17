@@ -108,15 +108,11 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
 
     args = ctx.actions.args()
     args.add_all(options)
+    args.add("--config", config.path)
     args.add("--scala-version", scala_toolchain.scala_version)
 
-    inputs = list(srcs)
+    inputs = list(srcs) + [config]
     outputs = [stdout]
-
-    # Add config file
-    if config:
-        args.add("--config", config.path)
-        inputs.append(config)
 
     if classpath:
         # Semantic mode: pass classpath and scalac options
@@ -132,27 +128,11 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
 
     if patch != None:
         # Use run_patcher for fix mode
-        args_list = list(options)
-        args_list.extend(["--scala-version", scala_toolchain.scala_version])
-        if config:
-            args_list.extend(["--config", config.path])
-        if classpath:
-            # Semantic mode: pass classpath and scalac options
-            args_list.extend(["--classpath", ":".join([jar.path for jar in classpath])])
-            for opt in scala_toolchain.scalacopts:
-                args_list.extend(["--scalac-options", opt])
-        else:
-            # Syntactic mode: no compilation data needed
-            args_list.append("--syntactic")
-
-        for src in srcs:
-            args_list.extend(["--files", src.path])
-
         run_patcher(
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args_list,
+            args = args,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable],
