@@ -13,10 +13,7 @@ local_path_override(
 
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
-    artifacts = [
-        "ch.epfl.scala:scalafix-cli_2.13.18:0.14.6",
-        "org.scalameta:scalafmt-cli_2.13:3.7.14",
-    ],
+    artifacts = ["org.scalameta:scalafmt-cli_2.13:3.7.14"],
     known_contributing_modules = [
         "",
         "protobuf",
@@ -28,6 +25,20 @@ maven.install(
     ],
 )
 use_repo(maven, "maven")
+
+# Scalafix is not binary-compatible with minor/patch versions of its
+# dependencies. Install it in a separate closure so it we use the exact
+# version of its dependencies.
+maven.install(
+    name = "maven_scalafix",
+    artifacts = ["ch.epfl.scala:scalafix-cli_2.13.18:0.14.7"],
+    fail_if_repin_required = True,
+    lock_file = "@//:scalafix_maven_install.json",
+    repositories = [
+        "https://repo1.maven.org/maven2",
+    ],
+)
+use_repo(maven, "maven_scalafix")
 
 scala_config = use_extension(
     "@rules_scala//scala/extensions:config.bzl",

@@ -4,5 +4,5 @@ java_binary(
     name = "scalafix",
     main_class = "scalafix.cli.Cli",
     visibility = ["//visibility:public"],
-    runtime_deps = ["@maven//:ch_epfl_scala_scalafix_cli_2_13_18"],
+    runtime_deps = ["@maven_scalafix//:ch_epfl_scala_scalafix_cli_2_13_18"],
 )

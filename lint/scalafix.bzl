@@ -22,6 +22,9 @@ maven.install(
 use_repo(maven, "maven")
 ```
 
+Note that scalafix is not binary compatible with its scala meta dependency.
+You will likely want to install it in a separate maven hub.
+
 Next, declare a binary target for it, typically in `tools/lint/BUILD.bazel`:
 
 ```starlark
