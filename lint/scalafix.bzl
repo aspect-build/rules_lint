@@ -179,8 +179,6 @@ def _scalafix_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    color_options = []  # scalafix doesn't have a color option, output is plain text
-
     # Semantic mode: collect classpath and semanticdb metadata
     classpath = None
 
@@ -205,7 +203,7 @@ def _scalafix_aspect_impl(target, ctx):
         ctx.file._config,
         outputs.human.out,
         outputs.human.exit_code,
-        color_options,
+        ctx.attr._extra_args,
         patch = getattr(outputs, "patch", None),
         classpath = classpath,
     )
@@ -219,6 +217,7 @@ def _scalafix_aspect_impl(target, ctx):
         ctx.file._config,
         raw_machine_report,
         outputs.machine.exit_code,
+        ctx.attr._extra_args,
         classpath = classpath,
     )
 
@@ -227,7 +226,7 @@ def _scalafix_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_binary", "scala_test", "scala_junit_test"], semantic = False):
+def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_binary", "scala_test", "scala_junit_test"], semantic = False, extra_args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -237,6 +236,7 @@ def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_b
         semantic: If True, enables semantic rules (requires SemanticDB from compilation).
             When enabled, the aspect will access classpath and SemanticDB metadata from the target.
             If SemanticDB is not enabled for the target, the aspect falls back to syntactic-only mode.
+        extra_args: Additional options to pass to scalafix cli
 
     Returns:
         An aspect definition for scalafix
@@ -262,6 +262,9 @@ def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_b
             ),
             "_semantic": attr.bool(
                 default = semantic,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         }),
         toolchains = [
