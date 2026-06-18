@@ -41,7 +41,7 @@ java_binary(
 Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
 
 ```starlark
-load("@aspect_rules_lint//lint:scalafix.bzl", "lint_scalafix_aspect")
+load("@aspect_rules_lint_scala//:scalafix.bzl", "lint_scalafix_aspect")
 
 scalafix = lint_scalafix_aspect(
     binary = Label("//tools/lint:scalafix"),
@@ -84,11 +84,10 @@ Note: rewrite-only rules emit diffs. The SARIF output uses a generic warning at 
 hunk start line, which is sufficient for CI but less detailed than the human report.
 """
 
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
+load("@aspect_rules_lint//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("@aspect_rules_lint//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 load("@rules_java//java:defs.bzl", "JavaInfo")
 load("@rules_scala//scala:semanticdb_provider.bzl", "SemanticdbInfo")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
-load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintScalafix"
 
@@ -246,9 +245,9 @@ def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_b
     """
     return aspect(
         implementation = _scalafix_aspect_impl,
-        attrs = dicts.add(patcher_attrs, {
+        attrs = patcher_attrs | {
             "_options": attr.label(
-                default = "//lint:options",
+                default = "@aspect_rules_lint//lint:options",
                 providers = [LintOptionsInfo],
             ),
             "_scalafix": attr.label(
@@ -269,7 +268,7 @@ def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_b
             "_extra_args": attr.string_list(
                 default = extra_args,
             ),
-        }),
+        },
         toolchains = [
             OPTIONAL_SARIF_PARSER_TOOLCHAIN,
              "@rules_scala//scala:toolchain_type",

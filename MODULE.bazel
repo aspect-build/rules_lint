@@ -34,7 +34,6 @@ bazel_dep(name = "rules_multitool", version = "0.11.0")
 bazel_dep(name = "rules_shell", version = "0.5.0")
 bazel_dep(name = "rules_java", version = "7.0.6")
 bazel_dep(name = "rules_cc", version = "0.2.0")
-bazel_dep(name = "rules_scala", version = "7.1.6")
 
 # Needed in the root because we dereference ProtoInfo in our aspect impl
 bazel_dep(name = "rules_proto", version = "7.1.0")
