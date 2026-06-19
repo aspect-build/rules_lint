@@ -132,6 +132,37 @@ jobs:
             --output_groups=rules_lint_patch \
             --@aspect_rules_lint//lint:fix \
             //...
+  # Same examples as `lint`, exercised through `aspect lint` — the
+  # better-DX entry point users actually run. Each example registers its
+  # linter aspects in `.aspect/config.axl`, so no `--config=lint` is needed.
+  #
+  # `--strategy=soft` surfaces findings across the whole tree without failing
+  # on them, matching the `lint` job's `bazel build --output_groups=...`
+  # (which produces reports for all targets and exits 0); the example fixtures
+  # carry seeded violations on purpose. No aspect-api-token — change detection
+  # resolves from git and the unactionable App-token tip is silenced.
+  lint-aspect-cli:
+    needs: list-examples
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJson(needs.list-examples.outputs.lint-matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: aspect-build/setup-aspect@c22a8f64fb38f82f59ce809cd7eb9f8ae096da44 # v2026.23.2
+      # TODO: Fix for Bazel 9
+      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
+        run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
+
+      - name: aspect lint
+        working-directory: ${{ matrix.folder }}
+        env:
+          folder: ${{ matrix.folder }}
+        run: |
+          key="lint-${folder//\//-}"
+          aspect lint --task-key="$key" --strategy=soft --tips:silence=add-aspect-api-token-github-actions -- //...
+          aspect lint --task-key="$key-fix" --fix --strategy=soft --tips:silence=add-aspect-api-token-github-actions -- //...
   test:
     strategy:
       matrix:
