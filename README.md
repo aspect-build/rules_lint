@@ -57,9 +57,9 @@ Lint findings
 ```
 
 It also scopes findings to your changed lines by default (the "Water Leak
-Principle"), surfaces them as PR review comments on [Aspect
-Workflows](https://docs.aspect.build/workflows), and applies fixes with
-`aspect lint --fix`.
+Principle") and applies fixes with `aspect lint --fix`. With the free Aspect
+Workflows GitHub App installed, it posts findings as PR review comments — see
+[installing and authenticating the app](https://aspect.build/docs/cli/authentication).
 
 Configure it once in `.aspect/config.axl` by pointing the `lint` task at your
 aspects — no `--config=lint` or output-group flags to remember:
