@@ -11,7 +11,7 @@ Each example is self-contained and shows:
 ## Structure
 
 - `python/` - Python formatting with Ruff; linting with Ruff, Bandit, Flake8, Pydoclint, Pylint, or Ty
-- `typescript/` - TypeScript/JavaScript formatting with Prettier; linting with ESLint
+- `nodejs/` - TypeScript/JavaScript formatting with Prettier or Biome; linting with Biome or ESLint
 - `java/` - Java formatting with Google Java Format; linting with PMD, Checkstyle, or SpotBugs
 - `rust/` - Rust formatting with rustfmt; linting with Clippy
 - `cpp/` - C/C++ formatting with clang-format; linting with Clang-Tidy or Cppcheck

@@ -9,6 +9,7 @@ exports_files(
     [
         ".swcrc",
         ".vale.ini",
+        "biome.json",
     ],
     visibility = ["//visibility:public"],
 )
@@ -31,4 +32,9 @@ js_library(
 js_library(
     name = "prettierrc",
     srcs = ["prettier.config.cjs"],
+)
+
+js_library(
+    name = "biomeconfig",
+    srcs = ["biome.json"],
 )

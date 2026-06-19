@@ -122,6 +122,17 @@ bzl_library(
 )
 
 bzl_library(
+    name = "biome",
+    srcs = ["biome.bzl"],
+    deps = [
+        "//lint/private:js_linter_inputs",
+        "//lint/private:lint_aspect",
+        "//lint/private:patcher_action",
+        "@aspect_rules_js//js:libs",
+    ],
+)
+
+bzl_library(
     name = "buf",
     srcs = ["buf.bzl"],
     deps = [

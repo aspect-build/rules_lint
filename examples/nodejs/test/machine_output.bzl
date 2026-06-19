@@ -2,7 +2,8 @@
 
 # buildifier: disable=bzl-visibility
 load("@aspect_rules_lint//lint/private:machine_report_testing.bzl", "machine_report_rule")
-load("//tools/lint:linters.bzl", "eslint", "stylelint")
+load("//tools/lint:linters.bzl", "biome", "eslint", "stylelint")
 
+machine_biome_report = machine_report_rule(biome)
 machine_eslint_report = machine_report_rule(eslint)
 machine_stylelint_report = machine_report_rule(stylelint)

@@ -38,17 +38,18 @@ Linters which are not language-specific:
 | C / C++                | [clang-format]            | [clang-tidy] or [cppcheck]                              |
 | CUE                    | [cue fmt]                 |                                                         |
 | Cuda                   | [clang-format]            |                                                         |
-| CSS, Less, Sass        | [Prettier]                | [Stylelint]                                             |
+| CSS                    | [Biome] or [Prettier]     | [Stylelint]                                             |
 | F#                     | [Fantomas]                |                                                         |
 | Go                     | [gofmt] or [gofumpt]      |                                                         |
 | Go Module              | [modfmt]                  |                                                         |
 | Gherkin                | [prettier-plugin-gherkin] |                                                         |
-| GraphQL                | [Prettier]                |                                                         |
+| GraphQL                | [Biome] or [Prettier]     |                                                         |
 | HCL (Hashicorp Config) | [terraform] fmt           |                                                         |
-| HTML                   | [Prettier]                |                                                         |
-| JSON                   | [Prettier]                |                                                         |
+| HTML                   | [Biome] or [Prettier]     |                                                         |
+| JSON                   | [Biome] or [Prettier]     |                                                         |
 | Java                   | [google-java-format]      | [pmd] , [Checkstyle], [Spotbugs]                        |
-| JavaScript             | [Prettier]                | [ESLint]                                                |
+| JavaScript             | [Biome] or [Prettier]     | [Biome], [ESLint]                                       |
+| Less, Sass             | [Prettier]                | [Stylelint]                                             |
 | HTML templates         | [djlint]                  |                                                         |
 | Jsonnet                | [jsonnetfmt]              |                                                         |
 | Kotlin                 | [ktfmt]                   | [ktlint]                                                |
@@ -65,12 +66,13 @@ Linters which are not language-specific:
 | Starlark               | [Buildifier]              | [Buildifier]                                            |
 | Swift                  | [SwiftFormat] (1)         |                                                         |
 | TOML                   | [taplo]                   |                                                         |
-| TSX                    | [Prettier]                | [ESLint]                                                |
-| TypeScript             | [Prettier]                | [ESLint]                                                |
+| TSX                    | [Biome] or [Prettier]     | [Biome], [ESLint]                                       |
+| TypeScript             | [Biome] or [Prettier]     | [Biome], [ESLint]                                       |
 | YAML                   | [yamlfmt]                 | [yamllint]                                              |
 | XML                    | [prettier/plugin-xml]     |                                                         |
 
 [prettier]: https://prettier.io
+[biome]: https://biomejs.dev/
 [google-java-format]: https://github.com/google/google-java-format
 [bandit]: https://bandit.readthedocs.io/en/latest/
 [Fantomas]: https://fsprojects.github.io/fantomas/

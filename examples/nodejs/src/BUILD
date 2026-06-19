@@ -42,6 +42,24 @@ filegroup(
 )
 
 ts_project(
+    name = "biome_bad",
+    srcs = ["biome_bad.ts"],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = ":tsconfig",
+    deps = [],
+)
+
+ts_project(
+    name = "biome_clean",
+    srcs = ["biome_clean.ts"],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = ":tsconfig",
+    deps = [],
+)
+
+ts_project(
     name = "ts_dep",
     srcs = ["file-dep.ts"],
     declaration = True,
@@ -78,4 +96,11 @@ format_test(
     ],
     javascript = ":prettier",
     markdown = ":prettier",
+)
+
+format_test(
+    name = "format_biome_js_test",
+    srcs = ["biome_clean.ts"],
+    javascript = "//tools/format:biome",
+    javascript_check_args = ["format"],
 )

@@ -17,6 +17,7 @@
 package sarif
 
 import (
+	"encoding/json"
 	"io"
 	"strings"
 	"testing"
@@ -81,6 +82,115 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(15)))
 	})
 
+	t.Run("normalizes native SARIF URIs from Bazel bin tree", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		report := `{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Biome"
+        }
+      },
+      "results": [
+        {
+          "message": {
+            "text": "lint message"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/home/user/.cache/bazel/_bazel_user/7ffd56a6e00ce98f30a5fdb044ac6a0c/execroot/_main/bazel-out/k8-fastbuild/bin/examples/nodejs/src/biome_bad.ts"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`
+
+		sarifJsonString, err := ToSarifJsonString("//examples/nodejs/src:biome_bad", "AspectRulesLintBiome", report)
+		g.Expect(err).NotTo(HaveOccurred())
+		sarifJson, err := toSarifJson(sarifJsonString)
+		g.Expect(err).NotTo(HaveOccurred())
+
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("examples/nodejs/src/biome_bad.ts"))
+	})
+
+	t.Run("normalizeSarifUris: normalizes URI fields in native SARIF JSON", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		report := `{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "results": [
+        {
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/home/user/.cache/bazel/_bazel_user/7ffd56a6e00ce98f30a5fdb044ac6a0c/execroot/_main/bazel-out/k8-fastbuild/bin/examples/nodejs/src/biome_bad.ts"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`
+
+		normalized, err := normalizeSarifUris("//examples/nodejs/src:biome_bad", report)
+		g.Expect(err).NotTo(HaveOccurred())
+
+		var sarif map[string]any
+		g.Expect(json.Unmarshal([]byte(normalized), &sarif)).To(Succeed())
+		uri := sarif["runs"].([]any)[0].(map[string]any)["results"].([]any)[0].(map[string]any)["locations"].([]any)[0].(map[string]any)["physicalLocation"].(map[string]any)["artifactLocation"].(map[string]any)["uri"]
+		g.Expect(uri).To(Equal("examples/nodejs/src/biome_bad.ts"))
+	})
+
+	t.Run("normalizeSarifValueUris: recursively normalizes URI fields", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		value := map[string]any{
+			"uri": "/outside/workspace/file.ts",
+			"runs": []any{
+				map[string]any{
+					"results": []any{
+						map[string]any{
+							"locations": []any{
+								map[string]any{
+									"physicalLocation": map[string]any{
+										"artifactLocation": map[string]any{
+											"uri": "/home/user/.cache/bazel/_bazel_user/7ffd56a6e00ce98f30a5fdb044ac6a0c/execroot/_main/examples/nodejs/src/biome_bad.ts",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		normalizeSarifValueUris("//examples/nodejs/src:biome_bad", value)
+
+		g.Expect(value["uri"]).To(Equal("/outside/workspace/file.ts"))
+		uri := value["runs"].([]any)[0].(map[string]any)["results"].([]any)[0].(map[string]any)["locations"].([]any)[0].(map[string]any)["physicalLocation"].(map[string]any)["artifactLocation"].(map[string]any)["uri"]
+		g.Expect(uri).To(Equal("examples/nodejs/src/biome_bad.ts"))
+	})
+
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
@@ -127,6 +237,9 @@ func TestSarif(t *testing.T) {
 		g.Expect(determineRelativePath("/mnt/ephemeral/output/bazel-examples/__main__/sandbox/linux-sandbox/769/execroot/_main/speller/lookup/lookup-test.cc", "//:lookup")).To(Equal("speller/lookup/lookup-test.cc"))
 		g.Expect(determineRelativePath("/mnt/ephemeral/output/bazel-examples/__main__/sandbox/linux-sandbox/780/execroot/_main/speller/data_driven_tests/lookup-datatest.cc", "//:data_driven_tests")).To(Equal("speller/data_driven_tests/lookup-datatest.cc"))
 		g.Expect(determineRelativePath("/private/var/tmp/_bazel_jesse/93d7e699c5e2019d94351d19b00be5a3/sandbox/darwin-sandbox/249/execroot/_main/speller/announce/announce.cc", "//:announce")).To(Equal("speller/announce/announce.cc"))
+
+		// bazel-out bin tree paths from copied/generated action inputs
+		g.Expect(determineRelativePath("/home/user/.cache/bazel/_bazel_user/7ffd56a6e00ce98f30a5fdb044ac6a0c/execroot/_main/bazel-out/k8-fastbuild/bin/examples/nodejs/src/biome_bad.ts", "//examples/nodejs/src:biome_bad")).To(Equal("examples/nodejs/src/biome_bad.ts"))
 	})
 
 	t.Run("determineRelativePath: returns absolute paths on regex or label error", func(t *testing.T) {

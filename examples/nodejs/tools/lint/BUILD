@@ -7,10 +7,17 @@ we don't want to trigger eager fetches of these for builds that don't want to ru
 load("@aspect_rules_lint//lint:vale_library.bzl", "VALE_STYLES")
 load("@bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@npm//:@biomejs/biome/package_json.bzl", biome_bin = "bin")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 load("@npm//:stylelint/package_json.bzl", stylelint_bin = "bin")
 
 package(default_visibility = ["//:__subpackages__"])
+
+biome_bin.biome_binary(
+    name = "biome",
+    data = ["//:biomeconfig"],
+    env = {"BAZEL_BINDIR": "."},
+)
 
 eslint_bin.eslint_binary(name = "eslint")
 
