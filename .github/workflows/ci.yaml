@@ -89,7 +89,7 @@ jobs:
           - folder: examples/shell
     steps:
       - uses: actions/checkout@v6
-      - uses: aspect-build/setup-aspect@c22a8f64fb38f82f59ce809cd7eb9f8ae096da44 # v2026.23.2
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
       - name: Setup bats
         uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1
         with:
@@ -139,8 +139,7 @@ jobs:
   # `--strategy=soft` surfaces findings across the whole tree without failing
   # on them, matching the `lint` job's `bazel build --output_groups=...`
   # (which produces reports for all targets and exits 0); the example fixtures
-  # carry seeded violations on purpose. No aspect-api-token — change detection
-  # resolves from git and the unactionable App-token tip is silenced.
+  # carry seeded violations on purpose.
   lint-aspect-cli:
     needs: list-examples
     runs-on: ubuntu-24.04
@@ -150,7 +149,9 @@ jobs:
         folder: ${{ fromJson(needs.list-examples.outputs.lint-matrix) }}
     steps:
       - uses: actions/checkout@v6
-      - uses: aspect-build/setup-aspect@c22a8f64fb38f82f59ce809cd7eb9f8ae096da44 # v2026.23.2
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_API_TOKEN }}
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
@@ -161,8 +162,8 @@ jobs:
           folder: ${{ matrix.folder }}
         run: |
           key="lint-${folder//\//-}"
-          aspect lint --task-key="$key" --strategy=soft --tips:silence=add-aspect-api-token-github-actions -- //...
-          aspect lint --task-key="$key-fix" --fix --strategy=soft --tips:silence=add-aspect-api-token-github-actions -- //...
+          aspect lint --task-key="$key" --strategy=soft -- //...
+          aspect lint --task-key="$key-fix" --fix --strategy=soft -- //...
   # Build & test the root workspace through `aspect test` on Linux across Bazel
   # versions. Complements `test` below, which covers macOS via vanilla Bazel.
   aspect-test:
@@ -181,7 +182,7 @@ jobs:
       USE_BAZEL_VERSION: ${{ matrix.bazel.version }}
     steps:
       - uses: actions/checkout@v6
-      - uses: aspect-build/setup-aspect@c22a8f64fb38f82f59ce809cd7eb9f8ae096da44 # v2026.23.2
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
         with:
           aspect-api-token: ${{ secrets.ASPECT_API_TOKEN }}
       - name: Test
