@@ -13,7 +13,7 @@ EOF
 }
 
 @test "should produce reports" {
-	run aspect lint --bazel-flag=--config=lint -- //src/...
+	run aspect lint --bazel-flag=--config=lint --tips:silence=add-aspect-api-token-github-actions -- //src/...
 	assert_success
 	assert_java_lints
 }
