@@ -52,7 +52,7 @@ If your custom ruleset is a third-party dependency and not a first-party depende
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@rules_java//java/common/rules:java_runtime.bzl", "JavaRuntimeInfo")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintKTLint"
 
@@ -145,7 +145,13 @@ def _ktlint_aspect_impl(target, ctx):
 
     color_options = ["--color"] if ctx.attr._options[LintOptionsInfo].color else []
     ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code, color_options)
-    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.machine.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code)
+
+    # ktlint has no SARIF output mode, so parse its raw text report into SARIF
+    # in a separate action — this is what surfaces KTLint findings in the
+    # structured lint report (rather than only as passthrough stdout).
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, raw_machine_report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code)
+    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
 def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, rule_kinds = ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]):
@@ -205,5 +211,6 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, 
         }, extra_attrs),
         toolchains = [
             "@bazel_tools//tools/jdk:toolchain_type",
+            OPTIONAL_SARIF_PARSER_TOOLCHAIN,
         ],
     )

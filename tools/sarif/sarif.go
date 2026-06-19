@@ -123,6 +123,9 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%IInfo: %f:%l:%c: %m`,
 			`%-G%.%#`,
 		}
+	case "AspectRulesLintKTLint":
+		// ktlint --relative text output: `path:line:col: message (rule)`.
+		fm = []string{`%f:%l:%c: %m`}
 	case "AspectRulesLintKeepSorted":
 		fm = []string{`%f:%l:%e:%m`}
 	case "AspectRulesLintTy":
