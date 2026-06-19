@@ -71,6 +71,9 @@ var pydoclint_output string
 //go:embed testdata/lint_result/cppcheck_output.txt
 var cppcheck_output string
 
+//go:embed testdata/lint_result/ktlint_output.txt
+var ktlint_output string
+
 type LintResult struct {
 	Label    string
 	Mnemonic string

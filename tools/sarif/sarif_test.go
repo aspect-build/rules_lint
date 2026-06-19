@@ -81,6 +81,22 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(15)))
 	})
 
+	t.Run("processes ktlint output -> sarif correctly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		sarifJsonString, _ := ToSarifJsonString("//src:hello_kt", "AspectRulesLintKTLint", ktlint_output)
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs)).To(Equal(1))
+		g.Expect(sarifJson.Runs[0].Tool.Driver.Name).To(Equal("KTLint"))
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(2))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("File name 'hello.kt' should conform PascalCase (standard:filename)"))
+		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(Equal("Wildcard import (standard:no-wildcard-imports)"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/hello.kt"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(1)))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(2)))
+	})
+
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
