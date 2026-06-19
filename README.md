@@ -57,9 +57,19 @@ Lint findings
 ```
 
 It also scopes findings to your changed lines by default (the "Water Leak
-Principle") and applies fixes with `aspect lint --fix`. With the free Aspect
-Workflows GitHub App installed, it posts findings as PR review comments — see
-[installing and authenticating the app](https://aspect.build/docs/cli/authentication).
+Principle") and applies fixes with `aspect lint --fix`.
+
+On CI, the **free [Aspect Workflows GitHub App](https://aspect.build/docs/cli/authentication)**
+makes this shine: every `aspect lint` task posts a rich GitHub **status check**
+— findings grouped by linter and severity with `file:line` and rule, a
+per-linter summary table, and a copy-paste reproduce command — and surfaces the
+same findings as inline PR review comments. Install and authenticate it in a few
+minutes; no server to run.
+
+[![aspect lint status check](./docs/lint-status-check.png)](https://github.com/aspect-build/rules_lint/pull/920/checks?check_run_id=82394567739)
+
+> The screenshot above is a live status check from this repo's `examples/python`
+> lint task — [open the real thing](https://github.com/aspect-build/rules_lint/pull/920/checks?check_run_id=82394567739).
 
 Configure it once in `.aspect/config.axl` by pointing the `lint` task at your
 aspects — no `--config=lint` or output-group flags to remember:
