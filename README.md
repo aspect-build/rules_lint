@@ -86,8 +86,35 @@ up for `aspect lint`. After [installing the CLI](https://docs.aspect.build/cli/i
 $ cd examples/shell && aspect lint //...
 ```
 
+### Formatting
+
+The same applies to formatting. Instead of `bazel run //tools/format`, the
+`aspect format` command runs your `//tools/format` target, formats only your
+changed files by default (or `--scope=all` for the whole tree), and reports
+exactly what it touched — with a ready-to-run fix command:
+
+```console
+$ aspect format
+
+→ ✨ Format · Formatting changed files
+→ 📋 Diff · Computing format diff
+2 files were modified:
+  - src/hello.sh
+  - src/sourced_dep.sh
+```
+
+On CI it posts a **format status check** via the same GitHub App, and
+`--severity` chooses whether an unformatted file warns or fails the build. It
+works out of the box — `aspect format` already targets `//tools/format`, so no
+extra config is needed:
+
+```console
+$ cd examples/shell && aspect format
+```
+
 See the [Aspect CLI overview](https://docs.aspect.build/cli/overview) and the
-[`lint` task docs](https://docs.aspect.build/cli/lint).
+[`lint`](https://docs.aspect.build/cli/lint) and
+[`format`](https://docs.aspect.build/cli/format) task docs.
 
 ## Supported tools
 

@@ -72,6 +72,33 @@ jobs:
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
+  # Same examples as `format`, exercised through `aspect format` — the
+  # better-DX entry point users actually run. `aspect format` defaults to the
+  # `//tools/format` target each example already defines, so no config is
+  # needed. `--scope=all` formats the whole tree like `bazel run //tools/format`
+  # and `--severity=warn` reports what was reformatted without failing (the
+  # example sources are intentionally unformatted), matching the `format` job.
+  format-aspect-cli:
+    needs: list-examples
+    # Our version of clang-format has some deps that aren't satisfiable on newer ubuntu yet
+    runs-on: ${{ matrix.folder == 'examples/cpp' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJson(needs.list-examples.outputs.format-matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_API_TOKEN }}
+      # Permit this gross non-hermetic dependency
+      - if: matrix.folder == 'examples/cpp'
+        run: sudo apt-get update && sudo apt-get install -y libtinfo5
+      # TODO: Fix for Bazel 9
+      - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
+        run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
+      - run: aspect format --scope=all --severity=warn
+        working-directory: ${{ matrix.folder }}
   integration-test:
     needs: list-examples
     runs-on: ubuntu-latest
