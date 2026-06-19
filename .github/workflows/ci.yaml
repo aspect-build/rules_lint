@@ -1,4 +1,4 @@
-name: CI - Vanilla Bazel
+name: CI
 
 on:
   push:
@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-    id-token: write
+  id-token: write
 
 jobs:
   list-examples:
@@ -163,10 +163,34 @@ jobs:
           key="lint-${folder//\//-}"
           aspect lint --task-key="$key" --strategy=soft --tips:silence=add-aspect-api-token-github-actions -- //...
           aspect lint --task-key="$key-fix" --fix --strategy=soft --tips:silence=add-aspect-api-token-github-actions -- //...
+  # Build & test the root workspace through `aspect test` on Linux across Bazel
+  # versions. Complements `test` below, which covers macOS via vanilla Bazel.
+  aspect-test:
+    name: aspect-test (${{ matrix.workspace.path }}, ${{ matrix.bazel.id }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace:
+          - { path: ".", slug: "root" }
+        bazel:
+          - { id: "bazel-7", version: "7.x", flags: "" }
+          - { id: "bazel-8", version: "8.x", flags: "" }
+          - { id: "bazel-9", version: "9.x", flags: "" }
+    env:
+      USE_BAZEL_VERSION: ${{ matrix.bazel.version }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: aspect-build/setup-aspect@c22a8f64fb38f82f59ce809cd7eb9f8ae096da44 # v2026.23.2
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_API_TOKEN }}
+      - name: Test
+        working-directory: ${{ matrix.workspace.path }}
+        run: aspect test --task-key=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} ${{ matrix.bazel.flags }} -- //...
   test:
     strategy:
       matrix:
-        # Linux is tested on Aspect Workflows
+        # Linux is covered by the aspect-test job above
         os:
           - macos-latest
           # TODO(alex): lots of places are missing windows...
