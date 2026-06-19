@@ -9,7 +9,7 @@ function assert_cpp_lints() {
 }
 
 @test "should produce reports" {
-	run aspect lint --bazel-flag=--config=lint --tips:silence=add-aspect-api-token-github-actions -- //src/...
+	run aspect lint --strategy=soft --tips:silence=add-aspect-api-token-github-actions -- //src/...
 	assert_success
 	assert_cpp_lints
 }
