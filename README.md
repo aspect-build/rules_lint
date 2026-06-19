@@ -25,6 +25,60 @@ Features:
 
 [![rules_lint at BazelCon](https://img.youtube.com/vi/CnK-RAdfrpI/0.jpg)](https://www.youtube.com/watch?v=CnK-RAdfrpI)
 
+## Better DX with the Aspect CLI
+
+You _can_ drive linting straight from Bazel, but the experience is rough: you
+run a verbose build to produce report files, then hunt them down under
+`bazel-out/` and `cat` them yourself.
+
+```console
+$ bazel build --config=lint --output_groups=rules_lint_human //...
+INFO: Build completed successfully, 8 total actions
+# ...no findings printed. Now go find and cat the reports:
+$ cat bazel-out/*/bin/src/hello.AspectRulesLintShellCheck.out
+In src/hello.sh line 10:
+grep '*foo*' file
+     ^-----^ SC2063 (warning): Grep uses regex, but this looks like a glob.
+```
+
+The [Aspect CLI](https://github.com/aspect-build/aspect-cli) adds a first-class
+`aspect lint` command that runs the same Bazel aspects, then collects and prints
+every finding for you — grouped by linter, tagged by severity, with `file:line`
+and rule, and one-key interactive fixes:
+
+```console
+$ aspect lint //...
+
+🧹 Linters (1): ShellCheck
+
+Lint findings
+  ℹ️ src/hello.sh:4 · ShellCheck — Double quote to prevent globbing and word splitting.
+  ⚠️ src/hello.sh:10 · ShellCheck — Grep uses regex, but this looks like a glob.
+```
+
+It also scopes findings to your changed lines by default (the "Water Leak
+Principle") and applies fixes with `aspect lint --fix`. With the free Aspect
+Workflows GitHub App installed, it posts findings as PR review comments — see
+[installing and authenticating the app](https://aspect.build/docs/cli/authentication).
+
+Configure it once in `.aspect/config.axl` by pointing the `lint` task at your
+aspects — no `--config=lint` or output-group flags to remember:
+
+```python
+def config(ctx: ConfigContext):
+    ctx.tasks["lint"].args.aspects = ["//tools/lint:linters.bzl%shellcheck"]
+```
+
+**Try it in this repo:** every linter under [`examples/`](./examples) is wired
+up for `aspect lint`. After [installing the CLI](https://docs.aspect.build/cli/install):
+
+```console
+$ cd examples/shell && aspect lint //...
+```
+
+See the [Aspect CLI overview](https://docs.aspect.build/cli/overview) and the
+[`lint` task docs](https://docs.aspect.build/cli/lint).
+
 ## Supported tools
 
 New tools are being added frequently, so check this page again!
