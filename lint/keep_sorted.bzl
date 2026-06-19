@@ -28,7 +28,7 @@ following the documentation at https://github.com/google/keep-sorted#usage.
 """
 
 load("@jq.bzl//jq:jq.bzl", "jq_lib")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintKeepSorted"
@@ -91,6 +91,9 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
         )
 
 def _keep_sorted_aspect_impl(target, ctx):
+    if not should_visit(ctx.rule, ["*"]):
+        return []
+
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
     else:
