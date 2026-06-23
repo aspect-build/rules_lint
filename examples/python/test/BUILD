@@ -29,6 +29,12 @@ write_file(
     content = ["import os"],
 )
 
+write_file(
+    name = "py_code_generator_no_imports",
+    out = "main_generated_no_imports.py",
+    content = ["import os"],
+)
+
 py_library(
     name = "generated_py",
     srcs = ["generated.py"],
@@ -128,6 +134,22 @@ py_library(
 ty_test(
     name = "ty_should_find_generated_dep",
     srcs = [":dep_generated"],
+)
+
+py_library(
+    name = "generated_no_imports",
+    srcs = ["main_generated_no_imports.py"],
+)
+
+py_library(
+    name = "dep_main_generated_no_imports",
+    srcs = ["dep_main_generated_no_imports.py"],
+    deps = [":generated_no_imports"],
+)
+
+ty_test(
+    name = "ty_should_find_main_generated_no_imports_dep",
+    srcs = [":dep_main_generated_no_imports"],
 )
 
 py_library(
