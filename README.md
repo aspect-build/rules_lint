@@ -151,7 +151,7 @@ Linters which are not language-specific:
 | Ruby                   |                           | [RuboCop], [Standard]                                   |
 | Rust                   | [rustfmt]                 | [clippy]                                                |
 | SQL                    | [prettier-plugin-sql]     |                                                         |
-| Scala                  | [scalafmt]                |                                                         |
+| Scala                  | [scalafmt]                | [scalafix]                                              |
 | Shell                  | [shfmt]                   | [shellcheck]                                            |
 | Starlark               | [Buildifier]              | [Buildifier]                                            |
 | Swift                  | [SwiftFormat] (1)         |                                                         |
@@ -209,6 +209,7 @@ Linters which are not language-specific:
 [rustfmt]: https://rust-lang.github.io/rustfmt
 [stylelint]: https://stylelint.io
 [clippy]: https://github.com/rust-lang/rust-clippy
+[scalafix]: https://scalacenter.github.io/scalafix/
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift

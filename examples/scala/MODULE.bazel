@@ -1,24 +1,61 @@
 "Bazel dependencies for Scala formatting example"
 
 bazel_dep(name = "aspect_rules_lint")
-bazel_dep(name = "rules_jvm_external", version = "6.5")
-bazel_dep(name = "rules_java", version = "8.5.0")
-bazel_dep(name = "bazel_skylib", version = "1.4.2")
+bazel_dep(name = "aspect_rules_lint_scala")
+bazel_dep(name = "protobuf", version = "35.1")
+bazel_dep(name = "rules_java", version = "9.3.0")
+bazel_dep(name = "rules_jvm_external", version = "7.0")
+bazel_dep(name = "rules_scala", version = "7.2.6")
 
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "../..",
 )
 
+local_path_override(
+    module_name = "aspect_rules_lint_scala",
+    path = "../../lint/scala",
+)
+
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
-    artifacts = [
-        "org.scalameta:scalafmt-cli_2.13:3.7.14",
+    artifacts = ["org.scalameta:scalafmt-cli_2.13:3.7.14"],
+    known_contributing_modules = [
+        "",
+        "protobuf",
     ],
+    fail_if_repin_required = True,
     lock_file = "@//:maven_install.json",
     repositories = [
-        "https://maven.google.com",
         "https://repo1.maven.org/maven2",
     ],
 )
 use_repo(maven, "maven")
+
+# Scalafix is not binary-compatible with minor/patch versions of its
+# dependencies. Install it in a separate closure so it we use the exact
+# version of its dependencies.
+maven.install(
+    name = "maven_scalafix",
+    artifacts = ["ch.epfl.scala:scalafix-cli_2.13.18:0.14.7"],
+    fail_if_repin_required = True,
+    lock_file = "@//:scalafix_maven_install.json",
+    repositories = [
+        "https://repo1.maven.org/maven2",
+    ],
+)
+use_repo(maven, "maven_scalafix")
+
+scala_config = use_extension(
+    "@rules_scala//scala/extensions:config.bzl",
+    "scala_config",
+)
+scala_config.settings(scala_version = "2.13.18")
+
+scala_deps = use_extension(
+    "@rules_scala//scala/extensions:deps.bzl",
+    "scala_deps",
+)
+scala_deps.scala()
+
+register_toolchains("//tools/scala:all")
