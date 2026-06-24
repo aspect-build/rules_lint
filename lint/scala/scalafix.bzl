@@ -110,7 +110,7 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
 
     args = ctx.actions.args()
     args.add_all(options)
-    args.add("--config", config.path)
+    args.add("--config", config)
     args.add("--scala-version", scala_toolchain.scala_version)
 
     inputs = list(srcs) + [config]
