@@ -76,6 +76,8 @@ rust-v*)
 	SRC_MODULE_ROOT="lint/rust"
 	;;
 	# rules-rust-v*) SRC_MODULE_ROOT="lint/rules_rust" ;;
+scala-v*)
+	SRC_MODULE_ROOT="lint/scala"
 v*) ;; # Root module release, handled below.
 *)
 	echo "Unknown tag format: ${TAG}" >&2

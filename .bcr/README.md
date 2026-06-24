@@ -14,6 +14,8 @@ live under this folder at the same relative path as the module in the repo:
 - `.bcr/` — the root `aspect_rules_lint` module, released from `v*` tags
 - `.bcr/lint/rust/` — the `aspect_rules_lint_rust` module (`lint/rust`),
   released from `rust-v*` tags
+- `.bcr/lint/scala/` — the `aspect_rules_lint_scala` module (`lint/scala`),
+  released from `scala-v*` tags
 
 Each release publishes exactly one module: the trigger workflow passes the
 module's root through the `module_roots` input of the publish-to-bcr reusable
