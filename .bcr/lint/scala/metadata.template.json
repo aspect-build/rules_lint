@@ -1,0 +1,23 @@
+{
+  "homepage": "https://github.com/aspect-build/rules_lint",
+  "maintainers": [
+    {
+      "email": "jesse@aspect.build",
+      "github": "JesseTatasciore",
+      "name": "Jesse Tatasciore"
+    },
+    {
+      "email": "jason@aspect.build",
+      "github": "jbedard",
+      "name": "Jason Bedard"
+    },
+    {
+      "email": "r@rafiksalama.com",
+      "github": "rafikk",
+      "name": "Rafik Salama"
+    }
+  ],
+  "repository": ["github:aspect-build/rules_lint"],
+  "versions": [],
+  "yanked_versions": {}
+}
