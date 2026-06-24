@@ -41,7 +41,7 @@ java_binary(
 Finally, create the linter aspect, typically in `tools/lint/linters.bzl`:
 
 ```starlark
-load("@aspect_rules_lint_scala//:scalafix.bzl", "lint_scalafix_aspect")
+load("@aspect_rules_lint_scala//lint:scalafix.bzl", "lint_scalafix_aspect")
 
 scalafix = lint_scalafix_aspect(
     binary = Label("//tools/lint:scalafix"),
