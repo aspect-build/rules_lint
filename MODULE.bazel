@@ -94,4 +94,5 @@ use_repo(
     "com_github_onsi_gomega",
     "com_github_reviewdog_errorformat",
     "com_github_reviewdog_reviewdog",
+    "org_golang_x_tools",
 )
