@@ -24,6 +24,7 @@ Each example is self-contained and shows:
 - `proto/` - Protocol Buffer formatting and linting with Buf
 - `starlark/` - Starlark formatting with Buildifier; linting with Buildifier
 - `qml/` - QML formatting with qmlformat; linting with qmllint
+- `terraform/` - Terraform formatting with terraform fmt; linting with tflint
 
 ## Multi-language Example
 
