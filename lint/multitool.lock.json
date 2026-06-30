@@ -80,6 +80,42 @@
       }
     ]
   },
+  "tflint": {
+    "binaries": [
+      {
+        "kind": "archive",
+        "url": "https://github.com/terraform-linters/tflint/releases/download/v0.61.0/tflint_linux_arm64.zip",
+        "file": "tflint",
+        "sha256": "999c25cfdb5208fe1133dec6b219e666a39fc2a7a0786a781dc9924ea5945ebf",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/terraform-linters/tflint/releases/download/v0.61.0/tflint_linux_amd64.zip",
+        "file": "tflint",
+        "sha256": "ca4e4e8cb7cc3436f2b6979e9c4fd4e2623a66fcca1ad1fe12f8669967636ae2",
+        "os": "linux",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/terraform-linters/tflint/releases/download/v0.61.0/tflint_darwin_arm64.zip",
+        "file": "tflint",
+        "sha256": "6593fa24cb6e14d2d0cf7af7fd02a271242f1038af6ecb5384f6738e105a0fea",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/terraform-linters/tflint/releases/download/v0.61.0/tflint_darwin_amd64.zip",
+        "file": "tflint",
+        "sha256": "9cd3106c7b74f83cbcd90e0593dfaa1ce14dc5260fe32d946915fd0004aec2f4",
+        "os": "macos",
+        "cpu": "x86_64"
+      }
+    ]
+  },
   "ty": {
     "binaries": [
       {
