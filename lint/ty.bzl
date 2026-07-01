@@ -172,7 +172,9 @@ def _ty_aspect_impl(target, ctx):
     # _resolve_import_path maps each entry to the correct execroot-relative path:
     #   - pip packages get an "external/" prefix
     #   - workspace-internal paths get the workspace name stripped
-    import_paths = {}
+    import_paths = {
+        ctx.bin_dir.path: True,
+    }
 
     # Collect from deps attribute using PyInfo
     if hasattr(ctx.rule.attr, "deps"):

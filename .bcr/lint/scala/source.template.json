@@ -1,0 +1,5 @@
+{
+  "integrity": "**leave this alone**",
+  "strip_prefix": "rules_lint-{TAG}",
+  "url": "https://github.com/{OWNER}/{REPO}/releases/download/{TAG}/rules_lint-{TAG}.tar.gz"
+}

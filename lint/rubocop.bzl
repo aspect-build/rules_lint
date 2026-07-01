@@ -140,18 +140,23 @@ def rubocop_action(
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs + config
+    
+    args = ctx.actions.args()
+    args.add("--force-exclusion")
+    if color:
+        args.add("--color")
+
     if patch != None:
         # Use run_patcher for fix mode
-        rubocop_args = (
-            ["--autocorrect-all", "--force-exclusion", "--cache", "false"] +
-            (["--color"] if color else []) +
-            [s.path for s in srcs]
-        )
+        args.add("--autocorrect-all")
+        args.add("--cache", "false")
+        args.add_all(srcs)
+
         run_patcher(
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = rubocop_args,
+            args = args,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable],
@@ -163,12 +168,8 @@ def rubocop_action(
     else:
         # Use run_shell for lint mode
         outputs = [stdout]
-        args = ctx.actions.args()
         args.add("--format", "simple")
-        args.add("--force-exclusion")
         args.add("--cache-root", "/tmp")
-        if color:
-            args.add("--color")
         args.add_all(srcs)
 
         command = _build_rubocop_command(

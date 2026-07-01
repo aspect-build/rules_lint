@@ -1,23 +1,33 @@
 # See https://github.com/bazel-contrib/publish-to-bcr
 name: Publish to BCR
 
+# Manual-retry entrypoint only. The release flow publishes via
+# release-module.yaml, which calls the publish-to-bcr reusable workflow
+# directly (the tag.yaml -> release.yml -> release-module.yaml chain already
+# uses three of GitHub's four reusable-workflow nesting levels, leaving no room
+# for this wrapper in between). Dispatch this workflow from the GitHub UI to
+# re-publish a release whose BCR publish failed.
 on:
-  # Run the publish workflow after a successful release
-  # Can be triggered from the release.yaml workflow
-  workflow_call:
-    inputs:
-      tag_name:
-        required: true
-        type: string
-    secrets:
-      BCR_PUBLISH_TOKEN:
-        required: true
-  # In case of problems, let release engineers retry by manually dispatching
-  # the workflow from the GitHub UI
   workflow_dispatch:
     inputs:
       tag_name:
+        description: 'The tag to publish, e.g. "v2.8.0" or "rust-v1.0.0".'
         required: true
+        type: string
+      tag_prefix:
+        description: 'Prefix stripped from the tag to get the version, e.g. "v" or "rust-v".'
+        required: true
+        default: "v"
+        type: string
+      module_roots:
+        description: |
+          Newline-separated module roots to publish, e.g. "." for the root
+          aspect_rules_lint module or "lint/rust" for aspect_rules_lint_rust.
+          Required because this repo hosts several separately versioned
+          modules: each release tag belongs to exactly one of them, so the
+          publish must name which module the tag's version applies to.
+        required: true
+        default: "."
         type: string
 
 jobs:
@@ -26,10 +36,12 @@ jobs:
     # version tag, not a commit SHA: slsa-verifier reads the builder ref from the
     # provenance and rejects a bare SHA ("unexpected ref type"), which breaks the
     # source.json attestation that BCR's presubmit verifies. Do not SHA-pin this.
-    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.2.0
+    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.4.1
     with:
       draft: false
       tag_name: ${{ inputs.tag_name }}
+      tag_prefix: ${{ inputs.tag_prefix }}
+      module_roots: ${{ inputs.module_roots }}
       # GitHub repository which is a fork of the upstream where the Pull Request will be opened.
       registry_fork: aspect-forks/bazel-central-registry
     permissions:

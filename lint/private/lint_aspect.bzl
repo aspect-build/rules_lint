@@ -35,7 +35,7 @@ def should_visit(rule, allow_kinds, allow_filegroup_tags = []):
 
     Args:
         rule: a [rules_attributes](https://bazel.build/rules/lib/builtins/rule_attributes.html) object
-        allow_kinds (list of string): return true if the rule's kind is in the list
+        allow_kinds (list of string): return true if the rule's kind is in the list, a value of ["*"] returns true for all rule kinds
         allow_filegroup_tags (list of string): return true if the rule is a filegroup and has a tag in this list
 
     Returns:
@@ -44,7 +44,7 @@ def should_visit(rule, allow_kinds, allow_filegroup_tags = []):
     if "no-lint" in rule.attr.tags:
         return False
 
-    if rule.kind in allow_kinds:
+    if rule.kind in allow_kinds or allow_kinds == ["*"]:
         return True
     if rule.kind == "filegroup":
         for allow_tag in allow_filegroup_tags:

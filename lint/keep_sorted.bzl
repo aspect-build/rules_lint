@@ -28,7 +28,7 @@ following the documentation at https://github.com/google/keep-sorted#usage.
 """
 
 load("@jq.bzl//jq:jq.bzl", "jq_lib")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintKeepSorted"
@@ -47,14 +47,19 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs
+
+    args = ctx.actions.args()
+    args.add_all(options)
+    args.add("--mode", "fix" if patch != None else "lint")
+    args.add_all(srcs)
+
     if patch != None:
         # Use run_patcher for fix mode
-        args_list = options + ["--mode=fix"] + [s.path for s in srcs]
         run_patcher(
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args_list,
+            args = args,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable],
@@ -67,10 +72,6 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
     else:
         # Use run_shell for lint mode
         outputs = [stdout]
-        args = ctx.actions.args()
-        args.add_all(options)
-        args.add("--mode=lint")
-        args.add_all(srcs)
 
         if exit_code:
             command = "{keep_sorted} $@ >{stdout}; echo $? > " + exit_code.path
@@ -90,6 +91,9 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
         )
 
 def _keep_sorted_aspect_impl(target, ctx):
+    if not should_visit(ctx.rule, ["*"]):
+        return []
+
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
     else:

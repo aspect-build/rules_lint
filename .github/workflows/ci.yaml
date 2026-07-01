@@ -1,4 +1,4 @@
-name: CI - Vanilla Bazel
+name: CI
 
 on:
   push:
@@ -12,10 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-    id-token: write
-
-env:
-  ASPECT_LAUNCHER_VERSION: 2026.22.39
+  id-token: write
 
 jobs:
   list-examples:
@@ -75,6 +72,33 @@ jobs:
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
       - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
+  # Same examples as `format`, exercised through `aspect format` — the
+  # better-DX entry point users actually run. `aspect format` defaults to the
+  # `//tools/format` target each example already defines, so no config is
+  # needed. `--scope=all` formats the whole tree like `bazel run //tools/format`
+  # and `--severity=warn` reports what was reformatted without failing (the
+  # example sources are intentionally unformatted), matching the `format` job.
+  format-aspect-cli:
+    needs: list-examples
+    # Our version of clang-format has some deps that aren't satisfiable on newer ubuntu yet
+    runs-on: ${{ matrix.folder == 'examples/cpp' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJson(needs.list-examples.outputs.format-matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_API_TOKEN }}
+      # Permit this gross non-hermetic dependency
+      - if: matrix.folder == 'examples/cpp'
+        run: sudo apt-get update && sudo apt-get install -y libtinfo5
+      # TODO: Fix for Bazel 9
+      - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
+        run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
+      - run: aspect format --scope=all --severity=warn
+        working-directory: ${{ matrix.folder }}
   integration-test:
     needs: list-examples
     runs-on: ubuntu-latest
@@ -92,8 +116,7 @@ jobs:
           - folder: examples/shell
     steps:
       - uses: actions/checkout@v6
-      - name: Install Aspect CLI
-        run: curl -fsSL https://install.aspect.build | bash -s -- "$ASPECT_LAUNCHER_VERSION"
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
       - name: Setup bats
         uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1
         with:
@@ -136,10 +159,66 @@ jobs:
             --output_groups=rules_lint_patch \
             --@aspect_rules_lint//lint:fix \
             //...
+  # Same examples as `lint`, exercised through `aspect lint` — the
+  # better-DX entry point users actually run. Each example registers its
+  # linter aspects in `.aspect/config.axl`, so no `--config=lint` is needed.
+  #
+  # `--strategy=soft` surfaces findings across the whole tree without failing
+  # on them, matching the `lint` job's `bazel build --output_groups=...`
+  # (which produces reports for all targets and exits 0); the example fixtures
+  # carry seeded violations on purpose.
+  lint-aspect-cli:
+    needs: list-examples
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJson(needs.list-examples.outputs.lint-matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_API_TOKEN }}
+      # TODO: Fix for Bazel 9
+      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
+        run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
+
+      - name: aspect lint
+        working-directory: ${{ matrix.folder }}
+        env:
+          folder: ${{ matrix.folder }}
+        run: |
+          key="lint-${folder//\//-}"
+          aspect lint --task-key="$key" --strategy=soft -- //...
+          aspect lint --task-key="$key-fix" --fix --strategy=soft -- //...
+  # Build & test the root workspace through `aspect test` on Linux across Bazel
+  # versions. Complements `test` below, which covers macOS via vanilla Bazel.
+  aspect-test:
+    name: aspect-test (${{ matrix.workspace.path }}, ${{ matrix.bazel.id }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace:
+          - { path: ".", slug: "root" }
+        bazel:
+          - { id: "bazel-7", version: "7.x", flags: "" }
+          - { id: "bazel-8", version: "8.x", flags: "" }
+          - { id: "bazel-9", version: "9.x", flags: "" }
+    env:
+      USE_BAZEL_VERSION: ${{ matrix.bazel.version }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_API_TOKEN }}
+      - name: Test
+        working-directory: ${{ matrix.workspace.path }}
+        run: aspect test --task-key=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} ${{ matrix.bazel.flags }} -- //...
   test:
     strategy:
       matrix:
-        # Linux is tested on Aspect Workflows
+        # Linux is covered by the aspect-test job above
         os:
           - macos-latest
           # TODO(alex): lots of places are missing windows...

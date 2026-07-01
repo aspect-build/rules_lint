@@ -1,5 +1,5 @@
---- a/lint/rust/testdata/patch/src/warning_and_error.rs
-+++ b/lint/rust/testdata/patch/src/warning_and_error.rs
+--- a/testdata/patch/src/warning_and_error.rs
++++ b/testdata/patch/src/warning_and_error.rs
 @@ -1,6 +1,6 @@
  fn main() {
      // Will emit a clippy warning because we could just write println!("Hello World").

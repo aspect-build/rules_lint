@@ -2,6 +2,7 @@
 
 # buildifier: disable=bzl-visibility
 load("@aspect_rules_lint//lint/private:machine_report_testing.bzl", "report_test")  # @unused: used in commented-out tests
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 load(
     "//tools/lint:linters.bzl",
     "clang_tidy_test",
@@ -47,6 +48,13 @@ machine_clang_tidy_report(
 machine_cppcheck_report(
     name = "machine_cppcheck_report",
     src = "//src:hello_cc",
+)
+
+# Fixture whose clang-tidy run promotes a warning to an error, exercising the
+# "N warning(s) treated as error(s)" summary-line filtering.
+cc_binary(
+    name = "inconsistent_cc",
+    srcs = ["inconsistent_params.cpp"],
 )
 
 # report_test(

@@ -25,6 +25,97 @@ Features:
 
 [![rules_lint at BazelCon](https://img.youtube.com/vi/CnK-RAdfrpI/0.jpg)](https://www.youtube.com/watch?v=CnK-RAdfrpI)
 
+## Better DX with the Aspect CLI
+
+You _can_ drive linting straight from Bazel, but the experience is rough: you
+run a verbose build to produce report files, then hunt them down under
+`bazel-out/` and `cat` them yourself.
+
+```console
+$ bazel build --config=lint --output_groups=rules_lint_human //...
+INFO: Build completed successfully, 8 total actions
+# ...no findings printed. Now go find and cat the reports:
+$ cat bazel-out/*/bin/src/hello.AspectRulesLintShellCheck.out
+In src/hello.sh line 10:
+grep '*foo*' file
+     ^-----^ SC2063 (warning): Grep uses regex, but this looks like a glob.
+```
+
+The [Aspect CLI](https://github.com/aspect-build/aspect-cli) adds a first-class
+`aspect lint` command that runs the same Bazel aspects, then collects and prints
+every finding for you — grouped by linter, tagged by severity, with `file:line`
+and rule, and one-key interactive fixes:
+
+```console
+$ aspect lint //...
+
+🧹 Linters (1): ShellCheck
+
+Lint findings
+  ℹ️ src/hello.sh:4 · ShellCheck — Double quote to prevent globbing and word splitting.
+  ⚠️ src/hello.sh:10 · ShellCheck — Grep uses regex, but this looks like a glob.
+```
+
+It also scopes findings to your changed lines by default (the "Water Leak
+Principle") and applies fixes with `aspect lint --fix`.
+
+On CI, the **free [Aspect Workflows GitHub App](https://aspect.build/docs/cli/authentication)**
+makes this shine: every `aspect lint` task posts a rich GitHub **status check**
+— findings grouped by linter and severity with `file:line` and rule, a
+per-linter summary table, and a copy-paste reproduce command — and surfaces the
+same findings as inline PR review comments. Install and authenticate it in a few
+minutes; no server to run.
+
+[![aspect lint status check](./docs/lint-status-check.png)](https://github.com/aspect-build/rules_lint/pull/920/checks?check_run_id=82394567739)
+
+> The screenshot above is a live status check from this repo's `examples/python`
+> lint task — [open the real thing](https://github.com/aspect-build/rules_lint/pull/920/checks?check_run_id=82394567739).
+
+Configure it once in `.aspect/config.axl` by pointing the `lint` task at your
+aspects — no `--config=lint` or output-group flags to remember:
+
+```python
+def config(ctx: ConfigContext):
+    ctx.tasks["lint"].args.aspects = ["//tools/lint:linters.bzl%shellcheck"]
+```
+
+**Try it in this repo:** every linter under [`examples/`](./examples) is wired
+up for `aspect lint`. After [installing the CLI](https://docs.aspect.build/cli/install):
+
+```console
+$ cd examples/shell && aspect lint //...
+```
+
+### Formatting
+
+The same applies to formatting. Instead of `bazel run //tools/format`, the
+`aspect format` command runs your `//tools/format` target, formats only your
+changed files by default (or `--scope=all` for the whole tree), and reports
+exactly what it touched — with a ready-to-run fix command:
+
+```console
+$ aspect format
+
+→ ✨ Format · Formatting changed files
+→ 📋 Diff · Computing format diff
+2 files were modified:
+  - src/hello.sh
+  - src/sourced_dep.sh
+```
+
+On CI it posts a **format status check** via the same GitHub App, and
+`--severity` chooses whether an unformatted file warns or fails the build. It
+works out of the box — `aspect format` already targets `//tools/format`, so no
+extra config is needed:
+
+```console
+$ cd examples/shell && aspect format
+```
+
+See the [Aspect CLI overview](https://docs.aspect.build/cli/overview) and the
+[`lint`](https://docs.aspect.build/cli/lint) and
+[`format`](https://docs.aspect.build/cli/format) task docs.
+
 ## Supported tools
 
 New tools are being added frequently, so check this page again!
@@ -60,7 +151,7 @@ Linters which are not language-specific:
 | Ruby                   |                           | [RuboCop], [Standard]                                   |
 | Rust                   | [rustfmt]                 | [clippy]                                                |
 | SQL                    | [prettier-plugin-sql]     |                                                         |
-| Scala                  | [scalafmt]                |                                                         |
+| Scala                  | [scalafmt]                | [scalafix]                                              |
 | Shell                  | [shfmt]                   | [shellcheck]                                            |
 | Starlark               | [Buildifier]              | [Buildifier]                                            |
 | Swift                  | [SwiftFormat] (1)         |                                                         |
@@ -118,6 +209,7 @@ Linters which are not language-specific:
 [rustfmt]: https://rust-lang.github.io/rustfmt
 [stylelint]: https://stylelint.io
 [clippy]: https://github.com/rust-lang/rust-clippy
+[scalafix]: https://scalacenter.github.io/scalafix/
 
 1. Non-hermetic: requires that a swift toolchain is installed on the machine.
    See https://github.com/bazelbuild/rules_swift#1-install-swift

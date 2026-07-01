@@ -1,13 +1,43 @@
 load("@bazel_lib//lib:expand_make_vars.bzl", _expand_locations = "expand_locations")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", _run_patcher = "run_patcher")
 
+def _repository_relative_path(file):
+    if not file.short_path.startswith("../"):
+        return file.short_path
+
+    components = file.short_path.split("/")
+    if len(components) < 3:
+        fail("{} does not contain a repository-relative path".format(file.short_path))
+    return "/".join(components[2:])
+
+def _workspace_root(file, repository_relative_path):
+    if file.path == repository_relative_path:
+        return "."
+
+    suffix = "/" + repository_relative_path
+    if not file.path.endswith(suffix):
+        fail("{} does not end with {}".format(file.path, repository_relative_path))
+    return file.path[:-len(suffix)]
+
 def _patcher_run_impl(ctx):
     diff_file = ctx.actions.declare_file("_{}.diff".format(ctx.label.name))
 
     files_to_diff = ctx.files.files_to_diff
+    if not files_to_diff:
+        fail("files_to_diff must not be empty")
+
+    files_to_diff_paths = [
+        _repository_relative_path(f)
+        for f in files_to_diff
+    ]
+    workspace_root = _workspace_root(files_to_diff[0], files_to_diff_paths[0])
+    for i in range(1, len(files_to_diff)):
+        current_workspace_root = _workspace_root(files_to_diff[i], files_to_diff_paths[i])
+        if current_workspace_root != workspace_root:
+            fail("files_to_diff must belong to one repository")
+
     data = ctx.files.data
     env = ctx.attr.env
-    bindir = "."
 
     inputs = [
         ctx.executable.tool,
@@ -23,10 +53,10 @@ def _patcher_run_impl(ctx):
         ctx.executable,
         inputs = inputs,
         args = tool_args,
-        files_to_diff = [f.path for f in files_to_diff],
+        files_to_diff = files_to_diff_paths,
         patch_out = diff_file,
         tools = [ctx.executable.tool],
-        patch_cfg_env = dict(env, **{"BAZEL_BINDIR": bindir}),
+        patch_cfg_env = dict(env, **{"BAZEL_BINDIR": workspace_root}),
         env = env,
         mnemonic = ctx.attr.mnemonic,
         progress_message = "Running patcher in %{label} as part of the build",

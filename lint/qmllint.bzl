@@ -48,9 +48,11 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
     """
     inputs = srcs + [config]
 
+    args = ctx.actions.args()
+    args.add_all(srcs)
+
     if patch != None:
         wrapper = ctx.actions.declare_file(ctx.label.name + ".qmllint_wrapper.sh")
-        files = [s.path for s in srcs]
         ctx.actions.write(
             output = wrapper,
             content = """#!/bin/bash
@@ -64,8 +66,8 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = files,
-            files_to_diff = files,
+            args = args,
+            files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [wrapper, executable],
             stdout = stdout,
@@ -75,8 +77,6 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
         )
     else:
         outputs = [stdout]
-        args = ctx.actions.args()
-        args.add_all(srcs)
 
         if exit_code:
             command = "{qmllint} $@ > {stdout} 2>&1; echo $? > " + exit_code.path
