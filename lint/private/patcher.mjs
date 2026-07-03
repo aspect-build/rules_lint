@@ -48,7 +48,7 @@ async function sync(src, dst, subdir, filesToDiff) {
 async function main(args, sandbox) {
   const config = JSON.parse(await fs.promises.readFile(args[0]));
   const spawnArgs = args.length > 1
-    ? (await fs.promises.readFile(args[1], "utf8")).split(/\r?\n/)
+    ? (await fs.promises.readFile(args[1], "utf8")).split(/\r?\n/).filter(Boolean)
     : config.args;
 
   debug("sandbox", sandbox);
