@@ -171,7 +171,7 @@ def _angle_includes_option(ctx):
     return "-I"
 
 def _is_cxx(file):
-    return not file.extension == "c"
+    return file.extension not in ["c", "m"]
 
 def _is_source(file):
     permitted_source_types = [
@@ -181,6 +181,8 @@ def _is_source(file):
         "cxx",
         "c++",
         "C",
+        "m",
+        "mm",
     ]
     return (file.is_source and file.extension in permitted_source_types)
 
@@ -279,10 +281,12 @@ def _get_compiler_args(ctx, compilation_context, srcs):
     sources_are_cxx = _is_cxx(srcs[0])
     if (sources_are_cxx):
         user_flags = ctx.fragments.cpp.cxxopts + ctx.fragments.cpp.copts
-        args.extend(_safe_flags(ctx, _toolchain_flags(ctx, user_flags, ACTION_NAMES.cpp_compile) + rule_flags) + ["-xc++"])
+        lang = "-xobjective-c++" if srcs[0].extension == "mm" else "-xc++"
+        args.extend(_safe_flags(ctx, _toolchain_flags(ctx, user_flags, ACTION_NAMES.cpp_compile) + rule_flags) + [lang])
     else:
         user_flags = ctx.fragments.cpp.copts
-        args.extend(_safe_flags(ctx, _toolchain_flags(ctx, user_flags, ACTION_NAMES.c_compile) + rule_flags) + ["-xc"])
+        lang = "-xobjective-c" if srcs[0].extension == "m" else "-xc"
+        args.extend(_safe_flags(ctx, _toolchain_flags(ctx, user_flags, ACTION_NAMES.c_compile) + rule_flags) + [lang])
 
     # add defines
     for define in compilation_context.defines.to_list():
