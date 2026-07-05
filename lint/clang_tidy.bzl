@@ -42,6 +42,7 @@ load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("@rules_cc//cc:defs.bzl", "CcInfo", "cc_common")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:macos_sdk.bzl", "macos_sdk_root")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
@@ -303,30 +304,21 @@ def _get_compiler_args(ctx, compilation_context, srcs):
     args.extend(_prefixed(compilation_context.system_includes.to_list(), _angle_includes_option(ctx)))
     args.extend(_prefixed(compilation_context.external_includes.to_list(), "-isystem"))
 
-    # A hermetic clang-tidy resolves its own libc++ and Clang builtins
-    # via binary-relative search, but not the platform SDK headers
-    # (e.g. macOS Xcode SDK: wchar.h, stdlib.h, stdint.h). Pass
-    # -isysroot so the frontend locates them, rather than injecting
-    # individual include dirs that risk mixing incompatible header
-    # versions (https://github.com/llvm/llvm-project/issues/63890).
-    #
-    # Apple-style toolchains leave builtin_sysroot unset and deliver
-    # the SDK via an -isysroot flag resolved at action time, so
-    # cc_toolchain.sysroot is empty; recover the SDK root from the
-    # builtin include dirs when targeting macOS.
-    # Fixes: https://github.com/aspect-build/rules_lint/issues/566
+    # clang-tidy runs as its own action, so a hermetic clang-tidy (e.g. from
+    # toolchains_llvm) resolves its own libc++/builtins by binary-relative
+    # search, but not the macOS SDK platform headers (wchar.h, stdlib.h,
+    # math.h) that libc++ pulls in via #include_next. Pass -isysroot at the SDK
+    # root so the frontend locates them, rather than injecting individual
+    # include dirs that risk mixing incompatible header versions
+    # (https://github.com/llvm/llvm-project/issues/63890).
+    # macOS-only; prefer cc_toolchain.sysroot, else derive it (macos_sdk_root).
     cc_toolchain = find_cpp_toolchain(ctx)
-    sysroot = cc_toolchain.sysroot
-    if not sysroot and ctx.target_platform_has_constraint(
+    if ctx.target_platform_has_constraint(
         ctx.attr._macos_constraint[platform_common.ConstraintValueInfo],
     ):
-        for d in cc_toolchain.built_in_include_directories:
-            idx = d.find(".sdk/")
-            if idx != -1:
-                sysroot = d[:idx + len(".sdk")]
-                break
-    if sysroot:
-        args.extend(["-isysroot", sysroot])
+        sysroot = cc_toolchain.sysroot or macos_sdk_root(cc_toolchain.built_in_include_directories)
+        if sysroot:
+            args.extend(["-isysroot", sysroot])
 
     return args
 
