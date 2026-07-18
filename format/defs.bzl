@@ -116,6 +116,7 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
             command(
                 command = Label("@aspect_rules_lint//format/private:format"),
                 description = "Formatting {} with {}...".format(lang, toolname),
+                tags = common_attrs.get("tags", []),
                 **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args)
             )
         commands.append(target_name)
