@@ -60,7 +60,7 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_
 languages = rule(
     implementation = lambda ctx: fail("languages rule is documentation-only; do not call it"),
     doc = """\
-Language attributes that may be passed to [format_multirun](#format_multirun) or [format_test](#format_test).
+Language attributes that may be passed to [format_multirun](#function-format_multirun) or [format_test](#function-format_test).
 
 Files with matching extensions from [GitHub Linguist] will be formatted for the given language.
 
@@ -91,7 +91,7 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
     This macro produces a target named `[name].check` which does not edit files,
     rather it exits non-zero if any sources require formatting.
 
-    To check formatting with `bazel test`, use [format_test](#format_test) instead.
+    To check formatting with `bazel test`, use [format_test](#function-format_test) instead.
 
     [multirun]: https://registry.bazel.build/modules/rules_multirun
 
@@ -101,7 +101,7 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
         print_command: whether to print a progress message before calling the formatter of each language.
             Note that a line is printed for a formatter even if no files of that language are to be formatted.
         disable_git_attribute_checks: Set to True to disable honoring .gitattributes filters
-        **kwargs: attributes named for each language; see [languages](#languages).
+        **kwargs: attributes named for each language; see [languages](#rule-languages).
             Additionally supports custom arguments via {language}_fix_args and {language}_check_args
             to override default formatter flags for fix and check modes respectively.
     """
@@ -116,6 +116,7 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
             command(
                 command = Label("@aspect_rules_lint//format/private:format"),
                 description = "Formatting {} with {}...".format(lang, toolname),
+                tags = common_attrs.get("tags", []),
                 **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args)
             )
         commands.append(target_name)
@@ -145,7 +146,7 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
     Intended to be used with `bazel test` to verify files are formatted.
     **This is not recommended**, because it is either non-hermetic or requires listing all source files.
 
-    To format with `bazel run`, see [format_multirun](#format_multirun).
+    To format with `bazel run`, see [format_multirun](#function-format_multirun).
 
     Args:
         name: name of the resulting target, typically "format"
@@ -156,11 +157,11 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             This mode causes the test to be non-hermetic and it cannot be cached. Read the documentation in /docs/formatting.md.
         disable_git_attribute_checks: Set to True to disable honoring .gitattributes filters
         tags: tags to apply to generated targets. In 'no_sandbox' mode, `["no-sandbox", "no-cache", "external"]` are added to the tags.
-        fix_target: label of the companion [format_multirun](#format_multirun) target. May be a target
+        fix_target: label of the companion [format_multirun](#function-format_multirun) target. May be a target
             name in the same package (e.g. `"format"`) or a full label (e.g. `"//tools/format:format"`).
             When set, the test's failure message points users at the per-language fix command of that
             target (e.g. `format_Go_with_gofmt`) instead of the test target itself.
-        **kwargs: attributes named for each language; see [languages](#languages).
+        **kwargs: attributes named for each language; see [languages](#rule-languages).
             Additionally supports custom arguments via {language}_fix_args and {language}_check_args
             to override default formatter flags. Test mode uses check_args when specified.
     """
