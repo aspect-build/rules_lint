@@ -1,0 +1,8 @@
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+sh_test(
+    name = "clang_tidy_wrapper_test",
+    srcs = ["clang_tidy_wrapper_test.sh"],
+    data = ["//lint:clang_tidy_wrapper"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)
