@@ -202,11 +202,12 @@ setup() {
     assert_output --partial "+ buf format --write --disable-symlinks --path examples/protobuf/src/unused.proto"
 }
 
-@test "should run yamlfmt on YAML" {
-    run bazel run //format/test:format_YAML_with_yamlfmt
+@test "should run prettier on YAML" {
+    run bazel run //format/test:format_YAML_with_prettier
     assert_success
 
-    assert_output --partial "+ yamlfmt .bcr/lint/rust/presubmit.yml .bcr/lint/scala/presubmit.yml .bcr/presubmit.yml"
+    assert_output --partial "+ prettier --write --log-level=warn .bcr/lint/rust/presubmit.yml .bcr/lint/scala/presubmit.yml .bcr/presubmit.yml"
+    assert_output --partial "examples/yaml/src/config.yaml"
 }
 
 @test "should run rustfmt on Rust" {

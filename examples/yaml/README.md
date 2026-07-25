@@ -6,7 +6,7 @@ This example demonstrates how to set up formatting and linting for YAML files us
 
 ### Formatters
 
-- **yamlfmt** - YAML formatter
+- **Prettier** - YAML formatter
 
 ### Linters
 

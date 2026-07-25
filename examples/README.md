@@ -19,7 +19,7 @@ Each example is self-contained and shows:
 - `ruby/` - Ruby formatting with RuboCop; linting with RuboCop or StandardRB
 - `kotlin/` - Kotlin formatting with ktfmt; linting with Ktlint
 - `css/` - CSS formatting with Prettier; linting with Stylelint
-- `yaml/` - YAML formatting with yamlfmt; linting with Yamllint
+- `yaml/` - YAML formatting with Prettier; linting with Yamllint
 - `markdown/` - Markdown formatting with Prettier; linting with Vale
 - `proto/` - Protocol Buffer formatting and linting with Buf
 - `starlark/` - Starlark formatting with Buildifier; linting with Buildifier

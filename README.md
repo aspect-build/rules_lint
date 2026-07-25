@@ -158,7 +158,7 @@ Linters which are not language-specific:
 | TOML                   | [taplo]                   |                                                         |
 | TSX                    | [Prettier]                | [ESLint]                                                |
 | TypeScript             | [Prettier]                | [ESLint]                                                |
-| YAML                   | [yamlfmt]                 | [yamllint]                                              |
+| YAML                   | [Prettier]                | [yamllint]                                              |
 | XML                    | [prettier/plugin-xml]     |                                                         |
 
 [prettier]: https://prettier.io
@@ -204,7 +204,6 @@ Linters which are not language-specific:
 [cue fmt]: https://cuelang.org/docs/reference/command/cue-help-fmt/
 [cppcheck]: https://www.cppcheck.com/
 [vale]: https://vale.sh/
-[yamlfmt]: https://github.com/google/yamlfmt
 [yamllint]: https://yamllint.readthedocs.io/en/stable/
 [rustfmt]: https://rust-lang.github.io/rustfmt
 [stylelint]: https://stylelint.io
