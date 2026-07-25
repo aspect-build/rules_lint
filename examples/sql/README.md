@@ -1,6 +1,6 @@
-# SQL Formatting Example
+# SQL Formatting and Linting Example
 
-This example demonstrates how to set up formatting for SQL code using `rules_lint`.
+This example demonstrates how to set up formatting and linting for SQL code using `rules_lint`.
 
 ## Supported Tools
 
@@ -8,19 +8,28 @@ This example demonstrates how to set up formatting for SQL code using `rules_lin
 
 - **Prettier** - SQL formatter (via Prettier SQL plugin)
 
-Note: No SQL linter is currently available in rules_lint.
+### Linters
+
+- **SQLFluff** - SQL linter and auto-fixer
 
 ## Setup
 
 1. Configure MODULE.bazel with required dependencies
-2. Create the MODULE.aspect file to register CLI tasks
+2. Set up the Python dependency lock (run `bazel run //:requirements.update`)
 3. Set up npm dependencies (run `pnpm install` to generate `pnpm-lock.yaml`)
-4. Configure Formatters
+4. Configure the tools
 
-- See `tools/format/BUILD.bazel` for how to set up the formatter
+- See `tools/format/BUILD` for the Prettier formatter
+- See `tools/lint/BUILD` for the SQLFluff binary
+- See `tools/lint/linters.bzl` for how to set up the linter
+- See `.aspect/config.axl` for `aspect lint` registration
+- See `.bazelrc` for direct `bazel build --config=lint` registration
+- See `.sqlfluff` for the SQL dialect and lint rules
+- See `src/BUILD` for a Jinja helper declared as target-local `data`
 
-5. Perform formatting using `aspect format`
+5. Run `aspect format` or `aspect lint -- //...`
 
 ## Example Code
 
-See `src/hello.sql` for a simple example SQL query.
+See `src/hello.sql` for a simple query with intentional SQLFluff findings. `src/query.sql.j2`
+imports a Jinja helper supplied through its Bazel target's `data` attribute.
