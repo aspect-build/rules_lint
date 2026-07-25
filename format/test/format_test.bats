@@ -93,11 +93,16 @@ setup() {
     assert_output --partial "+ prettier --write --log-level=warn examples/other_formatters/src/hello.graphql"
 }
 
-@test "should run prettier on SQL" {
-    run bazel run //format/test:format_SQL_with_prettier
+@test "should run sqlfluff on SQL" {
+    run bazel run //format/test:format_SQL_with_sqlfluff
     assert_success
 
-    assert_output --partial "+ prettier --write --log-level=warn examples/sql/src/hello.sql"
+    assert_output --partial "+ sqlfluff format examples/sql/src/clean.dml examples/sql/src/hello.sql examples/sql/src/query.sql.j2 examples/sql/src/templates/helpers.sql.j2"
+
+    run bazel run //format/test:format_SQL_with_sqlfluff.check
+    assert_success
+
+    assert_output --partial "+ sqlfluff lint --rules capitalisation,layout,ambiguous.union,convention.not_equal,convention.coalesce,convention.select_trailing_comma,convention.is_null,jinja.padding,structure.distinct examples/sql/src/clean.dml examples/sql/src/hello.sql examples/sql/src/query.sql.j2 examples/sql/src/templates/helpers.sql.j2"
 }
 
 @test "should run ruff on Python" {

@@ -20,7 +20,7 @@ Each example is self-contained and shows:
 - `kotlin/` - Kotlin formatting with ktfmt; linting with Ktlint
 - `css/` - CSS formatting with Prettier; linting with Stylelint
 - `yaml/` - YAML formatting with yamlfmt; linting with Yamllint
-- `sql/` - SQL formatting with Prettier; linting with SQLFluff
+- `sql/` - SQL formatting and linting with SQLFluff
 - `markdown/` - Markdown formatting with Prettier; linting with Vale
 - `proto/` - Protocol Buffer formatting and linting with Buf
 - `starlark/` - Starlark formatting with Buildifier; linting with Buildifier

@@ -23,7 +23,7 @@ TOOLS = {
     "Scala": "scalafmt",
     "Swift": "swiftformat",
     "Go": "gofmt",
-    "SQL": "prettier",
+    "SQL": "sqlfluff",
     "Shell": "shfmt",
     "Protocol Buffer": "buf",
     "C": "clang-format",
@@ -59,6 +59,8 @@ CHECK_FLAGS = {
     "ruff": "format --check --force-exclude --diff",
     "qmlformat": "",
     "shfmt": "--diff --apply-ignore",
+    # SQLFluff format has no check mode; these are the rule groups it applies.
+    "sqlfluff": "lint --rules capitalisation,layout,ambiguous.union,convention.not_equal,convention.coalesce,convention.select_trailing_comma,convention.is_null,jinja.padding,structure.distinct",
     "java-format": "--set-exit-if-changed --dry-run",
     "djlint": "--format-css --format-js --check",
     "ktfmt": "--set-exit-if-changed --dry-run",
@@ -91,6 +93,7 @@ FIX_FLAGS = {
     "qmlformat": "--inplace",
     # NB: apply-ignore added in https://github.com/mvdan/sh/issues/1037
     "shfmt": "-w --apply-ignore",
+    "sqlfluff": "format",
     "java-format": "--replace",
     "ktfmt": "",
     "gofmt": "-w",
