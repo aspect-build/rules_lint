@@ -86,14 +86,14 @@ def _flake8_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    color_options = ["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []
+    color_options = (["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []) + ctx.attr._extra_args
     flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code)
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, ctx.attr._extra_args)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"]):
+def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"], extra_args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -107,6 +107,7 @@ def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"])
             )
 
         config: the flake8 config file (`setup.cfg`, `tox.ini`, or `.flake8`)
+        extra_args: additional command-line options to pass to flake8
     """
     return aspect(
         implementation = _flake8_aspect_impl,
@@ -129,6 +130,9 @@ def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"])
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

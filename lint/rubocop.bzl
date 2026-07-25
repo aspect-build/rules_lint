@@ -113,7 +113,8 @@ def rubocop_action(
         stdout,
         exit_code = None,
         color = False,
-        patch = None):
+        patch = None,
+        extra_args = []):
     """Run RuboCop as an action under Bazel.
 
     RuboCop will select the configuration file to use for each source file,
@@ -138,10 +139,12 @@ def rubocop_action(
             See https://docs.rubocop.org/rubocop/usage/basic_usage.html
         color: boolean, whether to enable color output
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
+        extra_args: additional command-line arguments to pass to RuboCop
     """
     inputs = srcs + config
-    
+
     args = ctx.actions.args()
+    args.add_all(extra_args)
     args.add("--force-exclusion")
     if color:
         args.add("--color")
@@ -218,6 +221,7 @@ def _rubocop_aspect_impl(target, ctx):
         outputs.human.exit_code,
         color = ctx.attr._options[LintOptionsInfo].color,
         patch = getattr(outputs, "patch", None),
+        extra_args = ctx.attr._extra_args,
     )
 
     # Generate machine-readable report in JSON format for SARIF conversion
@@ -231,6 +235,7 @@ def _rubocop_aspect_impl(target, ctx):
 
     # Create separate action for JSON output
     json_args = ctx.actions.args()
+    json_args.add_all(ctx.attr._extra_args)
 
     # Use JSON format for machine-readable output (converted to SARIF)
     json_args.add("--format", "json")
@@ -277,7 +282,8 @@ def lint_rubocop_aspect(
         binary,
         configs,
         rule_kinds = ["rb_binary", "rb_library", "rb_test"],
-        filegroup_tags = ["ruby", "lint-with-rubocop"]):
+        filegroup_tags = ["ruby", "lint-with-rubocop"],
+        extra_args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -289,6 +295,7 @@ def lint_rubocop_aspect(
             See https://bazel.build/query/language#kind
         filegroup_tags: list of filegroup tags. Filegroups with these tags
             will be visited by the aspect in addition to Ruby rule kinds.
+        extra_args: additional command-line arguments to pass to RuboCop.
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -317,6 +324,9 @@ def lint_rubocop_aspect(
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

@@ -109,11 +109,22 @@ def _spotbugs_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
     format_options = []  # to define
-    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.human.out, outputs.human.exit_code, format_options)
-    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.machine.out, outputs.machine.exit_code, format_options)
+    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.human.out, outputs.human.exit_code, format_options + ctx.attr._extra_args)
+    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.machine.out, outputs.machine.exit_code, format_options + ctx.attr._extra_args)
     return [info]
 
-def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "java_binary", "java_test"]):
+def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "java_binary", "java_test"], extra_args = []):
+    """A factory function to create a Spotbugs linter aspect.
+
+    Args:
+        binary: a Spotbugs executable
+        exclude_filter: the Spotbugs exclude filter XML file
+        rule_kinds: which target kinds should be visited by the aspect
+        extra_args: Additional options to pass to Spotbugs
+
+    Returns:
+        An aspect definition for Spotbugs
+    """
     return aspect(
         implementation = _spotbugs_aspect_impl,
         # Edges we need to walk up the graph from the selected targets.
@@ -136,6 +147,9 @@ def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
     )

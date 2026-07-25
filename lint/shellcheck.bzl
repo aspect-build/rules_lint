@@ -96,11 +96,11 @@ def _shellcheck_aspect_impl(target, ctx):
     # So we must run an action to generate the report separately from an action that writes the human-readable report.
     if hasattr(outputs, "patch"):
         discard_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "patch_exit_code"))
-        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, transitive_srcs, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"])
+        shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, transitive_srcs, ctx.file._config_file, outputs.patch, discard_exit_code, ["--format", "diff"] + ctx.attr._extra_args)
 
-    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, transitive_srcs, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options + config_options)
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, transitive_srcs, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options + config_options + ctx.attr._extra_args)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, transitive_srcs, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, config_options)
+    shellcheck_action(ctx, ctx.executable._shellcheck, files_to_lint, transitive_srcs, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, config_options + ctx.attr._extra_args)
 
     # Shellcheck does not have a SARIF output format built-in.
     # We could use https://crates.io/crates/shellcheck-sarif but don't want to introduce a Rust dependency.
@@ -109,12 +109,13 @@ def _shellcheck_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_library", "sh_test"]):
+def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_library", "sh_test"], extra_args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
         binary: a shellcheck executable.
         config: the .shellcheckrc file
+        extra_args: Additional options to pass to ShellCheck
     """
     return aspect(
         implementation = _shellcheck_aspect_impl,
@@ -134,6 +135,9 @@ def lint_shellcheck_aspect(binary, config, rule_kinds = ["sh_binary", "sh_librar
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

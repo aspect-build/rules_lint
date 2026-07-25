@@ -99,7 +99,7 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
 
     if patch != None:
         # Use run_patcher for fix mode
-        args_list = ["--fix"] + list(options) + format_args + [s.short_path for s in srcs]
+        args_list = list(options) + ["--fix"] + format_args + [s.short_path for s in srcs]
         run_patcher(
             ctx,
             executable,
@@ -168,7 +168,7 @@ def _stylelint_aspect_impl(target, ctx):
         files_to_lint,
         outputs.human.out,
         outputs.human.exit_code,
-        options = color_options,
+        options = color_options + ctx.attr._extra_args,
         target = target,
     )
     if ctx.attr._options[LintOptionsInfo].fix:
@@ -183,7 +183,7 @@ def _stylelint_aspect_impl(target, ctx):
             files_to_lint,
             None,
             _exit_code,
-            options = color_options,
+            options = color_options + ctx.attr._extra_args,
             patch = outputs.patch,
             target = target,
         )
@@ -191,14 +191,14 @@ def _stylelint_aspect_impl(target, ctx):
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    stylelint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, format = ctx.attr._compact_formatter, target = target)
+    stylelint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, options = ctx.attr._extra_args, format = ctx.attr._compact_formatter, target = target)
 
     # We could probably use https://www.npmjs.com/package/stylelint-sarif-formatter instead.
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     return [info]
 
-def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegroup_tags = ["lint-with-stylelint"]):
+def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegroup_tags = ["lint-with-stylelint"], extra_args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -211,6 +211,7 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
         config: label(s) of the stylelint config file
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: which tags on a `filegroup` indicate that it should be visited by the aspect
+        extra_args: additional command-line arguments to pass to stylelint
     """
 
     return aspect(
@@ -239,6 +240,9 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

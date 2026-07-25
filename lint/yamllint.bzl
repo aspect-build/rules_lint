@@ -132,7 +132,15 @@ def lint_yamllint_aspect(
         rule_kinds = ["yaml_library"],
         filegroup_tags = ["lint-with-yamllint"],
         extra_args = []):
-    """Create a yamllint aspect."""
+    """Create a yamllint aspect.
+
+    Args:
+        binary: a yamllint executable
+        config: the yamllint config file
+        rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
+        filegroup_tags: filegroups tagged with these tags will also be visited by the aspect
+        extra_args: additional command-line options to pass to yamllint
+    """
     attrs = {
         "_options": attr.label(
             default = "//lint:options",

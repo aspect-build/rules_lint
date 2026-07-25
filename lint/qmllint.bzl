@@ -34,7 +34,7 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintQmllint"
 
-def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patch = None):
+def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patch = None, options = []):
     """Run qmllint as an action under Bazel.
 
     Args:
@@ -45,10 +45,12 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
         stdout: The file to write the human-readable report to.
         exit_code: An optional file to write the exit code to. If not provided, the action will not capture the exit code.
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
+        options: additional command-line arguments passed to qmllint.
     """
     inputs = srcs + [config]
 
     args = ctx.actions.args()
+    args.add_all(options)
     args.add_all(srcs)
 
     if patch != None:
@@ -114,6 +116,7 @@ def _qmllint_aspect_impl(target, ctx):
         outputs.human.out,
         outputs.human.exit_code,
         patch = getattr(outputs, "patch", None),
+        options = ctx.attr._extra_args,
     )
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
@@ -125,13 +128,25 @@ def _qmllint_aspect_impl(target, ctx):
         raw_machine_report,
         outputs.machine.exit_code,
         patch = getattr(outputs, "patch", None),
+        options = ctx.attr._extra_args,
     )
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     return [info]
 
-def lint_qmllint_aspect(binary, config, rule_kinds = [], filegroup_tags = ["qml", "lint-with-qmllint"]):
-    """Create a qmllint aspect."""
+def lint_qmllint_aspect(binary, config, rule_kinds = [], filegroup_tags = ["qml", "lint-with-qmllint"], extra_args = []):
+    """Create a qmllint aspect.
+
+    Args:
+        binary: the qmllint executable.
+        config: label of the `.qmllint.ini` configuration file.
+        rule_kinds: rule kinds to visit with the aspect.
+        filegroup_tags: filegroup tags to visit with the aspect.
+        extra_args: additional options to pass to qmllint.
+
+    Returns:
+        An aspect definition for qmllint.
+    """
 
     return aspect(
         implementation = _qmllint_aspect_impl,
@@ -154,6 +169,9 @@ def lint_qmllint_aspect(binary, config, rule_kinds = [], filegroup_tags = ["qml"
             ),
             "_filegroup_tags": attr.string_list(
                 default = filegroup_tags,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

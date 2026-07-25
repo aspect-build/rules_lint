@@ -91,16 +91,16 @@ def _pylint_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    human_options = ["--output-format=colorized"] if ctx.attr._options[LintOptionsInfo].color else ["--output-format=text"]
+    human_options = ctx.attr._extra_args + (["--output-format=colorized"] if ctx.attr._options[LintOptionsInfo].color else ["--output-format=text"])
     pylint_action(ctx, ctx.executable._pylint, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, options = human_options)
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    pylint_action(ctx, ctx.executable._pylint, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, options = ["--output-format=text"])
+    pylint_action(ctx, ctx.executable._pylint, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, options = ctx.attr._extra_args + ["--output-format=text"])
 
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-pylint"]):
+def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-pylint"], extra_args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -116,6 +116,7 @@ def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", 
         config: the pylint config file (`pyproject.toml`, `pylintrc`, or `.pylintrc`)
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: filegroups tagged with these tags will also be visited by the aspect
+        extra_args: additional command-line options to pass to pylint
     """
     return aspect(
         implementation = _pylint_aspect_impl,
@@ -138,6 +139,9 @@ def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", 
             ),
             "_filegroup_tags": attr.string_list(
                 default = filegroup_tags,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

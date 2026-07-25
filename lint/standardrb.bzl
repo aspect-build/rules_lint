@@ -117,7 +117,8 @@ def standardrb_action(
         stdout,
         exit_code = None,
         color = False,
-        patch = None):
+        patch = None,
+        extra_args = []):
     """Run Standard Ruby as an action under Bazel.
 
     Standard Ruby will select the configuration file to use for each
@@ -143,11 +144,13 @@ def standardrb_action(
             See https://github.com/standardrb/standard
         color: boolean, whether to enable color output
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
+        extra_args: additional command-line arguments to pass to Standard Ruby
     """
     inputs = srcs + config
     if patch != None:
         # Use run_patcher for fix mode
         standardrb_args = (
+            extra_args +
             ["--fix", "--cache", "false"] +
             (["--color"] if color else []) +
             [s.path for s in srcs]
@@ -170,6 +173,7 @@ def standardrb_action(
         # Use run_shell for lint mode
         outputs = [stdout]
         args = ctx.actions.args()
+        args.add_all(extra_args)
         args.add("--format", "simple")
         args.add("--force-exclusion")
         args.add("--cache-root", "/tmp")
@@ -224,6 +228,7 @@ def _standardrb_aspect_impl(target, ctx):
         outputs.human.exit_code,
         color = ctx.attr._options[LintOptionsInfo].color,
         patch = getattr(outputs, "patch", None),
+        extra_args = ctx.attr._extra_args,
     )
 
     # Generate machine-readable report in JSON format for SARIF conversion
@@ -237,6 +242,7 @@ def _standardrb_aspect_impl(target, ctx):
 
     # Create separate action for JSON output
     json_args = ctx.actions.args()
+    json_args.add_all(ctx.attr._extra_args)
 
     # Use JSON format for machine-readable output (converted to SARIF)
     json_args.add("--format", "json")
@@ -283,7 +289,8 @@ def lint_standardrb_aspect(
         binary,
         configs,
         rule_kinds = ["rb_binary", "rb_library", "rb_test"],
-        filegroup_tags = ["ruby", "lint-with-standardrb"]):
+        filegroup_tags = ["ruby", "lint-with-standardrb"],
+        extra_args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -295,6 +302,7 @@ def lint_standardrb_aspect(
             See https://bazel.build/query/language#kind
         filegroup_tags: list of filegroup tags. Filegroups with these tags
             will be visited by the aspect in addition to Ruby rule kinds.
+        extra_args: additional command-line arguments to pass to Standard Ruby.
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -323,6 +331,9 @@ def lint_standardrb_aspect(
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

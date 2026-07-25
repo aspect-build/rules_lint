@@ -94,7 +94,7 @@ def _checkstyle_aspect_impl(target, ctx):
         ctx.files._data,
         outputs.human.out,
         outputs.human.exit_code,
-        ["-f", "plain"],
+        ctx.attr._extra_args + ["-f", "plain"],
     )
     checkstyle_action(
         ctx,
@@ -104,11 +104,11 @@ def _checkstyle_aspect_impl(target, ctx):
         ctx.files._data,
         outputs.machine.out,
         outputs.machine.exit_code,
-        ["-f", "sarif"],
+        ctx.attr._extra_args + ["-f", "sarif"],
     )
     return [info]
 
-def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary", "java_library"]):
+def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary", "java_library"], extra_args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -122,6 +122,7 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
             )
 
         config: the Checkstyle XML file
+        extra_args: Additional options to pass to Checkstyle
     """
     return aspect(
         implementation = _checkstyle_aspect_impl,
@@ -151,6 +152,9 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
     )

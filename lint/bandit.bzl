@@ -132,7 +132,8 @@ def lint_bandit_aspect(
         config,
         args = [],
         env = {},
-        rule_kinds = RULE_KINDS):
+        rule_kinds = RULE_KINDS,
+        extra_args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -150,6 +151,7 @@ def lint_bandit_aspect(
         args: extra options passed to bandit (["--severity-level=medium"] for example).
         env: environment variables passed to the tool.
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
+        extra_args: additional command-line options to pass to bandit
     """
     return aspect(
         implementation = _bandit_aspect_impl,
@@ -168,7 +170,7 @@ def lint_bandit_aspect(
                 allow_single_file = True,
             ),
             "_args": attr.string_list(
-                default = args,
+                default = args + extra_args,
             ),
             "_env": attr.string_dict(
                 default = env,

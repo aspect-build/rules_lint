@@ -20,7 +20,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintTy"
 
-def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, env = {}, extra_search_paths = [], color = True):
+def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, env = {}, extra_search_paths = [], color = True, options = []):
     """Run ty as an action under Bazel.
 
     ty supports persistent configuration files at both the project- and user-level
@@ -43,6 +43,7 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
         env: environment variables for ty
         extra_search_paths: list of paths to add as --extra-search-path for third-party module resolution
         color: whether to enable color output (--color always) or disable it (--color never)
+        options: additional command-line options
     """
     inputs = depset(srcs + config, transitive = [transitive_srcs])
     outputs = [stdout]
@@ -54,6 +55,8 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
     # Enable verbose output if debug mode is enabled
     if ctx.attr._options[LintOptionsInfo].debug:
         args.add("--vvv")
+
+    args.add_all(options)
 
     # Add all source files to be linted
     args.add_all(srcs)
@@ -221,10 +224,10 @@ def _ty_aspect_impl(target, ctx):
     # Pass transitive sources to ty_action so ty can resolve imports from dependencies
     transitive_srcs_depset = depset(transitive = transitive_sources)
     extra_search_paths = import_paths.keys()
-    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env, extra_search_paths = extra_search_paths)
+    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env, extra_search_paths = extra_search_paths, options = ctx.attr._extra_args)
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code, extra_search_paths = extra_search_paths, color = False)
+    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code, extra_search_paths = extra_search_paths, color = False, options = ctx.attr._extra_args)
 
     # Ideally we'd just use {"TY_OUTPUT_FORMAT": "sarif"} however it prints absolute paths; see https://github.com/astral-sh/ruff/issues/14985
     # This issue should also be resolved when the issue from ruff is fixed.
@@ -232,7 +235,7 @@ def _ty_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ty"]):
+def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ty"], extra_args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -240,6 +243,7 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
         configs: ty config file(s) (`pyproject.toml`, `ty.toml`)
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
+        extra_args: additional command-line options to pass to ty
     """
 
     return aspect(
@@ -267,6 +271,9 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

@@ -116,21 +116,22 @@ def _keep_sorted_aspect_impl(target, ctx):
         files_to_lint,
         outputs.human.out,
         outputs.human.exit_code,
-        options = color_options,
+        options = color_options + ctx.attr._extra_args,
         patch = getattr(outputs, "patch", None),
     )
     raw_json_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_json_report"))
-    keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, raw_json_report, outputs.machine.exit_code)
+    keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, raw_json_report, outputs.machine.exit_code, options = ctx.attr._extra_args)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     jq_lib.jq_action(ctx, [raw_json_report], ".[] | [.path, .lines.start, .lines.end, .message] | join(\":\")", raw_machine_report, ["--raw-output"])
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_keep_sorted_aspect(binary):
+def lint_keep_sorted_aspect(binary, extra_args = []):
     """A factory function to create a linter aspect.
 
     Args:
         binary: a keep-sorted executable
+        extra_args: additional command-line arguments to pass to keep-sorted
 
     Returns:
         An aspect definition for keep-sorted
@@ -146,6 +147,9 @@ def lint_keep_sorted_aspect(binary):
                 default = binary,
                 executable = True,
                 cfg = "exec",
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [

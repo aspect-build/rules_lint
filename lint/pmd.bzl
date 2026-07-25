@@ -98,13 +98,13 @@ def _pmd_aspect_impl(target, ctx):
 
     # https://github.com/pmd/pmd/blob/master/docs/pages/pmd/userdocs/pmd_report_formats.md
     format_options = ["--format", "textcolor" if ctx.attr._options[LintOptionsInfo].color else "text"]
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code, format_options)
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code, format_options + ctx.attr._extra_args)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, raw_machine_report, outputs.machine.exit_code)
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, raw_machine_report, outputs.machine.exit_code, ctx.attr._extra_args)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"]):
+def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"], extra_args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -118,6 +118,7 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
             )
 
         rulesets: the PMD ruleset XML files
+        extra_args: Additional options to pass to PMD
     """
     return aspect(
         implementation = _pmd_aspect_impl,
@@ -143,6 +144,9 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

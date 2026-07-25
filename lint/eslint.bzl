@@ -90,7 +90,7 @@ def _gather_inputs(ctx, target, srcs, files):
         )
     return depset(inputs, transitive = [js_inputs])
 
-def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "stylish", env = {}, patch = None, target = None):
+def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "stylish", env = {}, patch = None, target = None, extra_args = []):
     """Create a Bazel Action that spawns an eslint process.
 
     Adapter for wrapping Bazel around
@@ -107,6 +107,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
         env: environment variables for eslint
         patch: output file for patch (optional). If provided, uses run_patcher instead of run/run_shell.
         target: the aspect target, used to reuse bin-tree inputs already produced by the target
+        extra_args: additional command-line arguments to pass to eslint
     """
     file_inputs = [ctx.attr._workaround_17660]
 
@@ -119,6 +120,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
             format_args = ["../../../" + format.files.to_list()[0].path]
             file_inputs.append(format)
         args_list = (
+            extra_args +
             ["--fix"] +
             (["--debug"] if ctx.attr._options[LintOptionsInfo].debug else []) +
             ["--format"] + format_args +
@@ -143,6 +145,7 @@ def eslint_action(ctx, executable, srcs, stdout, exit_code = None, format = "sty
     else:
         # Use run/run_shell for lint mode
         args = ctx.actions.args()
+        args.add_all(extra_args)
         args.add("--no-warn-ignored")
         if ctx.attr._options[LintOptionsInfo].debug:
             args.add("--debug")
@@ -212,11 +215,12 @@ def _eslint_aspect_impl(target, ctx):
         env = color_env,
         patch = getattr(outputs, "patch", None),
         target = target,
+        extra_args = ctx.attr._extra_args,
     )
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    eslint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, format = ctx.attr._compact_formatter, target = target)
+    eslint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, format = ctx.attr._compact_formatter, target = target, extra_args = ctx.attr._extra_args)
 
     # We could probably use https://www.npmjs.com/package/@microsoft/eslint-formatter-sarif instead.
     # However it probably requires the user to install this and pass it to us.
@@ -225,7 +229,7 @@ def _eslint_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project", "ts_project_rule"]):
+def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project", "ts_project_rule"], extra_args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -237,6 +241,7 @@ def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project"
             ```
         configs: label(s) of the eslint config file(s)
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
+        extra_args: additional command-line arguments to pass to eslint
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -275,6 +280,9 @@ def lint_eslint_aspect(binary, configs, rule_kinds = ["js_library", "ts_project"
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

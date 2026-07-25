@@ -36,7 +36,7 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintBuildifier"
 
-def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, patch = None):
+def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, patch = None, options = []):
     """Run Buildifier as an action under Bazel.
 
     Args:
@@ -46,11 +46,13 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
         stdout: output file containing stdout/stderr from Buildifier
         exit_code: optional output file containing the exit code
         patch: optional output file for a generated patch
+        options: additional command-line options
     """
     if patch != None:
         wrapper = ctx.actions.declare_file(ctx.label.name + ".buildifier_wrapper.sh")
         args = ctx.actions.args()
         args.add("--warnings={}".format(ctx.attr._warnings))
+        args.add_all(options)
         args.add_all(srcs)
 
         ctx.actions.write(
@@ -79,6 +81,7 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
         args = ctx.actions.args()
         args.add("--lint=warn")
         args.add("--warnings={}".format(ctx.attr._warnings))
+        args.add_all(options)
         args.add_all(srcs)
         outputs = [stdout]
 
@@ -119,6 +122,7 @@ def _buildifier_aspect_impl(target, ctx):
         outputs.human.out,
         outputs.human.exit_code,
         patch = getattr(outputs, "patch", None),
+        options = ctx.attr._extra_args,
     )
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
@@ -128,6 +132,7 @@ def _buildifier_aspect_impl(target, ctx):
         files_to_lint,
         raw_machine_report,
         outputs.machine.exit_code,
+        options = ctx.attr._extra_args,
     )
 
     # Buildifier does not have a SARIF output mode, so we need to parse the raw machine report into SARIF format in a separate action.
@@ -135,7 +140,7 @@ def _buildifier_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_buildifier_aspect(binary, warnings = "all", rule_kinds = ["bzl_library", "bzl_library_rule"], filegroup_tags = ["starlark", "lint-with-buildifier"]):
+def lint_buildifier_aspect(binary, warnings = "all", rule_kinds = ["bzl_library", "bzl_library_rule"], filegroup_tags = ["starlark", "lint-with-buildifier"], extra_args = []):
     """A factory function to create a Buildifier linter aspect.
 
     Args:
@@ -143,6 +148,7 @@ def lint_buildifier_aspect(binary, warnings = "all", rule_kinds = ["bzl_library"
         warnings: value for Buildifier's `--warnings` flag
         rule_kinds: which target kinds should be visited automatically
         filegroup_tags: which target tags opt a target into Buildifier linting
+        extra_args: Additional options to pass to Buildifier
     """
     return aspect(
         implementation = _buildifier_aspect_impl,
@@ -165,6 +171,9 @@ def lint_buildifier_aspect(binary, warnings = "all", rule_kinds = ["bzl_library"
             ),
             "_warnings": attr.string(
                 default = warnings,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

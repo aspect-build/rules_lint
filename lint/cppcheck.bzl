@@ -50,7 +50,7 @@ def _get_compiler_args(compilation_context):
     args.extend(_prefixed(compilation_context.external_includes.to_list(), "-I"))
     return args
 
-def cppcheck_action(ctx, compilation_context, executable, srcs, stdout, exit_code, do_xml = False):
+def cppcheck_action(ctx, compilation_context, executable, srcs, stdout, exit_code, do_xml = False, options = []):
     """Create a Bazel Action that spawns a cppcheck process.
 
     Args:
@@ -62,6 +62,7 @@ def cppcheck_action(ctx, compilation_context, executable, srcs, stdout, exit_cod
         exit_code: output file containing the exit code of cppcheck.
             If None, then fail the build when cppcheck exits non-zero.
         do_xml: If true, xml output is generated
+        options: additional command-line arguments passed to cppcheck
     """
 
     outputs = [stdout]
@@ -74,7 +75,7 @@ def cppcheck_action(ctx, compilation_context, executable, srcs, stdout, exit_cod
 
     env["CPPCHECK__VERBOSE"] = "1" if ctx.attr._verbose else ""
 
-    cppcheck_args = []
+    cppcheck_args = list(options)
 
     # cppcheck shall fail with exit code != 0 if issues found
     cppcheck_args.append("--error-exitcode=31")
@@ -117,16 +118,16 @@ def _cppcheck_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    cppcheck_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code)
+    cppcheck_action(ctx, compilation_context, ctx.executable, files_to_lint, outputs.human.out, outputs.human.exit_code, options = ctx.attr._extra_args)
 
     # report:
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    cppcheck_action(ctx, compilation_context, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code)
+    cppcheck_action(ctx, compilation_context, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, options = ctx.attr._extra_args)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     xml_output = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "xml"))
     xml_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "xml_exit_code"))
-    cppcheck_action(ctx, compilation_context, ctx.executable, files_to_lint, xml_output, xml_exit_code, do_xml = True)
+    cppcheck_action(ctx, compilation_context, ctx.executable, files_to_lint, xml_output, xml_exit_code, do_xml = True, options = ctx.attr._extra_args)
 
     # Create new OutputGroupInfo with xml_output added to machine outputs
     info = OutputGroupInfo(
@@ -137,7 +138,7 @@ def _cppcheck_aspect_impl(target, ctx):
     )
     return [info]
 
-def lint_cppcheck_aspect(binary, verbose = False):
+def lint_cppcheck_aspect(binary, verbose = False, extra_args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -165,6 +166,7 @@ def lint_cppcheck_aspect(binary, verbose = False):
             ```
 
         verbose: print debug messages including cppcheck command lines being invoked.
+        extra_args: additional options to pass to cppcheck.
     """
 
     return aspect(
@@ -176,6 +178,9 @@ def lint_cppcheck_aspect(binary, verbose = False):
             ),
             "_verbose": attr.bool(
                 default = verbose,
+            ),
+            "_extra_args": attr.string_list(
+                default = extra_args,
             ),
             "_cppcheck": attr.label(
                 default = binary,
