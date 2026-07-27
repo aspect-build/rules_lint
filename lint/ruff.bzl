@@ -101,7 +101,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
             stdout = stdout,
             exit_code = exit_code,
             env = env,
-            mnemonic = _MNEMONIC,
+            mnemonic = ctx.attr._mnemonic,
             progress_message = "Fixing %{label} with Ruff",
         )
     else:
@@ -123,7 +123,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
             outputs = outputs,
             command = command.format(ruff = executable.path, stdout = stdout.path),
             arguments = [args],
-            mnemonic = _MNEMONIC,
+            mnemonic = ctx.attr._mnemonic,
             env = env,
             progress_message = "Linting %{label} with Ruff",
             tools = [executable],
@@ -136,9 +136,9 @@ def _ruff_aspect_impl(target, ctx):
 
     files_to_lint = filter_srcs(ctx.rule)
     if ctx.attr._options[LintOptionsInfo].fix:
-        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
+        outputs, info = patch_and_output_files(ctx.attr._mnemonic, target, ctx)
     else:
-        outputs, info = output_files(_MNEMONIC, target, ctx)
+        outputs, info = output_files(ctx.attr._mnemonic, target, ctx)
 
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
@@ -158,15 +158,15 @@ def _ruff_aspect_impl(target, ctx):
     )
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = ctx.attr._mnemonic, suffix = "raw_machine_report"))
     ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, raw_machine_report, outputs.machine.exit_code)
 
     # Ideally we'd just use {"RUFF_OUTPUT_FORMAT": "sarif"} however it prints absolute paths; see https://github.com/astral-sh/ruff/issues/14985
-    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
+    parse_to_sarif_action(ctx, ctx.attr._mnemonic, raw_machine_report, outputs.machine.out)
 
     return [info]
 
-def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ruff"]):
+def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ruff"], mnemonic = _MNEMONIC):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -174,6 +174,7 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
         configs: ruff config file(s) (`pyproject.toml`, `ruff.toml`, or `.ruff.toml`)
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
+        mnemonic: The mnemonic to use for the actions created by this aspect
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -202,6 +203,10 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_mnemonic": attr.string(
+                default = mnemonic,
+                doc = "The mnemonic to use for the actions created by this aspect",
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
