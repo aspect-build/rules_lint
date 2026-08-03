@@ -31,7 +31,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_l
 
 _MNEMONIC = "AspectRulesLintCheckstyle"
 
-def checkstyle_action(ctx, executable, srcs, config, data, stdout, exit_code = None, options = []):
+def checkstyle_action(ctx, executable, srcs, config, data, stdout, exit_code = None, args = []):
     """Run Checkstyle as an action under Bazel.
 
     Based on https://checkstyle.sourceforge.io/cmdline.html
@@ -45,18 +45,18 @@ def checkstyle_action(ctx, executable, srcs, config, data, stdout, exit_code = N
         stdout: output file to generate
         exit_code: output file to write the exit code.
             If None, then fail the build when Checkstyle exits non-zero.
-        options: additional command-line options, see https://checkstyle.sourceforge.io/cmdline.html
+        args: additional command-line options, see https://checkstyle.sourceforge.io/cmdline.html
     """
     inputs = srcs + [config] + data
     outputs = [stdout]
 
     # Wire command-line options, see
     # https://checkstyle.sourceforge.io/cmdline.html
-    args = ctx.actions.args()
-    args.add_all(options)
+    action_args = ctx.actions.args()
+    action_args.add_all(args)
 
-    args.add_all(["-c", config.path])
-    args.add_all(srcs)
+    action_args.add_all(["-c", config.path])
+    action_args.add_all(srcs)
 
     if exit_code:
         command = "{CHECKSTYLE} $@ >{stdout}; echo $? > " + exit_code.path
@@ -69,7 +69,7 @@ def checkstyle_action(ctx, executable, srcs, config, data, stdout, exit_code = N
         inputs = inputs,
         outputs = outputs,
         command = command.format(CHECKSTYLE = executable.path, stdout = stdout.path),
-        arguments = [args],
+        arguments = [action_args],
         mnemonic = _MNEMONIC,
         tools = [executable],
         progress_message = "Linting %{label} with Checkstyle",
@@ -94,7 +94,7 @@ def _checkstyle_aspect_impl(target, ctx):
         ctx.files._data,
         outputs.human.out,
         outputs.human.exit_code,
-        ctx.attr._extra_args + ["-f", "plain"],
+        ctx.attr._args + ["-f", "plain"],
     )
     checkstyle_action(
         ctx,
@@ -104,11 +104,11 @@ def _checkstyle_aspect_impl(target, ctx):
         ctx.files._data,
         outputs.machine.out,
         outputs.machine.exit_code,
-        ctx.attr._extra_args + ["-f", "sarif"],
+        ctx.attr._args + ["-f", "sarif"],
     )
     return [info]
 
-def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary", "java_library"], extra_args = []):
+def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary", "java_library"], args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -122,7 +122,7 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
             )
 
         config: the Checkstyle XML file
-        extra_args: Additional options to pass to Checkstyle
+        args: Additional options to pass to Checkstyle
     """
     return aspect(
         implementation = _checkstyle_aspect_impl,
@@ -153,8 +153,8 @@ def lint_checkstyle_aspect(binary, config, data = [], rule_kinds = ["java_binary
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
-            "_extra_args": attr.string_list(
-                default = extra_args,
+            "_args": attr.string_list(
+                default = args,
             ),
         },
     )

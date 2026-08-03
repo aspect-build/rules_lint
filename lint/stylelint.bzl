@@ -68,7 +68,7 @@ def _gather_inputs(ctx, target, srcs, files = []):
         )
     return depset(inputs, transitive = [js_inputs])
 
-def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, options = [], format = None, patch = None, target = None):
+def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, args = [], format = None, patch = None, target = None):
     """Spawn stylelint as a Bazel action
 
     Args:
@@ -84,7 +84,7 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
                 64 - invalid CLI usage
                 78 - invalid configuration file
         env: environment variables for stylelint
-        options: additional command-line arguments
+        args: additional command-line arguments
         format: a formatter to add as a command line argument
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
         target: the aspect target, used to reuse bin-tree inputs already produced by the target
@@ -99,7 +99,7 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
 
     if patch != None:
         # Use run_patcher for fix mode
-        args_list = list(options) + ["--fix"] + format_args + [s.short_path for s in srcs]
+        args_list = list(args) + ["--fix"] + format_args + [s.short_path for s in srcs]
         run_patcher(
             ctx,
             executable,
@@ -118,9 +118,9 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
     else:
         # Use run_shell for lint mode
         outputs = [stderr]
-        args = ctx.actions.args()
-        args.add_all(options)
-        args.add_all(srcs)
+        action_args = ctx.actions.args()
+        action_args.add_all(args)
+        action_args.add_all(srcs)
 
         if exit_code:
             command = "{stylelint} $@ 2>{stderr}; echo $? >" + exit_code.path
@@ -130,16 +130,16 @@ def stylelint_action(ctx, executable, srcs, stderr, exit_code = None, env = {}, 
             command = "{stylelint} $@ && touch {stderr}"
 
         if type(format) == "string":
-            args.add_all(["--formatter", format])
+            action_args.add_all(["--formatter", format])
         elif format != None:
-            args.add_all(["--custom-formatter", "../../../" + format.files.to_list()[0].path])
+            action_args.add_all(["--custom-formatter", "../../../" + format.files.to_list()[0].path])
             file_inputs.append(format)
 
         ctx.actions.run_shell(
             inputs = _gather_inputs(ctx, target, srcs, file_inputs),
             outputs = outputs,
             command = command.format(stylelint = executable._stylelint.path, stderr = stderr.path),
-            arguments = [args],
+            arguments = [action_args],
             mnemonic = _MNEMONIC,
             env = dict(env, **{
                 "BAZEL_BINDIR": ctx.bin_dir.path,
@@ -168,7 +168,7 @@ def _stylelint_aspect_impl(target, ctx):
         files_to_lint,
         outputs.human.out,
         outputs.human.exit_code,
-        options = color_options + ctx.attr._extra_args,
+        args = color_options + ctx.attr._args,
         target = target,
     )
     if ctx.attr._options[LintOptionsInfo].fix:
@@ -183,7 +183,7 @@ def _stylelint_aspect_impl(target, ctx):
             files_to_lint,
             None,
             _exit_code,
-            options = color_options + ctx.attr._extra_args,
+            args = color_options + ctx.attr._args,
             patch = outputs.patch,
             target = target,
         )
@@ -191,14 +191,14 @@ def _stylelint_aspect_impl(target, ctx):
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
-    stylelint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, options = ctx.attr._extra_args, format = ctx.attr._compact_formatter, target = target)
+    stylelint_action(ctx, ctx.executable, files_to_lint, raw_machine_report, outputs.machine.exit_code, args = ctx.attr._args, format = ctx.attr._compact_formatter, target = target)
 
     # We could probably use https://www.npmjs.com/package/stylelint-sarif-formatter instead.
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     return [info]
 
-def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegroup_tags = ["lint-with-stylelint"], extra_args = []):
+def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegroup_tags = ["lint-with-stylelint"], args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -211,7 +211,7 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
         config: label(s) of the stylelint config file
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: which tags on a `filegroup` indicate that it should be visited by the aspect
-        extra_args: additional command-line arguments to pass to stylelint
+        args: additional command-line arguments to pass to stylelint
     """
 
     return aspect(
@@ -241,8 +241,8 @@ def lint_stylelint_aspect(binary, config, rule_kinds = ["css_library"], filegrou
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
-            "_extra_args": attr.string_list(
-                default = extra_args,
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = COPY_FILE_TO_BIN_TOOLCHAINS + [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

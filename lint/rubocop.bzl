@@ -114,7 +114,7 @@ def rubocop_action(
         exit_code = None,
         color = False,
         patch = None,
-        extra_args = []):
+        args = []):
     """Run RuboCop as an action under Bazel.
 
     RuboCop will select the configuration file to use for each source file,
@@ -139,27 +139,27 @@ def rubocop_action(
             See https://docs.rubocop.org/rubocop/usage/basic_usage.html
         color: boolean, whether to enable color output
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
-        extra_args: additional command-line arguments to pass to RuboCop
+        args: additional command-line arguments to pass to RuboCop
     """
     inputs = srcs + config
 
-    args = ctx.actions.args()
-    args.add_all(extra_args)
-    args.add("--force-exclusion")
+    action_args = ctx.actions.args()
+    action_args.add_all(args)
+    action_args.add("--force-exclusion")
     if color:
-        args.add("--color")
+        action_args.add("--color")
 
     if patch != None:
         # Use run_patcher for fix mode
-        args.add("--autocorrect-all")
-        args.add("--cache", "false")
-        args.add_all(srcs)
+        action_args.add("--autocorrect-all")
+        action_args.add("--cache", "false")
+        action_args.add_all(srcs)
 
         run_patcher(
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args,
+            args = action_args,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable],
@@ -171,9 +171,9 @@ def rubocop_action(
     else:
         # Use run_shell for lint mode
         outputs = [stdout]
-        args.add("--format", "simple")
-        args.add("--cache-root", "/tmp")
-        args.add_all(srcs)
+        action_args.add("--format", "simple")
+        action_args.add("--cache-root", "/tmp")
+        action_args.add_all(srcs)
 
         command = _build_rubocop_command(
             executable.path,
@@ -187,7 +187,7 @@ def rubocop_action(
             inputs = inputs,
             outputs = outputs,
             command = command,
-            arguments = [args],
+            arguments = [action_args],
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with RuboCop",
             tools = [executable],
@@ -221,7 +221,7 @@ def _rubocop_aspect_impl(target, ctx):
         outputs.human.exit_code,
         color = ctx.attr._options[LintOptionsInfo].color,
         patch = getattr(outputs, "patch", None),
-        extra_args = ctx.attr._extra_args,
+        args = ctx.attr._args,
     )
 
     # Generate machine-readable report in JSON format for SARIF conversion
@@ -235,7 +235,7 @@ def _rubocop_aspect_impl(target, ctx):
 
     # Create separate action for JSON output
     json_args = ctx.actions.args()
-    json_args.add_all(ctx.attr._extra_args)
+    json_args.add_all(ctx.attr._args)
 
     # Use JSON format for machine-readable output (converted to SARIF)
     json_args.add("--format", "json")
@@ -283,7 +283,7 @@ def lint_rubocop_aspect(
         configs,
         rule_kinds = ["rb_binary", "rb_library", "rb_test"],
         filegroup_tags = ["ruby", "lint-with-rubocop"],
-        extra_args = []):
+        args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -295,7 +295,7 @@ def lint_rubocop_aspect(
             See https://bazel.build/query/language#kind
         filegroup_tags: list of filegroup tags. Filegroups with these tags
             will be visited by the aspect in addition to Ruby rule kinds.
-        extra_args: additional command-line arguments to pass to RuboCop.
+        args: additional command-line arguments to pass to RuboCop.
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -325,8 +325,8 @@ def lint_rubocop_aspect(
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
-            "_extra_args": attr.string_list(
-                default = extra_args,
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

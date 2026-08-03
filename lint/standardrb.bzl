@@ -118,7 +118,7 @@ def standardrb_action(
         exit_code = None,
         color = False,
         patch = None,
-        extra_args = []):
+        args = []):
     """Run Standard Ruby as an action under Bazel.
 
     Standard Ruby will select the configuration file to use for each
@@ -144,13 +144,13 @@ def standardrb_action(
             See https://github.com/standardrb/standard
         color: boolean, whether to enable color output
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
-        extra_args: additional command-line arguments to pass to Standard Ruby
+        args: additional command-line arguments to pass to Standard Ruby
     """
     inputs = srcs + config
     if patch != None:
         # Use run_patcher for fix mode
         standardrb_args = (
-            extra_args +
+            args +
             ["--fix", "--cache", "false"] +
             (["--color"] if color else []) +
             [s.path for s in srcs]
@@ -172,15 +172,15 @@ def standardrb_action(
     else:
         # Use run_shell for lint mode
         outputs = [stdout]
-        args = ctx.actions.args()
-        args.add_all(extra_args)
-        args.add("--format", "simple")
-        args.add("--force-exclusion")
-        args.add("--cache-root", "/tmp")
-        args.add("--no-fix")
+        action_args = ctx.actions.args()
+        action_args.add_all(args)
+        action_args.add("--format", "simple")
+        action_args.add("--force-exclusion")
+        action_args.add("--cache-root", "/tmp")
+        action_args.add("--no-fix")
         if color:
-            args.add("--color")
-        args.add_all(srcs)
+            action_args.add("--color")
+        action_args.add_all(srcs)
 
         command = _build_standardrb_command(
             executable.path,
@@ -194,7 +194,7 @@ def standardrb_action(
             inputs = inputs,
             outputs = outputs,
             command = command,
-            arguments = [args],
+            arguments = [action_args],
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with Standard Ruby",
             tools = [executable],
@@ -228,7 +228,7 @@ def _standardrb_aspect_impl(target, ctx):
         outputs.human.exit_code,
         color = ctx.attr._options[LintOptionsInfo].color,
         patch = getattr(outputs, "patch", None),
-        extra_args = ctx.attr._extra_args,
+        args = ctx.attr._args,
     )
 
     # Generate machine-readable report in JSON format for SARIF conversion
@@ -242,7 +242,7 @@ def _standardrb_aspect_impl(target, ctx):
 
     # Create separate action for JSON output
     json_args = ctx.actions.args()
-    json_args.add_all(ctx.attr._extra_args)
+    json_args.add_all(ctx.attr._args)
 
     # Use JSON format for machine-readable output (converted to SARIF)
     json_args.add("--format", "json")
@@ -290,7 +290,7 @@ def lint_standardrb_aspect(
         configs,
         rule_kinds = ["rb_binary", "rb_library", "rb_test"],
         filegroup_tags = ["ruby", "lint-with-standardrb"],
-        extra_args = []):
+        args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -302,7 +302,7 @@ def lint_standardrb_aspect(
             See https://bazel.build/query/language#kind
         filegroup_tags: list of filegroup tags. Filegroups with these tags
             will be visited by the aspect in addition to Ruby rule kinds.
-        extra_args: additional command-line arguments to pass to Standard Ruby.
+        args: additional command-line arguments to pass to Standard Ruby.
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -332,8 +332,8 @@ def lint_standardrb_aspect(
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
-            "_extra_args": attr.string_list(
-                default = extra_args,
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

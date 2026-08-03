@@ -20,7 +20,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintTy"
 
-def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, env = {}, extra_search_paths = [], color = True, options = []):
+def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, env = {}, extra_search_paths = [], color = True, args = []):
     """Run ty as an action under Bazel.
 
     ty supports persistent configuration files at both the project- and user-level
@@ -43,32 +43,32 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
         env: environment variables for ty
         extra_search_paths: list of paths to add as --extra-search-path for third-party module resolution
         color: whether to enable color output (--color always) or disable it (--color never)
-        options: additional command-line options
+        args: additional command-line options
     """
     inputs = depset(srcs + config, transitive = [transitive_srcs])
     outputs = [stdout]
 
     # Wire command-line options, see
     # `ty help check` to see available options
-    args = ctx.actions.args()
+    action_args = ctx.actions.args()
 
     # Enable verbose output if debug mode is enabled
     if ctx.attr._options[LintOptionsInfo].debug:
-        args.add("--vvv")
+        action_args.add("--vvv")
 
-    args.add_all(options)
+    action_args.add_all(args)
 
     # Add all source files to be linted
-    args.add_all(srcs)
+    action_args.add_all(srcs)
 
     # Add config file flags based on the config file type
     for config_file in config:
         if config_file.basename == "pyproject.toml":
             # For pyproject.toml, pass the directory with --project
-            args.add("--project", config_file.dirname)
+            action_args.add("--project", config_file.dirname)
         else:
             # For ty.toml or other config files, pass the full path with --config-file
-            args.add("--config-file", config_file.path)
+            action_args.add("--config-file", config_file.path)
 
     # In cases where a type can be found in both a stub and "normal" code, make sure the stub is preferred.
     # See https://github.com/astral-sh/ty/issues/1967
@@ -132,7 +132,7 @@ fi
             extra_search_path_script = extra_search_path_script,
             color_flag = color_flag,
         ),
-        arguments = [args],
+        arguments = [action_args],
         mnemonic = _MNEMONIC,
         env = env,
         progress_message = "Linting %{label} with ty",
@@ -224,10 +224,10 @@ def _ty_aspect_impl(target, ctx):
     # Pass transitive sources to ty_action so ty can resolve imports from dependencies
     transitive_srcs_depset = depset(transitive = transitive_sources)
     extra_search_paths = import_paths.keys()
-    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env, extra_search_paths = extra_search_paths, options = ctx.attr._extra_args)
+    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env, extra_search_paths = extra_search_paths, args = ctx.attr._args)
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code, extra_search_paths = extra_search_paths, color = False, options = ctx.attr._extra_args)
+    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code, extra_search_paths = extra_search_paths, color = False, args = ctx.attr._args)
 
     # Ideally we'd just use {"TY_OUTPUT_FORMAT": "sarif"} however it prints absolute paths; see https://github.com/astral-sh/ruff/issues/14985
     # This issue should also be resolved when the issue from ruff is fixed.
@@ -235,7 +235,7 @@ def _ty_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ty"], extra_args = []):
+def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ty"], args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -243,7 +243,7 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
         configs: ty config file(s) (`pyproject.toml`, `ty.toml`)
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
-        extra_args: additional command-line options to pass to ty
+        args: additional command-line options to pass to ty
     """
 
     return aspect(
@@ -272,8 +272,8 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
-            "_extra_args": attr.string_list(
-                default = extra_args,
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

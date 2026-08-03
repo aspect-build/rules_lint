@@ -35,7 +35,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "noop_lint_action", "o
 
 _MNEMONIC = "AspectRulesLintSpotbugs"
 
-def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_code = None, options = []):
+def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_code = None, args = []):
     """Run Spotbugs as an action under Bazel.
 
     Based on https://spotbugs.readthedocs.io/en/latest/index.html
@@ -49,12 +49,12 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
         stdout: output file to generate
         exit_code: output file to write the exit code.
             If None, then fail the build when Spotbugs exits non-zero.
-        options: additional command-line options, see https://spotbugs.readthedocs.io/en/latest/running.html#command-line-options
+        args: additional command-line options, see https://spotbugs.readthedocs.io/en/latest/running.html#command-line-options
     """
     deps = target[JavaInfo].transitive_compile_time_jars
     outputs = [stdout]
-    args = ctx.actions.args()
-    args.add_all(options)
+    action_args = ctx.actions.args()
+    action_args.add_all(args)
 
     # For java_binary targets, include their runtime dependencies
     all_runtime_jars = []
@@ -64,7 +64,7 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
                 all_runtime_jars += dep[JavaInfo].transitive_compile_time_jars.to_list()
 
     if exclude_filter:
-        args.add_all(["-exclude", exclude_filter.path])
+        action_args.add_all(["-exclude", exclude_filter.path])
 
     src_args = ctx.actions.args()
     src_args.add_all(srcs)
@@ -73,9 +73,9 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
     all_classpath_jars = deps.to_list() + all_runtime_jars
     classpath_paths = [jar.path for jar in all_classpath_jars]
     if len(classpath_paths) > 0:
-        args.add_all(["-auxclasspath", ":".join(classpath_paths)])
+        action_args.add_all(["-auxclasspath", ":".join(classpath_paths)])
 
-    args.add_all(["-exitcode"])
+    action_args.add_all(["-exitcode"])
 
     if exit_code:
         command = "{SPOTBUGS} $@ >{stdout}; echo $? > " + exit_code.path
@@ -90,7 +90,7 @@ def spotbugs_action(ctx, executable, srcs, target, exclude_filter, stdout, exit_
         inputs = depset(all_inputs, transitive = [deps]),
         outputs = outputs,
         command = command.format(SPOTBUGS = executable.path, stdout = stdout.path),
-        arguments = [args, src_args],
+        arguments = [action_args, src_args],
         mnemonic = _MNEMONIC,
         tools = [executable],
         progress_message = "Linting %{label} with Spotbugs",
@@ -109,18 +109,18 @@ def _spotbugs_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
     format_options = []  # to define
-    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.human.out, outputs.human.exit_code, format_options + ctx.attr._extra_args)
-    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.machine.out, outputs.machine.exit_code, format_options + ctx.attr._extra_args)
+    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.human.out, outputs.human.exit_code, format_options + ctx.attr._args)
+    spotbugs_action(ctx, ctx.executable._spotbugs, files_to_lint, target, ctx.file._exclude_filter, outputs.machine.out, outputs.machine.exit_code, format_options + ctx.attr._args)
     return [info]
 
-def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "java_binary", "java_test"], extra_args = []):
+def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "java_binary", "java_test"], args = []):
     """A factory function to create a Spotbugs linter aspect.
 
     Args:
         binary: a Spotbugs executable
         exclude_filter: the Spotbugs exclude filter XML file
         rule_kinds: which target kinds should be visited by the aspect
-        extra_args: Additional options to pass to Spotbugs
+        args: Additional options to pass to Spotbugs
 
     Returns:
         An aspect definition for Spotbugs
@@ -148,8 +148,8 @@ def lint_spotbugs_aspect(binary, exclude_filter, rule_kinds = ["java_library", "
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
-            "_extra_args": attr.string_list(
-                default = extra_args,
+            "_args": attr.string_list(
+                default = args,
             ),
         },
     )

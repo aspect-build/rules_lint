@@ -91,7 +91,7 @@ load("@rules_scala//scala:semanticdb_provider.bzl", "SemanticdbInfo")
 
 _MNEMONIC = "AspectRulesLintScalafix"
 
-def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, options = [], patch = None, classpath = None):
+def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, args = [], patch = None, classpath = None):
     """Run scalafix as a build action in Bazel.
 
     Args:
@@ -102,31 +102,31 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
         stdout: output file for linter results
         exit_code: output file to write the exit code.
             If None, then fail the build when scalafix exits non-zero.
-        options: additional command-line arguments to scalafix
+        args: additional command-line arguments to scalafix
         patch: output file for patch (optional). If provided, uses run_patcher for fix mode.
         classpath: For semantic rules - transitive compile classpath (list of jars)
     """
     scala_toolchain = ctx.toolchains["@rules_scala//scala:toolchain_type"]
 
-    args = ctx.actions.args()
-    args.add_all(options)
-    args.add("--config", config)
-    args.add("--scala-version", scala_toolchain.scala_version)
+    action_args = ctx.actions.args()
+    action_args.add_all(args)
+    action_args.add("--config", config)
+    action_args.add("--scala-version", scala_toolchain.scala_version)
 
     inputs = list(srcs) + [config]
     outputs = [stdout]
 
     if classpath:
         # Semantic mode: pass classpath and scalac options
-        args.add("--classpath", ":".join([jar.path for jar in classpath]))
-        args.add_all(scala_toolchain.scalacopts, before_each = "--scalac-options")
+        action_args.add("--classpath", ":".join([jar.path for jar in classpath]))
+        action_args.add_all(scala_toolchain.scalacopts, before_each = "--scalac-options")
         inputs.extend(classpath)
     else:
         # Syntactic mode: no compilation data needed
-        args.add("--syntactic")
+        action_args.add("--syntactic")
 
     # Add source files
-    args.add_all(srcs, before_each = "--files")
+    action_args.add_all(srcs, before_each = "--files")
 
     if patch != None:
         # Use run_patcher for fix mode
@@ -134,7 +134,7 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args,
+            args = action_args,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable],
@@ -145,7 +145,7 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
         )
     else:
         # Lint mode with --check
-        args.add("--check")
+        action_args.add("--check")
 
         if exit_code:
             # Don't fail scalafix and just report the violations
@@ -159,7 +159,7 @@ def scalafix_action(ctx, executable, srcs, config, stdout, exit_code = None, opt
             inputs = inputs,
             outputs = outputs,
             command = command.format(scalafix = executable.path, stdout = stdout.path),
-            arguments = [args],
+            arguments = [action_args],
             mnemonic = _MNEMONIC,
             tools = [executable],
             progress_message = "Linting %{label} with Scalafix",
@@ -205,7 +205,7 @@ def _scalafix_aspect_impl(target, ctx):
         ctx.file._config,
         outputs.human.out,
         outputs.human.exit_code,
-        ctx.attr._extra_args,
+        ctx.attr._args,
         patch = getattr(outputs, "patch", None),
         classpath = classpath,
     )
@@ -219,7 +219,7 @@ def _scalafix_aspect_impl(target, ctx):
         ctx.file._config,
         raw_machine_report,
         outputs.machine.exit_code,
-        ctx.attr._extra_args,
+        ctx.attr._args,
         classpath = classpath,
     )
 
@@ -228,7 +228,7 @@ def _scalafix_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_binary", "scala_test", "scala_junit_test"], semantic = False, extra_args = []):
+def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_binary", "scala_test", "scala_junit_test"], semantic = False, args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -238,7 +238,7 @@ def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_b
         semantic: If True, enables semantic rules (requires SemanticDB from compilation).
             When enabled, the aspect will access classpath and SemanticDB metadata from the target.
             If SemanticDB is not enabled for the target, the aspect falls back to syntactic-only mode.
-        extra_args: Additional options to pass to scalafix cli
+        args: Additional options to pass to scalafix cli
 
     Returns:
         An aspect definition for scalafix
@@ -265,12 +265,12 @@ def lint_scalafix_aspect(binary, config, rule_kinds = ["scala_library", "scala_b
             "_semantic": attr.bool(
                 default = semantic,
             ),
-            "_extra_args": attr.string_list(
-                default = extra_args,
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [
             OPTIONAL_SARIF_PARSER_TOOLCHAIN,
-             "@rules_scala//scala:toolchain_type",
+            "@rules_scala//scala:toolchain_type",
         ],
     )

@@ -50,7 +50,7 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintRuff"
 
-def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}, patch = None, extra_args = []):
+def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}, patch = None, args = []):
     """Run ruff as an action under Bazel.
 
     Ruff will select the configuration file to use for each source file, as documented here:
@@ -76,26 +76,26 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
             See https://github.com/astral-sh/ruff/blob/dfe4291c0b7249ae892f5f1d513e6f1404436c13/docs/linter.md#exit-codes
         env: environment variaables for ruff
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
-        extra_args: additional command-line arguments to pass to ruff
+        args: additional command-line arguments to pass to ruff
     """
     inputs = srcs + config
 
-    args = ctx.actions.args()
-    args.add("check")
-    args.add("--force-exclude")
-    args.add("--quiet")
-    args.add_all(extra_args)
+    action_args = ctx.actions.args()
+    action_args.add("check")
+    action_args.add("--force-exclude")
+    action_args.add("--quiet")
+    action_args.add_all(args)
 
     if patch != None:
         # Use run_patcher for fix mode
-        args.add("--fix")
-        args.add_all(srcs)
+        action_args.add("--fix")
+        action_args.add_all(srcs)
 
         run_patcher(
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args,
+            args = action_args,
             files_to_diff = [s.path for s in srcs],
             patch_cfg_env = env,
             patch_out = patch,
@@ -109,9 +109,9 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
     else:
         # Use run_shell for lint mode
         outputs = [stdout]
-        args.add_all(srcs)
+        action_args.add_all(srcs)
         if not env.get("FORCE_COLOR"):
-            args.add("--output-format=concise")
+            action_args.add("--output-format=concise")
 
         if exit_code:
             command = "{ruff} $@ >{stdout}; echo $? >" + exit_code.path
@@ -124,7 +124,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
             inputs = inputs,
             outputs = outputs,
             command = command.format(ruff = executable.path, stdout = stdout.path),
-            arguments = [args],
+            arguments = [action_args],
             mnemonic = ctx.attr._mnemonic,
             env = env,
             progress_message = "Linting %{label} with Ruff",
@@ -157,19 +157,19 @@ def _ruff_aspect_impl(target, ctx):
         outputs.human.exit_code,
         env = color_env,
         patch = getattr(outputs, "patch", None),
-        extra_args = ctx.attr._extra_args,
+        args = ctx.attr._args,
     )
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = ctx.attr._mnemonic, suffix = "raw_machine_report"))
-    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, raw_machine_report, outputs.machine.exit_code, extra_args = ctx.attr._extra_args)
+    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, raw_machine_report, outputs.machine.exit_code, args = ctx.attr._args)
 
     # Ideally we'd just use {"RUFF_OUTPUT_FORMAT": "sarif"} however it prints absolute paths; see https://github.com/astral-sh/ruff/issues/14985
     parse_to_sarif_action(ctx, ctx.attr._mnemonic, raw_machine_report, outputs.machine.out)
 
     return [info]
 
-def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ruff"], mnemonic = _MNEMONIC, extra_args = []):
+def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ruff"], mnemonic = _MNEMONIC, args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -178,7 +178,7 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
         mnemonic: The mnemonic to use for the actions created by this aspect
-        extra_args: additional command-line arguments to pass to ruff
+        args: additional command-line arguments to pass to ruff
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -212,8 +212,8 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
                 default = mnemonic,
                 doc = "The mnemonic to use for the actions created by this aspect",
             ),
-            "_extra_args": attr.string_list(
-                default = extra_args,
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
