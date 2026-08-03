@@ -67,7 +67,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintVale"
 
-def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None, output = "CLI", env = {}):
+def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None, output = "CLI", env = {}, args = []):
     """Run Vale as an action under Bazel.
 
     Args:
@@ -81,6 +81,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
             If None, then fail the build when Vale exits non-zero.
         output: the value for the --output flag. May be a string like 'line', 'JSON', 'CLI', or a File of a template to use: https://vale.sh/docs/templates
         env: environment variables for vale
+        args: additional command-line arguments passed to Vale
     """
     inputs = srcs + [config]
 
@@ -92,14 +93,15 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
         env = dict(env, **{"VALE_STYLES_PATH": styles.path})
 
     # Wire command-line options, see output of vale --help
-    args = ctx.actions.args()
-    args.add_all(srcs)
-    args.add_all(["--config", config])
+    action_args = ctx.actions.args()
+    action_args.add_all(args)
+    action_args.add_all(srcs)
+    action_args.add_all(["--config", config])
     if type(output) == "File":
         inputs.append(output)
-        args.add_all(["--output", output.path])
+        action_args.add_all(["--output", output.path])
     else:
-        args.add_all(["--output", output])
+        action_args.add_all(["--output", output])
     outputs = [stdout]
 
     if exit_code:
@@ -117,7 +119,7 @@ def vale_action(ctx, executable, srcs, styles, config, stdout, exit_code = None,
             stdout = stdout.path,
         ),
         env = env,
-        arguments = [args],
+        arguments = [action_args],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Vale",
         tools = [executable],
@@ -139,9 +141,9 @@ def _vale_aspect_impl(target, ctx):
         if not styles.is_directory:
             fail("Styles should be a directory containing installed styles")
     output = ctx.file._template if hasattr(ctx.attr, "_template") and ctx.files._template else "CLI"
-    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.out, outputs.human.exit_code, env = color_env, output = output)
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, outputs.human.out, outputs.human.exit_code, env = color_env, output = output, args = ctx.attr._args)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, raw_machine_report, outputs.machine.exit_code, output = "line")
+    vale_action(ctx, ctx.executable._vale, ctx.rule.files.srcs, styles, ctx.file._config, raw_machine_report, outputs.machine.exit_code, output = "line", args = ctx.attr._args)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
@@ -149,7 +151,7 @@ def _vale_aspect_impl(target, ctx):
 # Users might want to try https://github.com/dwtj/dwtj_rules_markdown but we expect many won't
 # want to take that dependency.
 # So allow a filegroup(tags=["markdown"]) as an alternative rule to host the srcs.
-def lint_vale_aspect(binary, config, template = None, styles = Label("//lint:empty_styles"), rule_kinds = ["markdown_library"], filegroup_tags = ["markdown", "lint-with-vale"]):
+def lint_vale_aspect(binary, config, template = None, styles = Label("//lint:empty_styles"), rule_kinds = ["markdown_library"], filegroup_tags = ["markdown", "lint-with-vale"], args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -159,6 +161,7 @@ def lint_vale_aspect(binary, config, template = None, styles = Label("//lint:emp
         styles: a label of a directory containing installed Vale styles.
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect.
         filegroup_tags: filegroups tagged with these tags will also be visited by the aspect.
+        args: additional options to pass to Vale.
 
     Returns:
         An aspect definition for Vale.
@@ -196,6 +199,9 @@ def lint_vale_aspect(binary, config, template = None, styles = Label("//lint:emp
                 ),
                 "_rule_kinds": attr.string_list(
                     default = rule_kinds,
+                ),
+                "_args": attr.string_list(
+                    default = args,
                 ),
             },
             extra_attrs,

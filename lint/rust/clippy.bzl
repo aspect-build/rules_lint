@@ -153,7 +153,7 @@ def _clippy_aspect_impl(target, ctx):
         # They do this to force Bazel to re-run targets on failures.
         # However, we don't need to do that because we keep track of output files and exit codes separately.
         "-Wwarnings",
-    ] + ctx.attr._clippy_flags
+    ] + ctx.attr._clippy_flags + ctx.attr._args
 
     fail_on_violation = ctx.attr._options[LintOptionsInfo].fail_on_violation
 
@@ -246,7 +246,7 @@ def _parse_to_sarif_action(ctx, rustc_diagnostics_file, sarif_output):
 
 DEFAULT_RULE_KINDS = ["rust_binary", "rust_library", "rust_shared_library", "rust_test"]
 
-def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS, clippy_flags = []):
+def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS, clippy_flags = [], args = []):
     """A factory function to create a linter aspect.
 
     The Clippy binary will be read from the Rust toolchain.
@@ -255,6 +255,7 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS, clippy_flags = [
         config (File): Label of the desired Clippy configuration file to use. Reference: https://doc.rust-lang.org/clippy/configuration.html
         rule_kinds (List[str]): List of rule kinds to lint. Defaults to {default_rule_kinds}.
         clippy_flags (List[str]): Extra clippy/rustc lint flags (e.g. `-Dwarnings`, `-Aclippy::style`).
+        args (List[str]): Additional options to pass to Clippy.
     """.format(default_rule_kinds = DEFAULT_RULE_KINDS)
     attrs = {
         "_options": attr.label(
@@ -270,6 +271,9 @@ def lint_clippy_aspect(config, rule_kinds = DEFAULT_RULE_KINDS, clippy_flags = [
         ),
         "_clippy_flags": attr.string_list(
             default = clippy_flags,
+        ),
+        "_args": attr.string_list(
+            default = args,
         ),
         "_rustc_sarif_parser": attr.label(
             doc = """A binary that can convert JSON rustc diagnostics into SARIF.

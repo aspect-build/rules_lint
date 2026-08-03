@@ -31,7 +31,7 @@ bandit = lint_bandit_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintBandit"
 
@@ -43,7 +43,7 @@ def bandit_action(
         stdout,
         exit_code = None,
         env = {},
-        options = []):
+        args = []):
     """Run bandit as an action under Bazel.
 
     Args:
@@ -55,7 +55,7 @@ def bandit_action(
         exit_code: output file containing exit code of bandit
             If None, then fail the build when bandit exits non-zero.
         env: environment variables passed to the tool.
-        options: additional command-line options
+        args: additional command-line options
     """
     inputs = []
     inputs.extend(srcs)
@@ -64,15 +64,15 @@ def bandit_action(
     if len(config) > 1:
         fail("Requires a single config argument")
 
-    args = ctx.actions.args()
-    args.add("--quiet")
-    args.add_all(ctx.attr._args)
+    action_args = ctx.actions.args()
+    action_args.add("--quiet")
+    action_args.add_all(ctx.attr._args)
     if config:
-        args.add(config[0], format = "--config=%s")
+        action_args.add(config[0], format = "--config=%s")
         inputs.append(config[0])
-    args.add_all(options)
-    args.add("--")
-    args.add_all(srcs)
+    action_args.add_all(args)
+    action_args.add("--")
+    action_args.add_all(srcs)
 
     if exit_code:
         command = "{bandit} $@ > {stdout}; echo $? > " + exit_code.path
@@ -85,7 +85,7 @@ def bandit_action(
         outputs = outputs,
         tools = [executable._bandit],
         command = command.format(bandit = executable._bandit.path, stdout = stdout.path),
-        arguments = [args],
+        arguments = [action_args],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with bandit",
         env = env,
@@ -111,7 +111,7 @@ def _bandit_aspect_impl(target, ctx):
         outputs.human.out,
         outputs.human.exit_code,
         env = ctx.attr._env,
-        options = [],
+        args = [],
     )
     bandit_action(
         ctx,
@@ -121,7 +121,7 @@ def _bandit_aspect_impl(target, ctx):
         outputs.machine.out,
         outputs.machine.exit_code,
         env = ctx.attr._env,
-        options = ["--format=sarif"],
+        args = ["--format=sarif"],
     )
     return [info]
 

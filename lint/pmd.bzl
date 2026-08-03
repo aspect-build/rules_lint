@@ -31,7 +31,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintPMD"
 
-def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, options = []):
+def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, args = []):
     """Run PMD as an action under Bazel.
 
     Based on https://docs.pmd-code.org/latest/pmd_userdocs_installation.html#running-pmd-via-command-line
@@ -44,31 +44,31 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, option
         stdout: output file to generate
         exit_code: output file to write the exit code.
             If None, then fail the build when PMD exits non-zero.
-        options: additional command-line options, see https://pmd.github.io/pmd/pmd_userdocs_cli_reference.html
+        args: additional command-line options, see https://pmd.github.io/pmd/pmd_userdocs_cli_reference.html
     """
     inputs = srcs + rulesets
     outputs = [stdout]
 
     # Wire command-line options, see
     # https://docs.pmd-code.org/latest/pmd_userdocs_cli_reference.html
-    args = ctx.actions.args()
-    args.add("check")
-    args.add("--no-progress")
+    action_args = ctx.actions.args()
+    action_args.add("check")
+    action_args.add("--no-progress")
 
     # https://docs.pmd-code.org/pmd-doc-7.7.0/pmd_userdocs_incremental_analysis.html
     # is non-hermetic, and requires some thought and care before trying to use previous results.
     # If this is actually needed, it will probably have to be run as a Persistent worker :(
-    args.add("--no-cache")
-    args.add_all(options)
-    args.add("--rulesets")
-    args.add_joined(rulesets, join_with = ",")
+    action_args.add("--no-cache")
+    action_args.add_all(args)
+    action_args.add("--rulesets")
+    action_args.add_joined(rulesets, join_with = ",")
 
     src_args = ctx.actions.args()
     src_args.use_param_file("%s", use_always = True)
     src_args.add_all(srcs)
 
     if exit_code:
-        args.add_all(["--report-file", stdout.path])
+        action_args.add_all(["--report-file", stdout.path])
         command = "{PMD} $@; echo $? > " + exit_code.path
         outputs.append(exit_code)
     else:
@@ -79,7 +79,7 @@ def pmd_action(ctx, executable, srcs, rulesets, stdout, exit_code = None, option
         inputs = inputs,
         outputs = outputs,
         command = command.format(PMD = executable.path, stdout = stdout.path),
-        arguments = [args, "--file-list", src_args],
+        arguments = [action_args, "--file-list", src_args],
         mnemonic = _MNEMONIC,
         tools = [executable],
         progress_message = "Linting %{label} with PMD",
@@ -98,13 +98,13 @@ def _pmd_aspect_impl(target, ctx):
 
     # https://github.com/pmd/pmd/blob/master/docs/pages/pmd/userdocs/pmd_report_formats.md
     format_options = ["--format", "textcolor" if ctx.attr._options[LintOptionsInfo].color else "text"]
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code, format_options)
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, outputs.human.out, outputs.human.exit_code, format_options + ctx.attr._args)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, raw_machine_report, outputs.machine.exit_code)
+    pmd_action(ctx, ctx.executable._pmd, files_to_lint, ctx.files._rulesets, raw_machine_report, outputs.machine.exit_code, ctx.attr._args)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"]):
+def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library"], args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -118,6 +118,7 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
             )
 
         rulesets: the PMD ruleset XML files
+        args: Additional options to pass to PMD
     """
     return aspect(
         implementation = _pmd_aspect_impl,
@@ -143,6 +144,9 @@ def lint_pmd_aspect(binary, rulesets, rule_kinds = ["java_binary", "java_library
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

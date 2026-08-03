@@ -30,7 +30,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintFlake8"
 
-def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
+def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None, args = []):
     """Run flake8 as an action under Bazel.
 
     Based on https://flake8.pycqa.org/en/latest/user/invocation.html
@@ -43,17 +43,17 @@ def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None, optio
         stdout: output file containing stdout of flake8
         exit_code: output file containing exit code of flake8
             If None, then fail the build when flake8 exits non-zero.
-        options: additional command-line options, see https://flake8.pycqa.org/en/latest/user/options.html
+        args: additional command-line options, see https://flake8.pycqa.org/en/latest/user/options.html
     """
     inputs = srcs + [config]
     outputs = [stdout]
 
     # Wire command-line options, see
     # https://flake8.pycqa.org/en/latest/user/options.html
-    args = ctx.actions.args()
-    args.add_all(options)
-    args.add_all(srcs)
-    args.add(config, format = "--config=%s")
+    action_args = ctx.actions.args()
+    action_args.add_all(args)
+    action_args.add_all(srcs)
+    action_args.add(config, format = "--config=%s")
 
     if exit_code:
         command = "{flake8} $@ >{stdout}; echo $? > " + exit_code.path
@@ -67,7 +67,7 @@ def flake8_action(ctx, executable, srcs, config, stdout, exit_code = None, optio
         outputs = outputs,
         tools = [executable],
         command = command.format(flake8 = executable.path, stdout = stdout.path),
-        arguments = [args],
+        arguments = [action_args],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Flake8",
     )
@@ -86,14 +86,14 @@ def _flake8_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    color_options = ["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []
+    color_options = (["--color=always"] if ctx.attr._options[LintOptionsInfo].color else []) + ctx.attr._args
     flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, color_options)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code)
+    flake8_action(ctx, ctx.executable._flake8, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, ctx.attr._args)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"]):
+def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"], args = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -107,6 +107,7 @@ def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"])
             )
 
         config: the flake8 config file (`setup.cfg`, `tox.ini`, or `.flake8`)
+        args: additional command-line options to pass to flake8
     """
     return aspect(
         implementation = _flake8_aspect_impl,
@@ -129,6 +130,9 @@ def lint_flake8_aspect(binary, config, rule_kinds = ["py_binary", "py_library"])
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
