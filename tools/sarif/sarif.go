@@ -143,6 +143,12 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%f:%l:%c: %tarning: %m`,
 			`%-G%m`, // ignore any lines that do not match the above patterns
 		}
+	case "AspectRulesLintTaplo":
+		fm = []string{
+			`%Eerror: %m`,
+			`%C%.%# %f:%l:%c`,
+			`%-G%.%#`,
+		}
 	default:
 		return "", fmt.Errorf("No format string for linter mnemonic %s from target %s\n", mnemonic, label)
 	}
