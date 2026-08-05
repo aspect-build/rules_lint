@@ -1,7 +1,25 @@
-"Bazel dependencies for Terraform formatting example"
+"Bazel dependencies for Terraform formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
+bazel_dep(name = "jq.bzl", version = "0.6.0")
+
 local_path_override(
     module_name = "aspect_rules_lint",
     path = "../..",
 )
+
+# Demonstrate fetching a tflint plugin via the tflint_plugin repository rule.
+# The google plugin validates Google Cloud-specific Terraform resources.
+tflint_ext = use_extension("@aspect_rules_lint//lint:tflint_plugins.bzl", "tflint_ext")
+tflint_ext.plugin(
+    name = "tflint_plugin_google",
+    ruleset_name = "google",
+    sha256s = {
+        "linux_amd64": "e5034d2c25c2ed94b131897904614ea8b575fb1fc7a0619b14a874d8cb9adec1",
+        "linux_arm64": "e7e387b7ed4ee02c81efaaab87c47af69377a2a1809e579e357d0965fb524299",
+        "darwin_amd64": "2d393ac529b285c29d5818272ab9df9a9af3c6d1173ab642bd42d0a8b7cfe606",
+        "darwin_arm64": "96fb99f49b25b54000729da9f396b14ef885c2204e3db2e0414a7f21578fd6fc",
+    },
+    url_template = "https://github.com/terraform-linters/tflint-ruleset-google/releases/download/v0.39.0/tflint-ruleset-google_{platform}.zip",
+)
+use_repo(tflint_ext, "tflint_plugin_google")

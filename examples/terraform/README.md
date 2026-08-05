@@ -1,6 +1,6 @@
-# Terraform Formatting Example
+# Terraform Example
 
-This example demonstrates how to set up formatting for Terraform (HCL) code using `rules_lint`.
+This example demonstrates how to set up formatting and linting for Terraform (HCL) code using `rules_lint`.
 
 ## Supported Tools
 
@@ -8,7 +8,9 @@ This example demonstrates how to set up formatting for Terraform (HCL) code usin
 
 - **terraform** - Official Terraform formatter
 
-Note: No Terraform linter is currently available in rules_lint.
+### Linters
+
+- **tflint** - Pluggable Terraform linter
 
 ## Usage
 
@@ -20,8 +22,16 @@ Format all Terraform files:
 bazel run //tools/format:format
 ```
 
-Format specific files:
+### Lint Code
+
+Lint Terraform files via the aspect:
 
 ```bash
-bazel run //tools/format:format -- hello.tf
+bazel lint //src:example
+```
+
+Or using vanilla Bazel:
+
+```bash
+bazel build //src:example --aspects=//tools/lint:linters.bzl%tflint --output_groups=rules_lint_human
 ```
