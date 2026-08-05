@@ -5,7 +5,7 @@ const {
   diagnosticsToSarif,
   applyDiagnosticsAsPatches,
   diagnosticsToHumanReadable,
-} = require("./rust.diagnostic-formatter");
+} = require("./rust.diagnostic-formatter.cjs");
 
 /**
  * @typedef {"human-readable" | "patch" | "sarif"} CliCommand
@@ -23,22 +23,22 @@ function printUsage(command) {
   switch (command) {
     case "human-readable":
       console.error(
-          "Usage: node rust.cli.js human-readable <rustc-diagnostic-json-file> <output-file>"
+          "Usage: node rust.cli.cjs human-readable <rustc-diagnostic-json-file> <output-file>"
       );
       break;
     case "sarif":
       console.error(
-          "Usage: node rust.cli.js sarif <rustc-diagnostic-json-file> <output-file>"
+          "Usage: node rust.cli.cjs sarif <rustc-diagnostic-json-file> <output-file>"
       );
       break;
     case "patch":
       console.error(
-          "Usage: node rust.cli.js patch <rustc-diagnostic-json-file>"
+          "Usage: node rust.cli.cjs patch <rustc-diagnostic-json-file>"
       );
       break;
     case null:
       console.error(
-          "Usage: node rust.cli.js <command> [<arg>...]"
+          "Usage: node rust.cli.cjs <command> [<arg>...]"
       );
       console.error('  command: "human-readable", "patch", or "sarif"');
       break;

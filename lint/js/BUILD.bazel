@@ -2,19 +2,19 @@ load("@aspect_rules_js//js:defs.bzl", "js_library")
 
 js_library(
     name = "eslint.workaround_17660",
-    srcs = ["eslint.workaround_17660.js"],
+    srcs = ["eslint.workaround_17660.cjs"],
     visibility = ["//visibility:public"],
 )
 
 js_library(
     name = "eslint.compact-formatter",
-    srcs = ["eslint.compact-formatter.js"],
+    srcs = ["eslint.compact-formatter.cjs"],
     visibility = ["//visibility:public"],
 )
 
 js_library(
     name = "eslint.stylish-formatter",
-    srcs = ["eslint.stylish-formatter.js"],
+    srcs = ["eslint.stylish-formatter.cjs"],
     visibility = ["//visibility:public"],
 )
 
