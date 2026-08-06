@@ -18,6 +18,7 @@ package sarif
 
 import (
 	"io"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -155,6 +156,15 @@ func TestSarif(t *testing.T) {
 		g.Expect(determineRelativePath("foo/bar/baz", "//foo/bar")).To(Equal("foo/bar/baz"))
 		g.Expect(determineRelativePath("foo", "//foo/bar:baz")).To(Equal("foo"))
 		g.Expect(determineRelativePath("foo/bar/baz", "//foo/bar:baz")).To(Equal("foo/bar/baz"))
+	})
+
+	t.Run("determineRelativePath: returns host path separators as URI separators", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+        // Windows path with backslash. FromSlash and ToSlash only converts paths on windows
+		g.Expect(determineRelativePath(filepath.FromSlash("src/file.ts"), "//src:ts")).To(Equal("src/file.ts"))
+		g.Expect(determineRelativePath(filepath.FromSlash("foo/bar/baz"), "//foo/bar:baz")).To(Equal("foo/bar/baz"))
+		g.Expect(determineRelativePath(filepath.FromSlash("src/file.ts"), "")).To(Equal("src/file.ts"))
 	})
 
 	t.Run("determineRelativePath: returns absolute paths as relative paths", func(t *testing.T) {
