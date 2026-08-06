@@ -135,6 +135,19 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(2)))
 	})
 
+	t.Run("determineRelativePath: converts Windows path separators to URI separators", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		// These run on every platform, so they exercise the conversion on Linux CI too.
+		g.Expect(determineRelativePath(`src\file.ts`, "//src:ts")).To(Equal("src/file.ts"))
+		g.Expect(determineRelativePath(`foo\bar\baz`, "//foo/bar:baz")).To(Equal("foo/bar/baz"))
+		g.Expect(determineRelativePath(`src\file.ts`, "")).To(Equal("src/file.ts"))
+
+		// A POSIX path is already a valid URI path and is returned untouched.
+		g.Expect(determineRelativePath("src/file.ts", "//src:ts")).To(Equal("src/file.ts"))
+		g.Expect(determineRelativePath("foo/bar/baz", "//foo/bar:baz")).To(Equal("foo/bar/baz"))
+	})
+
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
@@ -181,6 +194,12 @@ func TestSarif(t *testing.T) {
 		g.Expect(determineRelativePath("/mnt/ephemeral/output/bazel-examples/__main__/sandbox/linux-sandbox/769/execroot/_main/speller/lookup/lookup-test.cc", "//:lookup")).To(Equal("speller/lookup/lookup-test.cc"))
 		g.Expect(determineRelativePath("/mnt/ephemeral/output/bazel-examples/__main__/sandbox/linux-sandbox/780/execroot/_main/speller/data_driven_tests/lookup-datatest.cc", "//:data_driven_tests")).To(Equal("speller/data_driven_tests/lookup-datatest.cc"))
 		g.Expect(determineRelativePath("/private/var/tmp/_bazel_jesse/93d7e699c5e2019d94351d19b00be5a3/sandbox/darwin-sandbox/249/execroot/_main/speller/announce/announce.cc", "//:announce")).To(Equal("speller/announce/announce.cc"))
+
+		// Windows path, with a drive letter instead of a leading slash
+		g.Expect(determineRelativePath("c:/private/var/tmp/_bazel_jesse/93d7e699c5e2019d94351d19b00be5a3/sandbox/darwin-sandbox/249/execroot/_main/speller/announce/announce.cc", "//speller/announce:announce")).To(Equal("speller/announce/announce.cc"))
+		g.Expect(determineRelativePath(`c:\private\var\tmp\_bazel_jesse\93d7e699c5e2019d94351d19b00be5a3\sandbox\darwin-sandbox\249\execroot\_main\speller\announce\announce.cc`, "//speller/announce:announce")).To(Equal("speller/announce/announce.cc"))
+		g.Expect(determineRelativePath("C:/users/jesse/_bazel/abc123/execroot/_main/speller/announce/announce.cc", "//:announce")).To(Equal("speller/announce/announce.cc"))
+		g.Expect(determineRelativePath(`C:\users\jesse\_bazel\abc123\execroot\_main\speller\announce\announce.cc`, "//:announce")).To(Equal("speller/announce/announce.cc"))
 	})
 
 	t.Run("determineRelativePath: returns absolute paths on regex or label error", func(t *testing.T) {
