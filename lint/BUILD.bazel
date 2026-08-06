@@ -153,7 +153,10 @@ bzl_library(
 bzl_library(
     name = "lint_test",
     srcs = ["lint_test.bzl"],  # keep
-    deps = ["@bazel_lib//lib:paths"],
+    deps = [
+        "@bazel_lib//lib:paths",
+        "@bazel_lib//lib:windows_utils",
+    ],
 )
 
 bzl_library(
