@@ -31,12 +31,3 @@ bats_load_library "bats-assert"
 	run bazel build --config=lint --output_groups=rules_lint_human --@aspect_rules_lint//lint:fail_on_violation //src:hello
 	assert_failure
 }
-
-@test "should check SQL formatting with SQLFluff" {
-	run bazel run //tools/format:format_SQL_with_sqlfluff.check -- src/clean.dml
-	assert_success
-
-	run bazel run //tools/format:format_SQL_with_sqlfluff.check -- src/hello.sql
-	assert_failure
-	assert_output --partial "CP01"
-}

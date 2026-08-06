@@ -149,6 +149,7 @@ function ls-files {
       # GitHub Linguist also groups .qbs with QML, but qmlformat only supports .qml files.
       'QML') patterns=('*.qml') ;;
       'Rust') patterns=('*.rs' '*.rs.in') ;;
+      # SQLFluff also recognizes .dml, .pkb, and .sql.j2 by default.
       'SQL') patterns=('*.sql' '*.cql' '*.ddl' '*.dml' '*.inc' '*.mysql' '*.pkb' '*.prc' '*.sql.j2' '*.tab' '*.udf' '*.viw') ;;
       'SCSS') patterns=('*.scss') ;;
       'Scala') patterns=('*.scala' '*.kojo' '*.sbt' '*.sc') ;;
