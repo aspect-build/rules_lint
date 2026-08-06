@@ -360,9 +360,8 @@ regex==2026.7.19 \
     --hash=sha256:fe31f28c94402043161876a258a9c6f757cb485905c7614ce8d6cd40e6b7bdc1 \
     --hash=sha256:ffd8893ccc1c2fce6e0d6ca402d716fe1b29db70c7132609a05955e31b2aa8f2
     # via sqlfluff
-sqlfluff==4.2.2 \
-    --hash=sha256:0ee2bcd5d704d0bef56bf80b8f0da9b519ab3e9e0bb1d5e6e4b7e3944d3f5606 \
-    --hash=sha256:62dbfbcd33728351043d216767ec017754a24cd8fb624e8321f61a79988b4fa7
+sqlfluff @ https://github.com/sqlfluff/sqlfluff/archive/fd916db91349f86fd5f0f784849352974aace85d.tar.gz \
+    --hash=sha256:b53eb267fa362f011d006ee69da1474d04c8dc8c7b4665724fe006429de8a746
     # via -r requirements.in
 tblib==3.2.2 \
     --hash=sha256:26bdccf339bcce6a88b2b5432c988b266ebbe63a4e593f6b578b1d2e723d2b76 \

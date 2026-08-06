@@ -1,5 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
+exports_files(["nested/.sqlfluff"])
+
 filegroup(
     name = "hello",
     srcs = ["hello.sql"],
@@ -16,6 +18,15 @@ filegroup(
 filegroup(
     name = "clean",
     srcs = ["clean.dml"],
+    tags = ["lint-with-sqlfluff"],
+)
+
+filegroup(
+    name = "config_hierarchy",
+    srcs = [
+        "clean.dml",
+        "nested/lowercase.sql",
+    ],
     tags = ["lint-with-sqlfluff"],
 )
 

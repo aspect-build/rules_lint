@@ -2,6 +2,9 @@
 
 This example demonstrates how to set up formatting and linting for SQL code using `rules_lint`.
 
+SQLFluff must include [sqlfluff/sqlfluff#8258](https://github.com/sqlfluff/sqlfluff/pull/8258).
+This example temporarily pins SQLFluff's 4.3.0 release-preparation commit.
+
 ## Supported Tools
 
 ### Formatters

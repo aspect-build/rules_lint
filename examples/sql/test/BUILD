@@ -23,6 +23,11 @@ sqlfluff_test(
     srcs = ["//src:clean"],
 )
 
+sqlfluff_test(
+    name = "sqlfluff_discovers_nested_config",
+    srcs = ["//src:config_hierarchy"],
+)
+
 machine_sqlfluff_report(
     name = "machine_sqlfluff_report",
     src = "//src:hello",

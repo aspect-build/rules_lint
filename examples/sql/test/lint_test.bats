@@ -6,6 +6,7 @@ bats_load_library "bats-assert"
 	assert_success
 	assert_output --partial "src/hello.sql:1"
 	assert_output --partial "CP01: Keywords must be upper case."
+	refute_output --partial "All Finished"
 }
 
 @test "should pass the SQLFluff Bazel tests" {

@@ -1,1 +1,1 @@
-sqlfluff==4.2.2
+sqlfluff @ https://github.com/sqlfluff/sqlfluff/archive/fd916db91349f86fd5f0f784849352974aace85d.tar.gz
