@@ -19,7 +19,7 @@ This example demonstrates how to set up formatting and linting for TOML files us
 3. Configure Taplo (shared by formatting and linting)
 4. Configure Formatters and Linters
 
-- See `tools/format/BUILD.bazel` for how to set up the formatter
+- See `tools/format/BUILD` for how to set up the formatter
 - See `tools/lint/linters.bzl` for how to set up the linter aspect
 
 5. Perform formatting and linting using `aspect format` and `aspect lint`
