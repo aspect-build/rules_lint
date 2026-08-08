@@ -149,7 +149,8 @@ function ls-files {
       # GitHub Linguist also groups .qbs with QML, but qmlformat only supports .qml files.
       'QML') patterns=('*.qml') ;;
       'Rust') patterns=('*.rs' '*.rs.in') ;;
-      'SQL') patterns=('*.sql' '*.cql' '*.ddl' '*.inc' '*.mysql' '*.prc' '*.tab' '*.udf' '*.viw') ;;
+      # SQLFluff also recognizes .dml, .pkb, and .sql.j2 by default.
+      'SQL') patterns=('*.sql' '*.cql' '*.ddl' '*.dml' '*.inc' '*.mysql' '*.pkb' '*.prc' '*.sql.j2' '*.tab' '*.udf' '*.viw') ;;
       'SCSS') patterns=('*.scss') ;;
       'Scala') patterns=('*.scala' '*.kojo' '*.sbt' '*.sc') ;;
       'Shell') patterns=('.bash_aliases' '.bash_functions' '.bash_history' '.bash_logout' '.bash_profile' '.bashrc' '.cshrc' '.flaskenv' '.kshrc' '.login' '.profile' '.zlogin' '.zlogout' '.zprofile' '.zshenv' '.zshrc' '9fs' 'PKGBUILD' 'bash_aliases' 'bash_logout' 'bash_profile' 'bashrc' 'cshrc' 'gradlew' 'kshrc' 'login' 'man' 'profile' 'zlogin' 'zlogout' 'zprofile' 'zshenv' 'zshrc' '*.sh' '*.bash' '*.bats' '*.cgi' '*.command' '*.fcgi' '*.ksh' '*.sh.in' '*.tmux' '*.tool' '*.trigger' '*.zsh' '*.zsh-theme') ;;

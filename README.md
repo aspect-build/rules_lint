@@ -150,7 +150,7 @@ Linters which are not language-specific:
 | QML                    | [qmlformat]               | [qmllint]                                               |
 | Ruby                   |                           | [RuboCop], [Standard]                                   |
 | Rust                   | [rustfmt]                 | [clippy]                                                |
-| SQL                    | [prettier-plugin-sql]     |                                                         |
+| SQL                    | [SQLFluff]                | [SQLFluff]                                              |
 | Scala                  | [scalafmt]                | [scalafix]                                              |
 | Shell                  | [shfmt]                   | [shellcheck]                                            |
 | Starlark               | [Buildifier]              | [Buildifier]                                            |
@@ -164,7 +164,7 @@ Linters which are not language-specific:
 [prettier]: https://prettier.io
 [google-java-format]: https://github.com/google/google-java-format
 [bandit]: https://bandit.readthedocs.io/en/latest/
-[Fantomas]: https://fsprojects.github.io/fantomas/
+[fantomas]: https://fsprojects.github.io/fantomas/
 [flake8]: https://flake8.pycqa.org/en/latest/index.html
 [pydoclint]: https://jsh9.github.io/pydoclint/
 [pmd]: https://docs.pmd-code.org/latest/index.html
@@ -181,7 +181,7 @@ Linters which are not language-specific:
 [buildifier]: https://github.com/keith/buildifier-prebuilt
 [djlint]: https://djlint.com/
 [pkl]: https://pkl-lang.org/index.html
-[prettier-plugin-sql]: https://github.com/un-ts/prettier
+[sqlfluff]: https://sqlfluff.com/
 [prettier-plugin-gherkin]: https://github.com/mapado/prettier-plugin-gherkin
 [prettier/plugin-xml]: https://github.com/prettier/plugin-xml
 [gofmt]: https://pkg.go.dev/cmd/gofmt
