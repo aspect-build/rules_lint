@@ -36,7 +36,7 @@ _BASE_OPTIONS = [
     "--persistent=n",
 ]
 
-def pylint_action(ctx, executable, srcs, config, stdout, exit_code = None, options = []):
+def pylint_action(ctx, executable, srcs, config, stdout, exit_code = None, args = []):
     """Run pylint as an action under Bazel.
 
     Based on https://pylint.readthedocs.io/en/stable/user_guide/run.html
@@ -49,19 +49,19 @@ def pylint_action(ctx, executable, srcs, config, stdout, exit_code = None, optio
         stdout: output file containing stdout of pylint
         exit_code: output file containing exit code of pylint
             If None, then fail the build when pylint exits non-zero.
-        options: additional command-line options
+        args: additional command-line options
     """
     inputs = list(srcs)
     if config:
         inputs.append(config)
     outputs = [stdout]
 
-    args = ctx.actions.args()
-    args.add_all(_BASE_OPTIONS)
+    action_args = ctx.actions.args()
+    action_args.add_all(_BASE_OPTIONS)
     if config:
-        args.add(config, format = "--rcfile=%s")
-    args.add_all(options)
-    args.add_all(srcs)
+        action_args.add(config, format = "--rcfile=%s")
+    action_args.add_all(args)
+    action_args.add_all(srcs)
 
     if exit_code:
         command = "{pylint} $@ >{stdout}; echo $? > " + exit_code.path
@@ -74,7 +74,7 @@ def pylint_action(ctx, executable, srcs, config, stdout, exit_code = None, optio
         outputs = outputs,
         tools = [executable],
         command = command.format(pylint = executable.path, stdout = stdout.path),
-        arguments = [args],
+        arguments = [action_args],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Pylint",
     )
@@ -91,16 +91,16 @@ def _pylint_aspect_impl(target, ctx):
         noop_lint_action(ctx, outputs)
         return [info]
 
-    human_options = ["--output-format=colorized"] if ctx.attr._options[LintOptionsInfo].color else ["--output-format=text"]
-    pylint_action(ctx, ctx.executable._pylint, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, options = human_options)
+    human_options = ctx.attr._args + (["--output-format=colorized"] if ctx.attr._options[LintOptionsInfo].color else ["--output-format=text"])
+    pylint_action(ctx, ctx.executable._pylint, files_to_lint, ctx.file._config_file, outputs.human.out, outputs.human.exit_code, args = human_options)
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    pylint_action(ctx, ctx.executable._pylint, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, options = ["--output-format=text"])
+    pylint_action(ctx, ctx.executable._pylint, files_to_lint, ctx.file._config_file, raw_machine_report, outputs.machine.exit_code, args = ctx.attr._args + ["--output-format=text"])
 
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-pylint"]):
+def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-pylint"], args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -116,6 +116,7 @@ def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", 
         config: the pylint config file (`pyproject.toml`, `pylintrc`, or `.pylintrc`)
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: filegroups tagged with these tags will also be visited by the aspect
+        args: additional command-line options to pass to pylint
     """
     return aspect(
         implementation = _pylint_aspect_impl,
@@ -138,6 +139,9 @@ def lint_pylint_aspect(binary, config, rule_kinds = ["py_binary", "py_library", 
             ),
             "_filegroup_tags": attr.string_list(
                 default = filegroup_tags,
+            ),
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

@@ -48,36 +48,36 @@
     "binaries": [
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.10.0/gofumpt_v0.10.0_linux_arm64",
-        "sha256": "5d239f93b1ed2dfe74d39b25112bb770a04f6581f986d4b4f5d380521e12ca61",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_linux_arm64",
+        "sha256": "9272c2d1738acc1acae33793419e74c69653e70fe56bec4ad9044b12b54715e5",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.10.0/gofumpt_v0.10.0_linux_amd64",
-        "sha256": "48ee398ec72afdaca6accb70f5ed741349d5dcccb52c5bb4c4469d698980b186",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_linux_amd64",
+        "sha256": "9f247ec294f5082375c7b062f3ddf48c8212a8711f65a6d75f5129f7fda0d7da",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.10.0/gofumpt_v0.10.0_darwin_arm64",
-        "sha256": "ba4b348e729cba915d5c7dc515774e2f2c7cc5c5ad011de20d34be10e5a2f906",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_darwin_arm64",
+        "sha256": "18936628f195369a80a129c73ee33d23e39086286dab538781ba826effc7e10b",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.10.0/gofumpt_v0.10.0_darwin_amd64",
-        "sha256": "30e5b914a824c3b6bd0480e4f493517012167d380de74643879c50f4aa0c834e",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_darwin_amd64",
+        "sha256": "b93b3d2c326196af9fb1ce34a5436a18e7b9a73a795bf42e5b6a542eea88d322",
         "os": "macos",
         "cpu": "x86_64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.10.0/gofumpt_v0.10.0_windows_amd64.exe",
-        "sha256": "20872b464435512b74678b1155b75bd75220de5737ad8c075b9151c846543697",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_windows_amd64.exe",
+        "sha256": "e7ae4253344a600f1116e4b5c7d0d0fcc108abbbf383c3d786a530077b4d4622",
         "os": "windows",
         "cpu": "x86_64"
       }

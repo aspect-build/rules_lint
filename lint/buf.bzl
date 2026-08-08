@@ -21,7 +21,7 @@ _MNEMONIC = "AspectRulesLintBuf"
 def _short_path(file, _):
     return file.path
 
-def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
+def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = []):
     """Runs the buf lint tool as a Bazel action.
 
     Args:
@@ -32,6 +32,7 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
         stderr: output file containing the stderr of protoc
         exit_code: output file to write the exit code.
             If None, then fail the build when protoc exits non-zero.
+        args: additional command-line arguments passed to protoc
     """
     config = json.encode({
         "input_config": "" if ctx.file._config == None else ctx.file._config.short_path,
@@ -54,12 +55,13 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
             f.path[len(target[ProtoInfo].proto_source_root) + 1:] if f.path.startswith(target[ProtoInfo].proto_source_root) else f.path,
         )
 
-    args = ctx.actions.args()
-    args.add_joined(["--plugin", "protoc-gen-buf-plugin", buf], join_with = "=")
-    args.add_joined(["--buf-plugin_opt", config], join_with = "=")
-    args.add_joined("--descriptor_set_in", deps, join_with = ":", map_each = _short_path)
-    args.add_joined(["--buf-plugin_out", "."], join_with = "=")
-    args.add_all(sources)
+    action_args = ctx.actions.args()
+    action_args.add_joined(["--plugin", "protoc-gen-buf-plugin", buf], join_with = "=")
+    action_args.add_joined(["--buf-plugin_opt", config], join_with = "=")
+    action_args.add_joined("--descriptor_set_in", deps, join_with = ":", map_each = _short_path)
+    action_args.add_joined(["--buf-plugin_out", "."], join_with = "=")
+    action_args.add_all(args)
+    action_args.add_all(sources)
     outputs = [stderr]
 
     if exit_code:
@@ -80,7 +82,7 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None):
             protoc = protoc.path,
             stderr = stderr.path,
         ),
-        arguments = [args],
+        arguments = [action_args],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Buf",
     )
@@ -94,19 +96,20 @@ def _buf_lint_aspect_impl(target, ctx):
     outputs, info = output_files(_MNEMONIC, target, ctx)
 
     # TODO(alex): there should be a reason to run the buf action again rather than just copy the files
-    buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code)
+    buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code, args = ctx.attr._args)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    buf_lint_action(ctx, buf, protoc, target, raw_machine_report, outputs.machine.exit_code)
+    buf_lint_action(ctx, buf, protoc, target, raw_machine_report, outputs.machine.exit_code, args = ctx.attr._args)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type", rule_kinds = ["proto_library"]):
+def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type", rule_kinds = ["proto_library"], args = []):
     """A factory function to create a linter aspect.
 
     Args:
         config: label of the buf.yaml file
         toolchain: override the default toolchain of the protoc-gen-buf-lint tool
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
+        args: additional options to pass to the underlying protoc invocation
     """
     return aspect(
         implementation = _buf_lint_aspect_impl,
@@ -125,6 +128,9 @@ def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [

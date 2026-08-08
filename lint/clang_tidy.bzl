@@ -322,7 +322,7 @@ def _get_compiler_args(ctx, compilation_context, srcs):
 
     return args
 
-def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code, patch = None):
+def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code, patch = None, args = []):
     """Create a Bazel Action that spawns a clang-tidy process.
 
     Adapter for wrapping Bazel around
@@ -337,11 +337,12 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
         exit_code: output file containing the exit code of clang-tidy.
             If None, then fail the build when clang-tidy exits non-zero.
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
+        args: additional clang-tidy arguments passed before the compiler arguments
     """
 
     # Common setup for both patch and non-patch actions
     inputs = _gather_inputs(ctx, compilation_context, srcs)
-    clang_tidy_args = _get_args(ctx, compilation_context, srcs)
+    clang_tidy_args = list(args) + _get_args(ctx, compilation_context, srcs)
     compiler_args = _get_compiler_args(ctx, compilation_context, srcs)
     env = _get_env(ctx, srcs)
     tools = [executable._clang_tidy_wrapper, executable._clang_tidy, find_cpp_toolchain(ctx).all_files]
@@ -425,11 +426,12 @@ def _clang_tidy_aspect_impl(target, ctx):
             output.human.out,
             output.human.exit_code,
             patch = getattr(output, "patch", None),
+            args = ctx.attr._args,
         )
 
         # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
         raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name + "_rules_lint/" + file.short_path, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-        clang_tidy_action(ctx, compilation_context, ctx.executable, [file], raw_machine_report, output.machine.exit_code)
+        clang_tidy_action(ctx, compilation_context, ctx.executable, [file], raw_machine_report, output.machine.exit_code, args = ctx.attr._args)
         parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, output.machine.out)
     return [info]
 
@@ -445,7 +447,8 @@ def lint_clang_tidy_aspect(
         lint_target_headers = False,
         angle_includes_are_system = True,
         verbose = False,
-        rule_kinds = DEFAULT_RULE_KINDS):
+        rule_kinds = DEFAULT_RULE_KINDS,
+        args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -475,6 +478,7 @@ def lint_clang_tidy_aspect(
             them as regular header files.
         verbose: print debug messages including clang-tidy command lines being invoked.
         rule_kinds: which target kinds should be visited automatically
+        args: additional options to pass to clang-tidy
     """
 
     if type(global_config) == "string":
@@ -528,6 +532,9 @@ def lint_clang_tidy_aspect(
             "_macos_constraint": attr.label(default = Label("@platforms//os:macos")),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [

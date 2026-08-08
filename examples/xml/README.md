@@ -12,14 +12,13 @@ Note: No XML linter is currently available in rules_lint.
 
 ## Setup
 
-1. Configure MODULE.bazel with required dependencies
-2. Create the MODULE.aspect file to register CLI tasks
-3. Set up npm dependencies (run `pnpm install` to generate `pnpm-lock.yaml`)
-4. Configure Formatters
+1. Configure `MODULE.bazel` with the required dependencies
+2. Set up npm dependencies by running `pnpm install` to generate `pnpm-lock.yaml`
+3. Configure the formatter
 
-- See `tools/format/BUILD.bazel` for how to set up the formatter
+- See `tools/format/BUILD` for how to set up the formatter
 
-5. Perform formatting using `aspect format`
+4. Perform formatting using `aspect format`
 
 ## Example Code
 

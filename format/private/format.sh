@@ -64,7 +64,12 @@ function process_args_in_batches() {
     # Uses up to ARG_MAX - 2k, or 128k, whichever is smaller, characters per
     # command. This was derived from following the defaults from xargs
     # https://www.gnu.org/software/findutils/manual/html_node/find_html/Limiting-Command-Size.html
-    max_batch_size=$(getconf ARG_MAX)-2048
+    # MSYS and Cygwin report ARG_MAX as "undefined", so fall back to the 8191
+    # character command line limit of cmd.exe, which formatters shipped as a
+    # `.bat` launcher have to be invoked through.
+    arg_max=$(getconf ARG_MAX)
+    [[ "$arg_max" =~ ^[0-9]+$ ]] || arg_max=8191
+    max_batch_size=$((arg_max - 2048))
     max_batch_size=$((max_batch_size < 128000 ? max_batch_size : 128000))
     
     # Check if there's only one argument and it starts with '@'

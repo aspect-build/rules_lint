@@ -33,7 +33,7 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintKeepSorted"
 
-def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options = [], patch = None):
+def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, args = [], patch = None):
     """Run keep-sorted as an action under Bazel.
 
     Args:
@@ -43,15 +43,15 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
         stdout: output file containing stdout
         exit_code: output file containing exit code
             If None, then fail the build when program exits non-zero.
-        options: additional command-line options
+        args: additional command-line options
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
     """
     inputs = srcs
 
-    args = ctx.actions.args()
-    args.add_all(options)
-    args.add("--mode", "fix" if patch != None else "lint")
-    args.add_all(srcs)
+    action_args = ctx.actions.args()
+    action_args.add_all(args)
+    action_args.add("--mode", "fix" if patch != None else "lint")
+    action_args.add_all(srcs)
 
     if patch != None:
         # Use run_patcher for fix mode
@@ -59,7 +59,7 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = args,
+            args = action_args,
             files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [executable],
@@ -85,7 +85,7 @@ def keep_sorted_action(ctx, executable, srcs, stdout, exit_code = None, options 
             outputs = outputs,
             tools = [executable],
             command = command.format(keep_sorted = executable.path, stdout = stdout.path),
-            arguments = [args],
+            arguments = [action_args],
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with KeepSorted",
         )
@@ -116,21 +116,22 @@ def _keep_sorted_aspect_impl(target, ctx):
         files_to_lint,
         outputs.human.out,
         outputs.human.exit_code,
-        options = color_options,
+        args = color_options + ctx.attr._args,
         patch = getattr(outputs, "patch", None),
     )
     raw_json_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_json_report"))
-    keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, raw_json_report, outputs.machine.exit_code)
+    keep_sorted_action(ctx, ctx.executable._keep_sorted, files_to_lint, raw_json_report, outputs.machine.exit_code, args = ctx.attr._args)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     jq_lib.jq_action(ctx, [raw_json_report], ".[] | [.path, .lines.start, .lines.end, .message] | join(\":\")", raw_machine_report, ["--raw-output"])
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_keep_sorted_aspect(binary):
+def lint_keep_sorted_aspect(binary, args = []):
     """A factory function to create a linter aspect.
 
     Args:
         binary: a keep-sorted executable
+        args: additional command-line arguments to pass to keep-sorted
 
     Returns:
         An aspect definition for keep-sorted
@@ -146,6 +147,9 @@ def lint_keep_sorted_aspect(binary):
                 default = binary,
                 executable = True,
                 cfg = "exec",
+            ),
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [

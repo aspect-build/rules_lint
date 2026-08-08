@@ -12,13 +12,12 @@ Note: You can also use standard `gofmt` instead of `gofumpt` if you prefer.
 
 ## Setup
 
-1. Configure MODULE.bazel with required dependencies
-2. Create the MODULE.aspect file to register CLI tasks
-3. Configure Formatters
+1. Configure `MODULE.bazel` with the required dependencies
+2. Configure the formatter
 
-- See `tools/format/BUILD.bazel` for how to set up the formatter
+- See `tools/format/BUILD` for how to set up the formatter
 
-4. Perform formatting using `aspect format`
+3. Perform formatting using `aspect format`
 
 ## Example Code
 

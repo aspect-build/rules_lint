@@ -34,7 +34,9 @@ async function sync(src, dst, subdir, filesToDiff) {
       // while with `cp` the `deference` option must be set explicitly.
       await fs.promises.copyFile(srcF, dstF);
       await fs.promises.chmod(dstF, "600");
-    } else if (filesToDiff.find((d) => d.startsWith(f + "/")) !== undefined) {
+    } else if (
+      filesToDiff.find((d) => d.startsWith(f + path.sep)) !== undefined
+    ) {
       debug(`entering ${f}`);
       await sync(src, dst, f, filesToDiff);
     } else {

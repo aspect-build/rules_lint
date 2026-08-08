@@ -56,7 +56,7 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintKTLint"
 
-def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None, options = []):
+def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, java_runtime, ruleset_jar = None, exit_code = None, args = []):
     """ Runs ktlint as build action in Bazel.
 
     Adapter for wrapping Bazel around
@@ -73,11 +73,11 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
         ruleset_jar: An optional, custom ktlint ruleset jar.
         exit_code: output file to write the exit code.
             If None, then fail the build when ktlint exits non-zero.
-        options: additional command-line arguments to ktlint, see https://pinterest.github.io/ktlint/latest/install/cli/#miscellaneous-flags-and-commands
+        args: additional command-line arguments to ktlint, see https://pinterest.github.io/ktlint/latest/install/cli/#miscellaneous-flags-and-commands
     """
 
-    args = ctx.actions.args()
-    args.add_all(options)
+    action_args = ctx.actions.args()
+    action_args.add_all(args)
     inputs = srcs
     outputs = [stdout]
 
@@ -94,15 +94,15 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
 
     if editorconfig:
         inputs.append(editorconfig)
-        args.add("--editorconfig={}".format(editorconfig.path))
+        action_args.add("--editorconfig={}".format(editorconfig.path))
     if baseline_file:
         inputs.append(baseline_file)
-        args.add("--baseline={}".format(baseline_file.path))
+        action_args.add("--baseline={}".format(baseline_file.path))
     if ruleset_jar:
         inputs.append(ruleset_jar)
-        args.add("--ruleset={}".format(ruleset_jar.path))
+        action_args.add("--ruleset={}".format(ruleset_jar.path))
 
-    args.add("--relative")
+    action_args.add("--relative")
 
     # Include source files and Java runtime files required for ktlint
     inputs = depset(direct = inputs, transitive = [java_runtime_files])
@@ -122,7 +122,7 @@ def ktlint_action(ctx, executable, srcs, editorconfig, stdout, baseline_file, ja
         inputs = inputs,
         outputs = outputs,
         command = command.format(ktlint = executable.path, stdout = stdout.path),
-        arguments = [args],
+        arguments = [action_args],
         mnemonic = _MNEMONIC,
         progress_message = "Linting %{label} with Ktlint",
         env = env,
@@ -144,17 +144,17 @@ def _ktlint_aspect_impl(target, ctx):
         return [info]
 
     color_options = ["--color"] if ctx.attr._options[LintOptionsInfo].color else []
-    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code, color_options)
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, outputs.human.out, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.human.exit_code, color_options + ctx.attr._args)
 
     # ktlint has no SARIF output mode, so parse its raw text report into SARIF
     # in a separate action — this is what surfaces KTLint findings in the
     # structured lint report (rather than only as passthrough stdout).
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, raw_machine_report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code)
+    ktlint_action(ctx, ctx.executable._ktlint, files_to_lint, ctx.file._editorconfig, raw_machine_report, ctx.file._baseline_file, ctx.attr._java_runtime, ruleset_jar, outputs.machine.exit_code, ctx.attr._args)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
-def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, rule_kinds = ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"]):
+def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, rule_kinds = ["kt_jvm_library", "kt_jvm_binary", "kt_js_library"], args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -163,6 +163,7 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, 
         baseline_file: An optional attribute pointing to the label of the baseline file used by ktlint.
         ruleset_jar: An optional, custom ktlint ruleset provided as a fat jar, and works on top of the standard rules.
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
+        args: Additional options to pass to ktlint
 
     Returns:
         An aspect definition for ktlint
@@ -207,6 +208,9 @@ def lint_ktlint_aspect(binary, editorconfig, baseline_file, ruleset_jar = None, 
             ),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
+            ),
+            "_args": attr.string_list(
+                default = args,
             ),
         }, extra_attrs),
         toolchains = [

@@ -12,12 +12,12 @@ Note: No C# linter is currently available in rules_lint.
 
 ## Setup
 
-1. Configure MODULE.bazel with required dependencies
-2. Create the MODULE.aspect file to register CLI tasks
-3. Configure Formatters
+1. Configure `MODULE.bazel` with the required dependencies and .NET toolchain
+2. Configure the Paket dependencies in `paket.dependencies` and `3rdparty/nuget/`
+3. Configure the formatter
 
-- See `tools/format/BUILD.bazel` for how to set up the formatter
-- See `3rdparty/nuget/` for paket dependency setup
+- See `tools/format/BUILD` for how to set up the formatter
+- See `3rdparty/nuget/` for Paket dependency setup
 
 4. Perform formatting using `aspect format`
 
