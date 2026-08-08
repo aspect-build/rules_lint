@@ -15,13 +15,12 @@ This example demonstrates formatting for various specialized languages and file 
 
 ## Setup
 
-1. Configure MODULE.bazel with required dependencies
-2. Create the MODULE.aspect file to register CLI tasks
-3. Configure Formatters
+1. Configure `MODULE.bazel` with the required dependencies
+2. Configure the formatters
 
-- See `tools/format/BUILD.bazel` for how to set up each formatter
+- See `tools/format/BUILD` for how to set up each formatter
 
-4. Perform formatting using `aspect format`
+3. Perform formatting using `aspect format`
 
 ## Example Code
 

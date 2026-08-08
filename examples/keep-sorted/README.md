@@ -13,7 +13,7 @@ Keep-sorted is a tool that ensures code blocks marked with `// keep-sorted start
 ## Setup
 
 1. Configure MODULE.bazel with required dependencies
-2. Create the MODULE.aspect file to register CLI tasks
+2. Configure the Aspect CLI lint task in `.aspect/config.axl`
 3. Configure Go SDK
 4. Fetch keep-sorted Dependency (requires `--experimental_isolated_extension_usages` in `.bazelrc`)
 5. Configure Linters

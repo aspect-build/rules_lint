@@ -11,7 +11,7 @@ This example demonstrates how to lint Starlark files with `rules_lint` using Bui
 ## Setup
 
 1. Configure `MODULE.bazel` with the required dependencies
-2. Create the `MODULE.aspect` file to register CLI tasks
+2. Configure the Aspect CLI lint task in `.aspect/config.axl`
 3. Configure the Buildifier linter in `tools/lint/linters.bzl`
 4. Run linting with `aspect lint`
 
