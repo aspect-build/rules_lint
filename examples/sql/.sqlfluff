@@ -1,0 +1,10 @@
+[sqlfluff]
+dialect = oracle
+templater = jinja
+rules = CP01
+
+[sqlfluff:templater:jinja]
+loader_search_path = src/templates
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper
