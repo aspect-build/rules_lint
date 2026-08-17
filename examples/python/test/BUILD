@@ -237,6 +237,13 @@ ty_test(
     srcs = ["//src:uses_dependency_correctly"],
 )
 
+# Reproduces argument loss when Bazel materializes a long `run_shell` command.
+# The clean source must not inherit the unrelated error from its transitive dep.
+ty_test(
+    name = "ty_should_scope_materialized_command",
+    srcs = ["//src:uses_dependency_correctly_materialized"],
+)
+
 ty_test(
     name = "ty_should_resolve_generated_dep",
     srcs = ["//src:uses_generated_dependency_correctly"],

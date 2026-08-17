@@ -41,6 +41,26 @@ py_library(
     deps = ["//src/python_lib:py_dependency"],
 )
 
+# Forces Bazel to materialize the ty action's shell command. The transitive
+# source has a known type error but is not imported by the clean target below.
+py_library(
+    name = "many_imports_with_unrelated_error",
+    srcs = ["unsupported_operator.py"],
+    imports = [
+        "long_import_path_{}/subdirectory/that_makes_the_generated_shell_command_long".format(i)
+        for i in range(250)
+    ],
+)
+
+py_library(
+    name = "uses_dependency_correctly_materialized",
+    srcs = ["uses_dependency_correctly.py"],
+    deps = [
+        ":many_imports_with_unrelated_error",
+        "//src/python_lib:py_dependency",
+    ],
+)
+
 py_library(
     name = "uses_generated_dependency_correctly",
     srcs = ["uses_generated_dependency_correctly.py"],

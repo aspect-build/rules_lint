@@ -81,18 +81,24 @@ def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code 
         else:
             code_search_paths.append(p)
 
-    # Build a script that adds --extra-search-path only for directories that exist
-    # Some pip package directories may not exist, so we check first
-    # Pass --extra-search-path via a @param file, as there might be many of them
-    extra_search_path_script = """PARAM_FILE="$(mktemp)"
-"""
+    # Pass the candidate search paths in a Bazel-managed parameter file so the
+    # shell command stays constant-size. Some candidates may not exist, so the
+    # command filters them into the parameter file consumed by ty.
+    search_path_args = ctx.actions.args()
+    search_path_args.add_all(stub_search_paths + code_search_paths)
+    search_path_args.set_param_file_format("multiline")
+    search_path_args.use_param_file("%s", use_always = True)
 
-    for path in stub_search_paths + code_search_paths:
-        extra_search_path_script += """if [ -d "{path}" ]; then
-  echo "--extra-search-path" >> "$PARAM_FILE"
-  echo "{path}" >> "$PARAM_FILE"
-fi
-""".format(path = path)
+    extra_search_path_script = """readonly SEARCH_PATHS_FILE="$1"
+shift
+
+readonly PARAM_FILE="$(mktemp)"
+while IFS= read -r path; do
+  if [ -d "$path" ]; then
+    printf '%s\n' "--extra-search-path" "$path" >> "$PARAM_FILE"
+  fi
+done < "$SEARCH_PATHS_FILE"
+"""
 
     color_flag = "--color always" if color else "--color never"
     command = """
@@ -132,7 +138,7 @@ fi
             extra_search_path_script = extra_search_path_script,
             color_flag = color_flag,
         ),
-        arguments = [action_args],
+        arguments = [search_path_args, action_args],
         mnemonic = _MNEMONIC,
         env = env,
         progress_message = "Linting %{label} with ty",
