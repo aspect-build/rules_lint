@@ -1,7 +1,42 @@
 """Aspect CLI configuration."""
 
 load("@aspect//feature/artifacts.axl", "ArtifactUpload")
+load("@aspect//feature/github_lint_comments.axl", "GithubLintComments")
+load("@aspect//feature/github_status_checks.axl", "GithubStatusChecks")
+load("@aspect//feature/github_status_comments.axl", "GithubStatusComments")
+load("@aspect//feature/tips.axl", "Tips")
 load("@aspect//traits.axl", "BazelTrait")
+
+# Tips the App/id-token features emit when their credentials are absent.
+# On a fork PR neither can be provided, so we silence both rather than
+# surface an unactionable IMPORTANT tip.
+_FORK_UNACTIONABLE_TIPS = [
+    "add-aspect-api-token-github-actions",
+    "add-id-token-permission",
+]
+
+def _is_fork_ci(ctx: ConfigContext) -> bool:
+    """True on a GitHub Actions pull_request run whose head is a fork.
+
+    Fork PRs run without repo secrets (`ASPECT_API_TOKEN`) and GitHub
+    withholds the OIDC token (`id-token: write` is granted but inert), so
+    every feature backed by the Aspect Workflows GitHub App or artifact
+    uploads is inoperable. Detected by comparing the PR head repo in the
+    event payload against `GITHUB_REPOSITORY`.
+    """
+    env = ctx.std.env
+    if not env.var("GITHUB_ACTIONS"):
+        return False
+    if (env.var("GITHUB_EVENT_NAME") or "") not in ("pull_request", "pull_request_target"):
+        return False
+
+    event_path = env.var("GITHUB_EVENT_PATH") or ""
+    if not event_path or not ctx.std.fs.exists(event_path):
+        return False
+    event = json.try_decode(ctx.std.fs.read_to_string(event_path), {})
+
+    head_repo = (((event.get("pull_request") or {}).get("head") or {}).get("repo") or {}).get("full_name") or ""
+    return bool(head_repo) and head_repo != (env.var("GITHUB_REPOSITORY") or "")
 
 def config(ctx: ConfigContext):
     is_ci = bool(ctx.std.env.var("CI"))
@@ -16,3 +51,13 @@ def config(ctx: ConfigContext):
     ctx.features[ArtifactUpload].args.upload_test_logs = "failed"
     ctx.features[ArtifactUpload].args.upload_profile = True
     ctx.features[ArtifactUpload].args.upload_bep = True
+
+    # Fork PRs lack ASPECT_API_TOKEN and a usable OIDC token, so disable
+    # the features that depend on them (and silence the tips they would
+    # otherwise emit). The build/test itself is unaffected.
+    if _is_fork_ci(ctx):
+        ctx.features[ArtifactUpload].enabled = False
+        ctx.features[GithubStatusChecks].enabled = False
+        ctx.features[GithubStatusComments].enabled = False
+        ctx.features[GithubLintComments].enabled = False
+        ctx.features[Tips].args.silence = _FORK_UNACTIONABLE_TIPS

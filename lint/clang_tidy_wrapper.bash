@@ -32,15 +32,32 @@ if [[ -n $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
 else
     out_file=$(mktemp)
 fi
+# Capture raw output here; statistics get filtered into $out_file below.
+raw_out_file=$(mktemp)
 # include stderr in output file; it contains some of the diagnostics
-command="$clang_tidy $@ $file > $out_file 2>&1"
+# NB: do NOT collapse "$@" into a single string and eval it — args containing
+# shell metacharacters such as `__attribute__((deprecated))` then get re-parsed
+# by the shell ("syntax error near unexpected token `('"). Run clang-tidy
+# directly with "$@" so each argument is preserved verbatim.
 if [[ -n $CLANG_TIDY__VERBOSE ]]; then
     echo "$@"
     echo "cwd: " `pwd`
-    echo $command
+    echo "$clang_tidy $@ > $raw_out_file 2>&1"
 fi
-eval $command
+"$clang_tidy" "$@" > "$raw_out_file" 2>&1
 exit_code=$?
+# Drop clang-tidy summary statistics (e.g. "N warnings generated.") that it
+# prints even on a clean, exit-0 run thus tripping in fail_on_violation mode.
+# Diagnostics are kept.
+grep -Ev '^[0-9]+ (warnings?|errors?)( and [0-9]+ errors?)? generated\.$|^Suppressed [0-9]+ warnings? \(.*\)\.$|^Use -header-filter=.*$|^[0-9]+ warnings? treated as errors?$' $raw_out_file > $out_file
+grep_status=$?
+rm -f $raw_out_file
+# grep exit >=2 means grep itself failed and $out_file is unreliable; bail
+# before the return-code logic below reads it and reports a false-clean result.
+if [ $grep_status -gt 1 ]; then
+    echo "clang_tidy_wrapper: failed to filter clang-tidy output (grep exit $grep_status)" >&2
+    exit $grep_status
+fi
 if [[ -z $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
     cat $out_file
 fi

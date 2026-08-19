@@ -1,0 +1,67 @@
+warning: this `if` branch is empty
+ --> src/main.rs:3:3
+  |
+3 |   if vec.len() <= 0 {}
+  |   ^^^^^^^^^^^^^^^^^^^^ help: you can remove it: `vec.len() <= 0;`
+  |
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_if
+  = note: `#[warn(clippy::needless_if)]` on by default
+
+
+error: this comparison involving the minimum or maximum element for this type contains a case that is always true or always false
+ --> src/main.rs:3:6
+  |
+3 |   if vec.len() <= 0 {}
+  |      ^^^^^^^^^^^^^^
+  |
+  = help: because `0` is the minimum value for this type, the case where the two sides are not equal never occurs, consider using `vec.len() == 0` instead
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#absurd_extreme_comparisons
+  = note: `#[deny(clippy::absurd_extreme_comparisons)]` on by default
+
+
+error: this comparison involving the minimum or maximum element for this type contains a case that is always true or always false
+ --> src/main.rs:4:6
+  |
+4 |   if 100 > i32::MAX {}
+  |      ^^^^^^^^^^^^^^
+  |
+  = help: because `i32::MAX` is the maximum value for this type, this comparison is always false
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#absurd_extreme_comparisons
+
+
+error: aborting due to 2 previous errors; 1 warning emitted
+
+
+warning: this `if` branch is empty
+ --> src/main.rs:3:3
+  |
+3 |   if vec.len() <= 0 {}
+  |   ^^^^^^^^^^^^^^^^^^^^ help: you can remove it: `vec.len() <= 0;`
+  |
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_if
+  = note: `#[warn(clippy::needless_if)]` on by default
+
+
+error: this comparison involving the minimum or maximum element for this type contains a case that is always true or always false
+ --> src/main.rs:3:6
+  |
+3 |   if vec.len() <= 0 {}
+  |      ^^^^^^^^^^^^^^
+  |
+  = help: because `0` is the minimum value for this type, the case where the two sides are not equal never occurs, consider using `vec.len() == 0` instead
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#absurd_extreme_comparisons
+  = note: `#[deny(clippy::absurd_extreme_comparisons)]` on by default
+
+
+error: this comparison involving the minimum or maximum element for this type contains a case that is always true or always false
+ --> src/main.rs:4:6
+  |
+4 |   if 100 > i32::MAX {}
+  |      ^^^^^^^^^^^^^^
+  |
+  = help: because `i32::MAX` is the maximum value for this type, this comparison is always false
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#absurd_extreme_comparisons
+
+
+error: aborting due to 2 previous errors; 1 warning emitted
+

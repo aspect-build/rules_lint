@@ -34,7 +34,7 @@ _MNEMONIC = "AspectRulesLintYamllint"
 
 _YAML_EXTENSIONS = (".yaml", ".yml")
 
-def yamllint_action(ctx, executable, srcs, config, stdout, exit_code = None, format = None, options = []):
+def yamllint_action(ctx, executable, srcs, config, stdout, exit_code = None, format = None, args = []):
     """Run yamllint as an action under Bazel.
 
     Args:
@@ -45,20 +45,20 @@ def yamllint_action(ctx, executable, srcs, config, stdout, exit_code = None, for
         stdout: output file for yamllint stdout
         exit_code: optional output file for exit code. If absent, non-zero exits fail the build.
         format: optional formatter passed via `-f`
-        options: additional command-line options
+        args: additional command-line options
     """
     inputs = list(srcs)
     if config:
         inputs.append(config)
 
-    args = ctx.actions.args()
+    action_args = ctx.actions.args()
     if format:
-        args.add_all(["-f", format])
-    args.add_all(options)
+        action_args.add_all(["-f", format])
+    action_args.add_all(args)
     if config:
-        args.add("-c")
-        args.add(config.path)
-    args.add_all(srcs)
+        action_args.add("-c")
+        action_args.add(config.path)
+    action_args.add_all(srcs)
 
     outputs = [stdout]
     if exit_code:
@@ -77,7 +77,7 @@ def yamllint_action(ctx, executable, srcs, config, stdout, exit_code = None, for
     ctx.actions.run_shell(
         inputs = inputs,
         outputs = outputs,
-        arguments = [args],
+        arguments = [action_args],
         tools = [executable],
         command = command,
         mnemonic = _MNEMONIC,
@@ -100,7 +100,7 @@ def _yamllint_aspect_impl(target, ctx):
         return [info]
 
     color_format = "colored" if ctx.attr._options[LintOptionsInfo].color else "standard"
-    common_options = ctx.attr._extra_args
+    common_options = ctx.attr._args
     yamllint_action(
         ctx,
         ctx.executable._yamllint,
@@ -109,7 +109,7 @@ def _yamllint_aspect_impl(target, ctx):
         outputs.human.out,
         outputs.human.exit_code,
         format = color_format,
-        options = common_options,
+        args = common_options,
     )
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
@@ -121,7 +121,7 @@ def _yamllint_aspect_impl(target, ctx):
         raw_machine_report,
         outputs.machine.exit_code,
         format = "parsable",
-        options = common_options,
+        args = common_options,
     )
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
@@ -131,8 +131,16 @@ def lint_yamllint_aspect(
         config,
         rule_kinds = ["yaml_library"],
         filegroup_tags = ["lint-with-yamllint"],
-        extra_args = []):
-    """Create a yamllint aspect."""
+        args = []):
+    """Create a yamllint aspect.
+
+    Args:
+        binary: a yamllint executable
+        config: the yamllint config file
+        rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
+        filegroup_tags: filegroups tagged with these tags will also be visited by the aspect
+        args: additional command-line options to pass to yamllint
+    """
     attrs = {
         "_options": attr.label(
             default = "//lint:options",
@@ -153,8 +161,8 @@ def lint_yamllint_aspect(
         "_filegroup_tags": attr.string_list(
             default = filegroup_tags,
         ),
-        "_extra_args": attr.string_list(
-            default = extra_args,
+        "_args": attr.string_list(
+            default = args,
         ),
     }
 

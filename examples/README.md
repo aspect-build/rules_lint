@@ -1,30 +1,37 @@
 # Examples
 
-This directory contains language-specific examples demonstrating how to use `rules_lint` for both formatting and linting.
+This directory contains self-contained examples demonstrating how to use `rules_lint` for formatting, linting, or both.
 
-Each example is self-contained and shows:
+Each example includes a minimal working configuration for its supported tools. From an example directory, run `aspect format` for formatting or `aspect lint //...` for linting when the corresponding tool is configured.
 
-- How to set up formatting and linting for a specific language
-- Minimal working configuration
-- How to run formatters and linters with Bazel
+## Available Examples
 
-## Structure
+| Directory           | Formatter(s)                                                                  | Linter(s)                                   |
+| ------------------- | ----------------------------------------------------------------------------- | ------------------------------------------- |
+| `cpp/`              | clang-format for C, C++, and CUDA                                             | clang-tidy, Cppcheck                        |
+| `csharp/`           | CSharpier                                                                     |                                             |
+| `fsharp/`           | Fantomas                                                                      |                                             |
+| `go-module/`        | modfmt                                                                        |                                             |
+| `go/`               | gofumpt                                                                       |                                             |
+| `java/`             | google-java-format                                                            | PMD, Checkstyle, SpotBugs                   |
+| `keep-sorted/`      |                                                                               | keep-sorted                                 |
+| `kotlin/`           | ktfmt                                                                         | ktlint                                      |
+| `nodejs/`           | Prettier for JavaScript, TypeScript, Vue, CSS, Less, SCSS, HTML, and Markdown | ESLint, Stylelint, Vale                     |
+| `other_formatters/` | cue fmt, Prettier, jsonnetfmt, djlint                                         |                                             |
+| `pkl/`              | pkl format                                                                    |                                             |
+| `protobuf/`         | Buf                                                                           | Buf                                         |
+| `python/`           | Ruff                                                                          | Ruff, Bandit, Flake8, pydoclint, Pylint, ty |
+| `qml/`              | qmlformat                                                                     | qmllint                                     |
+| `ruby/`             |                                                                               | RuboCop, StandardRB                         |
+| `rust/`             | rustfmt                                                                       | Clippy                                      |
+| `scala/`            | Scalafmt                                                                      | Scalafix                                    |
+| `shell/`            | shfmt                                                                         | ShellCheck                                  |
+| `sql/`              | Prettier with its SQL plugin                                                  |                                             |
+| `starlark/`         |                                                                               | Buildifier                                  |
+| `swift/`            | SwiftFormat                                                                   |                                             |
+| `terraform/`        | terraform fmt                                                                 |                                             |
+| `toml/`             | Taplo                                                                         | Taplo                                       |
+| `xml/`              | Prettier with its XML plugin                                                  |                                             |
+| `yaml/`             | yamlfmt                                                                       | yamllint                                    |
 
-- `python/` - Python formatting with Ruff; linting with Ruff, Bandit, Flake8, Pydoclint, Pylint, or Ty
-- `typescript/` - TypeScript/JavaScript formatting with Prettier; linting with ESLint
-- `java/` - Java formatting with Google Java Format; linting with PMD, Checkstyle, or SpotBugs
-- `rust/` - Rust formatting with rustfmt; linting with Clippy
-- `cpp/` - C/C++ formatting with clang-format; linting with Clang-Tidy or Cppcheck
-- `shell/` - Shell script formatting with shfmt; linting with ShellCheck
-- `ruby/` - Ruby formatting with RuboCop; linting with RuboCop or StandardRB
-- `kotlin/` - Kotlin formatting with ktfmt; linting with Ktlint
-- `css/` - CSS formatting with Prettier; linting with Stylelint
-- `yaml/` - YAML formatting with yamlfmt; linting with Yamllint
-- `markdown/` - Markdown formatting with Prettier; linting with Vale
-- `proto/` - Protocol Buffer formatting and linting with Buf
-- `starlark/` - Starlark formatting with Buildifier; linting with Buildifier
-- `qml/` - QML formatting with qmlformat; linting with qmllint
-
-## Multi-language Example
-
-For examples of a monorepo with multiple languages, see the `example/` directory at the repository root.
+The `other_formatters/` example covers CUE, Gherkin, GraphQL, HTML Jinja templates, JSON5, and Jsonnet without creating a separate workspace for each format.

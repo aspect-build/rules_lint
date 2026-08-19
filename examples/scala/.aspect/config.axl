@@ -1,0 +1,8 @@
+"""Aspect CLI configuration."""
+
+def config(ctx: ConfigContext):
+    # Register the linter aspects so `aspect lint -- //...` runs them
+    # natively (no Bazel `--config=lint`).
+    ctx.tasks["lint"].args.aspects = [
+        "//tools/lint:linters.bzl%scalafix",
+    ]

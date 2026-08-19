@@ -50,6 +50,25 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(19)))
 	})
 
+	t.Run("processes taplo output -> sarif correctly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		sarifJsonString, _ := ToSarifJsonString("//src:toml", "AspectRulesLintTaplo", taplo_output)
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs)).To(Equal(1))
+		g.Expect(sarifJson.Runs[0].Tool.Driver.Name).To(Equal("Taplo"))
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(2))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("invalid TOML"))
+		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(Equal("conflicting keys"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/invalid.toml"))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/bad.toml"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(1)))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(3)))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Column).To(Equal(int32(5)))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Column).To(Equal(int32(0)))
+	})
+
 	t.Run("processes pydoclint output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
@@ -64,7 +83,6 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/missing_doc_arg.py"))
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(4)))
 	})
-
 	t.Run("processes cppcheck output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
@@ -79,6 +97,42 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/hello.cc"))
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(10)))
 		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(15)))
+	})
+
+	t.Run("processes ktlint output -> sarif correctly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		sarifJsonString, _ := ToSarifJsonString("//src:hello_kt", "AspectRulesLintKTLint", ktlint_output)
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs)).To(Equal(1))
+		g.Expect(sarifJson.Runs[0].Tool.Driver.Name).To(Equal("KTLint"))
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(2))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("File name 'hello.kt' should conform PascalCase (standard:filename)"))
+		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(Equal("Wildcard import (standard:no-wildcard-imports)"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/hello.kt"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(1)))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(2)))
+	})
+
+	t.Run("processes scalafix diff output -> sarif correctly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		diff := `--- /private/var/tmp/_bazel_foo/execroot/_main/src/semantic_test.scala
++++ <expected fix>
+@@ -2,8 +2,8 @@
+-import scala.util.Try
++import scala.util.Try
+`
+
+		sarifJsonString, _ := ToSarifJsonString("//src:semantic_test", "AspectRulesLintScalafix", diff)
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs)).To(Equal(1))
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(1))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("Scalafix rewrite suggested"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/semantic_test.scala"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(2)))
 	})
 
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {

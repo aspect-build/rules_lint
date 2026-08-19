@@ -15,11 +15,11 @@ This example demonstrates how to set up formatting and linting for YAML files us
 ## Setup
 
 1. Configure MODULE.bazel with required dependencies
-2. Create the MODULE.aspect file to register CLI tasks
+2. Configure the Aspect CLI lint task in `.aspect/config.axl`
 3. Configure Python Dependencies (set up pip for yamllint)
 4. Configure Formatters and Linters
 
-- See `tools/format/BUILD.bazel` for how to set up the formatter
+- See `tools/format/BUILD` for how to set up the formatter
 - See `tools/lint/linters.bzl` for how to set up the linter aspect
 
 5. Perform formatting and linting using `aspect format` and `aspect lint`

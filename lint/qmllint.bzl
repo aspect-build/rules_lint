@@ -34,7 +34,7 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintQmllint"
 
-def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patch = None):
+def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patch = None, args = []):
     """Run qmllint as an action under Bazel.
 
     Args:
@@ -45,12 +45,16 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
         stdout: The file to write the human-readable report to.
         exit_code: An optional file to write the exit code to. If not provided, the action will not capture the exit code.
         patch: output file for patch (optional). If provided, uses run_patcher instead of run_shell.
+        args: additional command-line arguments passed to qmllint.
     """
     inputs = srcs + [config]
 
+    action_args = ctx.actions.args()
+    action_args.add_all(args)
+    action_args.add_all(srcs)
+
     if patch != None:
         wrapper = ctx.actions.declare_file(ctx.label.name + ".qmllint_wrapper.sh")
-        files = [s.path for s in srcs]
         ctx.actions.write(
             output = wrapper,
             content = """#!/bin/bash
@@ -64,8 +68,8 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
             ctx,
             ctx.executable,
             inputs = inputs,
-            args = files,
-            files_to_diff = files,
+            args = action_args,
+            files_to_diff = [s.path for s in srcs],
             patch_out = patch,
             tools = [wrapper, executable],
             stdout = stdout,
@@ -75,8 +79,6 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
         )
     else:
         outputs = [stdout]
-        args = ctx.actions.args()
-        args.add_all(srcs)
 
         if exit_code:
             command = "{qmllint} $@ > {stdout} 2>&1; echo $? > " + exit_code.path
@@ -87,7 +89,7 @@ def qmllint_action(ctx, executable, srcs, config, stdout, exit_code = None, patc
         ctx.actions.run_shell(
             inputs = inputs,
             outputs = outputs,
-            arguments = [args],
+            arguments = [action_args],
             tools = [executable],
             command = command.format(qmllint = executable.path, stdout = stdout.path),
             mnemonic = _MNEMONIC,
@@ -114,6 +116,7 @@ def _qmllint_aspect_impl(target, ctx):
         outputs.human.out,
         outputs.human.exit_code,
         patch = getattr(outputs, "patch", None),
+        args = ctx.attr._args,
     )
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
@@ -125,13 +128,25 @@ def _qmllint_aspect_impl(target, ctx):
         raw_machine_report,
         outputs.machine.exit_code,
         patch = getattr(outputs, "patch", None),
+        args = ctx.attr._args,
     )
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
 
     return [info]
 
-def lint_qmllint_aspect(binary, config, rule_kinds = [], filegroup_tags = ["qml", "lint-with-qmllint"]):
-    """Create a qmllint aspect."""
+def lint_qmllint_aspect(binary, config, rule_kinds = [], filegroup_tags = ["qml", "lint-with-qmllint"], args = []):
+    """Create a qmllint aspect.
+
+    Args:
+        binary: the qmllint executable.
+        config: label of the `.qmllint.ini` configuration file.
+        rule_kinds: rule kinds to visit with the aspect.
+        filegroup_tags: filegroup tags to visit with the aspect.
+        args: additional options to pass to qmllint.
+
+    Returns:
+        An aspect definition for qmllint.
+    """
 
     return aspect(
         implementation = _qmllint_aspect_impl,
@@ -154,6 +169,9 @@ def lint_qmllint_aspect(binary, config, rule_kinds = [], filegroup_tags = ["qml"
             ),
             "_filegroup_tags": attr.string_list(
                 default = filegroup_tags,
+            ),
+            "_args": attr.string_list(
+                default = args,
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],

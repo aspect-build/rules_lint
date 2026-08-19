@@ -14,7 +14,7 @@ Note: No Ruby formatter is currently available in rules_lint.
 ## Setup
 
 1. Configure MODULE.bazel with required dependencies
-2. Create the MODULE.aspect file to register CLI tasks
+2. Configure the Aspect CLI lint task in `.aspect/config.axl`
 3. Configure Linters
 
 - See `tools/lint/linters.bzl` for how to set up each linter aspect

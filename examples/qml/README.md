@@ -18,7 +18,7 @@ The `qml` tag is used for both formatting and linting in this example.
 ## Setup
 
 1. Configure `MODULE.bazel` with `rules_python` and `rules_lint`
-2. Create the `MODULE.aspect` file to register CLI tasks
+2. Configure the Aspect CLI lint task in `.aspect/config.axl`
 3. Install PySide tool wrappers with `pip.parse`
 4. Configure formatters and linters
 

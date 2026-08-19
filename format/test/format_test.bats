@@ -20,7 +20,7 @@ setup() {
     assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/(special_char)/[square]/hello.ts examples/nodejs/src/file-dep.ts examples/nodejs/src/file.ts"
     assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/hello.tsx"
     assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/src/hello.vue"
-    assert_output --partial "+ prettier --write --log-level=warn .bcr/metadata.template.json"
+    assert_output --partial "+ prettier --write --log-level=warn .bcr/lint/rust/metadata.template.json .bcr/lint/rust/source.template.json .bcr/lint/scala/metadata.template.json .bcr/lint/scala/source.template.json .bcr/metadata.template.json .bcr/source.template.json"
     assert_output --partial "+ prettier --write --log-level=warn examples/nodejs/.swcrc"
     assert_output --partial "+ prettier --write --log-level=warn examples/other_formatters/src/config.json5"
 }
@@ -118,7 +118,13 @@ setup() {
     run bazel run //format/test:format_TOML_with_taplo
     assert_success
 
-    assert_output --partial '+ taplo format _typos.toml examples/python/pyproject.toml'
+    assert_output --partial "+ taplo format"
+    assert_output --partial "_typos.toml"
+    assert_output --partial "examples/python/pyproject.toml"
+    assert_output --partial "examples/python/src/ruff.toml examples/python/src/subdir/ruff.toml"
+    assert_output --partial "examples/rust/.clippy.toml"
+    assert_output --partial "examples/toml/.taplo.toml"
+    assert_output --partial "examples/toml/src/bad.toml examples/toml/src/hello.toml"
 }
 
 @test "should run terraform fmt on HCL" {
@@ -153,7 +159,7 @@ setup() {
     run bazel run //format/test:format_Scala_with_scalafmt
     assert_success
 
-    assert_output --partial "+ scalafmt --respect-project-filters examples/scala/src/hello.scala"
+    assert_output --partial "+ scalafmt --respect-project-filters examples/scala/src/App.scala examples/scala/src/Foo.scala"
 }
 
 @test "should run gofmt on Go" {
@@ -206,7 +212,7 @@ setup() {
     run bazel run //format/test:format_YAML_with_yamlfmt
     assert_success
 
-    assert_output --partial "+ yamlfmt .bcr/presubmit.yml"
+    assert_output --partial "+ yamlfmt .bcr/lint/rust/presubmit.yml .bcr/lint/scala/presubmit.yml .bcr/presubmit.yml"
 }
 
 @test "should run rustfmt on Rust" {

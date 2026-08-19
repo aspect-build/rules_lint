@@ -1,0 +1,36 @@
+# Release + publish aspect_rules_lint_rust to the BCR, independently of the
+# root module (own rust-v* version line). Thin trigger over release-module.yaml;
+# to add another module (e.g. lint/rules_rust), copy this file with a new tag
+# prefix / root / name (and add a release_prep.sh case + .bcr/<module>/ templates).
+name: Release Rust lint module
+
+on:
+  push:
+    tags:
+      - "rust-v*.*.*"
+  # In case of problems, let release engineers retry by manually dispatching
+  # the workflow from the GitHub UI
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  attestations: write
+  contents: write
+
+jobs:
+  release:
+    uses: ./.github/workflows/release-module.yaml
+    with:
+      tag_name: ${{ inputs.tag_name || github.ref_name }}
+      tag_prefix: "rust-v"
+      module_root: "lint/rust"
+      module_name: "aspect_rules_lint_rust"
+      # The root workspace's tests don't cover this nested module (it is its
+      # own Bazel workspace, tested by repo CI), so skip the test run.
+      bazel_test_command: "true"
+    secrets:
+      BCR_PUBLISH_TOKEN: ${{ secrets.BCR_PUBLISH_TOKEN }}

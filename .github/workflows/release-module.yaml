@@ -1,0 +1,176 @@
+# Reusable per-module BCR release, copied from aspect-build/aspect-gazelle.
+# Called by thin per-module trigger workflows (release.yml for the root
+# aspect_rules_lint module, release-rust.yml for aspect_rules_lint_rust) that
+# supply the tag prefix, module root, module name, and optionally the release
+# assets to upload. Builds the module's archive via release_prep.sh (which
+# branches on the tag prefix) and drives the publish-to-bcr reusable workflow,
+# passing the module root through its native `module_roots` input so only this
+# module is published (not the others).
+name: Release (module)
+on:
+  workflow_call:
+    inputs:
+      tag_name:
+        description: 'The tag being released, e.g. "rust-v1.2.3". Unlike aspect-gazelle, this cannot default to github.ref_name because the root release is also invoked via workflow_call from tag.yaml, where the ref is a branch.'
+        required: true
+        type: string
+      tag_prefix:
+        description: 'Tag prefix, e.g. "rust-v"; stripped from the tag to get the version.'
+        required: true
+        type: string
+      module_root:
+        description: 'Repo-relative module directory, e.g. "lint/rust" or "." for the root module.'
+        required: true
+        type: string
+      module_name:
+        description: 'Bzlmod module name, e.g. "aspect_rules_lint_rust".'
+        required: true
+        type: string
+      release_files:
+        description: |
+          Newline-separated globs of release assets to upload. Defaults to just
+          the module's source archive (rules_lint-<tag>*.tar.gz). The root
+          release overrides this to also upload the compiled Go binaries.
+        required: false
+        default: ""
+        type: string
+      bazel_test_command:
+        description: |
+          Bazel test command run by release_ruleset before cutting the release.
+          Sub-module releases pass "true" to skip it: the root workspace's
+          tests don't cover the nested modules, which are tested by repo CI.
+        required: false
+        default: "bazel test //..."
+        type: string
+    secrets:
+      BCR_PUBLISH_TOKEN:
+        required: true
+permissions:
+  id-token: write
+  attestations: write
+  contents: write
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.check.outputs.prerelease }}
+    steps:
+      - name: Check if pre-release
+        id: check
+        env:
+          TAG: ${{ inputs.tag_name }}
+          PREFIX: ${{ inputs.tag_prefix }}
+        run: |
+          # Strip the tag prefix to get semver (e.g. "rust-v1.2.3" -> "1.2.3").
+          VERSION="${TAG#"$PREFIX"}"
+          if [[ "$VERSION" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+  release:
+    needs: tag
+    # SLSA trusted-builder reusable workflows MUST be referenced by a semantic
+    # version tag, not a commit SHA: slsa-verifier reads the builder ref from the
+    # provenance and rejects a bare SHA ("unexpected ref type"), which breaks the
+    # release-artifact attestations that BCR's presubmit verifies. Do not SHA-pin.
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.6.0
+    with:
+      prerelease: ${{ needs.tag.outputs.prerelease == 'true' }}
+      tag_name: ${{ inputs.tag_name }}
+      # Default to the source archive; callers can add extra release assets.
+      release_files: ${{ inputs.release_files != '' && inputs.release_files || format('rules_lint-{0}*.tar.gz', inputs.tag_name) }}
+      bazel_test_command: ${{ inputs.bazel_test_command }}
+      # release_prep.sh emits a changelog scoped to this module's subtree and
+      # diffed against the previous <prefix> tag. GitHub's auto-generated notes
+      # would diff against the previous tag of any prefix and list every repo
+      # PR, so disable them and use only our changelog.
+      generate_release_notes: false
+      # Draft so publish-to-bcr can upload attestations before the release is
+      # finalized (immutable releases reject later asset uploads).
+      draft: true
+  publish:
+    needs: [tag, release]
+    if: ${{ needs.tag.outputs.prerelease == 'false' }}
+    permissions:
+      id-token: write
+      attestations: write
+      contents: write
+    # Called directly rather than via the local publish.yaml wrapper: the chain
+    # tag.yaml -> release.yml -> release-module.yaml already uses three of
+    # GitHub's four reusable-workflow nesting levels, so there is no room for
+    # another local wrapper in between.
+    #
+    # SLSA trusted-builder reusable workflows MUST be referenced by a semantic
+    # version tag, not a commit SHA: slsa-verifier reads the builder ref from the
+    # provenance and rejects a bare SHA ("unexpected ref type"), which breaks the
+    # source.json attestation that BCR's presubmit verifies. Do not SHA-pin this.
+    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.4.1
+    with:
+      tag_name: ${{ inputs.tag_name }}
+      tag_prefix: ${{ inputs.tag_prefix }}
+      module_roots: ${{ inputs.module_root }}
+      registry_fork: "aspect-forks/bazel-central-registry"
+      # Open the BCR PR from the open-bcr-pr job after the release is finalized,
+      # so BCR's unauthenticated presubmit doesn't 404 on the still-draft archive.
+      open_pull_request: false
+    secrets:
+      publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}
+  finalize:
+    needs: [release, publish]
+    # Publish the draft release once all uploads are done. Run when release
+    # succeeded and publish either succeeded or was skipped (pre-releases).
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.release.result == 'success' &&
+      contains(fromJSON('["success","skipped"]'), needs.publish.result)
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag_name }}
+        run: |
+          gh release edit "$TAG" \
+            --draft=false \
+            --repo "${{ github.repository }}"
+  open-bcr-pr:
+    needs: [tag, publish, finalize]
+    if: ${{ needs.tag.outputs.prerelease == 'false' && needs.publish.result == 'success' && needs.finalize.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag_name }}
+      REPO: ${{ github.repository }}
+      MODULE: ${{ inputs.module_name }}
+      PREFIX: ${{ inputs.tag_prefix }}
+    steps:
+      - name: Open BCR pull request
+        env:
+          GH_TOKEN: ${{ secrets.BCR_PUBLISH_TOKEN }}
+        run: |
+          set -o errexit -o nounset -o pipefail
+          VERSION="${TAG#"$PREFIX"}"
+          # Must match the branch pushed to the fork by publish-to-bcr:
+          # <module-names>-<tag>.
+          BRANCH="${MODULE}-${TAG}"
+          BODY=$(printf 'Release: https://github.com/%s/releases/tag/%s\n\n_Automated by [Publish to BCR](https://github.com/bazel-contrib/publish-to-bcr)_' "$REPO" "$TAG")
+          ERR=$(mktemp)
+          if gh api repos/bazelbuild/bazel-central-registry/pulls \
+              --method POST \
+              -f "title=${MODULE}@${VERSION}" \
+              -f "body=${BODY}" \
+              -f "head=aspect-forks:${BRANCH}" \
+              -f "base=main" \
+              -F "maintainer_can_modify=true" \
+              -F "draft=false" \
+              --jq .html_url 2>"$ERR"; then
+            echo "Opened BCR pull request"
+          elif grep -q "already exists" "$ERR"; then
+            echo "BCR pull request for ${BRANCH} already exists"
+          else
+            cat "$ERR"
+            exit 1
+          fi

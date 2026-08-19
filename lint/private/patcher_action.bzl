@@ -32,7 +32,7 @@ def run_patcher(
         ctx: Bazel Rule or Aspect evaluation context
         executable: struct with a _patcher field
         inputs: action inputs (list or depset)
-        args: list of arguments to pass to the linter
+        args: Args object or list of arguments to pass to the linter
         files_to_diff: list of file paths to diff
         patch_out: output file for the patch
         tools: tools for the action (first tool is used as the linter)
@@ -51,16 +51,23 @@ def run_patcher(
     if patch_cfg_name == None:
         patch_cfg_name = ctx.label.name
     patch_cfg = ctx.actions.declare_file("_{}.{}".format(patch_cfg_name, patch_cfg_suffix))
+    arguments = [patch_cfg.path]
 
     # Build patch config dictionary
     patch_cfg_dict = {
         "linter": tools[0].path,  # Derive linter path from the first tool
-        "args": args,
         "files_to_diff": files_to_diff,
         "output": patch_out.path,
     }
     if patch_cfg_env != None:
         patch_cfg_dict["env"] = patch_cfg_env
+
+    if type(args) == "Args":
+        args.use_param_file("%s", use_always=True)
+        args.set_param_file_format("multiline")
+        arguments.append(args)
+    else:
+        patch_cfg_dict["args"] = args
 
     ctx.actions.write(
         output = patch_cfg,
@@ -103,7 +110,7 @@ def run_patcher(
         "inputs": final_inputs,
         "outputs": outputs_list,
         "executable": executable._patcher,
-        "arguments": [patch_cfg.path],
+        "arguments": arguments,
         "env": final_env,
         "tools": tools,
     }
