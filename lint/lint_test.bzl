@@ -36,6 +36,7 @@ flake8_test(
 """
 
 load("@bazel_lib//lib:paths.bzl", "to_rlocation_path")
+load("@bazel_lib//lib:windows_utils.bzl", "create_windows_native_launcher_script")
 
 def _write_assert(ctx, files):
     "Create a parameter to substitute into the shell script"
@@ -72,8 +73,15 @@ def _test_impl(ctx):
         },
         is_executable = True,
     )
+
+    if ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]):
+        launcher = create_windows_native_launcher_script(ctx, bin)
+        runfiles = runfiles.merge(ctx.runfiles(files = [bin]))
+    else:
+        launcher = bin
+
     return [DefaultInfo(
-        executable = bin,
+        executable = launcher,
         runfiles = runfiles,
     )]
 
@@ -89,6 +97,8 @@ def lint_test(aspect):
             """),
             "_bin": attr.label(default = ":lint_test.sh", allow_single_file = True, executable = True, cfg = "exec"),
             "_runfiles_lib": attr.label(default = "@bazel_tools//tools/bash/runfiles"),
+            "_windows_constraint": attr.label(default = "@platforms//os:windows"),
         },
+        toolchains = ["@bazel_tools//tools/sh:toolchain_type"],
         test = True,
     )
