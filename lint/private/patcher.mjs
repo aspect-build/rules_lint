@@ -72,7 +72,7 @@ async function main(args, sandbox) {
   const ret = childProcess.spawnSync(config.linter, config.args, {
     stdio: "inherit",
     cwd: sandbox,
-    // Merge process.env so the linter wrapper (a bash script) can find PATH.
+    // Merge process.env so the linter wrapper (a bash script) can find PATH
     env: Object.assign({}, process.env, config.env || {}),
   });
 
