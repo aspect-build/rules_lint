@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -271,6 +272,9 @@ func rubocopJsonToSarif(label, mnemonic, report string) (sarifJsonString string,
 //   - The linter is running on the host, so the path will have an 'execroot' segment
 //   - We only lint source files, so there is no 'bazel-bin/<platform>/bin' segment
 func determineRelativePath(path string, label string) string {
+    // Convert windows path separator to uri path separator
+	path = filepath.ToSlash(path)
+
 	if !strings.HasPrefix(path, "/") || !strings.HasPrefix(label, "//") {
 		return path
 	}
