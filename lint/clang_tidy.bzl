@@ -42,6 +42,7 @@ load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("@rules_cc//cc:defs.bzl", "CcInfo", "cc_common")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
+load("//lint/private:macos_sdk.bzl", "macos_sdk_root")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintClangTidy"
@@ -264,6 +265,14 @@ def _get_args(ctx, compilation_context, srcs):
     args.extend([src.path for src in srcs])
     return args
 
+def _has_sysroot_flag(flags):
+    # Matches the separate (`-isysroot <dir>`) and joined (`-isysroot<dir>`)
+    # spellings, plus `--sysroot`, which clang also honours for header search.
+    for flag in flags:
+        if flag.startswith("-isysroot") or flag.startswith("--sysroot"):
+            return True
+    return False
+
 def _get_compiler_args(ctx, compilation_context, srcs):
     # add args specified by the toolchain, on the command line and rule copts
     args = []
@@ -302,6 +311,28 @@ def _get_compiler_args(ctx, compilation_context, srcs):
     args.extend(_prefixed(compilation_context.quote_includes.to_list(), "-iquote"))
     args.extend(_prefixed(compilation_context.system_includes.to_list(), _angle_includes_option(ctx)))
     args.extend(_prefixed(compilation_context.external_includes.to_list(), "-isystem"))
+
+    # clang-tidy runs as its own action, so a hermetic clang-tidy (e.g. from
+    # toolchains_llvm) resolves its own libc++/builtins by binary-relative
+    # search, but not the macOS SDK platform headers (wchar.h, stdlib.h,
+    # math.h) that libc++ pulls in via #include_next. Pass -isysroot at the SDK
+    # root so the frontend locates them, rather than injecting individual
+    # include dirs that risk mixing incompatible header versions
+    # (https://github.com/llvm/llvm-project/issues/63890).
+    # macOS-only; prefer cc_toolchain.sysroot, else derive it (macos_sdk_root).
+    # Defer to a sysroot pinned by the target or command line, as the last
+    # -isysroot takes effect. Toolchain flags don't count: apple_support's
+    # `-isysroot` is a placeholder that only its own wrapped_clang expands at
+    # exec time, and clang-tidy never runs through that wrapper.
+    # https://github.com/bazelbuild/apple_support/blob/8a5de128485e553bd35b8cd881b43480708f43ec/crosstool/cc_toolchain_config.bzl#L1052-L1053
+    if ctx.target_platform_has_constraint(
+        ctx.attr._macos_constraint[platform_common.ConstraintValueInfo],
+    ) and not (_has_sysroot_flag(rule_flags) or _has_sysroot_flag(user_flags)):
+        cc_toolchain = find_cpp_toolchain(ctx)
+        sysroot = cc_toolchain.sysroot or macos_sdk_root(cc_toolchain.built_in_include_directories)
+        if sysroot:
+            args.extend(["-isysroot", sysroot])
+
     return args
 
 def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_code, patch = None, args = []):
@@ -511,6 +542,7 @@ def lint_clang_tidy_aspect(
                 cfg = "exec",
             ),
             "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
+            "_macos_constraint": attr.label(default = Label("@platforms//os:macos")),
             "_rule_kinds": attr.string_list(
                 default = rule_kinds,
             ),
