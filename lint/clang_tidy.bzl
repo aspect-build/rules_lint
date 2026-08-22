@@ -265,6 +265,14 @@ def _get_args(ctx, compilation_context, srcs):
     args.extend([src.path for src in srcs])
     return args
 
+def _has_sysroot_flag(flags):
+    # Matches the separate (`-isysroot <dir>`) and joined (`-isysroot<dir>`)
+    # spellings, plus `--sysroot`, which clang also honours for header search.
+    for flag in flags:
+        if flag.startswith("-isysroot") or flag.startswith("--sysroot"):
+            return True
+    return False
+
 def _get_compiler_args(ctx, compilation_context, srcs):
     # add args specified by the toolchain, on the command line and rule copts
     args = []
@@ -312,10 +320,15 @@ def _get_compiler_args(ctx, compilation_context, srcs):
     # include dirs that risk mixing incompatible header versions
     # (https://github.com/llvm/llvm-project/issues/63890).
     # macOS-only; prefer cc_toolchain.sysroot, else derive it (macos_sdk_root).
-    cc_toolchain = find_cpp_toolchain(ctx)
+    # Defer to a sysroot pinned by the target or command line, as the last
+    # -isysroot takes effect. Toolchain flags don't count: apple_support's
+    # `-isysroot` is a placeholder that only its own wrapped_clang expands at
+    # exec time, and clang-tidy never runs through that wrapper.
+    # https://github.com/bazelbuild/apple_support/blob/8a5de128485e553bd35b8cd881b43480708f43ec/crosstool/cc_toolchain_config.bzl#L1052-L1053
     if ctx.target_platform_has_constraint(
         ctx.attr._macos_constraint[platform_common.ConstraintValueInfo],
-    ):
+    ) and not (_has_sysroot_flag(rule_flags) or _has_sysroot_flag(user_flags)):
+        cc_toolchain = find_cpp_toolchain(ctx)
         sysroot = cc_toolchain.sysroot or macos_sdk_root(cc_toolchain.built_in_include_directories)
         if sysroot:
             args.extend(["-isysroot", sysroot])
