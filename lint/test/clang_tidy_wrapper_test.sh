@@ -132,6 +132,31 @@ else
 fi
 
 #-------------------------------------------------------------------
+# Test 4: a clang-tidy that could not be executed (126/127) must fail the
+# action, even when an exit code file is requested.
+
+for code in 126 127; do
+    export MOCK_ARGS_FILE="$tmp_dir/args4_$code.txt"
+    export CLANG_TIDY__EXIT_CODE_OUTPUT_FILE="$tmp_dir/exit_code4_$code.txt"
+    export CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE="$tmp_dir/output4_$code.txt"
+    exit_code=0
+    MOCK_EXIT_CODE=$code "$wrapper" "$mock_clang_tidy" baz.cpp \
+        > "$tmp_dir/stdout4_$code.txt" 2>&1 || exit_code=$?
+    unset CLANG_TIDY__EXIT_CODE_OUTPUT_FILE
+    unset CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE
+
+    if [[ $exit_code -ne $code ]]; then
+        fail "expected exit $code from a clang-tidy that cannot run, got $exit_code"
+    elif [[ -f "$tmp_dir/exit_code4_$code.txt" ]]; then
+        fail "exit $code was captured as a finding instead of failing the action"
+    elif [[ ! -s "$tmp_dir/output4_$code.txt" ]]; then
+        fail "report for exit $code was deleted; the loader error is the only evidence"
+    else
+        pass "clang-tidy that cannot run ($code) fails the action instead of reporting clean"
+    fi
+done
+
+#-------------------------------------------------------------------
 
 if [[ $failures -ne 0 ]]; then
     echo "$failures test(s) failed" >&2
