@@ -231,9 +231,6 @@ def _aggregate_regex(ctx, compilation_context):
         print("target header dirs: " + ",".join(dirs))
     return regex
 
-def _quoted_arg(arg):
-    return "\"" + arg + "\""
-
 def _get_env(ctx, srcs):
     sources_are_cxx = _is_cxx(srcs[0])
     if (sources_are_cxx):
@@ -251,16 +248,18 @@ def _get_env(ctx, srcs):
     return env
 
 def _get_args(ctx, compilation_context, srcs):
+    # These reach clang-tidy verbatim; the wrapper runs it directly, so shell
+    # quoting added here arrives as literal characters.
     args = []
     if (any(ctx.files._global_config)):
         args.append("--config-file=" + ctx.files._global_config[0].path)
     if (ctx.attr._lint_target_headers):
         regex = _aggregate_regex(ctx, compilation_context)
         if (regex):
-            args.append(_quoted_arg("-header-filter=" + regex))
+            args.append("-header-filter=" + regex)
     elif (ctx.attr._header_filter):
         regex = ctx.attr._header_filter
-        args.append(_quoted_arg("-header-filter=" + regex))
+        args.append("-header-filter=" + regex)
     args.extend([src.path for src in srcs])
     return args
 
