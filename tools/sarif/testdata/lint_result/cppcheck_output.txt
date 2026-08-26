@@ -1,4 +1,9 @@
-/some_absolute_path/sandbox/linux-sandbox/1/execroot/_main/src/hello.cc:10:5: error: Memory leak: ptr [memleak]
-    int *ptr = new int;
-    ^
-/some_absolute_path/sandbox/linux-sandbox/1/execroot/_main/src/hello.cc:15:3: warning: Variable 'x' is assigned a value that is never used. [unreadVariable]
+Checking src/hello.cc ...
+src/base.h:38:19: Required: A public base class should declare a protected non-virtual destructor. [Required 15.0.1]
+Checking src/goodbye.cc ...
+/some_absolute_path/sandbox/linux-sandbox/1/execroot/_main/src/widget.h:232:22: warning: Member variable 'Widget::handler' is not initialized in the constructor. [warning uninitMemberVar]
+src/goodbye.cc:15:5: error: Memory leak: ptr [error memleak]
+src/goodbye.cc:177:49: performance: Consider using std::find_if algorithm instead of a raw loop. [performance 6.9.2]
+src/gadget.h:41:7: Advisory: Member variable 'Gadget::count' is not initialized in the constructor. [Advisory 15.1.4]
+nofile:0:0: information: Active checkers: 158/849 (use --checkers-report=<filename> to see details) [information checkersReport]
+src/gadget.h:58:3: L1: Do not use a bare pointer here. [L1 certDemo-MEM50]
