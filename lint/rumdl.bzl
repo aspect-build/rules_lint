@@ -37,7 +37,8 @@ def rumdl_action(ctx, executable, srcs, stdout, exit_code = None, config = None,
             non-zero exit fails the action.
         config: optional rumdl configuration file. When absent, rumdl runs with
             built-in defaults and does not discover configuration files.
-        data: additional files available for local link resolution.
+        data: additional files available for local link resolution. Markdown
+            files are also checked so rumdl can validate cross-file fragments.
         output_format: optional value for rumdl's `--output-format` flag.
         args: additional lint-selection command-line arguments passed to rumdl.
             Do not pass output, color, cache, or configuration flags, which are
@@ -56,7 +57,8 @@ def rumdl_action(ctx, executable, srcs, stdout, exit_code = None, config = None,
     if output_format:
         action_args.add_all(["--output-format", output_format])
     action_args.add_all(args)
-    action_args.add_all([src.short_path for src in srcs])
+    files_to_check = depset(srcs + _markdown_files(data)).to_list()
+    action_args.add_all([src.short_path for src in files_to_check])
 
     outputs = [stdout]
     redirect = ">{stdout}" if output_format else ">{stdout} 2>&1"
@@ -140,6 +142,7 @@ def lint_rumdl_aspect(
         config: optional rumdl configuration file. If omitted, only built-in
             defaults and command-line arguments are used.
         data: additional files to make available for local link resolution.
+            Markdown files are also checked to validate cross-file fragments.
         rule_kinds: rule kinds visited by the aspect.
         filegroup_tags: tags that opt `filegroup` targets into rumdl linting.
         args: additional lint-selection command-line arguments passed to rumdl.
