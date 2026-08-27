@@ -143,7 +143,7 @@ Linters which are not language-specific:
 | JavaScript         | [Prettier]                | [ESLint]                                                |
 | Jsonnet            | [jsonnetfmt]              |                                                         |
 | Kotlin             | [ktfmt]                   | [ktlint]                                                |
-| Markdown           | [Prettier]                | [Vale]                                                  |
+| Markdown           | [Prettier]                | [rumdl], [Vale]                                         |
 | Pkl                | [pkl]                     |                                                         |
 | PowerShell         |                           | [PSScriptAnalyzer]                                      |
 | Protocol Buffer    | [buf]                     | [buf lint]                                              |
@@ -196,6 +196,7 @@ Linters which are not language-specific:
 [rubocop]: https://docs.rubocop.org/
 [standard]: https://github.com/standardrb/standard
 [ruff]: https://docs.astral.sh/ruff/
+[rumdl]: https://github.com/rvben/rumdl
 [ty]: https://docs.astral.sh/ty/
 [pylint]: https://pylint.readthedocs.io/en/stable/
 [qmlformat]: https://doc.qt.io/qt-6/qtqml-tooling-qmlformat.html

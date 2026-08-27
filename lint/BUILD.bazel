@@ -18,6 +18,11 @@ alias(
 )
 
 alias(
+    name = "rumdl_bin",
+    actual = "@multitool//tools/rumdl",
+)
+
+alias(
     name = "shellcheck_bin",
     actual = "@multitool//tools/shellcheck",
 )
@@ -258,6 +263,12 @@ bzl_library(
         "//lint/private:patcher_action",
         "@bazel_skylib//lib:versions",
     ],
+)
+
+bzl_library(
+    name = "rumdl",
+    srcs = ["rumdl.bzl"],
+    deps = ["//lint/private:lint_aspect"],
 )
 
 bzl_library(

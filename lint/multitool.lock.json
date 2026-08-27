@@ -44,6 +44,50 @@
       }
     ]
   },
+  "rumdl": {
+    "binaries": [
+      {
+        "kind": "archive",
+        "url": "https://github.com/rvben/rumdl/releases/download/v0.2.61/rumdl-v0.2.61-aarch64-unknown-linux-musl.tar.gz",
+        "file": "rumdl",
+        "sha256": "24463084dbdf1c010d19028b43712419ebdfc5e5e1613429cd7433b7f0bb4c3e",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/rvben/rumdl/releases/download/v0.2.61/rumdl-v0.2.61-x86_64-unknown-linux-musl.tar.gz",
+        "file": "rumdl",
+        "sha256": "f088028834601b3280e1694cc20accef856946aaa3b48f50d839b5963a036548",
+        "os": "linux",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/rvben/rumdl/releases/download/v0.2.61/rumdl-v0.2.61-aarch64-apple-darwin.tar.gz",
+        "file": "rumdl",
+        "sha256": "e085746013509d547b157cf91c8ec24c61a90c48eca3ca79d0c1666f4046164f",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/rvben/rumdl/releases/download/v0.2.61/rumdl-v0.2.61-x86_64-apple-darwin.tar.gz",
+        "file": "rumdl",
+        "sha256": "0b50f411855fd81c5a08742036eee1c20a16bc9e24f94458dc2aac3021dc8a23",
+        "os": "macos",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "archive",
+        "url": "https://github.com/rvben/rumdl/releases/download/v0.2.61/rumdl-v0.2.61-x86_64-pc-windows-msvc.zip",
+        "file": "rumdl.exe",
+        "sha256": "7299f5ce8af784051f8efeee94efe6d6127dafbf99540e1dccfcc7e1d98da80b",
+        "os": "windows",
+        "cpu": "x86_64"
+      }
+    ]
+  },
   "shellcheck": {
     "binaries": [
       {

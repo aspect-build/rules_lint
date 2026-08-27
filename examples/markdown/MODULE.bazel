@@ -1,0 +1,7 @@
+"Bazel dependencies for the Markdown linting example"
+
+bazel_dep(name = "aspect_rules_lint")
+local_path_override(
+    module_name = "aspect_rules_lint",
+    path = "../..",
+)
