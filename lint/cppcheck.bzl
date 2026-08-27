@@ -3,7 +3,7 @@
 
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("@rules_cc//cc:defs.bzl", "CcInfo", "cc_common")
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "should_visit")
 
 _MNEMONIC = "AspectRulesLintCppCheck"
 
@@ -101,6 +101,9 @@ def cppcheck_action(ctx, compilation_context, executable, srcs, stdout, exit_cod
     )
 
 def _cppcheck_aspect_impl(target, ctx):
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds):
+        return []
+
     if not CcInfo in target:
         return []
 
@@ -138,7 +141,9 @@ def _cppcheck_aspect_impl(target, ctx):
     )
     return [info]
 
-def lint_cppcheck_aspect(binary, verbose = False, args = []):
+DEFAULT_RULE_KINDS = ["cc_binary", "cc_library"]
+
+def lint_cppcheck_aspect(binary, verbose = False, rule_kinds = DEFAULT_RULE_KINDS, args = []):
     """A factory function to create a linter aspect.
 
     Args:
@@ -166,6 +171,7 @@ def lint_cppcheck_aspect(binary, verbose = False, args = []):
             ```
 
         verbose: print debug messages including cppcheck command lines being invoked.
+        rule_kinds: which target kinds should be visited automatically
         args: additional options to pass to cppcheck.
     """
 
@@ -193,6 +199,9 @@ def lint_cppcheck_aspect(binary, verbose = False, args = []):
                 cfg = "exec",
             ),
             "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
+            ),
         },
         toolchains = [
             OPTIONAL_SARIF_PARSER_TOOLCHAIN,
