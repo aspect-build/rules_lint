@@ -60,7 +60,7 @@ def rumdl_action(ctx, executable, srcs, stdout, exit_code = None, config = None,
     if output_format:
         action_args.add_all(["--output-format", output_format])
     action_args.add_all(args)
-    files_to_check = depset(srcs + _markdown_files(data)).to_list()
+    files_to_check = depset(srcs).to_list()
     action_args.add_all([src.short_path for src in files_to_check])
 
     if patch:
