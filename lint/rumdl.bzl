@@ -128,6 +128,7 @@ def _rumdl_aspect_impl(target, ctx):
         "always" if ctx.attr._options[LintOptionsInfo].color else "never",
         "--deny-config-warnings",
         "--no-cache",
+        "--quiet",
     ]
     if ctx.attr._options[LintOptionsInfo].debug:
         common_args.append("--verbose")
