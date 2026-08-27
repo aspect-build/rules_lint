@@ -19,13 +19,14 @@ rumdl = lint_rumdl_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintRumdl"
 
 _MARKDOWN_EXTENSIONS = (".md", ".mdx", ".qmd", ".Rmd")
 
-def rumdl_action(ctx, executable, srcs, stdout, exit_code = None, config = None, data = [], output_format = None, args = []):
+def rumdl_action(ctx, executable, srcs, stdout, exit_code = None, config = None, data = [], output_format = None, args = [], patch = None):
     """Run rumdl as an action under Bazel.
 
     Args:
@@ -43,6 +44,8 @@ def rumdl_action(ctx, executable, srcs, stdout, exit_code = None, config = None,
         args: additional lint-selection command-line arguments passed to rumdl.
             Do not pass output, color, cache, or configuration flags, which are
             managed by the aspect.
+        patch: optional output file for fixes. When present, rumdl edits sandbox
+            copies and the standard rules_lint patcher records the changes.
     """
     inputs = srcs + data
     if config:
@@ -60,17 +63,35 @@ def rumdl_action(ctx, executable, srcs, stdout, exit_code = None, config = None,
     files_to_check = depset(srcs + _markdown_files(data)).to_list()
     action_args.add_all([src.short_path for src in files_to_check])
 
+    if patch:
+        action_args.add("--fix")
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = inputs,
+            args = action_args,
+            files_to_diff = [file.path for file in files_to_check],
+            patch_out = patch,
+            tools = [executable],
+            stdout = stdout,
+            exit_code = exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with rumdl",
+            patch_cfg_suffix = "rumdl.patch_cfg",
+        )
+        return
+
     outputs = [stdout]
-    redirect = ">{stdout}" if output_format else ">{stdout} 2>&1"
+    redirect = '>"{stdout}"' if output_format else '>"{stdout}" 2>&1'
     if exit_code:
-        command = "{rumdl} $@ {redirect}; echo $? > {exit_code}".format(
+        command = '"{rumdl}" "$@" {redirect}; echo $? > "{exit_code}"'.format(
             rumdl = executable.path,
             redirect = redirect.format(stdout = stdout.path),
             exit_code = exit_code.path,
         )
         outputs.append(exit_code)
     else:
-        command = "{rumdl} $@ {redirect}".format(
+        command = '"{rumdl}" "$@" {redirect}'.format(
             rumdl = executable.path,
             redirect = redirect.format(stdout = stdout.path),
         )
@@ -94,7 +115,10 @@ def _rumdl_aspect_impl(target, ctx):
         return []
 
     files_to_lint = _markdown_files(filter_srcs(ctx.rule))
-    outputs, info = output_files(_MNEMONIC, target, ctx)
+    if ctx.attr._options[LintOptionsInfo].fix:
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
+    else:
+        outputs, info = output_files(_MNEMONIC, target, ctx)
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
         return [info]
@@ -105,6 +129,8 @@ def _rumdl_aspect_impl(target, ctx):
         "--deny-config-warnings",
         "--no-cache",
     ]
+    if ctx.attr._options[LintOptionsInfo].debug:
+        common_args.append("--verbose")
     rumdl_action(
         ctx,
         ctx.executable._rumdl,
@@ -114,6 +140,7 @@ def _rumdl_aspect_impl(target, ctx):
         config = ctx.file._config_file,
         data = ctx.files._data,
         args = common_args,
+        patch = getattr(outputs, "patch", None),
     )
     rumdl_action(
         ctx,
@@ -154,7 +181,7 @@ def lint_rumdl_aspect(
     """
     return aspect(
         implementation = _rumdl_aspect_impl,
-        attrs = {
+        attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
                 providers = [LintOptionsInfo],
