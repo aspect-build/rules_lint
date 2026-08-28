@@ -16,6 +16,12 @@ rumdl_test(
     srcs = ["//src:good"],
 )
 
+rumdl_test(
+    name = "rumdl_combined",
+    srcs = ["//src:combined"],
+    expected_exit_code = 1,
+)
+
 machine_rumdl_report(
     name = "machine_rumdl_report",
     src = "//src:bad",
@@ -24,7 +30,7 @@ machine_rumdl_report(
 report_test(
     name = "rumdl_machine_output_test",
     expected_tool = "rumdl",
-    expected_uri = "examples/markdown/src/bad.md",
+    expected_uri = "src/bad.md",
     report = "machine_rumdl_report",
 )
 

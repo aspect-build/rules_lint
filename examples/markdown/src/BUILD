@@ -7,6 +7,15 @@ filegroup(
 )
 
 filegroup(
+    name = "combined",
+    srcs = [
+        "bad.md",
+        "bad_local.md",
+    ],
+    tags = ["markdown"],
+)
+
+filegroup(
     name = "good",
     srcs = ["good.md"],
     tags = ["markdown"],
