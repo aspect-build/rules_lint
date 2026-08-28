@@ -1,9 +1,24 @@
-"""Workaround https://github.com/bazelbuild/bazel/issues/14009 to support Bazel prior to 8.3 & 9
+"Patcher binary that includes diff tool"
 
-TODO(3.0): when we drop support for Bazel 7 and 8.2, we can simplify this.
-"""
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
-load("@bazel_features//:features.bzl", "bazel_features")
+
+_DIFF_TOOLCHAIN = "@diff.bzl//diff/toolchain:execution_type"
+
+def _diff_bin_impl(ctx):
+    diff_bin = ctx.toolchains[_DIFF_TOOLCHAIN].diffutilsinfo.diff_bin
+    # Use basename to maintain .exe file extension on windows to allow for execution
+    diff_copy = ctx.actions.declare_file(diff_bin.basename)
+    ctx.actions.symlink(output = diff_copy, target_file = diff_bin, is_executable = True)
+    return DefaultInfo(
+        files = depset([diff_copy]),
+        runfiles = ctx.runfiles(files = [diff_copy]),
+    )
+
+_diff_bin = rule(
+    doc = "Copies the diff binary out of the resolved toolchain, preserving its filename.",
+    implementation = _diff_bin_impl,
+    toolchains = [_DIFF_TOOLCHAIN],
+)
 
 def patcher_binary(name):
     """Create a js_binary that can be used to run the patcher.mjs script.
@@ -11,25 +26,14 @@ def patcher_binary(name):
     Args:
         name: The name of the patcher binary.
     """
-    diff_bin_copy = "_{}.diff_bin".format(name)
-    env = {}
-    data = []
-    if bazel_features.toolchains.genrule_accepts_toolchain_types:
-        native.genrule(
-            name = diff_bin_copy,
-            outs = ["diff_bin"],
-            cmd = "cp $(DIFF_BIN) $(location :diff_bin)",
-            executable = True,
-            toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
-        )
-        data.append(diff_bin_copy)
-        env["DIFF_BIN"] = "$(rlocationpath {})".format(diff_bin_copy)
+    diff_bin = "_{}.diff_bin".format(name)
+    _diff_bin(name = diff_bin)
 
     js_binary(
         name = name,
-        data = data,
+        data = [diff_bin],
         entry_point = "patcher.mjs",
-        env = env,
+        env = {"DIFF_BIN": "$(rlocationpath {})".format(diff_bin)},
         log_level = select({
             "@aspect_rules_lint//lint:debug.enabled": "debug",
             "//conditions:default": "error",
