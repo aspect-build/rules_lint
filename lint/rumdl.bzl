@@ -64,6 +64,7 @@ def rumdl_action(ctx, executable, src, stdout, exit_code = None, config = None, 
             inputs = inputs,
             args = action_args,
             files_to_diff = [src.path],
+            files_to_copy = [file.path for file in _markdown_files(data)],
             patch_out = patch,
             tools = [executable],
             stdout = stdout,
@@ -71,6 +72,7 @@ def rumdl_action(ctx, executable, src, stdout, exit_code = None, config = None, 
             mnemonic = _MNEMONIC,
             progress_message = "Fixing %{label} with rumdl",
             patch_cfg_suffix = "rumdl.patch_cfg",
+            patch_cfg_name = "{}_rules_lint/{}".format(ctx.label.name, src.short_path),
         )
         return
 

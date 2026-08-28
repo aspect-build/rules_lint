@@ -15,6 +15,7 @@ def run_patcher(
         files_to_diff,
         patch_out,
         tools,
+        files_to_copy = [],
         stdout = None,
         stderr = None,
         exit_code = None,
@@ -34,6 +35,7 @@ def run_patcher(
         inputs: action inputs (list or depset)
         args: Args object or list of arguments to pass to the linter
         files_to_diff: list of file paths to diff
+        files_to_copy: additional file paths that must be writable but should not be diffed
         patch_out: output file for the patch
         tools: tools for the action (first tool is used as the linter)
         stdout: output file for stdout (optional)
@@ -56,6 +58,7 @@ def run_patcher(
     # Build patch config dictionary
     patch_cfg_dict = {
         "linter": tools[0].path,  # Derive linter path from the first tool
+        "files_to_copy": files_to_copy,
         "files_to_diff": files_to_diff,
         "output": patch_out.path,
     }
@@ -63,7 +66,7 @@ def run_patcher(
         patch_cfg_dict["env"] = patch_cfg_env
 
     if type(args) == "Args":
-        args.use_param_file("%s", use_always=True)
+        args.use_param_file("%s", use_always = True)
         args.set_param_file_format("multiline")
         arguments.append(args)
     else:

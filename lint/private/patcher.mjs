@@ -18,14 +18,14 @@ function debug(...kwargs) {
 }
 
 // assumes there are no recursive symlinks
-async function sync(src, dst, subdir, filesToDiff) {
+async function sync(src, dst, subdir, filesToCopy) {
   const files = (await fs.promises.readdir(path.join(src, subdir))).map((f) =>
     path.join(subdir, f)
   );
   for (const f of files) {
     const srcF = path.join(src, f);
     const dstF = path.join(dst, f);
-    if (filesToDiff.includes(f)) {
+    if (filesToCopy.includes(f)) {
       debug(`copying ${f}`);
       await fs.promises.mkdir(path.dirname(dstF), { recursive: true });
       // NB: `fs.promises.copyFile` dates back to Node.js 10 (https://nodejs.org/api/fs.html#fspromisescopyfilesrc-dest-mode)
@@ -35,10 +35,10 @@ async function sync(src, dst, subdir, filesToDiff) {
       await fs.promises.copyFile(srcF, dstF);
       await fs.promises.chmod(dstF, "600");
     } else if (
-      filesToDiff.find((d) => d.startsWith(f + path.sep)) !== undefined
+      filesToCopy.find((d) => d.startsWith(f + path.sep)) !== undefined
     ) {
       debug(`entering ${f}`);
-      await sync(src, dst, f, filesToDiff);
+      await sync(src, dst, f, filesToCopy);
     } else {
       debug(`symlinking ${f}`);
       await fs.promises.mkdir(path.dirname(dstF), { recursive: true });
@@ -49,24 +49,28 @@ async function sync(src, dst, subdir, filesToDiff) {
 
 async function main(args, sandbox) {
   const config = JSON.parse(await fs.promises.readFile(args[0]));
-  const spawnArgs = args.length > 1
-    ? (await fs.promises.readFile(args[1], "utf8")).split(/\r?\n/).filter(Boolean)
-    : config.args;
+  const spawnArgs =
+    args.length > 1
+      ? (await fs.promises.readFile(args[1], "utf8"))
+          .split(/\r?\n/)
+          .filter(Boolean)
+      : config.args;
 
   debug("sandbox", sandbox);
   debug("config", JSON.stringify(config, null, 2));
   // JS-specific workaround where sources are copied-to-bin
   const sourcePrefix = config.env?.BAZEL_BINDIR || ".";
 
-  // sync the execroot to a custom sandbox; files_to_diff are copied
-  // and all other files in the execroot are symlinked at their lowest
-  // point that is not a root of any files_to_diff.
+  // sync the execroot to a custom sandbox; writable files are copied and all
+  // other files are symlinked at their lowest shared directory.
   debug(`syncing ${process.cwd()} to ${sandbox}`);
   await sync(
     process.cwd(),
     sandbox,
     ".",
-    config.files_to_diff.map((f) => path.join(sourcePrefix, f))
+    [...config.files_to_diff, ...(config.files_to_copy || [])].map((f) =>
+      path.join(sourcePrefix, f)
+    )
   );
 
   debug(
@@ -86,7 +90,6 @@ async function main(args, sandbox) {
     console.error(ret.error);
     process.exit(1);
   }
-  
 
   const diffOut = fs.openSync(config.output, "w");
   const diffBin = process.env["DIFF_BIN"]
