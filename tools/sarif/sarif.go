@@ -266,12 +266,21 @@ func rubocopJsonToSarif(label, mnemonic, report string) (sarifJsonString string,
 	return sarifJsonString, nil
 }
 
+// Matches an absolute path once separators have been normalised to slashes:
+// either a POSIX path ("/foo") or a Windows drive-letter path ("C:/foo").
+// filepath.IsAbs cannot be used here because it only recognises the host's
+// convention, which would make the result depend on the platform running the linter.
+var absolutePathRe = regexp.MustCompile(`^(?:/|[a-zA-Z]:/)`)
+
 // We expect relative paths when processing lint output and therefore need to convert any absolute paths.
 // Assumptions we make when determining the relative paths:
 //   - The linter is running on the host, so the path will have an 'execroot' segment
 //   - We only lint source files, so there is no 'bazel-bin/<platform>/bin' segment
 func determineRelativePath(path string, label string) string {
-	if !strings.HasPrefix(path, "/") || !strings.HasPrefix(label, "//") {
+	// A SARIF artifactLocation.uri is a URI, so it always uses forward slashes.
+	path = strings.ReplaceAll(path, `\`, "/")
+
+	if !absolutePathRe.MatchString(path) || !strings.HasPrefix(label, "//") {
 		return path
 	}
 
