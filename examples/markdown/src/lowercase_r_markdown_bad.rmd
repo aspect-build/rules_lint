@@ -1,0 +1,3 @@
+# Lowercase R Markdown Fixture
+
+See the [missing section](#missing-section).

@@ -24,7 +24,7 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintRumdl"
 
-_MARKDOWN_EXTENSIONS = (".md", ".mdx", ".qmd", ".Rmd")
+_MARKDOWN_EXTENSIONS = (".md", ".mdx", ".qmd", ".rmd", ".Rmd")
 
 def rumdl_action(ctx, executable, src, stdout, exit_code = None, config = None, data = [], output_format = None, args = [], patch = None):
     """Run rumdl as an action under Bazel.

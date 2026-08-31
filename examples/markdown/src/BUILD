@@ -22,6 +22,12 @@ filegroup(
 )
 
 filegroup(
+    name = "lowercase_r_markdown_bad",
+    srcs = ["lowercase_r_markdown_bad.rmd"],
+    tags = ["markdown"],
+)
+
+filegroup(
     name = "link_targets",
     srcs = ["target.md"],
 )

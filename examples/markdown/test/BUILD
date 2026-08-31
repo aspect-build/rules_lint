@@ -17,6 +17,12 @@ rumdl_test(
 )
 
 rumdl_test(
+    name = "rumdl_lowercase_r_markdown_bad",
+    srcs = ["//src:lowercase_r_markdown_bad"],
+    expected_exit_code = 1,
+)
+
+rumdl_test(
     name = "rumdl_combined",
     srcs = ["//src:combined"],
     expected_exit_code = 1,
