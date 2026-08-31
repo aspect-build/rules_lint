@@ -26,7 +26,7 @@ Each example includes a minimal working configuration for its supported tools. F
 | `rust/`             | rustfmt                                                                       | Clippy                                      |
 | `scala/`            | Scalafmt                                                                      | Scalafix                                    |
 | `shell/`            | shfmt                                                                         | ShellCheck                                  |
-| `sql/`              | Prettier with its SQL plugin                                                  |                                             |
+| `sql/`              | SQLFluff                                                                      | SQLFluff                                    |
 | `starlark/`         |                                                                               | Buildifier                                  |
 | `swift/`            | SwiftFormat                                                                   |                                             |
 | `terraform/`        | terraform fmt                                                                 |                                             |
