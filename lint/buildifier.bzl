@@ -48,6 +48,9 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
         patch: optional output file for a generated patch
         args: additional command-line options
     """
+    files_to_run = ctx.attr._buildifier[DefaultInfo].files_to_run
+    runfiles_env = {"RUNFILES_DIR": executable.path + ".runfiles"}
+
     if patch != None:
         wrapper = ctx.actions.declare_file(ctx.label.name + ".buildifier_wrapper.sh")
         action_args = ctx.actions.args()
@@ -71,8 +74,9 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
             args = action_args,
             files_to_diff = [src.path for src in srcs],
             patch_out = patch,
-            tools = [wrapper, ctx.attr._buildifier[DefaultInfo].files_to_run],
-            env = {"RUNFILES_DIR": executable.path + ".runfiles"},
+            tools = [wrapper, files_to_run],
+            env = runfiles_env,
+            patch_cfg_env = runfiles_env,
             stdout = stdout,
             exit_code = exit_code,
             mnemonic = _MNEMONIC,
@@ -95,9 +99,9 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
         ctx.actions.run_shell(
             inputs = srcs,
             outputs = outputs,
-            tools = [ctx.attr._buildifier[DefaultInfo].files_to_run],
+            tools = [files_to_run],
             arguments = [action_args],
-            env = {"RUNFILES_DIR": executable.path + ".runfiles"},
+            env = runfiles_env,
             command = command.format(buildifier = executable.path, stdout = stdout.path),
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with Buildifier",
