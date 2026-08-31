@@ -51,11 +51,13 @@ def rumdl_action(ctx, executable, src, stdout, exit_code = None, config = None, 
         inputs.append(config)
 
     action_args = ctx.actions.args()
-    if output_format:
-        action_args.add_all(["--output-format", output_format])
-    action_args.add_all(args)
-
     if patch:
+        action_args.add("check")
+        if config:
+            action_args.add_all(["--config", config.path])
+        else:
+            action_args.add("--no-config")
+        action_args.add_all(args)
         action_args.add("--fix")
         action_args.add(src.path)
         run_patcher(
@@ -76,6 +78,9 @@ def rumdl_action(ctx, executable, src, stdout, exit_code = None, config = None, 
         )
         return
 
+    if output_format:
+        action_args.add_all(["--output-format", output_format])
+    action_args.add_all(args)
     markdown_data = _markdown_files(data)
     linked_data = [file for file in data if file not in markdown_data]
     context_args = ctx.actions.args()
