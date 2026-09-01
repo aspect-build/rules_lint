@@ -245,7 +245,7 @@ We recommend using a Git pre-commit hook to format changed files, and [Aspect Wo
 
 See [Formatting](./docs/formatting.md) for more ways to use the formatter.
 
-Also see [API Documentation](https://registry.bazel.build/modules/aspect_rules_lint/latest/docs#format-defs-bzl)
+Also see [API Documentation](https://registry.bazel.build/modules/aspect_rules_lint/latest/docs/format/defs.bzl)
 
 Demo:
 ![pre-commit format](./docs/format-demo.svg)

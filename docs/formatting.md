@@ -13,7 +13,7 @@ load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 format_multirun(name = "format")
 ```
 
-For more details, see the `format_multirun` [API documentation](https://registry.bazel.build/modules/aspect_rules_lint/latest/docs#format-defs-bzl) and
+For more details, see the `format_multirun` [API documentation](https://registry.bazel.build/modules/aspect_rules_lint/latest/docs/format/defs.bzl) and
 the `example/tools/format/BUILD.bazel` file.
 
 Finally, make it easy for developers to run on their changed files:
