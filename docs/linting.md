@@ -93,7 +93,7 @@ You may wish to use the `--keep_going` flag to continue linting even after the f
 
 ### 5. Failures during `bazel test`
 
-Call the [lint_test](https://registry.bazel.build/docs/aspect_rules_lint#lint-lint_test-bzl)
+Call the [lint_test](https://registry.bazel.build/modules/aspect_rules_lint/latest/docs#lint-lint_test-bzl)
 factory function in your `linters.bzl` file, then use the resulting rule in your BUILD files or in a wrapper macro.
 
 See the `example/test/BUILD.bazel` file in this repo for some examples.
