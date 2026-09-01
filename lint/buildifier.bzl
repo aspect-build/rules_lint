@@ -36,20 +36,19 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintBuildifier"
 
-def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, patch = None, args = []):
+def buildifier_action(ctx, tool, srcs, stdout = None, exit_code = None, patch = None, args = []):
     """Run Buildifier as an action under Bazel.
 
     Args:
         ctx: Bazel Rule or Aspect evaluation context
-        executable: label of the Buildifier program
+        tool: FilesToRunProvider for the Buildifier program
         srcs: Starlark files to lint
         stdout: output file containing stdout/stderr from Buildifier
         exit_code: optional output file containing the exit code
         patch: optional output file for a generated patch
         args: additional command-line options
     """
-    files_to_run = ctx.attr._buildifier[DefaultInfo].files_to_run
-    runfiles_env = {"RUNFILES_DIR": executable.path + ".runfiles"}
+    executable = tool.executable
 
     if patch != None:
         wrapper = ctx.actions.declare_file(ctx.label.name + ".buildifier_wrapper.sh")
@@ -74,9 +73,7 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
             args = action_args,
             files_to_diff = [src.path for src in srcs],
             patch_out = patch,
-            tools = [wrapper, files_to_run],
-            env = runfiles_env,
-            patch_cfg_env = runfiles_env,
+            tools = [wrapper, tool],
             stdout = stdout,
             exit_code = exit_code,
             mnemonic = _MNEMONIC,
@@ -99,9 +96,8 @@ def buildifier_action(ctx, executable, srcs, stdout = None, exit_code = None, pa
         ctx.actions.run_shell(
             inputs = srcs,
             outputs = outputs,
-            tools = [files_to_run],
+            tools = [tool],
             arguments = [action_args],
-            env = runfiles_env,
             command = command.format(buildifier = executable.path, stdout = stdout.path),
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{label} with Buildifier",
@@ -123,7 +119,7 @@ def _buildifier_aspect_impl(target, ctx):
 
     buildifier_action(
         ctx,
-        ctx.executable._buildifier,
+        ctx.attr._buildifier[DefaultInfo].files_to_run,
         files_to_lint,
         outputs.human.out,
         outputs.human.exit_code,
@@ -134,7 +130,7 @@ def _buildifier_aspect_impl(target, ctx):
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     buildifier_action(
         ctx,
-        ctx.executable._buildifier,
+        ctx.attr._buildifier[DefaultInfo].files_to_run,
         files_to_lint,
         raw_machine_report,
         outputs.machine.exit_code,
