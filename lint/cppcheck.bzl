@@ -37,7 +37,7 @@ def _filter_srcs(rule):
 def _prefixed(list, prefix):
     array = []
     for arg in list:
-        array.append("{} {}".format(prefix, arg))
+        array.append("{}{}".format(prefix, arg))
     return array
 
 def _get_compiler_args(compilation_context):
