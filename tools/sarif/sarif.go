@@ -82,13 +82,26 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	case "AspectRulesLintVale":
 		fm = []string{`%f:%l:%c:%m`}
 	case "AspectRulesLintCppCheck":
+		// Keyed to the --template the cppcheck aspect pins. Order matters: errorformat takes
+		// the first matching pattern, so the ignore patterns have to precede what they would
+		// otherwise fall into.
 		fm = []string{
-			`%f:%l:%c: %trror: %m`,
-			`%f:%l:%c: %tarning: %m`,
-			`%f:%l:%c: %tyle: %m`,
-			`%f:%l:%c: %terformance: %m`,
-			`%f:%l:%c: %tortability: %m`,
-			`%f:%l:%c: %tnformation: %m`,
+			// run metadata carries no location, e.g. `nofile:0:0: information: Active checkers: ...`
+			`%-Gnofile:%.%#`,
+			`%E%f:%l:%c: error: %m`,
+			// --report-type prints the coding-standard classification in place of the severity
+			`%E%f:%l:%c: Mandatory: %m`,
+			`%E%f:%l:%c: Required: %m`,
+			`%W%f:%l:%c: warning: %m`,
+			`%W%f:%l:%c: Advisory: %m`,
+			`%I%f:%l:%c: style: %m`,
+			`%I%f:%l:%c: performance: %m`,
+			`%I%f:%l:%c: portability: %m`,
+			`%I%f:%l:%c: information: %m`,
+			`%I%f:%l:%c: debug: %m`,
+			// a classification this list does not enumerate still yields a finding. Its leading
+			// token stays in the message, since errorformat cannot both match and discard it.
+			`%I%f:%l:%c: %m`,
 			`%-G%.%#`,
 		}
 	case "AspectRulesLintClangTidy":
