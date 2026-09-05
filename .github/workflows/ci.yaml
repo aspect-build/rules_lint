@@ -50,8 +50,7 @@ jobs:
           echo "Generated test matrix: $folders"
   format:
     needs: list-examples
-    # Our version of clang-format has some deps that aren't satisfiable on newer ubuntu yet
-    runs-on: ${{ matrix.folder == 'examples/cpp' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -64,9 +63,6 @@ jobs:
             common     --show_progress_rate_limit=60
             common     --show_timestamps
             build:lint --no@aspect_rules_lint//lint:color
-      # Permit this gross non-hermetic dependency
-      - if: matrix.folder == 'examples/cpp'
-        run: sudo apt-get update && sudo apt-get install -y libtinfo5
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
@@ -80,8 +76,7 @@ jobs:
   # example sources are intentionally unformatted), matching the `format` job.
   format-aspect-cli:
     needs: list-examples
-    # Our version of clang-format has some deps that aren't satisfiable on newer ubuntu yet
-    runs-on: ${{ matrix.folder == 'examples/cpp' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -91,9 +86,6 @@ jobs:
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
         with:
           aspect-api-token: ${{ secrets.ASPECT_API_TOKEN }}
-      # Permit this gross non-hermetic dependency
-      - if: matrix.folder == 'examples/cpp'
-        run: sudo apt-get update && sudo apt-get install -y libtinfo5
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
