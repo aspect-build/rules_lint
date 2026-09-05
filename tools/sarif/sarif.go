@@ -82,13 +82,26 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	case "AspectRulesLintVale":
 		fm = []string{`%f:%l:%c:%m`}
 	case "AspectRulesLintCppCheck":
+		// Keyed to the --template the cppcheck aspect pins. Order matters: errorformat takes
+		// the first matching pattern, so the ignore patterns have to precede what they would
+		// otherwise fall into.
 		fm = []string{
-			`%f:%l:%c: %trror: %m`,
-			`%f:%l:%c: %tarning: %m`,
-			`%f:%l:%c: %tyle: %m`,
-			`%f:%l:%c: %terformance: %m`,
-			`%f:%l:%c: %tortability: %m`,
-			`%f:%l:%c: %tnformation: %m`,
+			// run metadata carries no location, e.g. `nofile:0:0: information: Active checkers: ...`
+			`%-Gnofile:%.%#`,
+			`%E%f:%l:%c: error: %m`,
+			// --report-type prints the coding-standard classification in place of the severity
+			`%E%f:%l:%c: Mandatory: %m`,
+			`%E%f:%l:%c: Required: %m`,
+			`%W%f:%l:%c: warning: %m`,
+			`%W%f:%l:%c: Advisory: %m`,
+			`%I%f:%l:%c: style: %m`,
+			`%I%f:%l:%c: performance: %m`,
+			`%I%f:%l:%c: portability: %m`,
+			`%I%f:%l:%c: information: %m`,
+			`%I%f:%l:%c: debug: %m`,
+			// a classification this list does not enumerate still yields a finding. Its leading
+			// token stays in the message, since errorformat cannot both match and discard it.
+			`%I%f:%l:%c: %m`,
 			`%-G%.%#`,
 		}
 	case "AspectRulesLintClangTidy":
@@ -266,12 +279,21 @@ func rubocopJsonToSarif(label, mnemonic, report string) (sarifJsonString string,
 	return sarifJsonString, nil
 }
 
+// Matches an absolute path once separators have been normalised to slashes:
+// either a POSIX path ("/foo") or a Windows drive-letter path ("C:/foo").
+// filepath.IsAbs cannot be used here because it only recognises the host's
+// convention, which would make the result depend on the platform running the linter.
+var absolutePathRe = regexp.MustCompile(`^(?:/|[a-zA-Z]:/)`)
+
 // We expect relative paths when processing lint output and therefore need to convert any absolute paths.
 // Assumptions we make when determining the relative paths:
 //   - The linter is running on the host, so the path will have an 'execroot' segment
 //   - We only lint source files, so there is no 'bazel-bin/<platform>/bin' segment
 func determineRelativePath(path string, label string) string {
-	if !strings.HasPrefix(path, "/") || !strings.HasPrefix(label, "//") {
+	// A SARIF artifactLocation.uri is a URI, so it always uses forward slashes.
+	path = strings.ReplaceAll(path, `\`, "/")
+
+	if !absolutePathRe.MatchString(path) || !strings.HasPrefix(label, "//") {
 		return path
 	}
 

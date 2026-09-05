@@ -5,6 +5,8 @@
 # Controls:
 # - CPPCHECK__VERBOSE: If set, be verbose
 # - CPPCHECK__STDOUT_STDERR_OUTPUT_FILE: If set, write stdout and stderr to this file
+# - CPPCHECK__OUTPUT_FILE: If set, pass --output-file with this path to cppcheck; created
+# up-front since cppcheck writes nothing when it fails before checking starts
 # - CPPCHECK__EXIT_CODE_OUTPUT_FILE: If set, write the highest exit code 
 # to this file and return success
 
@@ -27,23 +29,34 @@ if [[ -n $CPPCHECK__EXIT_CODE_OUTPUT_FILE ]]; then
     fi
 fi
 
+output_file_arg=""
+if [[ -n $CPPCHECK__OUTPUT_FILE ]]; then
+    : > "$CPPCHECK__OUTPUT_FILE"
+    output_file_arg="--output-file=$CPPCHECK__OUTPUT_FILE"
+fi
+
 if [[ -n $CPPCHECK__STDOUT_STDERR_OUTPUT_FILE ]]; then
     out_file=$CPPCHECK__STDOUT_STDERR_OUTPUT_FILE
 else
     out_file=$(mktemp)
 fi
-# include stderr in output file; it contains some of the diagnostics
-command="$cppcheck $@ $file > $out_file 2>&1"
-if [[ -n $CPPCHECK__VERBOSE ]]; then
-    echo "$@"
-    echo "cwd: " `pwd`
-    echo $command
+cmd=("$cppcheck")
+if [[ -n $output_file_arg ]]; then
+    cmd+=("$output_file_arg")
 fi
-eval $command
+cmd+=("$@")
+
+if [[ -n $CPPCHECK__VERBOSE ]]; then
+    echo "cwd: " `pwd`
+    printf '%q ' "${cmd[@]}"
+    echo "> $out_file 2>&1"
+fi
+# include stderr in output file; it contains some of the diagnostics
+"${cmd[@]}" > "$out_file" 2>&1
 exit_code=$?
 if [ $exit_code -eq 1 ] && [ -s $out_file ]; then
     echo "Error: " $exit_code
-    echo "Something went wrong when running cppcheck. Maybe license file missing?"
+    echo "cppcheck failed, see its output below."
 fi
 cat $out_file
 
