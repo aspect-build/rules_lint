@@ -83,20 +83,58 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/missing_doc_arg.py"))
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(4)))
 	})
-	t.Run("processes cppcheck output -> sarif correctly", func(t *testing.T) {
+	t.Run("processes cppcheck text output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
-		sarifJsonString, _ := ToSarifJsonString("//src:hello_cc", "AspectRulesLintCppCheck", cppcheck_output)
-		sarifJson, _ := toSarifJson(sarifJsonString)
+		sarifJsonString, err := ToSarifJsonString("//src:hello_cc", "AspectRulesLintCppCheck", cppcheck_output)
+		g.Expect(err).ToNot(HaveOccurred())
 
+		sarifJson, err := toSarifJson(sarifJsonString)
+		g.Expect(err).ToNot(HaveOccurred())
 		g.Expect(len(sarifJson.Runs)).To(Equal(1))
-		g.Expect(sarifJson.Runs[0].Tool.Driver.Name).To(Equal("CppCheck"))
-		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(2))
-		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("Memory leak: ptr [memleak]"))
-		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(Equal("Variable 'x' is assigned a value that is never used. [unreadVariable]"))
-		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/hello.cc"))
-		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(10)))
-		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(15)))
+
+		run := sarifJson.Runs[0]
+		g.Expect(run.Tool.Driver.Name).To(Equal("CppCheck"))
+
+		// the progress lines and the location-less checkersReport entry contribute no results
+		g.Expect(len(run.Results)).To(Equal(6))
+		for _, result := range run.Results {
+			g.Expect(result.Message.Text).ToNot(ContainSubstring("checkersReport"))
+			g.Expect(result.Message.Text).ToNot(ContainSubstring("Checking "))
+		}
+
+		// --report-type makes cppcheck print the classification in place of the severity and the
+		// guideline in place of the id, so a Required violation outranks its style severity
+		guideline := run.Results[0]
+		g.Expect(guideline.Level).To(Equal("error"))
+		// the tag rides along in the message rather than being set as ruleId: reviewdog writes a
+		// ruleId as a bare `<id>`, which GitHub's markdown sanitizer strips when it parses as an
+		// HTML tag name
+		g.Expect(guideline.Message.Text).To(Equal("A public base class should declare a protected non-virtual destructor. [Required 15.0.1]"))
+		g.Expect(guideline.Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/base.h"))
+		g.Expect(guideline.Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(38)))
+		g.Expect(guideline.Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Column).To(Equal(int32(19)))
+
+		// a finding cppcheck did not map to a guideline keeps its severity and id
+		uninit := run.Results[1]
+		g.Expect(uninit.Level).To(Equal("warning"))
+		g.Expect(uninit.Message.Text).To(HaveSuffix(" [warning uninitMemberVar]"))
+		// sandbox-absolute paths are made workspace-relative, as for the other text-scraped linters
+		g.Expect(uninit.Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/widget.h"))
+
+		g.Expect(run.Results[2].Level).To(Equal("error"))
+
+		// a guideline with no classification keeps the plain severity, which stays a note. The
+		// severity is consumed off the front of the line, so it shows up only in the tag.
+		g.Expect(run.Results[3].Level).To(Equal("note"))
+		g.Expect(run.Results[3].Message.Text).To(Equal("Consider using std::find_if algorithm instead of a raw loop. [performance 6.9.2]"))
+
+		g.Expect(run.Results[4].Level).To(Equal("warning"))
+		g.Expect(run.Results[4].Message.Text).To(HaveSuffix(" [Advisory 15.1.4]"))
+
+		// an unenumerated classification is still reported, at note level, keeping its leading token
+		g.Expect(run.Results[5].Level).To(Equal("note"))
+		g.Expect(run.Results[5].Message.Text).To(Equal("L1: Do not use a bare pointer here. [L1 certDemo-MEM50]"))
 	})
 
 	t.Run("processes ktlint output -> sarif correctly", func(t *testing.T) {
@@ -133,6 +171,19 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal("Scalafix rewrite suggested"))
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/semantic_test.scala"))
 		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(2)))
+	})
+
+	t.Run("determineRelativePath: converts Windows path separators to URI separators", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		// These run on every platform, so they exercise the conversion on Linux CI too.
+		g.Expect(determineRelativePath(`src\file.ts`, "//src:ts")).To(Equal("src/file.ts"))
+		g.Expect(determineRelativePath(`foo\bar\baz`, "//foo/bar:baz")).To(Equal("foo/bar/baz"))
+		g.Expect(determineRelativePath(`src\file.ts`, "")).To(Equal("src/file.ts"))
+
+		// A POSIX path is already a valid URI path and is returned untouched.
+		g.Expect(determineRelativePath("src/file.ts", "//src:ts")).To(Equal("src/file.ts"))
+		g.Expect(determineRelativePath("foo/bar/baz", "//foo/bar:baz")).To(Equal("foo/bar/baz"))
 	})
 
 	t.Run("determineRelativePath: returns relative paths untouched", func(t *testing.T) {
@@ -181,6 +232,12 @@ func TestSarif(t *testing.T) {
 		g.Expect(determineRelativePath("/mnt/ephemeral/output/bazel-examples/__main__/sandbox/linux-sandbox/769/execroot/_main/speller/lookup/lookup-test.cc", "//:lookup")).To(Equal("speller/lookup/lookup-test.cc"))
 		g.Expect(determineRelativePath("/mnt/ephemeral/output/bazel-examples/__main__/sandbox/linux-sandbox/780/execroot/_main/speller/data_driven_tests/lookup-datatest.cc", "//:data_driven_tests")).To(Equal("speller/data_driven_tests/lookup-datatest.cc"))
 		g.Expect(determineRelativePath("/private/var/tmp/_bazel_jesse/93d7e699c5e2019d94351d19b00be5a3/sandbox/darwin-sandbox/249/execroot/_main/speller/announce/announce.cc", "//:announce")).To(Equal("speller/announce/announce.cc"))
+
+		// Windows path, with a drive letter instead of a leading slash
+		g.Expect(determineRelativePath("c:/private/var/tmp/_bazel_jesse/93d7e699c5e2019d94351d19b00be5a3/sandbox/darwin-sandbox/249/execroot/_main/speller/announce/announce.cc", "//speller/announce:announce")).To(Equal("speller/announce/announce.cc"))
+		g.Expect(determineRelativePath(`c:\private\var\tmp\_bazel_jesse\93d7e699c5e2019d94351d19b00be5a3\sandbox\darwin-sandbox\249\execroot\_main\speller\announce\announce.cc`, "//speller/announce:announce")).To(Equal("speller/announce/announce.cc"))
+		g.Expect(determineRelativePath("C:/users/jesse/_bazel/abc123/execroot/_main/speller/announce/announce.cc", "//:announce")).To(Equal("speller/announce/announce.cc"))
+		g.Expect(determineRelativePath(`C:\users\jesse\_bazel\abc123\execroot\_main\speller\announce\announce.cc`, "//:announce")).To(Equal("speller/announce/announce.cc"))
 	})
 
 	t.Run("determineRelativePath: returns absolute paths on regex or label error", func(t *testing.T) {
