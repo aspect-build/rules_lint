@@ -98,7 +98,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
             args = action_args,
             files_to_diff = [s.path for s in srcs],
             patch_cfg_env = env,
-            patch_cfg_suffix = "{}patch_cfg".format("." + mnemonic if mnemonic != _MNEMONIC else ""),
+            patch_cfg_suffix = "{}patch_cfg".format(mnemonic + "." if mnemonic != _MNEMONIC else ""),
             patch_out = patch,
             tools = [executable],
             stdout = stdout,
