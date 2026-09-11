@@ -16,7 +16,7 @@ local_path_override(
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
 llvm.toolchain(
     llvm_versions = {
-        "": "16.0.0",
+        "": "16.0.4",
         "darwin-x86_64": "15.0.7",
     },
 )
