@@ -3,7 +3,7 @@
 # buildifier: disable=bzl-visibility
 load("@aspect_rules_lint//lint/private:machine_report_testing.bzl", "report_test")  # @unused: used in commented-out tests
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
 load(
     "//tools/lint:linters.bzl",
     "bandit_test",
@@ -248,6 +248,19 @@ ty_test(
     name = "ty_should_resolve_generated_dep",
     srcs = ["//src:uses_generated_dependency_correctly"],
 )
+
+ty_test(
+    name = "ty_should_resolve_global_types",
+    srcs = ["//src:uses_types_correctly"],
+)
+
+py_test(
+    name = "ty_types_not_in_runfiles_test",
+    srcs = ["types_not_in_runfiles_test.py"],
+    main = "types_not_in_runfiles_test.py",
+    deps = ["//src:uses_types_correctly"],
+)
+
 
 machine_flake8_report(
     name = "machine_flake8_report",
