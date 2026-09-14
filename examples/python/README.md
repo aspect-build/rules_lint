@@ -36,6 +36,8 @@ The `src/` directory contains example Python files with intentional violations:
 - `unsupported_operator.py` - Contains type error (unsupported operator)
 - `call_non_callable.py` - Contains call to non-callable (ignored in ty.toml)
 - `uses_dependency.py` - Demonstrates transitive dependency linting
+- `uses_types_correctly.py` - Demonstrates resolving types provided via `lint_ty_aspect(types = [...])` without adding them to target runtime dependencies
+
 
 ## Configuration Files
 
