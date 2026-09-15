@@ -1,0 +1,6 @@
+"""Aspect CLI configuration."""
+
+def config(ctx: ConfigContext):
+    ctx.tasks["lint"].args.aspects = [
+        "//tools/lint:linters.bzl%sqlfluff",
+    ]

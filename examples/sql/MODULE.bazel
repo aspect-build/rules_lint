@@ -1,7 +1,9 @@
-"Bazel dependencies for SQL formatting example"
+"Bazel dependencies for SQL formatting and linting example"
 
 bazel_dep(name = "aspect_rules_lint")
 bazel_dep(name = "aspect_rules_js", version = "2.0.0")
+bazel_dep(name = "jq.bzl", version = "0.6.0")
+bazel_dep(name = "rules_python", version = "1.7.0")
 
 local_path_override(
     module_name = "aspect_rules_lint",
@@ -14,3 +16,18 @@ npm.npm_translate_lock(
     pnpm_lock = "//:pnpm-lock.yaml",
 )
 use_repo(npm, "npm")
+
+python_version = "3.11"
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    python_version = python_version,
+)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pip",
+    python_version = python_version,
+    requirements_lock = "//:requirements.txt",
+)
+use_repo(pip, "pip")
