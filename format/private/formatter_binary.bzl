@@ -23,7 +23,7 @@ TOOLS = {
     "Scala": "scalafmt",
     "Swift": "swiftformat",
     "Go": "gofmt",
-    "SQL": "prettier",
+    "SQL": "sqlfluff",
     "Shell": "shfmt",
     "Protocol Buffer": "buf",
     "C": "clang-format",
@@ -50,6 +50,20 @@ BUILTIN_TOOL_LABELS = {
     "Python": "@multitool//tools/ruff",
 }
 
+# Keep this synchronized with SQLFluff's `format` command:
+# https://github.com/sqlfluff/sqlfluff/blob/fd916db91349f86fd5f0f784849352974aace85d/src/sqlfluff/cli/commands.py#L1529-L1549
+_SQLFLUFF_FORMAT_RULES = ",".join([
+    "capitalisation",
+    "layout",
+    "ambiguous.union",
+    "convention.not_equal",
+    "convention.coalesce",
+    "convention.select_trailing_comma",
+    "convention.is_null",
+    "jinja.padding",
+    "structure.distinct",
+])
+
 # Flags to pass each tool's CLI when running in check mode
 CHECK_FLAGS = {
     "buildifier": "-mode=check",
@@ -59,6 +73,8 @@ CHECK_FLAGS = {
     "ruff": "format --check --force-exclude --diff",
     "qmlformat": "",
     "shfmt": "--diff --apply-ignore",
+    # SQLFluff format has no check mode, so lint using the same rule groups.
+    "sqlfluff": "lint --quiet --rules {}".format(_SQLFLUFF_FORMAT_RULES),
     "java-format": "--set-exit-if-changed --dry-run",
     "djlint": "--format-css --format-js --check",
     "ktfmt": "--set-exit-if-changed --dry-run",
@@ -91,6 +107,7 @@ FIX_FLAGS = {
     "qmlformat": "--inplace",
     # NB: apply-ignore added in https://github.com/mvdan/sh/issues/1037
     "shfmt": "-w --apply-ignore",
+    "sqlfluff": "format --quiet",
     "java-format": "--replace",
     "ktfmt": "",
     "gofmt": "-w",

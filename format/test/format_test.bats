@@ -11,6 +11,14 @@ setup() {
     cd "$(git rev-parse --show-toplevel)"
 }
 
+assert_sql_files() {
+    assert_output --partial "examples/sql/src/clean.dml"
+    assert_output --partial "examples/sql/src/hello.sql"
+    assert_output --partial "examples/sql/src/nested/lowercase.sql"
+    assert_output --partial "examples/sql/src/query.sql.j2"
+    assert_output --partial "examples/sql/src/templates/helpers.sql.j2"
+}
+
 # No arguments: will use git ls-files
 @test "should run prettier on javascript using git ls-files" {
     run bazel run //format/test:format_JavaScript_with_prettier
@@ -93,11 +101,18 @@ setup() {
     assert_output --partial "+ prettier --write --log-level=warn examples/other_formatters/src/hello.graphql"
 }
 
-@test "should run prettier on SQL" {
-    run bazel run //format/test:format_SQL_with_prettier
+@test "should run sqlfluff on SQL" {
+    run bazel run //format/test:format_SQL_with_sqlfluff
     assert_success
 
-    assert_output --partial "+ prettier --write --log-level=warn examples/sql/src/hello.sql"
+    assert_output --partial "+ sqlfluff format --quiet"
+    assert_sql_files
+
+    run bazel run //format/test:format_SQL_with_sqlfluff.check
+    assert_success
+
+    assert_output --partial "+ sqlfluff lint --quiet --rules capitalisation,layout,ambiguous.union,convention.not_equal,convention.coalesce,convention.select_trailing_comma,convention.is_null,jinja.padding,structure.distinct"
+    assert_sql_files
 }
 
 @test "should run ruff on Python" {

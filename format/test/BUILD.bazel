@@ -62,7 +62,7 @@ format_multirun(
     rust = ":mock_rustfmt.sh",
     scala = ":mock_scalafmt.sh",
     shell = ":mock_shfmt.sh",
-    sql = ":mock_prettier.sh",
+    sql = ":mock_sqlfluff.sh",
     starlark = ":mock_buildifier.sh",
     swift = ":mock_swiftformat.sh",
     # TODO: this attribute should be renamed to hcl

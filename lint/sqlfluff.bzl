@@ -1,0 +1,229 @@
+"""Configures [SQLFluff](https://sqlfluff.com/) to run as a Bazel aspect.
+
+Typical usage:
+
+Create an executable target for SQLFluff, for example in `tools/lint/BUILD.bazel`:
+
+```starlark
+load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
+
+py_console_script_binary(
+    name = "sqlfluff",
+    pkg = "@pip//sqlfluff:pkg",
+)
+```
+
+Then declare the linter aspect, typically in `tools/lint/linters.bzl`:
+
+```starlark
+load("@aspect_rules_lint//lint:sqlfluff.bzl", "lint_sqlfluff_aspect")
+
+sqlfluff = lint_sqlfluff_aspect(
+    binary = Label("//tools/lint:sqlfluff"),
+    configs = [
+        Label("//:.sqlfluff"),
+        Label("//path/to/package:.sqlfluff"),
+    ],
+)
+```
+
+SQLFluff 4.3.0 or newer is required, and the configuration must select a SQL dialect. Finally,
+opt SQL sources into linting by tagging a `filegroup` with `sql` or
+`lint-with-sqlfluff`, or by providing a custom `rule_kinds` list that matches your SQL rules.
+Files in a visited target's `data` attribute are available to SQLFluff templaters without being
+linted themselves. Prefer target-local `data` for project-specific macros; use the aspect's `data`
+only for templater files shared by every linted target.
+
+Bazel target membership selects candidate files, while SQLFluff's `sql_file_exts` configuration
+determines which candidates are SQL. `.sqlfluffignore` files are not consulted; use the standard
+`no-lint` tag or exclude files from the target instead.
+"""
+
+load("@jq.bzl//jq:jq.bzl", "jq_lib")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
+load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
+
+_MNEMONIC = "AspectRulesLintSQLFluff"
+_JQ_TOOLCHAIN = Label("@jq.bzl//jq/toolchain:type")
+_SARIF_FILTER = "del(.runs[].invocations[]?.startTimeUtc, .runs[].invocations[]?.endTimeUtc)"
+
+def sqlfluff_action(
+        ctx,
+        executable,
+        srcs,
+        configs,
+        stdout,
+        exit_code = None,
+        data = [],
+        format = None,
+        args = [],
+        patch = None,
+        use_color = False):
+    """Run SQLFluff as an action under Bazel.
+
+    SQLFluff selects the configuration for each source file using its standard directory hierarchy.
+    All configuration files are action inputs, so changing any config invalidates every SQLFluff action.
+
+    Args:
+        ctx: Bazel Rule or Aspect evaluation context
+        executable: File representing the SQLFluff program
+        srcs: SQL files to lint
+        configs: SQLFluff configuration files available for native per-file discovery
+        stdout: output file for SQLFluff stdout
+        exit_code: optional output file for exit code. If absent, non-zero exits fail the build.
+        data: additional files required by the configuration or templater
+        format: optional output format passed via `--format`
+        args: additional command-line arguments
+        patch: optional patch output. When present, runs `sqlfluff fix` and records its edits.
+        use_color: whether to emit color in human-readable output
+    """
+    inputs = depset(list(srcs) + data + configs).to_list()
+
+    action_args = ctx.actions.args()
+    action_args.add("fix" if patch != None else "lint")
+    action_args.add("--quiet")
+    action_args.add("--disregard-sqlfluffignores")
+    action_args.add("--color" if use_color else "--nocolor")
+    action_args.add_all(args)
+    if format:
+        action_args.add("--format", format)
+    action_args.add_all(srcs)
+
+    if patch != None:
+        run_patcher(
+            ctx,
+            ctx.executable,
+            inputs = inputs,
+            args = action_args,
+            files_to_diff = [s.path for s in srcs],
+            patch_out = patch,
+            tools = [executable],
+            stdout = stdout,
+            exit_code = exit_code,
+            mnemonic = _MNEMONIC,
+            progress_message = "Fixing %{label} with SQLFluff",
+        )
+        return
+
+    outputs = [stdout]
+    if exit_code:
+        command = "{sqlfluff} \"$@\" >{stdout}; echo $? >{exit_code}".format(
+            sqlfluff = executable.path,
+            stdout = stdout.path,
+            exit_code = exit_code.path,
+        )
+        outputs.append(exit_code)
+    else:
+        command = "{sqlfluff} \"$@\" >{stdout}".format(
+            sqlfluff = executable.path,
+            stdout = stdout.path,
+        )
+
+    ctx.actions.run_shell(
+        inputs = inputs,
+        outputs = outputs,
+        arguments = [action_args],
+        tools = [executable],
+        command = command,
+        mnemonic = _MNEMONIC,
+        progress_message = "Linting %{label} with SQLFluff",
+    )
+
+# buildifier: disable=function-docstring
+def _sqlfluff_aspect_impl(target, ctx):
+    if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
+        return []
+
+    files_to_lint = filter_srcs(ctx.rule)
+    target_data = ctx.rule.files.data if hasattr(ctx.rule.attr, "data") else []
+    action_data = depset(ctx.files._data + target_data).to_list()
+    if ctx.attr._options[LintOptionsInfo].fix:
+        outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
+    else:
+        outputs, info = output_files(_MNEMONIC, target, ctx)
+
+    if len(files_to_lint) == 0:
+        noop_lint_action(ctx, outputs)
+        return [info]
+
+    sqlfluff_action(
+        ctx,
+        ctx.executable._sqlfluff,
+        files_to_lint,
+        ctx.files._config_files,
+        outputs.human.out,
+        outputs.human.exit_code,
+        data = action_data,
+        args = ctx.attr._args,
+        patch = getattr(outputs, "patch", None),
+        use_color = ctx.attr._options[LintOptionsInfo].color,
+    )
+    raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
+    sqlfluff_action(
+        ctx,
+        ctx.executable._sqlfluff,
+        files_to_lint,
+        ctx.files._config_files,
+        raw_machine_report,
+        outputs.machine.exit_code,
+        data = action_data,
+        format = "sarif",
+        args = ctx.attr._args,
+    )
+    jq_lib.jq_action(ctx, [raw_machine_report], _SARIF_FILTER, outputs.machine.out)
+    return [info]
+
+def lint_sqlfluff_aspect(
+        binary,
+        configs,
+        data = [],
+        rule_kinds = ["sql_library"],
+        filegroup_tags = ["sql", "lint-with-sqlfluff"],
+        args = []):
+    """Create a SQLFluff aspect.
+
+    Args:
+        binary: a SQLFluff 4.3.0 or newer executable
+        configs: SQLFluff configuration files available for native per-file discovery. Each
+            linted file must resolve to a configuration that selects a SQL dialect.
+        data: files required by the configuration or templater for every visited target. Prefer a
+            target's `data` attribute for target-specific templater files.
+        rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
+        filegroup_tags: filegroups tagged with these tags will also be visited by the aspect
+        args: additional command-line arguments passed to SQLFluff
+    """
+    if type(configs) == "string":
+        configs = [configs]
+
+    return aspect(
+        implementation = _sqlfluff_aspect_impl,
+        attrs = patcher_attrs | {
+            "_options": attr.label(
+                default = "//lint:options",
+                providers = [LintOptionsInfo],
+            ),
+            "_sqlfluff": attr.label(
+                default = binary,
+                executable = True,
+                cfg = "exec",
+            ),
+            "_config_files": attr.label_list(
+                default = configs,
+                allow_files = True,
+            ),
+            "_data": attr.label_list(
+                default = data,
+                allow_files = True,
+            ),
+            "_rule_kinds": attr.string_list(
+                default = rule_kinds,
+            ),
+            "_filegroup_tags": attr.string_list(
+                default = filegroup_tags,
+            ),
+            "_args": attr.string_list(
+                default = args,
+            ),
+        },
+        toolchains = [_JQ_TOOLCHAIN],
+    )

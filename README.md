@@ -151,7 +151,7 @@ Linters which are not language-specific:
 | QML                | [qmlformat]               | [qmllint]                                               |
 | Ruby               |                           | [RuboCop], [StandardRB][standard]                       |
 | Rust               | [rustfmt]                 | [clippy]                                                |
-| SQL                | [prettier-plugin-sql]     |                                                         |
+| SQL                | [SQLFluff]                | [SQLFluff]                                              |
 | Scala              | [scalafmt]                | [scalafix]                                              |
 | Shell              | [shfmt]                   | [shellcheck]                                            |
 | Starlark           | [Buildifier]              | [Buildifier]                                            |
@@ -185,7 +185,7 @@ Linters which are not language-specific:
 [buildifier]: https://github.com/keith/buildifier-prebuilt
 [djlint]: https://djlint.com/
 [pkl]: https://pkl-lang.org/index.html
-[prettier-plugin-sql]: https://github.com/un-ts/prettier
+[sqlfluff]: https://sqlfluff.com/
 [prettier-plugin-gherkin]: https://github.com/mapado/prettier-plugin-gherkin
 [prettier/plugin-xml]: https://github.com/prettier/plugin-xml
 [gofmt]: https://pkg.go.dev/cmd/gofmt

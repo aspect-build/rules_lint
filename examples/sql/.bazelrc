@@ -1,0 +1,4 @@
+build:lint --aspects=//tools/lint:linters.bzl%sqlfluff
+
+# Override the preset's `--lockfile_mode=error` on CI since MODULE.bazel.lock is ignored.
+common:ci --lockfile_mode=off
