@@ -46,13 +46,6 @@ def config(ctx: ConfigContext):
             "--config=ci",
         ])
 
-    # Endpoints and metadata come from the user bazelrc that
-    # .github/actions/aspect-cloud writes, which reaches every workspace. Only
-    # the exec log is workspace-bound: its path is %workspace%-relative and only
-    # the root workspace has .aspect/generated.
-    if is_ci and ctx.std.env.var("ASPECT_HAS_API_TOKEN") == "true":
-        ctx.traits[BazelTrait].extra_flags.append("--config=aspect-execlog")
-
     # Enable artifact uploads for testlogs, profile, and BEP.
     # upload_test_logs="failed" — only the logs from failing tests are useful.
     ctx.features[ArtifactUpload].args.upload_test_logs = "failed"
