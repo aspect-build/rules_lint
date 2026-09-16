@@ -1,5 +1,6 @@
 """Aspect CLI configuration."""
 
+load("./ci.axl", "report_to_aspect_cloud")
 load("@aspect//feature/artifacts.axl", "ArtifactUpload")
 load("@aspect//feature/github_lint_comments.axl", "GithubLintComments")
 load("@aspect//feature/github_status_checks.axl", "GithubStatusChecks")
@@ -45,6 +46,8 @@ def config(ctx: ConfigContext):
         ctx.traits[BazelTrait].extra_flags.extend([
             "--config=ci",
         ])
+
+    report_to_aspect_cloud(ctx, exec_log = True)
 
     # Enable artifact uploads for testlogs, profile, and BEP.
     # upload_test_logs="failed" — only the logs from failing tests are useful.

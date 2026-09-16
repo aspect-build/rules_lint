@@ -1,6 +1,10 @@
 """Aspect CLI configuration."""
 
+load("./ci.axl", "report_to_aspect_cloud")
+
 def config(ctx: ConfigContext):
+    report_to_aspect_cloud(ctx)
+
     # Register the linter aspect so `aspect lint -- //...` runs it
     # natively (no Bazel `--config=lint`).
     ctx.tasks["lint"].args.aspects = [

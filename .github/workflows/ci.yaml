@@ -14,19 +14,11 @@ concurrency:
 permissions:
   id-token: write
 
-# What the aspect-cli jobs wire from Aspect Cloud. `none` on fork PRs: they get
-# no secret, so `aspect auth login` never ran and there is no deployment to draw
-# endpoints from. Never the secret's value.
-#
-# --remote's BES half only reaches the sinks in `aspect build`/`test`; lint,
-# format, run, gazelle and delivery call collect_bes_sinks without the trait's
-# bes_backends, so their stream is silently dropped (CLI 2026.38.10, still on
-# main). Naming the backend explicitly goes through the path that does attach
-# the login JWT. Deduped against --remote, so the tasks that already stream keep
-# one sink; drop it once the CLI wires them.
+# Whether the secret exists, never its value. Read by .aspect/ci.axl, which
+# adds Aspect Cloud's BES to `aspect <task>` alone — vanilla `bazel` never runs
+# config.axl, so it stays a cache client and reports nothing.
 env:
-  ASPECT_REMOTE: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && 'cache,bes' || 'none' }}
-  ASPECT_BES: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--bes-backend=grpcs://bes.aspect.build' || '' }}
+  ASPECT_HAS_API_TOKEN: ${{ secrets.ASPECT_OSS_API_TOKEN != '' }}
 
 jobs:
   list-examples:
@@ -79,20 +71,19 @@ jobs:
             common     --show_timestamps
             build:lint --no@aspect_rules_lint//lint:color
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
-        with: &aspect-cache
+        with: &aspect-cloud
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
           # Superseded by the remote cache; setup-aspect defaults them on.
           bazelisk-cache: 'false'
           disk-cache: 'false'
           repository-cache: 'false'
-          # Vanilla bazel has no --remote, and ~/.bazelrc is the only route into
-          # the examples/* trees — each is its own workspace the repo's .bazelrc
-          # never reaches. The try-imports only declare configs and are inert;
-          # activation is gated because a fork PR gets no secret, and an
-          # unauthenticated credential helper is fatal to the build.
+          # ~/.bazelrc reaches every workspace on the runner — each examples/*
+          # tree is its own workspace the repo's .bazelrc never applies to. The
+          # try-import only declares the configs and is inert; activation is
+          # gated because a fork PR gets no secret, and an unauthenticated
+          # credential helper is fatal to the build.
           bazelrc: |
             try-import ${{ github.workspace }}/.aspect/bazelrc
-            try-import ${{ github.workspace }}/.aspect/ci.bazelrc
             ${{ secrets.ASPECT_OSS_API_TOKEN != '' && 'common --config=aspect-cloud-cache' || '' }}
       # Permit this gross non-hermetic dependency
       - if: matrix.folder == 'examples/cpp'
@@ -119,22 +110,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
-        with: &aspect-login
-          aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
-          # Superseded by the remote cache; setup-aspect defaults them on.
-          bazelisk-cache: 'false'
-          disk-cache: 'false'
-          repository-cache: 'false'
-          # No bazelrc: --remote wires the cache, BES, credentials and the
-          # --build_metadata the Web UI reads from the deployment the login
-          # above recorded.
+        with: *aspect-cloud
       # Permit this gross non-hermetic dependency
       - if: matrix.folder == 'examples/cpp'
         run: sudo apt-get update && sudo apt-get install -y libtinfo5
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
-      - run: aspect format --scope=all --severity=warn --remote=$ASPECT_REMOTE $ASPECT_BES
+      - run: aspect format --scope=all --severity=warn
         working-directory: ${{ matrix.folder }}
   integration-test:
     needs: list-examples
@@ -154,7 +137,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
-        with: *aspect-cache
+        with: *aspect-cloud
       - name: Setup bats
         uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1
         with:
@@ -185,7 +168,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
         with: *bazelrc
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
-        with: *aspect-cache
+        with: *aspect-cloud
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
@@ -217,7 +200,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
-        with: *aspect-login
+        with: *aspect-cloud
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
@@ -228,8 +211,8 @@ jobs:
           folder: ${{ matrix.folder }}
         run: |
           key="lint-${folder//\//-}"
-          aspect lint --task:name="$key" --remote="$ASPECT_REMOTE" $ASPECT_BES --strategy=soft -- //...
-          aspect lint --task:name="$key-fix" --remote="$ASPECT_REMOTE" $ASPECT_BES --fix --strategy=soft -- //...
+          aspect lint --task-key="$key" --strategy=soft -- //...
+          aspect lint --task-key="$key-fix" --fix --strategy=soft -- //...
   # Build & test the root workspace through `aspect test` on Linux across Bazel
   # versions. Complements `test` below, which covers macOS via vanilla Bazel.
   aspect-test:
@@ -249,10 +232,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
-        with: *aspect-login
+        with: *aspect-cloud
       - name: Test
         working-directory: ${{ matrix.workspace.path }}
-        run: aspect test --task:name=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} --remote=$ASPECT_REMOTE $ASPECT_BES ${{ matrix.bazel.flags }} -- //...
+        run: aspect test --task-key=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} ${{ matrix.bazel.flags }} -- //...
   test:
     strategy:
       matrix:
@@ -274,7 +257,7 @@ jobs:
             common --announce_rc
             common --color=yes
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
-        with: *aspect-cache
+        with: *aspect-cloud
       - name: Test
         # Reduce time on macos runners by testing one example
         working-directory: examples/java
