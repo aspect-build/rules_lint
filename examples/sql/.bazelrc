@@ -2,5 +2,3 @@
 # `aspect setup bazelrc`; regenerate there, not here. %workspace% is this
 # example, so `../..` reaches the root the examples share.
 try-import %workspace%/../../.aspect/bazelrc
-
-build:lint --aspects=//tools/lint:linters.bzl%taplo
