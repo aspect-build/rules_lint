@@ -26,6 +26,11 @@ permissions:
 env:
   ASPECT_WORKSPACE: ${{ github.workspace }}
   REMOTE_FLAG: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--remote' || '' }}
+  # The vanilla-bazel jobs' half: `--config=aspect-cloud` comes from the
+  # committed .aspect/bazelrc, and the status command attributes the invocation
+  # in the Web UI (the rc holds constants, and this data is per-invocation).
+  # Swap the script for `aspect setup workspace-data` when aspect-cli#1465 ships.
+  BAZEL_ASPECT_FLAGS: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && format('--config=aspect-cloud --workspace_status_command={0}/.github/workflows/workspace_status.sh', github.workspace) || '' }}
 
 jobs:
   list-examples:
@@ -77,13 +82,18 @@ jobs:
             common     --show_progress_rate_limit=60
             common     --show_timestamps
             build:lint --no@aspect_rules_lint//lint:color
+      # `aspect` must be on PATH: the rc's aspect-cloud section authenticates
+      # through the `aspect get` credential helper.
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
       # Permit this gross non-hermetic dependency
       - if: matrix.folder == 'examples/cpp'
         run: sudo apt-get update && sudo apt-get install -y libtinfo5
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
-      - run: bazel run //tools/format
+      - run: bazel run $BAZEL_ASPECT_FLAGS //tools/format
         working-directory: ${{ matrix.folder }}
   # Same examples as `format`, exercised through `aspect format` — the
   # better-DX entry point users actually run. `aspect format` defaults to the
@@ -163,6 +173,9 @@ jobs:
       - uses: actions/checkout@v6
       - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
         with: *bazelrc
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
@@ -170,9 +183,9 @@ jobs:
       - name: Lint
         working-directory: ${{ matrix.folder }}
         run: |
-          bazel build --config=lint --output_groups=rules_lint_human //...
+          bazel build $BAZEL_ASPECT_FLAGS --config=lint --output_groups=rules_lint_human //...
 
-          bazel build --config=lint \
+          bazel build $BAZEL_ASPECT_FLAGS --config=lint \
             --output_groups=rules_lint_patch \
             --@aspect_rules_lint//lint:fix \
             //...
@@ -253,9 +266,12 @@ jobs:
           bazelrc: |
             common --announce_rc
             common --color=yes
+      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
       - name: Test
         # Reduce time on macos runners by testing one example
         working-directory: examples/java
         env:
           USE_BAZEL_VERSION: ${{ matrix.version }}
-        run: bazel test //...
+        run: bazel test $BAZEL_ASPECT_FLAGS //...

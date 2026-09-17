@@ -1,3 +1,6 @@
+# Aspect's rc for vanilla `bazel`, maintained by `aspect setup bazelrc`.
+try-import %workspace%/.aspect/bazelrc
+
 import %workspace%/../java/tools/java21.bazelrc
 
 common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
