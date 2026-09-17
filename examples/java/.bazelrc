@@ -1,5 +1,7 @@
-# Aspect's rc for vanilla `bazel`, maintained by `aspect setup bazelrc`.
-try-import %workspace%/.aspect/bazelrc
+# Aspect's rc for vanilla `bazel`. Generated at the repository root by
+# `aspect setup bazelrc`; regenerate there, not here. %workspace% is this
+# example, so `../..` reaches the root the examples share.
+try-import %workspace%/../../.aspect/bazelrc
 
 import %workspace%/tools/java21.bazelrc
 

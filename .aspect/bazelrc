@@ -24,14 +24,10 @@ common:aspect-bes --experimental_profile_include_primary_output
 common:aspect-bes --legacy_important_outputs
 common:aspect-bes --remote_build_event_upload=all
 
-# The compact execution log, uploaded with the build diagnostics for per-action data in the Web UI. Slow on a thin link: remove this group and the --config lines naming it to skip it.
-common:aspect-exec-log --execution_log_compact_file=%workspace%/.aspect/generated/exec.log.zstd
-
 # Aspect Cloud: remote cache + BES; auth via ASPECT_API_TOKEN or `aspect auth login`.
 common:aspect-cloud --config=aspect-common
 common:aspect-cloud --config=aspect-cache
 common:aspect-cloud --config=aspect-bes
-common:aspect-cloud --config=aspect-exec-log
 common:aspect-cloud --remote_cache=grpcs://cache.aspect.build
 common:aspect-cloud --bes_backend=grpcs://bes.aspect.build
 common:aspect-cloud --bes_results_url=https://app.aspect.build/i/
