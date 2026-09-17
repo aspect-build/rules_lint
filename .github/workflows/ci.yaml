@@ -129,7 +129,11 @@ jobs:
           - folder: examples/shell
     steps:
       - uses: actions/checkout@v6
+      # The lint_test.bats in each example shell out to `aspect lint`, so this
+      # job needs the token too — they pick up $REMOTE_FLAG from the job env.
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+        with:
+          aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
       - name: Setup bats
         uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1
         with:
