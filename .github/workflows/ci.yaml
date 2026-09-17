@@ -151,9 +151,7 @@ jobs:
 
       - name: "Integration test"
         working-directory: ${{ matrix.folder }}
-        # --show-output-of-passing-tests surfaces the `aspect lint` output that
-        # `run` would otherwise capture, so the remote cache wiring is auditable.
-        run: bats --show-output-of-passing-tests ./test
+        run: bats ./test
   lint:
     needs: list-examples
     runs-on: ubuntu-24.04
