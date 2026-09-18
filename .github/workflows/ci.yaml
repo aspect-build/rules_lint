@@ -26,11 +26,7 @@ permissions:
 env:
   ASPECT_WORKSPACE: ${{ github.workspace }}
   REMOTE_FLAG: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--remote' || '' }}
-  # The vanilla-bazel jobs' half: `--config=aspect-cloud` comes from the
-  # committed .aspect/bazelrc, and the status command attributes the invocation
-  # in the Web UI (the rc holds constants, and this data is per-invocation).
-  # Swap the script for `aspect setup workspace-data` when aspect-cli#1465 ships.
-  BAZEL_ASPECT_FLAGS: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && format('--config=aspect-cloud --workspace_status_command={0}/.github/workflows/workspace_status.sh', github.workspace) || '' }}
+  BAZEL_ASPECT_FLAGS: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--config=aspect-cloud' || '' }}
 
 jobs:
   list-examples:
