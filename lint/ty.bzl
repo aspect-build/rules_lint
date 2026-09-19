@@ -169,6 +169,20 @@ def _resolve_import_path(import_path, workspace_name, bin_dir_path):
     external_rel = "external/" + import_path
     return [external_rel, bin_dir_path + "/" + external_rel]
 
+def _collect_py_info(dep, ctx, transitive_sources, import_paths):
+    if PyInfo in dep:
+        transitive_sources.append(dep[PyInfo].transitive_sources)
+        transitive_sources.append(dep[PyInfo].transitive_pyi_files)
+        imports = dep[PyInfo].imports.to_list()
+        if imports:
+            for import_path in imports:
+                resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
+                for e in resolved:
+                    import_paths[e] = True
+        elif dep.label.workspace_root:
+            import_paths[dep.label.workspace_root] = True
+            import_paths[ctx.bin_dir.path + "/" + dep.label.workspace_root] = True
+
 # buildifier: disable=function-docstring
 def _ty_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
@@ -188,35 +202,18 @@ def _ty_aspect_impl(target, ctx):
     # Collect from deps attribute using PyInfo
     if hasattr(ctx.rule.attr, "deps"):
         for dep in ctx.rule.attr.deps:
-            if PyInfo in dep:
-                transitive_sources.append(dep[PyInfo].transitive_sources)
-                transitive_sources.append(dep[PyInfo].transitive_pyi_files)
-                imports = dep[PyInfo].imports.to_list()
-                if imports:
-                    for import_path in imports:
-                        resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
-                        for e in resolved:
-                            import_paths[e] = True
-                elif dep.label.workspace_root:
-                    import_paths[dep.label.workspace_root] = True
-                    import_paths[ctx.bin_dir.path + "/" + dep.label.workspace_root] = True
+            _collect_py_info(dep, ctx, transitive_sources, import_paths)
 
     # When srcs contain labels to other targets (e.g., genrules that produce .py files),
     # we need to collect their transitive sources for proper type resolution
     if hasattr(ctx.rule.attr, "srcs"):
         for src in ctx.rule.attr.srcs:
-            if PyInfo in src:
-                transitive_sources.append(src[PyInfo].transitive_sources)
-                transitive_sources.append(src[PyInfo].transitive_pyi_files)
-                imports = src[PyInfo].imports.to_list()
-                if imports:
-                    for import_path in imports:
-                        resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
-                        for e in resolved:
-                            import_paths[e] = True
-                elif src.label.workspace_root:
-                    import_paths[src.label.workspace_root] = True
-                    import_paths[ctx.bin_dir.path + "/" + src.label.workspace_root] = True
+            _collect_py_info(src, ctx, transitive_sources, import_paths)
+
+    # Include global type stubs for type checking without polluting runtime runfiles of the targets
+    if hasattr(ctx.attr, "_types") and ctx.attr._types:
+        for dep in ctx.attr._types:
+            _collect_py_info(dep, ctx, transitive_sources, import_paths)
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)
@@ -241,7 +238,7 @@ def _ty_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ty"], args = []):
+def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ty"], args = [], types = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -250,6 +247,7 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
         args: additional command-line options to pass to ty
+        types: optional list of targets (providing PyInfo) that contain type stubs/definitions to include during type checking
     """
 
     return aspect(
@@ -280,6 +278,10 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
             ),
             "_args": attr.string_list(
                 default = args,
+            ),
+            "_types": attr.label_list(
+                default = types,
+                providers = [PyInfo],
             ),
         },
         toolchains = [OPTIONAL_SARIF_PARSER_TOOLCHAIN],
