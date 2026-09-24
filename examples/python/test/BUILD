@@ -175,6 +175,11 @@ ty_test(
 )
 
 ty_test(
+    name = "ty_should_resolve_pyi_deps",
+    srcs = ["//src:uses_dependency_via_pyi_deps"],
+)
+
+ty_test(
     name = "ty_should_fail_unsupported_operator",
     srcs = ["//src:unsupported_operator"],
     expected_exit_code = 1,
