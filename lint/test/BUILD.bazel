@@ -1,8 +1,26 @@
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load(":lint_test_no_report_test.bzl", "no_report_test", "skipped_lint_test")
 
 sh_test(
     name = "clang_tidy_wrapper_test",
     srcs = ["clang_tidy_wrapper_test.sh"],
     data = ["//lint:clang_tidy_wrapper"],
     deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+filegroup(
+    name = "unlinted",
+    srcs = ["clang_tidy_wrapper_test.sh"],
+)
+
+# Fails analysis by design, so only the analysis test below may reach it.
+skipped_lint_test(
+    name = "lint_test_without_report",
+    srcs = [":unlinted"],
+    tags = ["manual"],
+)
+
+no_report_test(
+    name = "lint_test_no_report_test",
+    target_under_test = ":lint_test_without_report",
 )

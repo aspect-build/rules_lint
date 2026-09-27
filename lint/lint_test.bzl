@@ -57,11 +57,25 @@ def _write_assert(ctx, files):
         return ["assert_output_empty '{}'".format(to_rlocation_path(ctx, o)) for o in outputs]
     fail("missing output file among", files)
 
+def _reports(ctx, src):
+    "The report files the aspect produced for one of the srcs"
+    if OutputGroupInfo not in src or not hasattr(src[OutputGroupInfo], "rules_lint_human"):
+        fail("""\
+{test}: the lint aspect produced no report for {src}, so there is nothing to assert on.
+The aspect did not run on that target. Either its rule kind is not one the aspect visits, \
+it is tagged "no-lint", or it does not advertise a provider the aspect requires \
+(clippy: the target is built by a different rules_rust than the lint module loads).""".format(
+            test = ctx.label,
+            src = src.label,
+        ))
+    return src[OutputGroupInfo].rules_lint_human
+
 def _test_impl(ctx):
     bin = ctx.actions.declare_file("{}.lint_test.sh".format(ctx.label.name))
-    asserts = [a for src in ctx.attr.srcs for a in _write_assert(ctx, src[OutputGroupInfo].rules_lint_human)]
+    reports = [_reports(ctx, src) for src in ctx.attr.srcs]
+    asserts = [a for files in reports for a in _write_assert(ctx, files)]
 
-    runfiles = ctx.runfiles(transitive_files = depset(transitive = [src[OutputGroupInfo].rules_lint_human for src in ctx.attr.srcs]))
+    runfiles = ctx.runfiles(transitive_files = depset(transitive = reports))
     runfiles = runfiles.merge(ctx.attr._runfiles_lib[DefaultInfo].default_runfiles)
 
     ctx.actions.expand_template(

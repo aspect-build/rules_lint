@@ -20,6 +20,8 @@ clippy = lint_clippy_aspect(
 ```
 
 Now your targets will be linted with clippy.
+Only targets built with the `rules_rust` that `rules_rs` provides are linted. The aspect skips any other Rust target,
+and a `lint_test` on one fails rather than passing with nothing checked.
 If you wish a target to be excluded from linting, you can give them the `noclippy` tag.
 If you wish a clippy lint exception to fail the build, please enable the `--@aspect_rules_lint//lint:fail_on_violation` flag.
 
@@ -31,7 +33,7 @@ Please watch issue https://github.com/aspect-build/rules_lint/issues/385 for upd
 
 load("@aspect_rules_lint//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 load("@aspect_rules_lint//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
-load("@rules_rust//rust:defs.bzl", "rust_clippy_action")
+load("@rules_rust//rust:defs.bzl", "rust_clippy_action", "rust_common")
 
 _MNEMONIC = "AspectRulesLintClippy"
 
@@ -307,6 +309,14 @@ References:
         attr_aspects = ["deps"],
         implementation = _clippy_aspect_impl,
         attrs = patcher_attrs | attrs,
+        # A target not built by rules_rs carries a CrateInfo this module cannot read, so skip
+        # it rather than report it clean. Either provider qualifies: static and shared
+        # libraries advertise only the test one.
+        # https://github.com/hermeticbuild/rules_rust/blob/d11dcf615d6eddeb48d524d464563ca06c3b2a98/rust/private/rust.bzl#L1278-L1281
+        required_providers = [
+            [rust_common.crate_info],
+            [rust_common.test_crate_info],
+        ],
         toolchains =
             [
                 Label("@rules_rust//rust:toolchain_type"),
