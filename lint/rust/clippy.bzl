@@ -33,7 +33,8 @@ Please watch issue https://github.com/aspect-build/rules_lint/issues/385 for upd
 
 load("@aspect_rules_lint//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "patch_and_output_files", "should_visit")
 load("@aspect_rules_lint//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
-load("@rules_rust//rust:defs.bzl", "rust_clippy_action", "rust_common")
+load("@rules_rust//rust:defs.bzl", "rust_clippy_action")
+load("@rules_rust//rust:rust_common.bzl", "CrateInfo", "TestCrateInfo")
 
 _MNEMONIC = "AspectRulesLintClippy"
 
@@ -314,8 +315,8 @@ References:
         # libraries advertise only the test one.
         # https://github.com/hermeticbuild/rules_rust/blob/d11dcf615d6eddeb48d524d464563ca06c3b2a98/rust/private/rust.bzl#L1278-L1281
         required_providers = [
-            [rust_common.crate_info],
-            [rust_common.test_crate_info],
+            [CrateInfo],
+            [TestCrateInfo],
         ],
         toolchains =
             [
