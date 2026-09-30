@@ -398,6 +398,11 @@ def _clang_tidy_aspect_impl(target, ctx):
     else:
         outputs, info = output_files(_MNEMONIC, target, ctx, files_to_lint = files_to_lint)
 
+    # clang-tidy only colors a terminal, and its output is captured to a file here.
+    # The machine report stays plain because it feeds the SARIF parser. User args
+    # come last so they can override this, e.g. with --use-color=false.
+    human_args = (["--use-color"] if ctx.attr._options[LintOptionsInfo].color else []) + ctx.attr._args
+
     for output, file in zip(outputs, files_to_lint):
         clang_tidy_action(
             ctx,
@@ -407,7 +412,7 @@ def _clang_tidy_aspect_impl(target, ctx):
             output.human.out,
             output.human.exit_code,
             patch = getattr(output, "patch", None),
-            args = ctx.attr._args,
+            args = human_args,
         )
 
         # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
