@@ -36,7 +36,11 @@ mock_clang_tidy="$tmp_dir/mock-clang-tidy"
 cat > "$mock_clang_tidy" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$@" > "$MOCK_ARGS_FILE"
-echo "mock clang-tidy output"
+if [[ -n "${MOCK_OUTPUT_FILE:-}" ]]; then
+    cat "$MOCK_OUTPUT_FILE"
+else
+    echo "mock clang-tidy output"
+fi
 exit "${MOCK_EXIT_CODE:-0}"
 EOF
 chmod +x "$mock_clang_tidy"
@@ -155,6 +159,46 @@ for code in 126 127; do
         pass "clang-tidy that cannot run ($code) fails the action instead of reporting clean"
     fi
 done
+
+#-------------------------------------------------------------------
+# Test 5: with --use-color, summary lines are still dropped even when they
+# carry SGR escapes, and diagnostics are kept.
+
+esc=$'\033'
+printf '%s\n' \
+    "1 warning generated." \
+    "${esc}[1mfoo.cpp:1:5: ${esc}[0m${esc}[0;1;31merror: ${esc}[0m${esc}[1muse a trailing return type [modernize-use-trailing-return-type,-warnings-as-errors]${esc}[0m" \
+    "${esc}[0m1 warning treated as error" \
+    > "$tmp_dir/colored_violation.txt"
+printf '%s\n' \
+    "1 warning generated." \
+    "Suppressed 1 warnings (1 in non-user code)." \
+    "Use -header-filter=.* or leave it as default to display errors from all non-system headers." \
+    > "$tmp_dir/colored_clean.txt"
+
+export MOCK_ARGS_FILE="$tmp_dir/args5.txt"
+export CLANG_TIDY__EXIT_CODE_OUTPUT_FILE="$tmp_dir/exit_code5.txt"
+export CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE="$tmp_dir/output5.txt"
+MOCK_OUTPUT_FILE="$tmp_dir/colored_violation.txt" MOCK_EXIT_CODE=1 \
+    "$wrapper" "$mock_clang_tidy" --use-color foo.cpp > "$tmp_dir/stdout5.txt" 2>&1 || true
+if grep -q "treated as error" "$tmp_dir/output5.txt"; then
+    fail "colored summary line leaked into the report"
+elif ! grep -q "modernize-use-trailing-return-type" "$tmp_dir/output5.txt"; then
+    fail "colored diagnostic was dropped from the report"
+else
+    pass "colored summary lines are filtered and diagnostics kept"
+fi
+
+export CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE="$tmp_dir/output5_clean.txt"
+MOCK_OUTPUT_FILE="$tmp_dir/colored_clean.txt" MOCK_EXIT_CODE=0 \
+    "$wrapper" "$mock_clang_tidy" --use-color foo.cpp > "$tmp_dir/stdout5_clean.txt" 2>&1 || true
+unset CLANG_TIDY__EXIT_CODE_OUTPUT_FILE
+unset CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE
+if [[ -s "$tmp_dir/output5_clean.txt" ]]; then
+    fail "clean colored run left a non-empty report: $(cat -v "$tmp_dir/output5_clean.txt")"
+else
+    pass "clean colored run yields an empty report"
+fi
 
 #-------------------------------------------------------------------
 
