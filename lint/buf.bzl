@@ -10,7 +10,11 @@ buf = lint_buf_aspect(
 )
 ```
 
-**Important:** while using buf's [`allow_comment_ignores` functionality](https://buf.build/docs/configuration/v1/buf-yaml#allow_comment_ignores), the bazel flag `--experimental_proto_descriptor_sets_include_source_info` is required.
+**Important:** the aspect lints the descriptor sets of `proto_library` targets, which only carry
+source locations with the bazel flag `--experimental_proto_descriptor_sets_include_source_info`.
+Without it, every finding is reported at line 1, and buf's
+[`allow_comment_ignores` functionality](https://buf.build/docs/configuration/v1/buf-yaml#allow_comment_ignores)
+does not work.
 """
 
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
@@ -21,7 +25,20 @@ _MNEMONIC = "AspectRulesLintBuf"
 def _short_path(file, _):
     return file.path
 
-def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = []):
+def _import_root(ctx):
+    """Workspace-relative directory the import paths of the visited proto_library start from.
+
+    Returns None when an `import_prefix` maps imports away from the source tree.
+    """
+    attr = ctx.rule.attr
+    if getattr(attr, "import_prefix", ""):
+        return None
+    prefix = getattr(attr, "strip_import_prefix", "/") or "/"
+    if prefix.startswith("/"):
+        return prefix.strip("/")
+    return "/".join([p for p in [ctx.label.package, prefix.strip("/")] if p])
+
+def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = [], path_prefix = ""):
     """Runs the buf lint tool as a Bazel action.
 
     Args:
@@ -33,6 +50,8 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = [
         exit_code: output file to write the exit code.
             If None, then fail the build when protoc exits non-zero.
         args: additional command-line arguments passed to protoc
+        path_prefix: prepended to the file paths buf reports, which are relative to the
+            target's import root, so that they are relative to the workspace instead.
     """
     config = json.encode({
         "input_config": "" if ctx.file._config == None else ctx.file._config.short_path,
@@ -64,12 +83,22 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = [
     action_args.add_all(sources)
     outputs = [stderr]
 
-    if exit_code:
+    if path_prefix:
+        # Only findings (`<path>.proto:<line>:...`, the first one behind protoc's
+        # `--buf-plugin_out: `) are rewritten, other protoc output is kept as is.
+        rewrite = "sed -E 's#^(--buf-plugin_out: )?([^:]+\\.proto:[0-9]+:)#\\1{prefix}\\2#'"
+        if exit_code:
+            command = "{protoc} $@ 2>&1 >/dev/null | " + rewrite + " > {stderr}; echo ${{PIPESTATUS[0]}} > " + exit_code.path
+        else:
+            # Create empty file on success, as Bazel expects one
+            command = "set -o pipefail; {protoc} $@ 2>&1 >/dev/null | " + rewrite + " >&2 && touch {stderr}"
+    elif exit_code:
         command = "{protoc} $@ 2>{stderr}; echo $? > " + exit_code.path
-        outputs.append(exit_code)
     else:
         # Create empty file on success, as Bazel expects one
         command = "{protoc} $@ && touch {stderr}"
+    if exit_code:
+        outputs.append(exit_code)
 
     ctx.actions.run_shell(
         inputs = depset([
@@ -81,6 +110,7 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = [
         command = command.format(
             protoc = protoc.path,
             stderr = stderr.path,
+            prefix = path_prefix,
         ),
         arguments = [action_args],
         mnemonic = _MNEMONIC,
@@ -95,10 +125,13 @@ def _buf_lint_aspect_impl(target, ctx):
     protoc = ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable
     outputs, info = output_files(_MNEMONIC, target, ctx)
 
+    import_root = _import_root(ctx)
+    path_prefix = import_root + "/" if import_root else ""
+
     # TODO(alex): there should be a reason to run the buf action again rather than just copy the files
-    buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code, args = ctx.attr._args)
+    buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code, args = ctx.attr._args, path_prefix = path_prefix)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    buf_lint_action(ctx, buf, protoc, target, raw_machine_report, outputs.machine.exit_code, args = ctx.attr._args)
+    buf_lint_action(ctx, buf, protoc, target, raw_machine_report, outputs.machine.exit_code, args = ctx.attr._args, path_prefix = path_prefix)
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
     return [info]
 
