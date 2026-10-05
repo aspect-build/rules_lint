@@ -75,9 +75,11 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%-Z%r`,
 		}
 	case "AspectRulesLintBuf":
+		// protoc only prefixes the first line of the plugin's output, so each
+		// finding starts a new error whether or not it carries the prefix.
 		fm = []string{
 			`%E--buf-plugin_out: %f:%l:%c:%m`,
-			`%-Z%r`,
+			`%E%f:%l:%c:%m`,
 		}
 	case "AspectRulesLintVale":
 		fm = []string{`%f:%l:%c:%m`}

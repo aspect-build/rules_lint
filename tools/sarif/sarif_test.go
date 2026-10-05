@@ -50,6 +50,27 @@ func TestSarif(t *testing.T) {
 		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(19)))
 	})
 
+	t.Run("processes buf output -> sarif correctly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		sarifJsonString, _ := ToSarifJsonString("//src:foo_proto", "AspectRulesLintBuf", buf_output)
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs)).To(Equal(1))
+		g.Expect(sarifJson.Runs[0].Tool.Driver.Name).To(Equal("Buf"))
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(3))
+		g.Expect(sarifJson.Runs[0].Results[0].Message.Text).To(Equal(`Field name "userId" should be lower_snake_case, such as "user_id".`))
+		g.Expect(sarifJson.Runs[0].Results[1].Message.Text).To(Equal(`Service name "Http" should be suffixed with "Service".`))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/file.proto"))
+		g.Expect(sarifJson.Runs[0].Results[2].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("src/other.proto"))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(5)))
+		g.Expect(sarifJson.Runs[0].Results[1].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Line).To(Equal(int32(12)))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.Region.GetRdfRange().Start.Column).To(Equal(int32(3)))
+		for _, result := range sarifJson.Runs[0].Results {
+			g.Expect(string(result.Level)).To(Equal("error"))
+		}
+	})
+
 	t.Run("processes taplo output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
