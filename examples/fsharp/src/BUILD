@@ -1,4 +1,4 @@
-load("@rules_dotnet//dotnet:defs.bzl", "fsharp_binary")
+load("@rules_dotnet//dotnet:defs.bzl", "fsharp_binary", "fsharp_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -8,7 +8,16 @@ fsharp_binary(
     target_frameworks = ["net9.0"],
 )
 
+fsharp_library(
+    name = "record",
+    srcs = ["record.fs"],
+    target_frameworks = ["net9.0"],
+)
+
 filegroup(
     name = "all",
-    srcs = [":hello_fsharp"],
+    srcs = [
+        ":hello_fsharp",
+        ":record",
+    ],
 )
