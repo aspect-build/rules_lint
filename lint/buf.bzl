@@ -10,14 +10,10 @@ buf = lint_buf_aspect(
 )
 ```
 
-**Important:** the aspect lints the descriptor sets of `proto_library` targets, which only carry
-source locations with the bazel flag `--experimental_proto_descriptor_sets_include_source_info`.
-Without it, every finding is reported at line 1, and buf's
-[`allow_comment_ignores` functionality](https://buf.build/docs/configuration/v1/buf-yaml#allow_comment_ignores)
-does not work.
+**Important:** the aspect lints the descriptor sets of `proto_library` targets, which only carry source locations with the bazel flag `--experimental_proto_descriptor_sets_include_source_info`.
+Without it, every finding is reported at line 1, and buf's [`allow_comment_ignores` functionality](https://buf.build/docs/configuration/v1/buf-yaml#allow_comment_ignores) does not work.
 
-For a [v2 `buf.yaml`](https://buf.build/docs/configuration/v2/buf-yaml) listing `modules`, set
-`infer_module = True` so each target is linted as part of the module rooted at its import root:
+For a [v2 `buf.yaml`](https://buf.build/docs/configuration/v2/buf-yaml) listing `modules`, set `infer_module = True` so each target is linted as part of the module rooted at its import root:
 
 ```
 buf = lint_buf_aspect(
@@ -36,18 +32,12 @@ def _short_path(file, _):
     return file.path
 
 def _import_root(ctx):
-    """Workspace-relative directory the visited proto_library's import paths are relative to.
-
-    Ignores `import_prefix`, which only prepends a prefix to those paths.
-    """
+    """Workspace-relative directory the visited proto_library's import paths are relative to."""
     attr = ctx.rule.attr
     prefix = getattr(attr, "strip_import_prefix", "/") or "/"
     if prefix.startswith("/"):
         return prefix.strip("/")
     return "/".join([p for p in [ctx.label.package, prefix.strip("/")] if p])
-
-def _regex_escape(s):
-    return "".join(["\\" + c if c in "\\.[]()*+?{}|^$#" else c for c in s.elems()])
 
 def _module(import_root, config):
     """Path of the buf.yaml module rooted at `import_root`, relative to the config's directory."""
@@ -60,7 +50,7 @@ def _module(import_root, config):
         return import_root[len(config_dir) + 1:]
     return ""
 
-def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = [], module = "", path_prefix = "", import_prefix = ""):
+def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = [], module = ""):
     """Runs the buf lint tool as a Bazel action.
 
     Args:
@@ -74,10 +64,6 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = [
         args: additional command-line arguments passed to protoc
         module: path of the buf.yaml module the target belongs to, relative to the config.
             Required by v2 configs listing `modules`.
-        path_prefix: prepended to the file paths buf reports, which are relative to the
-            target's import root, so that they are relative to the workspace instead.
-        import_prefix: the target's `import_prefix`, stripped from the reported file paths
-            before `path_prefix` is prepended.
     """
     plugin_opt = {
         "input_config": "" if ctx.file._config == None else ctx.file._config.short_path,
@@ -112,26 +98,12 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = [
     action_args.add_all(sources)
     outputs = [stderr]
 
-    rewrite = ""
-    if path_prefix or import_prefix:
-        # Only findings (`<path>.proto:<line>:...`, the first one behind protoc's
-        # `--buf-plugin_out: `) are rewritten, other protoc output is kept as is.
-        rewrite = "sed -E 's#^(--buf-plugin_out: )?{import_prefix}([^:]+\\.proto:[0-9]+:)#\\1{path_prefix}\\2#'".format(
-            import_prefix = _regex_escape(import_prefix + "/") if import_prefix else "",
-            path_prefix = path_prefix,
-        )
-        if exit_code:
-            command = "{protoc} $@ 2>&1 >/dev/null | {rewrite} > {stderr}; echo ${{PIPESTATUS[0]}} > " + exit_code.path
-        else:
-            # Create empty file on success, as Bazel expects one
-            command = "set -o pipefail; {protoc} $@ 2>&1 >/dev/null | {rewrite} >&2 && touch {stderr}"
-    elif exit_code:
+    if exit_code:
         command = "{protoc} $@ 2>{stderr}; echo $? > " + exit_code.path
+        outputs.append(exit_code)
     else:
         # Create empty file on success, as Bazel expects one
         command = "{protoc} $@ && touch {stderr}"
-    if exit_code:
-        outputs.append(exit_code)
 
     ctx.actions.run_shell(
         inputs = depset([
@@ -143,7 +115,6 @@ def buf_lint_action(ctx, buf, protoc, target, stderr, exit_code = None, args = [
         command = command.format(
             protoc = protoc.path,
             stderr = stderr.path,
-            rewrite = rewrite,
         ),
         arguments = [action_args],
         mnemonic = _MNEMONIC,
@@ -158,16 +129,23 @@ def _buf_lint_aspect_impl(target, ctx):
     protoc = ctx.toolchains["@rules_proto//proto:toolchain_type"].proto.proto_compiler.executable
     outputs, info = output_files(_MNEMONIC, target, ctx)
 
+    # buf reports paths relative to the import root, possibly behind an import_prefix.
     import_root = _import_root(ctx)
-    path_prefix = import_root + "/" if import_root else ""
     import_prefix = getattr(ctx.rule.attr, "import_prefix", "").strip("/")
     module = _module(import_root, ctx.file._config) if ctx.attr._infer_module else ""
 
     # TODO(alex): there should be a reason to run the buf action again rather than just copy the files
-    buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code, args = ctx.attr._args, module = module, path_prefix = path_prefix, import_prefix = import_prefix)
+    buf_lint_action(ctx, buf, protoc, target, outputs.human.out, outputs.human.exit_code, args = ctx.attr._args, module = module)
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    buf_lint_action(ctx, buf, protoc, target, raw_machine_report, outputs.machine.exit_code, args = ctx.attr._args, module = module, path_prefix = path_prefix, import_prefix = import_prefix)
-    parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
+    buf_lint_action(ctx, buf, protoc, target, raw_machine_report, outputs.machine.exit_code, args = ctx.attr._args, module = module)
+    parse_to_sarif_action(
+        ctx,
+        _MNEMONIC,
+        raw_machine_report,
+        outputs.machine.out,
+        strip_path_prefix = import_prefix + "/" if import_prefix else "",
+        add_path_prefix = import_root + "/" if import_root else "",
+    )
     return [info]
 
 def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:toolchain_type", rule_kinds = ["proto_library"], args = [], infer_module = False):
@@ -178,10 +156,8 @@ def lint_buf_aspect(config, toolchain = "@rules_buf//tools/protoc-gen-buf-lint:t
         toolchain: override the default toolchain of the protoc-gen-buf-lint tool
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         args: additional options to pass to the underlying protoc invocation
-        infer_module: lint each target as part of the module rooted at its import root (its
-            `strip_import_prefix`), relative to the directory of `config`. Required by a v2
-            buf.yaml listing `modules`, which otherwise fails with `no module found for "."`.
-            Leave unset for configs without `modules`, which would reject the module.
+        infer_module: lint each target as part of the buf.yaml module rooted at its import root.
+            Required for a v2 buf.yaml listing `modules`, leave unset otherwise.
     """
     return aspect(
         implementation = _buf_lint_aspect_impl,

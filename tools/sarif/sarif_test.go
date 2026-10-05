@@ -33,7 +33,7 @@ func TestSarif(t *testing.T) {
 			io.Copy(stdOut, stdOutReader)
 		}()
 
-		sarifJsonString, _ := ToSarifJsonString("//speller/announce:announce", "AspectRulesLintClangTidy", clang_tidy_output)
+		sarifJsonString, _ := ToSarifJsonString("//speller/announce:announce", "AspectRulesLintClangTidy", clang_tidy_output, "", "")
 		sarifJson, _ := toSarifJson(sarifJsonString)
 
 		stdOutWriter.Close()
@@ -53,7 +53,7 @@ func TestSarif(t *testing.T) {
 	t.Run("processes buf output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
-		sarifJsonString, _ := ToSarifJsonString("//src:foo_proto", "AspectRulesLintBuf", buf_output)
+		sarifJsonString, _ := ToSarifJsonString("//src:foo_proto", "AspectRulesLintBuf", buf_output, "", "")
 		sarifJson, _ := toSarifJson(sarifJsonString)
 
 		g.Expect(len(sarifJson.Runs)).To(Equal(1))
@@ -71,10 +71,21 @@ func TestSarif(t *testing.T) {
 		}
 	})
 
+	t.Run("maps buf paths from import paths to workspace paths", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		sarifJsonString, _ := ToSarifJsonString("//src:foo_proto", "AspectRulesLintBuf", buf_output, "src/", "proto/src/")
+		sarifJson, _ := toSarifJson(sarifJsonString)
+
+		g.Expect(len(sarifJson.Runs[0].Results)).To(Equal(3))
+		g.Expect(sarifJson.Runs[0].Results[0].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("proto/src/file.proto"))
+		g.Expect(sarifJson.Runs[0].Results[2].Locations[0].PhysicalLocation.ArtifactLocation.URI).To(Equal("proto/src/other.proto"))
+	})
+
 	t.Run("processes taplo output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
-		sarifJsonString, _ := ToSarifJsonString("//src:toml", "AspectRulesLintTaplo", taplo_output)
+		sarifJsonString, _ := ToSarifJsonString("//src:toml", "AspectRulesLintTaplo", taplo_output, "", "")
 		sarifJson, _ := toSarifJson(sarifJsonString)
 
 		g.Expect(len(sarifJson.Runs)).To(Equal(1))
@@ -93,7 +104,7 @@ func TestSarif(t *testing.T) {
 	t.Run("processes pydoclint output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
-		sarifJsonString, _ := ToSarifJsonString("//src:missing_doc_arg", "AspectRulesLintPydoclint", pydoclint_output)
+		sarifJsonString, _ := ToSarifJsonString("//src:missing_doc_arg", "AspectRulesLintPydoclint", pydoclint_output, "", "")
 		sarifJson, _ := toSarifJson(sarifJsonString)
 
 		g.Expect(len(sarifJson.Runs)).To(Equal(1))
@@ -107,7 +118,7 @@ func TestSarif(t *testing.T) {
 	t.Run("processes cppcheck text output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
-		sarifJsonString, err := ToSarifJsonString("//src:hello_cc", "AspectRulesLintCppCheck", cppcheck_output)
+		sarifJsonString, err := ToSarifJsonString("//src:hello_cc", "AspectRulesLintCppCheck", cppcheck_output, "", "")
 		g.Expect(err).ToNot(HaveOccurred())
 
 		sarifJson, err := toSarifJson(sarifJsonString)
@@ -161,7 +172,7 @@ func TestSarif(t *testing.T) {
 	t.Run("processes ktlint output -> sarif correctly", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
-		sarifJsonString, _ := ToSarifJsonString("//src:hello_kt", "AspectRulesLintKTLint", ktlint_output)
+		sarifJsonString, _ := ToSarifJsonString("//src:hello_kt", "AspectRulesLintKTLint", ktlint_output, "", "")
 		sarifJson, _ := toSarifJson(sarifJsonString)
 
 		g.Expect(len(sarifJson.Runs)).To(Equal(1))
@@ -184,7 +195,7 @@ func TestSarif(t *testing.T) {
 +import scala.util.Try
 `
 
-		sarifJsonString, _ := ToSarifJsonString("//src:semantic_test", "AspectRulesLintScalafix", diff)
+		sarifJsonString, _ := ToSarifJsonString("//src:semantic_test", "AspectRulesLintScalafix", diff, "", "")
 		sarifJson, _ := toSarifJson(sarifJsonString)
 
 		g.Expect(len(sarifJson.Runs)).To(Equal(1))
