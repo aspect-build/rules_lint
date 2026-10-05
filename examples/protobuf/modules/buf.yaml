@@ -1,0 +1,7 @@
+version: v2
+modules:
+  - path: proto
+  - path: fixtures
+lint:
+  use:
+    - DEFAULT
