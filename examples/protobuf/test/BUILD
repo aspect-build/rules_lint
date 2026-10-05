@@ -27,6 +27,7 @@ buf_modules_test(
     name = "buf_modules",
     srcs = [
         "//modules/fixtures/widget/v1:widget_proto",
+        "//modules/prefixed:gadget_proto",
         "//modules/proto/acme/v1:acme_proto",
     ],
     expected_exit_code = 1,
@@ -40,6 +41,11 @@ machine_buf_modules_report(
 machine_buf_modules_report(
     name = "machine_buf_modules_fixtures_report",
     src = "//modules/fixtures/widget/v1:widget_proto",
+)
+
+machine_buf_modules_report(
+    name = "machine_buf_modules_prefixed_report",
+    src = "//modules/prefixed:gadget_proto",
 )
 
 report_test(
@@ -60,4 +66,11 @@ report_test(
     expected_tool = "Buf",
     expected_uri = "modules/fixtures/widget/v1/widget.proto",
     report = "machine_buf_modules_fixtures_report",
+)
+
+report_test(
+    name = "buf_modules_prefixed_machine_output_test",
+    expected_tool = "Buf",
+    expected_uri = "modules/prefixed/gadget.proto",
+    report = "machine_buf_modules_prefixed_report",
 )

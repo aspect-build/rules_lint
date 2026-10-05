@@ -2,6 +2,7 @@ version: v2
 modules:
   - path: proto
   - path: fixtures
+  - path: prefixed
 lint:
   use:
     - DEFAULT

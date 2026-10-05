@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package gadget.v1;
+
+message Gadget {
+  string gadgetName = 1;
+}
