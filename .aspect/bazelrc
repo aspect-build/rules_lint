@@ -24,13 +24,11 @@ common:aspect-bes --experimental_profile_include_primary_output
 common:aspect-bes --legacy_important_outputs
 common:aspect-bes --remote_build_event_upload=all
 
-# Aspect Cloud: remote cache + BES; auth via ASPECT_API_TOKEN or `aspect auth login`.
+# Aspect Cloud: remote cache + BES; auth via a PAT in --remote_cache_header/--bes_header=X-Aspect=<token>, set in your user rc.
 common:aspect-cloud --config=aspect-common
 common:aspect-cloud --config=aspect-cache
 common:aspect-cloud --config=aspect-bes
 common:aspect-cloud --remote_cache=grpcs://cache.aspect.build
 common:aspect-cloud --bes_backend=grpcs://bes.aspect.build
 common:aspect-cloud --bes_results_url=https://app.aspect.build/i/
-common:aspect-cloud --credential_helper=cache.aspect.build=aspect
-common:aspect-cloud --credential_helper=bes.aspect.build=aspect
 common:aspect-cloud --workspace_status_command="aspect setup workspace-data"

@@ -26,7 +26,7 @@ permissions:
 env:
   ASPECT_WORKSPACE: ${{ github.workspace }}
   REMOTE_FLAG: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--remote' || '' }}
-  BAZEL_ASPECT_FLAGS: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--config=aspect-cloud' || '' }}
+  BAZEL_ASPECT_FLAGS: ${{ secrets.OSS_SAAS_PAT != '' && '--config=aspect-cloud' || '' }}
 
 jobs:
   list-examples:
@@ -78,8 +78,10 @@ jobs:
             common     --show_progress_rate_limit=60
             common     --show_timestamps
             build:lint --no@aspect_rules_lint//lint:color
-      # `aspect` must be on PATH: the rc's aspect-cloud section authenticates
-      # through the `aspect get` credential helper.
+            common:aspect-cloud --remote_cache_header=X-Aspect=${{ secrets.OSS_SAAS_PAT }}
+            common:aspect-cloud --bes_header=X-Aspect=${{ secrets.OSS_SAAS_PAT }}
+      # `aspect` must be on PATH: the rc's aspect-cloud section runs
+      # `aspect setup workspace-data` as its workspace status command.
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
         with:
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
@@ -262,6 +264,8 @@ jobs:
           bazelrc: |
             common --announce_rc
             common --color=yes
+            common:aspect-cloud --remote_cache_header=X-Aspect=${{ secrets.OSS_SAAS_PAT }}
+            common:aspect-cloud --bes_header=X-Aspect=${{ secrets.OSS_SAAS_PAT }}
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
         with:
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
