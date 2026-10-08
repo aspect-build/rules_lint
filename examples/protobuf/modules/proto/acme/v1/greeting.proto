@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package acme.v1;
+
+message Greeting {
+  string firstName = 1;
+  string lastName = 2;
+}

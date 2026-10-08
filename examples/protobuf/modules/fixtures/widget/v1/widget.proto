@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package widget.v1;
+
+message Widget {
+  string widgetName = 1;
+}

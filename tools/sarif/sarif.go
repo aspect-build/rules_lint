@@ -35,7 +35,7 @@ func mnemonicPrettyName(mnemonic string) string {
 	return strings.Replace(mnemonic, "AspectRulesLint", "", 1)
 }
 
-func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonString string, err error) {
+func ToSarifJsonString(label string, mnemonic string, report string, stripPathPrefix string, addPathPrefix string) (sarifJsonString string, err error) {
 	regex := regexp.MustCompile(`^{\s+"\$schema":.+sarif`)
 	// If it's already in SARIF format, just return it
 	if regex.Match([]byte(report)) {
@@ -75,9 +75,11 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 			`%-Z%r`,
 		}
 	case "AspectRulesLintBuf":
+		// protoc only prefixes the first line of the plugin's output, so each
+		// finding starts a new error whether or not it carries the prefix.
 		fm = []string{
 			`%E--buf-plugin_out: %f:%l:%c:%m`,
-			`%-Z%r`,
+			`%E%f:%l:%c:%m`,
 		}
 	case "AspectRulesLintVale":
 		fm = []string{`%f:%l:%c:%m`}
@@ -198,7 +200,7 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	for s.Scan() {
 		entry := s.Entry()
 		if entry.Filename != "" && entry.Text != "" {
-			entry.Filename = determineRelativePath(entry.Filename, label)
+			entry.Filename = addPathPrefix + strings.TrimPrefix(determineRelativePath(entry.Filename, label), stripPathPrefix)
 			if err := jsonWriter.Write(entry); err != nil {
 				return "", err
 			}
