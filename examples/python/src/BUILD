@@ -41,6 +41,12 @@ py_library(
     deps = ["//src/python_lib:py_dependency"],
 )
 
+py_library(
+    name = "uses_dependency_via_pyi_deps",
+    srcs = ["uses_dependency_correctly.py"],
+    pyi_deps = ["//src/python_lib:py_dependency"],
+)
+
 # Forces Bazel to materialize the ty action's shell command. The transitive
 # source has a known type error but is not imported by the clean target below.
 py_library(

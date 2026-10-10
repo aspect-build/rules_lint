@@ -185,38 +185,25 @@ def _ty_aspect_impl(target, ctx):
         ctx.bin_dir.path: True,
     }
 
-    # Collect from deps attribute using PyInfo
-    if hasattr(ctx.rule.attr, "deps"):
-        for dep in ctx.rule.attr.deps:
-            if PyInfo in dep:
-                transitive_sources.append(dep[PyInfo].transitive_sources)
-                transitive_sources.append(dep[PyInfo].transitive_pyi_files)
-                imports = dep[PyInfo].imports.to_list()
-                if imports:
-                    for import_path in imports:
-                        resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
-                        for e in resolved:
-                            import_paths[e] = True
-                elif dep.label.workspace_root:
-                    import_paths[dep.label.workspace_root] = True
-                    import_paths[ctx.bin_dir.path + "/" + dep.label.workspace_root] = True
-
-    # When srcs contain labels to other targets (e.g., genrules that produce .py files),
-    # we need to collect their transitive sources for proper type resolution
-    if hasattr(ctx.rule.attr, "srcs"):
-        for src in ctx.rule.attr.srcs:
-            if PyInfo in src:
-                transitive_sources.append(src[PyInfo].transitive_sources)
-                transitive_sources.append(src[PyInfo].transitive_pyi_files)
-                imports = src[PyInfo].imports.to_list()
-                if imports:
-                    for import_path in imports:
-                        resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
-                        for e in resolved:
-                            import_paths[e] = True
-                elif src.label.workspace_root:
-                    import_paths[src.label.workspace_root] = True
-                    import_paths[ctx.bin_dir.path + "/" + src.label.workspace_root] = True
+    # Collect from deps, pyi_deps, and srcs attributes using PyInfo:
+    # - pyi_deps provides type stub dependencies for rules_python targets.
+    # - When srcs contain labels to other targets (e.g., genrules that produce .py files),
+    #   we need to collect their transitive sources for proper type resolution.
+    for attr_name in ("deps", "pyi_deps", "srcs"):
+        if hasattr(ctx.rule.attr, attr_name):
+            for dep in getattr(ctx.rule.attr, attr_name):
+                if PyInfo in dep:
+                    transitive_sources.append(dep[PyInfo].transitive_sources)
+                    transitive_sources.append(dep[PyInfo].transitive_pyi_files)
+                    imports = dep[PyInfo].imports.to_list()
+                    if imports:
+                        for import_path in imports:
+                            resolved = _resolve_import_path(import_path, ctx.workspace_name, ctx.bin_dir.path)
+                            for e in resolved:
+                                import_paths[e] = True
+                    elif dep.label.workspace_root:
+                        import_paths[dep.label.workspace_root] = True
+                        import_paths[ctx.bin_dir.path + "/" + dep.label.workspace_root] = True
 
     files_to_lint = filter_srcs(ctx.rule)
     outputs, info = output_files(_MNEMONIC, target, ctx)

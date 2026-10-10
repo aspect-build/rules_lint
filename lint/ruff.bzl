@@ -50,7 +50,7 @@ load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
 _MNEMONIC = "AspectRulesLintRuff"
 
-def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}, patch = None, args = []):
+def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {}, patch = None, args = [], mnemonic = _MNEMONIC):
     """Run ruff as an action under Bazel.
 
     Ruff will select the configuration file to use for each source file, as documented here:
@@ -98,6 +98,7 @@ def ruff_action(ctx, executable, srcs, config, stdout, exit_code = None, env = {
             args = action_args,
             files_to_diff = [s.path for s in srcs],
             patch_cfg_env = env,
+            patch_cfg_suffix = "{}patch_cfg".format(mnemonic + "." if mnemonic != _MNEMONIC else ""),
             patch_out = patch,
             tools = [executable],
             stdout = stdout,
@@ -158,6 +159,7 @@ def _ruff_aspect_impl(target, ctx):
         env = color_env,
         patch = getattr(outputs, "patch", None),
         args = ctx.attr._args,
+        mnemonic = ctx.attr._mnemonic,
     )
 
     # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?

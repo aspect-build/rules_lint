@@ -48,36 +48,36 @@
     "binaries": [
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_linux_arm64",
-        "sha256": "9272c2d1738acc1acae33793419e74c69653e70fe56bec4ad9044b12b54715e5",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.12.0/gofumpt_v0.12.0_linux_arm64",
+        "sha256": "4322f081241ab0618356aa5921a8c110e4c7acfc17175cc15dc57b2f4a4b652d",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_linux_amd64",
-        "sha256": "9f247ec294f5082375c7b062f3ddf48c8212a8711f65a6d75f5129f7fda0d7da",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.12.0/gofumpt_v0.12.0_linux_amd64",
+        "sha256": "3bc4fcad497439918f5f56d4987de4709a99da0a355e6bec13a7278532b01d38",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_darwin_arm64",
-        "sha256": "18936628f195369a80a129c73ee33d23e39086286dab538781ba826effc7e10b",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.12.0/gofumpt_v0.12.0_darwin_arm64",
+        "sha256": "1a3e325b956ed12c21031d9e13382bd51a4fabb57de8d40428819b9583c3cfb9",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_darwin_amd64",
-        "sha256": "b93b3d2c326196af9fb1ce34a5436a18e7b9a73a795bf42e5b6a542eea88d322",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.12.0/gofumpt_v0.12.0_darwin_amd64",
+        "sha256": "1d3626892a321aca96a891696eaecb8f68e69e90582c2b55672d5ca210fd5fa8",
         "os": "macos",
         "cpu": "x86_64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_windows_amd64.exe",
-        "sha256": "e7ae4253344a600f1116e4b5c7d0d0fcc108abbbf383c3d786a530077b4d4622",
+        "url": "https://github.com/mvdan/gofumpt/releases/download/v0.12.0/gofumpt_v0.12.0_windows_amd64.exe",
+        "sha256": "66bd679908b64864fc85417e7ea01148774b477364b9a02ab1c194333a55c997",
         "os": "windows",
         "cpu": "x86_64"
       }
@@ -131,36 +131,36 @@
     "binaries": [
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/sh/releases/download/v3.14.0/shfmt_v3.14.0_linux_arm64",
-        "sha256": "8029959a945b5c6f2bc92ce53fca5cf0384c811cc0884b25b196a093a005657a",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.14.1/shfmt_v3.14.1_linux_arm64",
+        "sha256": "5f2db09dae91fca848f7adbdd014632e921a383863a2ad7e0450ad3aba0c6489",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/sh/releases/download/v3.14.0/shfmt_v3.14.0_linux_amd64",
-        "sha256": "fe42021c7272ef2d67ea36cbc3031683c625d0badec733ef3a57b567246a0b66",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.14.1/shfmt_v3.14.1_linux_amd64",
+        "sha256": "76e77641faa025814b77f153b29796b8e6fa2fca03e0c76a691608b86c7ea7bf",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/sh/releases/download/v3.14.0/shfmt_v3.14.0_darwin_arm64",
-        "sha256": "4710ba8074a74334069719d5b82f8cb97532e5623bfe43ef7cdb3442101b9cb2",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.14.1/shfmt_v3.14.1_darwin_arm64",
+        "sha256": "b7c872db63553ccffc7253aba3ed7d4885a27d83f1ba567b1138c6315a5847e5",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/sh/releases/download/v3.14.0/shfmt_v3.14.0_darwin_amd64",
-        "sha256": "74255a8087d74a79f5c1307db807e7efa8f062c429e3a05c075550392e0dcfa1",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.14.1/shfmt_v3.14.1_darwin_amd64",
+        "sha256": "d33eee0da0f92835b3562e9767a05cee7e4eaeef47daa03bfd09da17b4b590a6",
         "os": "macos",
         "cpu": "x86_64"
       },
       {
         "kind": "file",
-        "url": "https://github.com/mvdan/sh/releases/download/v3.14.0/shfmt_v3.14.0_windows_amd64.exe",
-        "sha256": "6738a3e155fbfec3bedc70962f9cd1610197587a43b5d7100f405239d8e11375",
+        "url": "https://github.com/mvdan/sh/releases/download/v3.14.1/shfmt_v3.14.1_windows_amd64.exe",
+        "sha256": "13629ce28442ca80b6b5a819f7574ab39e1c28c6e26734ca816c9714e04851df",
         "os": "windows",
         "cpu": "x86_64"
       }

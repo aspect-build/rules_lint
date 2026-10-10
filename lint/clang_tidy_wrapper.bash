@@ -48,8 +48,10 @@ fi
 exit_code=$?
 # Drop clang-tidy summary statistics (e.g. "N warnings generated.") that it
 # prints even on a clean, exit-0 run thus tripping in fail_on_violation mode.
-# Diagnostics are kept.
-grep -Ev '^[0-9]+ (warnings?|errors?)( and [0-9]+ errors?)? generated\.$|^Suppressed [0-9]+ warnings? \(.*\)\.$|^Use -header-filter=.*$|^[0-9]+ warnings? treated as errors?$' $raw_out_file > $out_file
+# Diagnostics are kept. With --use-color, a summary line can carry the SGR
+# reset left over from the preceding diagnostic.
+sgr=$'(\033\\[[0-9;]*m)*'
+grep -Ev "^${sgr}([0-9]+ (warnings?|errors?)( and [0-9]+ errors?)? generated\.|Suppressed [0-9]+ warnings? \(.*\)\.|Use -header-filter=.*|[0-9]+ warnings? treated as errors?)${sgr}\$" $raw_out_file > $out_file
 grep_status=$?
 rm -f $raw_out_file
 # grep exit >=2 means grep itself failed and $out_file is unreliable; bail
@@ -63,7 +65,12 @@ if [[ -z $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
 fi
 # distinguish between compile (fatal) errors and warnings-as-errors errors
 fatal_error=0
-if [ $exit_code -ne 0 ] && [ -s $out_file ]; then
+if [ $exit_code -eq 126 ] || [ $exit_code -eq 127 ]; then
+    # 126/127 mean clang-tidy never ran (not executable, or a shared library
+    # the loader could not resolve). With no diagnostics to capture, recording
+    # the code would leave the report indistinguishable from a clean lint.
+    fatal_error=1
+elif [ $exit_code -ne 0 ] && [ -s $out_file ]; then
     while read line
     do
         if [[ $line == *"clang-diagnostic-error"* ]]; then
@@ -74,9 +81,13 @@ if [ $exit_code -ne 0 ] && [ -s $out_file ]; then
 fi
 if [ $fatal_error -ne 0 ]; then
     cat $out_file
-    rm $out_file
+    # only a temp file is ours to delete; when the env var is set this is a
+    # declared Bazel output, and the diagnostics in it are the whole evidence
+    if [[ -z $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
+        rm $out_file
+    fi
     if [[ -n $CLANG_TIDY__VERBOSE ]]; then
-        echo "found clang-diagnostic-error (regarding as fatal)"
+        echo "regarding exit $exit_code as fatal"
         echo "exit $exit_code"
     fi
     exit $exit_code
