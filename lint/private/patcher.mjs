@@ -49,7 +49,7 @@ async function sync(src, dst, subdir, filesToDiff) {
 
 async function main(args, sandbox) {
   const config = JSON.parse(await fs.promises.readFile(args[0]));
-  const spawnArgs = args.length > 1
+  let spawnArgs = args.length > 1
     ? (await fs.promises.readFile(args[1], "utf8")).split(/\r?\n/).filter(Boolean)
     : config.args;
 
@@ -74,10 +74,22 @@ async function main(args, sandbox) {
       " "
     )} (with env ${JSON.stringify(config.env || {})})`
   );
-  const ret = childProcess.spawnSync(config.linter, spawnArgs, {
+  // Windows refuses to execute `.bat`/`.cmd` launchers directly in nodejs
+  // (CVE-2024-27980) and must be run with cmd.exe directly.
+  let [command, spawnOpts] = [config.linter, {}];
+  if (process.platform === "win32" && /\.(bat|cmd)$/i.test(config.linter)) {
+    const commandLine = [config.linter, ...spawnArgs]
+      .map((arg) => `"${arg}"`)
+      .join(" ");
+    command = process.env.COMSPEC || "cmd.exe";
+    spawnArgs = ["/d", "/s", "/c", `"${commandLine}"`];
+    spawnOpts = { windowsVerbatimArguments: true };
+  }
+  const ret = childProcess.spawnSync(command, spawnArgs, {
     stdio: "inherit",
     cwd: sandbox,
     env: config.env || {},
+    ...spawnOpts,
   });
 
   // Check if we failed to spawn the process.
