@@ -270,6 +270,12 @@ bzl_library(
 )
 
 bzl_library(
+    name = "fsharplint",
+    srcs = ["fsharplint.bzl"],
+    deps = ["//lint/private:lint_aspect"],
+)
+
+bzl_library(
     name = "shellcheck",
     srcs = ["shellcheck.bzl"],
     deps = ["//lint/private:lint_aspect"],

@@ -1,0 +1,25 @@
+{
+    "recordFieldNames": {
+        "enabled": true,
+        "config": {
+            "naming": "PascalCase",
+            "underscores": "None"
+        }
+    },
+    "favourIgnoreOverLetWild": {
+        "enabled": true
+    },
+    "uselessBinding": {
+        "enabled": true
+    },
+    "noTabCharacters": {
+        "enabled": true
+    },
+    "hints": {
+        "add": [
+            "not true ===> false",
+            "not false ===> true",
+            "List.head (List.sort x) ===> List.min x"
+        ]
+    }
+}

@@ -140,6 +140,13 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 	case "AspectRulesLintKTLint":
 		// ktlint --relative text output: `path:line:col: message (rule)`.
 		fm = []string{`%f:%l:%c: %m`}
+	case "AspectRulesLintFSharpLint":
+		// --format msbuild output: `path(line,col,endLine,endCol):FSharpLint warning FL0039: message`.
+		// The info lines around it (rule counts, per-file banners) are dropped.
+		fm = []string{
+			`%f(%l\,%c\,%e\,%k):FSharpLint %tarning %m`,
+			`%-G%.%#`,
+		}
 	case "AspectRulesLintKeepSorted":
 		fm = []string{`%f:%l:%e:%m`}
 	case "AspectRulesLintTy":
@@ -199,6 +206,11 @@ func ToSarifJsonString(label string, mnemonic string, report string) (sarifJsonS
 		entry := s.Entry()
 		if entry.Filename != "" && entry.Text != "" {
 			entry.Filename = determineRelativePath(entry.Filename, label)
+			if mnemonic == "AspectRulesLintFSharpLint" {
+				// FSharpLint prints the F# compiler's 0-based columns, while SARIF columns are 1-based.
+				entry.Col++
+				entry.EndCol++
+			}
 			if err := jsonWriter.Write(entry); err != nil {
 				return "", err
 			}
