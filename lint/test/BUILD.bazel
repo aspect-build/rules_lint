@@ -1,5 +1,6 @@
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load(":lint_test_no_report_test.bzl", "no_report_test", "skipped_lint_test")
+load(":lint_test_xml.bzl", "fake_lint_test")
 
 sh_test(
     name = "clang_tidy_wrapper_test",
@@ -23,4 +24,26 @@ skipped_lint_test(
 no_report_test(
     name = "lint_test_no_report_test",
     target_under_test = ":lint_test_without_report",
+)
+
+filegroup(name = "clean_target")
+
+filegroup(name = "dirty_target")
+
+# Fails by design, so only lint_test_xml_test below runs it.
+fake_lint_test(
+    name = "fake_lint",
+    srcs = [
+        ":clean_target",
+        ":dirty_target",
+    ],
+    tags = ["manual"],
+)
+
+sh_test(
+    name = "lint_test_xml_test",
+    srcs = ["lint_test_xml_test.sh"],
+    args = ["$(rlocationpath :fake_lint)"],
+    data = [":fake_lint"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
 )
