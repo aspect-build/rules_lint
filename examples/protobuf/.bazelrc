@@ -5,6 +5,10 @@ try-import %workspace%/../../.aspect/bazelrc
 
 build:lint --aspects=//tools/lint:linters.bzl%buf
 
+# Source locations in proto descriptor sets: real line numbers in buf findings,
+# and buf's comment ignores.
+common --experimental_proto_descriptor_sets_include_source_info
+
 # Build without the bytes
 common:ci --remote_download_outputs=minimal
 common:ci --nobuild_runfile_links

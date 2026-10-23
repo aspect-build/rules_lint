@@ -68,6 +68,9 @@ var qmllint_output string
 //go:embed testdata/lint_result/taplo_output.txt
 var taplo_output string
 
+//go:embed testdata/lint_result/buf_output.txt
+var buf_output string
+
 //go:embed testdata/lint_result/pydoclint_output.txt
 var pydoclint_output string
 
