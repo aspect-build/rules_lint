@@ -217,7 +217,7 @@ def _ty_aspect_impl(target, ctx):
     # Pass transitive sources to ty_action so ty can resolve imports from dependencies
     transitive_srcs_depset = depset(transitive = transitive_sources)
     extra_search_paths = import_paths.keys()
-    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env, extra_search_paths = extra_search_paths, args = ctx.attr._args)
+    ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, outputs.human.out, outputs.human.exit_code, env = color_env, extra_search_paths = extra_search_paths, color = ctx.attr._options[LintOptionsInfo].color, args = ctx.attr._args)
 
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
     ty_action(ctx, ctx.executable._ty, files_to_lint, transitive_srcs_depset, ctx.files._config_file, raw_machine_report, outputs.machine.exit_code, extra_search_paths = extra_search_paths, color = False, args = ctx.attr._args)
