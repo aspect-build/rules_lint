@@ -143,6 +143,7 @@ function ls-files {
       'Kotlin') patterns=('*.kt' '*.ktm' '*.kts') ;;
       'Less') patterns=('*.less') ;;
       'Markdown') patterns=('contents.lr' '*.md' '*.livemd' '*.markdown' '*.mdown' '*.mdwn' '*.mkd' '*.mkdn' '*.mkdown' '*.ronn' '*.scd' '*.workbook') ;;
+      'Nix') patterns=('*.nix') ;;
       'Pkl') patterns=('*.pkl' 'PklProject') ;;
       'Protocol Buffer') patterns=('*.proto') ;;
       'Python') patterns=('.gclient' 'DEPS' 'SConscript' 'SConstruct' 'wscript' '*.py' '*.cgi' '*.fcgi' '*.gyp' '*.gypi' '*.lmi' '*.py3' '*.pyde' '*.pyi' '*.pyp' '*.pyt' '*.pyw' '*.rpy' '*.spec' '*.tac' '*.wsgi' '*.xpy') ;;
@@ -326,6 +327,23 @@ function run-format {
       Java|Scala)
           # Setting JAVA_RUNFILES to work around https://github.com/bazelbuild/bazel/issues/12348
           ( export JAVA_RUNFILES="${RUNFILES_DIR}" ; time-run "$files" "$bin" "$lang" 0 $args )
+        ;;
+      Nix)
+        # nixfmt only accepts one file at a time and has no formatting check mode.
+        while IFS= read -r file; do
+          if [[ "${mode:-}" == "check" ]]; then
+            formatted=$(mktemp)
+            "$bin" $args < "$file" > "$formatted"
+            if ! cmp -s "$file" "$formatted"; then
+              echo "Nix file not formatted: $file" >&2
+              rm "$formatted"
+              exit 1
+            fi
+            rm "$formatted"
+          else
+            "$bin" $args "$file"
+          fi
+        done <<< "$files"
         ;;
       Swift)
         # for any formatter that must be silenced
