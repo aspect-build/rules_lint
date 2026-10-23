@@ -77,6 +77,9 @@ var cppcheck_output string
 //go:embed testdata/lint_result/ktlint_output.txt
 var ktlint_output string
 
+//go:embed testdata/lint_result/fsharplint_output.txt
+var fsharplint_output string
+
 type LintResult struct {
 	Label    string
 	Mnemonic string

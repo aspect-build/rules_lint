@@ -154,7 +154,7 @@ jobs:
           assert-path: /usr/lib/bats/bats-assert
           assert-version: "2.1.0"
       # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/java' || matrix.folder == 'examples/shell'  || matrix.folder == 'examples/kotlin' || matrix.folder == 'format'
+      - if: matrix.folder == 'examples/java' || matrix.folder == 'examples/shell'  || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/fsharp' || matrix.folder == 'format'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
 
       - name: "Integration test"
@@ -175,7 +175,7 @@ jobs:
         with:
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
       # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
+      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
 
       - name: Lint
@@ -208,7 +208,7 @@ jobs:
         with:
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
       # TODO: Fix for Bazel 9
-      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
+      - if: matrix.folder == 'examples/cpp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/kotlin' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
 
       - name: aspect lint

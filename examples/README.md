@@ -10,7 +10,7 @@ Each example includes a minimal working configuration for its supported tools. F
 | ------------------- | ----------------------------------------------------------------------------- | ------------------------------------------- |
 | `cpp/`              | clang-format for C, C++, and CUDA                                             | clang-tidy, Cppcheck                        |
 | `csharp/`           | CSharpier                                                                     |                                             |
-| `fsharp/`           | Fantomas                                                                      |                                             |
+| `fsharp/`           | Fantomas                                                                      | FSharpLint                                  |
 | `go-module/`        | modfmt                                                                        |                                             |
 | `go/`               | gofumpt                                                                       |                                             |
 | `java/`             | google-java-format                                                            | PMD, Checkstyle, SpotBugs                   |
