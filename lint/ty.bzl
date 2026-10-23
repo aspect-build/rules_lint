@@ -228,7 +228,7 @@ def _ty_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ty"], args = []):
+def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ty"], args = [], required_providers = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -237,10 +237,13 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
         rule_kinds: which [kinds](https://bazel.build/query/language#kind) of rules should be visited by the aspect
         filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
         args: additional command-line options to pass to ty
+        required_providers: Provider requirements forwarded to `aspect()`. Defaults to no filtering.
+            For example, `[PyInfo]` skips targets without Python providers, including tagged filegroups.
     """
 
     return aspect(
         implementation = _ty_aspect_impl,
+        required_providers = required_providers,
         # Propagate the aspect to dependencies so they are also linted.
         # Transitive sources for type resolution are obtained via PyInfo provider.
         attr_aspects = ["deps"],
