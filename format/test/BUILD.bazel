@@ -2,8 +2,9 @@ load("@bazel_skylib//lib:sets.bzl", "sets")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
-load("//format:defs.bzl", "format_multirun")
+load("//format:defs.bzl", "format_multirun", "format_test")
 load("//format/private:formatter_binary.bzl", "TOOLS")
+load(":format_test_attrs_test.bzl", "test_attrs_test")
 
 sh_test(
     name = "ls-files_test",
@@ -96,4 +97,19 @@ sh_test(
         ":format_with_custom_args_Kotlin_with_ktfmt.check",
     ],
     deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+# Only test_attrs_test below inspects it.
+format_test(
+    name = "format_test_with_attrs",
+    size = "small",
+    timeout = "short",
+    srcs = ["custom_args_test.sh"],
+    shell = ":mock_shfmt.sh",
+    tags = ["manual"],
+)
+
+test_attrs_test(
+    name = "format_test_attrs_test",
+    target_under_test = ":format_test_with_attrs_Shell_with_shfmt",
 )
