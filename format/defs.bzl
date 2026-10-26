@@ -18,9 +18,9 @@ load("@bazel_lib//lib:lists.bzl", "unique")
 load("@bazel_lib//lib:utils.bzl", "propagate_common_rule_attributes", "propagate_common_test_rule_attributes")
 load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
-load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "to_attribute_name")
+load("//format/private:formatter_binary.bzl", "BUILTIN_TOOL_LABELS", "CHECK_FLAGS", "FIX_FLAGS", "TOOLS", "parallel_error", "to_attribute_name")
 
-def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args = None, fix_target_label = None):
+def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args = None, fix_target_label = None, batches = False):
     if mode not in ["check", "fix", "test"]:
         fail("Invalid mode", mode)
 
@@ -52,6 +52,7 @@ def _format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_
             "flags": flags,
             "mode": "check" if mode == "test" else mode,
             "disable_git_attribute_checks": "true" if disable_git_attribute_checks else "false",
+            "parallel": "true" if batches else "false",
         },
         "data": [tool_label],
         ("args" if mode == "test" else "arguments"): args,
@@ -83,7 +84,7 @@ Some languages have dialects:
     },
 )
 
-def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute_checks = False, **kwargs):
+def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute_checks = False, parallel = [], **kwargs):
     """Create a [multirun] binary for the given languages.
 
     Intended to be used with `bazel run` to update source files in-place.
@@ -101,10 +102,17 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
         print_command: whether to print a progress message before calling the formatter of each language.
             Note that a line is printed for a formatter even if no files of that language are to be formatted.
         disable_git_attribute_checks: Set to True to disable honoring .gitattributes filters
+        parallel: language attributes, such as `["cc", "starlark"]`, whose formatters write only the
+            files they are given. A listed language with many files runs as parallel batches, up to
+            min(online CPUs, 16) at once. The `RULES_LINT_FORMAT_CPUS` environment variable, a
+            positive integer or `auto`, changes that count at run time; `1` turns batches off.
+            See "Formatter parallelism" in docs/formatting.md.
         **kwargs: attributes named for each language; see [languages](#rule-languages).
             Additionally supports custom arguments via {language}_fix_args and {language}_check_args
             to override default formatter flags for fix and check modes respectively.
     """
+    _check_parallel(parallel, kwargs)
+
     commands = []
 
     common_attrs = propagate_common_rule_attributes(kwargs)
@@ -117,7 +125,7 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
                 command = Label("@aspect_rules_lint//format/private:format"),
                 description = "Formatting {} with {}...".format(lang, toolname),
                 tags = common_attrs.get("tags", []),
-                **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args)
+                **_format_attr_factory(target_name, lang, toolname, tool_label, mode, disable_git_attribute_checks, custom_args, batches = to_attribute_name(lang) in parallel)
             )
         commands.append(target_name)
 
@@ -140,7 +148,7 @@ def format_multirun(name, jobs = 4, print_command = False, disable_git_attribute
         **common_attrs
     )
 
-def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable_git_attribute_checks = False, tags = [], fix_target = None, **kwargs):
+def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable_git_attribute_checks = False, tags = [], fix_target = None, parallel = [], **kwargs):
     """Create test for the given formatters.
 
     Intended to be used with `bazel test` to verify files are formatted.
@@ -161,10 +169,14 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             name in the same package (e.g. `"format"`) or a full label (e.g. `"//tools/format:format"`).
             When set, the test's failure message points users at the per-language fix command of that
             target (e.g. `format_Go_with_gofmt`) instead of the test target itself.
+        parallel: checked like format_multirun's, then ignored, so one set of arguments can serve
+            both. format_test always runs each formatter serially, because Bazel already runs tests
+            in parallel.
         **kwargs: attributes named for each language; see [languages](#rule-languages).
             Additionally supports custom arguments via {language}_fix_args and {language}_check_args
             to override default formatter flags. Test mode uses check_args when specified.
     """
+    _check_parallel(parallel, kwargs)
     if srcs and workspace:
         fail("Cannot provide both 'srcs' and 'workspace' at the same time")
     if not srcs and not workspace:
@@ -213,6 +225,12 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
         tests = test_targets,
         tags = tags,
     )
+
+def _check_parallel(parallel, kwargs):
+    """Fails unless parallel is valid for a macro with these language kwargs."""
+    error = parallel_error(parallel, kwargs)
+    if error:
+        fail(error)
 
 def _format_target_name(name, lang, toolname):
     """Name of the per-language target created by format_multirun and format_test."""

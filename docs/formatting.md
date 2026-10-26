@@ -94,6 +94,37 @@ The custom argument attributes follow the pattern `{language}_{mode}_args`:
 When custom arguments are specified, they completely replace the default arguments for that mode.
 If not specified, the built-in defaults for each formatter are used.
 
+### Formatter parallelism
+
+By default each formatter runs serially, as one `xargs` pipeline over all its files.
+A formatter that writes only the files it is given, such as clang-format or buildifier, can instead run as parallel batches.
+List those languages in `parallel`:
+
+```starlark
+format_multirun(
+    name = "format",
+    cc = "@llvm_toolchain_llvm//:bin/clang-format",
+    parallel = ["cc"],
+)
+```
+
+A listed language runs up to min(online CPUs, 16) batches at once.
+Set the `RULES_LINT_FORMAT_CPUS` environment variable, a number or `auto`, to change that count when you run the target, and `1` to turn batches off.
+Inside a container the online CPU count is the host's, even under a CPU limit, so set a number there.
+
+The count limits formatter processes per language. It is not a CPU quota, and rules_lint does not limit the threads inside each process.
+With any `jobs` other than 0, including the default, `format_multirun` formats one language at a time. With `jobs = 0`, every language runs at once and their counts add up.
+
+A language batches only when it has at least 128 files to format.
+A language batches only when every path names a different file, which `stat -L` checks by inode.
+A repeated path, overlapping arguments such as `src ./src`, a symlink to a listed file, or a hard link runs that language serially instead, as do a missing file and a platform that reports no inode.
+Languages are not deduplicated against each other. C and C++ both match `*.h`, so with `jobs = 0` both formatters can write the same header at once. Keep the default `jobs` when two languages share files.
+Output is printed in batch order after every batch finishes. Ctrl-C stops every batch, and an interrupted run prints no batch output.
+Leave out of `parallel` formatters that write other files too: rustfmt also formats the modules a file declares.
+Formatters that start one thread per CPU, such as ruff and gofumpt, can oversubscribe the CPUs when batched: 8 batches on a 16-CPU machine start 128 threads.
+Cap their threads yourself if you opt them in, for example with `RAYON_NUM_THREADS` for ruff or `GOMAXPROCS` for gofumpt.
+`format_test` always runs serially, because Bazel already runs tests in parallel.
+
 ### One-time re-format all files
 
 Assuming you installed with the typical layout:
