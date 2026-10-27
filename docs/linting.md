@@ -107,6 +107,39 @@ Each linter aspect accepts the configuration file(s) as an argument.
 To specify whether a certain lint rule should be a warning or error, follow the documentation for the linter.
 rules_lint provides the exit code of the linter process to allow the desired developer experiences listed above.
 
+## Filtering aspects by providers
+
+The Ruff and ty aspect factories accept an optional `required_providers` argument,
+which is forwarded to Bazel's `aspect()` function. For example, to apply these
+aspects only to targets whose rules advertise `PyInfo`:
+
+```starlark
+load("@rules_python//python:defs.bzl", "PyInfo")
+load("@aspect_rules_lint//lint:ruff.bzl", "lint_ruff_aspect")
+load("@aspect_rules_lint//lint:ty.bzl", "lint_ty_aspect")
+
+ruff = lint_ruff_aspect(
+    binary = Label("@aspect_rules_lint//lint:ruff_bin"),
+    configs = [Label("//:pyproject.toml")],
+    required_providers = [PyInfo],
+)
+
+ty = lint_ty_aspect(
+    binary = Label("@aspect_rules_lint//lint:ty_bin"),
+    config = Label("//:pyproject.toml"),
+    required_providers = [PyInfo],
+)
+```
+
+Bazel skips a nonmatching aspect before analyzing its implicit tool and config
+dependencies. For command-line aspects, enable
+`--incompatible_top_level_aspects_require_providers` so Bazel honors this filter.
+Matching targets still follow the existing `rule_kinds`, `filegroup_tags`, and
+`no-lint` checks.
+
+The default is `[]`, preserving existing behavior. Opting into `[PyInfo]` also
+excludes tagged filegroups, since filegroups do not advertise `PyInfo`.
+
 ## Ignoring targets
 
 To ignore a specific target, you can use the `no-lint` tag. This will prevent the linter from visiting the target.

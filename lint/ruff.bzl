@@ -171,7 +171,7 @@ def _ruff_aspect_impl(target, ctx):
 
     return [info]
 
-def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ruff"], mnemonic = _MNEMONIC, args = []):
+def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "py_test"], filegroup_tags = ["python", "lint-with-ruff"], mnemonic = _MNEMONIC, args = [], required_providers = []):
     """A factory function to create a linter aspect.
 
     Attrs:
@@ -181,6 +181,8 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
         filegroup_tags: filegroups tagged with these tags will be visited by the aspect in addition to Python rule kinds
         mnemonic: The mnemonic to use for the actions created by this aspect
         args: additional command-line arguments to pass to ruff
+        required_providers: Provider requirements forwarded to `aspect()`. Defaults to no filtering.
+            For example, `[PyInfo]` skips targets without Python providers, including tagged filegroups.
     """
 
     # syntax-sugar: allow a single config file in addition to a list
@@ -189,6 +191,7 @@ def lint_ruff_aspect(binary, configs, rule_kinds = ["py_binary", "py_library", "
 
     return aspect(
         implementation = _ruff_aspect_impl,
+        required_providers = required_providers,
         attrs = patcher_attrs | {
             "_options": attr.label(
                 default = "//lint:options",
