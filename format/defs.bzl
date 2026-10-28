@@ -205,7 +205,7 @@ def format_test(name, srcs = None, workspace = None, no_sandbox = False, disable
             srcs = [Label("@aspect_rules_lint//format/private:format.sh")],
             deps = [Label("@bazel_tools//tools/bash/runfiles")],
             tags = unique(tags + (["no-sandbox", "no-cache", "external"] if workspace else [])),
-            **attrs
+            **(common_attrs | attrs)
         )
         test_targets.append(attrs["name"])
     native.test_suite(
