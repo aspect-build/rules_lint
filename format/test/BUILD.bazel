@@ -5,10 +5,17 @@ load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//format:defs.bzl", "format_multirun", "format_test")
 load("//format/private:formatter_binary.bzl", "TOOLS")
 load(":format_test_attrs_test.bzl", "test_attrs_test")
+load(":parallel_error_test.bzl", "parallel_error_test_suite")
 
 sh_test(
     name = "ls-files_test",
     srcs = ["ls-files_test.sh"],
+    data = ["//format/private:format"],
+)
+
+sh_test(
+    name = "parallel_test",
+    srcs = ["parallel_test.sh"],
     data = ["//format/private:format"],
 )
 
@@ -112,4 +119,43 @@ format_test(
 test_attrs_test(
     name = "format_test_attrs_test",
     target_under_test = ":format_test_with_attrs_Shell_with_shfmt",
+)
+
+format_multirun(
+    name = "format_parallel",
+    parallel = ["python"],
+    python = ":mock_ruff.sh",
+    shell = ":mock_shfmt.sh",
+)
+
+sh_test(
+    name = "parallel_args_test",
+    srcs = ["parallel_args_test.sh"],
+    data = [
+        ":format_Python_with_ruff",
+        ":format_parallel_Python_with_ruff",
+        ":format_parallel_Shell_with_shfmt",
+    ],
+)
+
+parallel_error_test_suite(name = "parallel_error_test")
+
+# format_test accepts format_multirun's parallel and ignores it, so one dict of
+# arguments can serve both. Its formatter fails unless it runs with batches off.
+write_file(
+    name = "mock_serial_shfmt_sh",
+    out = "mock_serial_shfmt.sh",
+    content = [
+        "#!/usr/bin/env bash",
+        "[[ \"${parallel:-}\" == false ]] || { echo >&2 \"format_test ran with parallel=${parallel:-unset}\"; exit 1; }",
+    ],
+)
+
+format_test(
+    name = "format_test_ignores_parallel",
+    srcs = ["parallel_test.sh"],
+    # The test sandbox is not a git repository.
+    disable_git_attribute_checks = True,
+    parallel = ["shell"],
+    shell = ":mock_serial_shfmt.sh",
 )
