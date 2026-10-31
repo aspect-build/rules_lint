@@ -1,0 +1,3 @@
+--buf-plugin_out: src/file.proto:5:3:Field name "userId" should be lower_snake_case, such as "user_id".
+src/file.proto:12:1:Service name "Http" should be suffixed with "Service".
+src/other.proto:3:1:Files with package "foo.v1" must be within a directory "foo/v1" relative to root but were in directory "src".
