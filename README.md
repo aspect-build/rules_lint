@@ -1,5 +1,8 @@
 # Run linters and formatters under Bazel
 
+> [!IMPORTANT]
+> These modules were previously published as `aspect_rules_lint`, `aspect_rules_lint_rust` and `aspect_rules_lint_scala`. To upgrade, drop the `aspect_` prefix in your `bazel_dep`, `load()` statements and flags.
+
 > [!NOTE]
 > This repository uses the [Aspect CLI](https://github.com/aspect-build/aspect-cli) for CI and local development.
 > See the [docs](https://docs.aspect.build/cli/overview) and [install instructions](https://docs.aspect.build/cli/install) to get started.
