@@ -219,7 +219,7 @@ def noop_lint_action(ctx, outputs):
 SARIF_PARSER_TOOLCHAIN = Label("@aspect_rules_lint//tools/toolchains:sarif_parser_toolchain_type")
 OPTIONAL_SARIF_PARSER_TOOLCHAIN = config_common.toolchain_type(SARIF_PARSER_TOOLCHAIN, mandatory = False)
 
-def parse_to_sarif_action(ctx, mnemonic, raw_machine_report, sarif_out):
+def parse_to_sarif_action(ctx, mnemonic, raw_machine_report, sarif_out, strip_path_prefix = "", add_path_prefix = ""):
     """Translate a machine-readable report to SARIF format by running our Go tool sarif.go.
 
     Args:
@@ -227,6 +227,8 @@ def parse_to_sarif_action(ctx, mnemonic, raw_machine_report, sarif_out):
         mnemonic: the mnemonic identifier for the linter being used
         raw_machine_report: the raw machine-readable report
         sarif_out: the SARIF output file
+        strip_path_prefix: removed from the start of the file paths in the report
+        add_path_prefix: prepended to the file paths in the report, after strip_path_prefix
     """
     sarif_parser_toolchain = ctx.toolchains[SARIF_PARSER_TOOLCHAIN]
     if not sarif_parser_toolchain:
@@ -238,6 +240,10 @@ def parse_to_sarif_action(ctx, mnemonic, raw_machine_report, sarif_out):
     args.add("-out", sarif_out.path)
     args.add("-label", ctx.label)
     args.add("-mnemonic", mnemonic)
+    if strip_path_prefix:
+        args.add("-strip-path-prefix", strip_path_prefix)
+    if add_path_prefix:
+        args.add("-add-path-prefix", add_path_prefix)
 
     ctx.actions.run(
         inputs = [raw_machine_report],
