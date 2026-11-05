@@ -38,6 +38,8 @@ set -u
 FIX_CMD="bazel run ${FIX_TARGET:-} $@"
 function on_exit {
   code=$?
+  # Batch files of an interrupted run-batches.
+  [ -z "${BATCH_DIR:-}" ] || rm -rf "$BATCH_DIR"
   case "$code" in
     # return code 143 is the result of SIGTERM, which isn't failure, so suppress failure suggestion
     0|143)
@@ -275,6 +277,115 @@ function ls-files {
   fi
 }
 
+# A formatter runs as one serial xargs call unless it has at least twice this
+# many files. Small sets, such as the files changed in one commit, gain nothing
+# from extra processes.
+MIN_PARALLEL_BATCH=64
+
+# cpu-budget prints how many batches one language may run at once:
+# RULES_LINT_FORMAT_CPUS from the caller's environment, a positive number or
+# "auto", else auto. Auto is min(online CPUs, 16): inside a container the online
+# CPU count is the host's even under a CPU limit, and the formatters measured
+# were no faster past 16.
+function cpu-budget {
+  local n=auto
+  if [[ "${RULES_LINT_FORMAT_CPUS:-}" =~ ^([1-9][0-9]*|auto)$ ]]; then
+    n="$RULES_LINT_FORMAT_CPUS"
+  fi
+  if [[ "$n" == auto ]]; then
+    n=$(getconf _NPROCESSORS_ONLN 2>/dev/null || nproc 2>/dev/null || echo 1)
+    [[ "$n" =~ ^[1-9][0-9]*$ ]] || n=1
+    n=$((n > 16 ? 16 : n))
+  fi
+  echo "$n"
+}
+
+# stop-batches <exit code>: on an interrupt, stops the batches' process group,
+# then exits; on_exit removes the batch files. KILL catches a batch the outer
+# xargs started while the group was being signaled.
+function stop-batches {
+  local i
+  kill -TERM -"$BATCH_PID" 2>/dev/null || true
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    kill -0 -"$BATCH_PID" 2>/dev/null || break
+    sleep 0.1
+  done
+  kill -KILL -"$BATCH_PID" 2>/dev/null || true
+  exit "$1"
+}
+
+# run-batches <files> <jobs> <batch> <command...> runs command over files in
+# batches of <batch> files, <jobs> batches at a time. Each batch's stdout and
+# stderr are printed in batch order after all batches finish, so output from
+# different batches never interleaves. Fails like xargs when any batch fails.
+# The batches run in their own process group (set -m) so stop-batches can stop
+# them all; `kill -SIG -PGID` is the form bash 3.2's kill accepts.
+function run-batches {
+  local files="$1" jobs="$2" batch="$3" && shift 3
+  local f code=0
+  BATCH_DIR=$(mktemp -d)
+  echo "$files" | split -l "$batch" -a 4 - "$BATCH_DIR/batch."
+  printf '%s\0' "$BATCH_DIR"/batch.???? > "$BATCH_DIR/batches"
+  set -m
+  xargs -0 -n 1 -P "$jobs" bash -c '
+    set -o pipefail
+    f="${!#}"
+    tr "\n" "\0" < "$f" | xargs -0 "${@:1:$#-1}" > "$f.out" 2> "$f.err"
+  ' _ "$@" < "$BATCH_DIR/batches" &
+  BATCH_PID=$!
+  set +m
+  trap 'stop-batches 130' INT
+  trap 'stop-batches 143' TERM
+  trap 'stop-batches 129' HUP
+  wait "$BATCH_PID" || code=$?
+  trap - INT TERM HUP
+  for f in "$BATCH_DIR"/batch.????; do
+    cat "$f.out"
+    cat "$f.err" >&2
+  done
+  rm -rf "$BATCH_DIR"
+  return $code
+}
+
+# distinct-files succeeds when every path on stdin names a different file:
+# `src/a` and `./src/a`, a symlink to a listed file, or a hard link share an
+# inode. It also fails when stat cannot report an inode for every path.
+function distinct-files {
+  local flag=-c paths inodes
+  stat -L -c %i / >/dev/null 2>&1 || flag=-f
+  # ./ keeps a relative path that starts with - from being read as an option.
+  paths=$(awk '{ print (substr($0, 1, 1) == "/" ? $0 : "./" $0) }')
+  inodes=$(tr \\n \\0 <<< "$paths" | xargs -0 stat -L "$flag" %i 2>/dev/null) || return
+  # An inode of 0 means the platform does not report one.
+  [[ "$(grep -c '' <<< "$inodes")" == "$(grep -c '' <<< "$paths")" ]] &&
+    awk '$0 == 0 || seen[$0]++ { exit 1 }' <<< "$inodes"
+}
+
+# format-files <files> <command...> runs command over files, writing the
+# formatter's stdout to stdout. A large set runs as parallel batches when
+# $parallel is true: format_multirun sets it for the languages in its
+# `parallel` list, whose formatters write only the files they are given.
+# Batches run only when every path names a different file, so two batches
+# never write one file. Otherwise the set runs serially, as without batches.
+function format-files {
+  local files="$1" && shift
+  local budget=0 count=0 batch
+  if [[ "${parallel:-false}" == true ]]; then
+    budget=$(cpu-budget)
+    count=$(grep -c '' <<< "$files")
+  fi
+  if ((budget < 2 || count < 2 * MIN_PARALLEL_BATCH)) || ! distinct-files <<< "$files"; then
+    echo "$files" | tr \\n \\0 | xargs -0 "$@"
+    return
+  fi
+  # About four batches per job, so one slow batch does not hold up the rest.
+  batch=$(((count + budget * 4 - 1) / (budget * 4)))
+  if ((batch < MIN_PARALLEL_BATCH)); then
+    batch=$MIN_PARALLEL_BATCH
+  fi
+  run-batches "$files" "$budget" "$batch" "$@"
+}
+
 function time-run {
   local files="$1" && shift
   local bin="$1" && shift
@@ -284,7 +395,7 @@ function time-run {
 
   if [ $silent != 0 ] ; then 2>/dev/null ; fi
   time {
-    echo "$files" | tr \\n \\0 | xargs -0 "$bin" "$@" >&2
+    format-files "$files" "$bin" "$@" >&2
   }
 }
 
@@ -310,7 +421,7 @@ function run-format {
         if [[ "${mode:-}" == "check" ]]; then
           GOFMT_OUT=$(mktemp)
           time {
-            echo "$files" | tr \\n \\0 | xargs -0 "$bin" $args > "$GOFMT_OUT"
+            format-files "$files" "$bin" $args > "$GOFMT_OUT"
           }
           NEED_FMT="$(cat $GOFMT_OUT)"
           rm $GOFMT_OUT

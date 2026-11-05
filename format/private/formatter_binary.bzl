@@ -127,3 +127,37 @@ def to_attribute_name(lang):
     if lang == "F#":
         return "fsharp"
     return lang.lower().replace(" ", "_")
+
+# Language attributes that format.sh does not pass to format-files, so parallel
+# batches cannot apply: buf takes one --path per call.
+UNBATCHED_LANGUAGES = ["protocol_buffer"]
+
+def parallel_error(parallel, kwargs):
+    """Checks format_multirun's parallel argument.
+
+    Args:
+        parallel: the parallel argument, a list of language attributes such as ["cc"].
+        kwargs: format_multirun's language attributes.
+
+    Returns:
+        Why parallel is invalid, or None if every entry names a distinct language
+        that has a formatter in kwargs.
+    """
+    if type(parallel) != "list":
+        return "parallel must be a list of language attributes, such as [\"cc\"], got {}".format(parallel)
+    languages = [to_attribute_name(lang) for lang in TOOLS.keys()]
+    configured = [a for a in languages if kwargs.get(a) != None]
+    seen = []
+    for lang_attribute in parallel:
+        if type(lang_attribute) != "string":
+            return "parallel entries must be strings, got {}".format(lang_attribute)
+        if lang_attribute not in languages:
+            return "parallel names {}, which is not a language attribute. Valid language attributes: {}".format(lang_attribute, languages)
+        if lang_attribute in UNBATCHED_LANGUAGES:
+            return "parallel names {}, whose formatter format.sh runs once per file, so it cannot run as batches".format(lang_attribute)
+        if lang_attribute not in configured:
+            return "parallel names {}, which has no formatter set. Languages with formatters: {}".format(lang_attribute, configured)
+        if lang_attribute in seen:
+            return "parallel lists {} more than once".format(lang_attribute)
+        seen.append(lang_attribute)
+    return None
