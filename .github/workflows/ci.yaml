@@ -15,9 +15,10 @@ permissions:
   id-token: write
 
 # BAZEL_ASPECT_FLAGS is empty on a fork PR, which gets no org secrets, so the
-# vanilla `bazel` jobs skip Aspect Cloud instead of sending a blank X-Aspect
-# header. The `aspect` jobs need no equivalent: `--remote` defaults to `auto`,
-# which wires Aspect Cloud on CI only when a credential is present.
+# vanilla `bazel` jobs skip Aspect Cloud instead of calling the `aspect`
+# credential helper with no login. The `aspect` jobs need no equivalent:
+# `--remote` defaults to `auto`, which wires Aspect Cloud on CI only when a
+# credential is present.
 env:
   BAZEL_ASPECT_FLAGS: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--config=aspect-cloud' || '' }}
 
@@ -71,10 +72,8 @@ jobs:
             common     --show_progress_rate_limit=60
             common     --show_timestamps
             build:lint --no@rules_lint//lint:color
-            common:aspect-cloud --remote_cache_header=X-Aspect=${{ secrets.ASPECT_OSS_API_TOKEN }}
-            common:aspect-cloud --bes_header=X-Aspect=${{ secrets.ASPECT_OSS_API_TOKEN }}
-      # `aspect` must be on PATH: the rc's aspect-cloud section runs
-      # `aspect setup workspace-data` as its workspace status command.
+      # `aspect` must be on PATH: the rc's aspect-cloud section uses it as the
+      # credential helper for cache.aspect.build and bes.aspect.build.
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
         with:
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
@@ -257,8 +256,6 @@ jobs:
           bazelrc: |
             common --announce_rc
             common --color=yes
-            common:aspect-cloud --remote_cache_header=X-Aspect=${{ secrets.ASPECT_OSS_API_TOKEN }}
-            common:aspect-cloud --bes_header=X-Aspect=${{ secrets.ASPECT_OSS_API_TOKEN }}
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
         with:
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
