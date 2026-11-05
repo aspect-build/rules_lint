@@ -27,13 +27,19 @@ if [[ -n $CLANG_TIDY__EXIT_CODE_OUTPUT_FILE ]]; then
     fi
 fi
 
+# Without a scratch file clang-tidy cannot run, so fail rather than report an
+# empty, clean-looking result.
+make_temp() {
+    mktemp || { echo "clang_tidy_wrapper: mktemp failed; is coreutils on PATH?" >&2; exit 1; }
+}
+
 if [[ -n $CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE ]]; then
     out_file=$CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE
 else
-    out_file=$(mktemp)
+    out_file=$(make_temp) || exit 1
 fi
 # Capture raw output here; statistics get filtered into $out_file below.
-raw_out_file=$(mktemp)
+raw_out_file=$(make_temp) || exit 1
 # include stderr in output file; it contains some of the diagnostics
 # NB: do NOT collapse "$@" into a single string and eval it — args containing
 # shell metacharacters such as `__attribute__((deprecated))` then get re-parsed

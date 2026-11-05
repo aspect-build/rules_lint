@@ -201,6 +201,33 @@ else
 fi
 
 #-------------------------------------------------------------------
+# Test 6: when mktemp fails (coreutils not on PATH), the wrapper must fail the
+# action instead of recording an exit code for a clang-tidy that never ran.
+
+broken_bin="$tmp_dir/broken_bin"
+mkdir -p "$broken_bin"
+printf '#!/bin/sh\nexit 1\n' > "$broken_bin/mktemp"
+chmod +x "$broken_bin/mktemp"
+
+export MOCK_ARGS_FILE="$tmp_dir/args6.txt"
+export CLANG_TIDY__EXIT_CODE_OUTPUT_FILE="$tmp_dir/exit_code6.txt"
+export CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE="$tmp_dir/output6.txt"
+exit_code=0
+PATH="$broken_bin:$PATH" "$wrapper" "$mock_clang_tidy" qux.cpp > "$tmp_dir/stdout6.txt" 2>&1 || exit_code=$?
+unset CLANG_TIDY__EXIT_CODE_OUTPUT_FILE
+unset CLANG_TIDY__STDOUT_STDERR_OUTPUT_FILE
+
+if [[ $exit_code -eq 0 ]]; then
+    fail "wrapper succeeded although mktemp failed"
+elif [[ -f "$tmp_dir/exit_code6.txt" ]]; then
+    fail "a failed mktemp was recorded as a lint result"
+elif ! grep -q "mktemp failed" "$tmp_dir/stdout6.txt"; then
+    fail "no mktemp error message: $(cat "$tmp_dir/stdout6.txt")"
+else
+    pass "a failed mktemp fails the action instead of reporting clean"
+fi
+
+#-------------------------------------------------------------------
 
 if [[ $failures -ne 0 ]]; then
     echo "$failures test(s) failed" >&2
