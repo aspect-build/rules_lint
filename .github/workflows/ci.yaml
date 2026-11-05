@@ -20,13 +20,14 @@ permissions:
 # Pinned to the checkout root because the example jobs run from subdirectories;
 # it selects only the deployment list, never which `.aspect/config.axl` loads.
 #
-# REMOTE_FLAG is empty on a fork PR, which gets no org secrets: setup-aspect's
-# `aspect auth login --with-api-token` never runs there, so `--remote` would
-# reach Aspect Cloud with no credential.
+# REMOTE_FLAG and BAZEL_ASPECT_FLAGS are empty on a fork PR, which gets no org
+# secrets: setup-aspect's `aspect auth login --with-api-token` never runs there
+# and the X-Aspect headers would be blank, so Aspect Cloud would be reached with
+# no credential.
 env:
   ASPECT_WORKSPACE: ${{ github.workspace }}
   REMOTE_FLAG: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--remote' || '' }}
-  BAZEL_ASPECT_FLAGS: ${{ secrets.OSS_SAAS_PAT != '' && '--config=aspect-cloud' || '' }}
+  BAZEL_ASPECT_FLAGS: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--config=aspect-cloud' || '' }}
 
 jobs:
   list-examples:
@@ -78,8 +79,8 @@ jobs:
             common     --show_progress_rate_limit=60
             common     --show_timestamps
             build:lint --no@rules_lint//lint:color
-            common:aspect-cloud --remote_cache_header=X-Aspect=${{ secrets.OSS_SAAS_PAT }}
-            common:aspect-cloud --bes_header=X-Aspect=${{ secrets.OSS_SAAS_PAT }}
+            common:aspect-cloud --remote_cache_header=X-Aspect=${{ secrets.ASPECT_OSS_API_TOKEN }}
+            common:aspect-cloud --bes_header=X-Aspect=${{ secrets.ASPECT_OSS_API_TOKEN }}
       # `aspect` must be on PATH: the rc's aspect-cloud section runs
       # `aspect setup workspace-data` as its workspace status command.
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
@@ -264,8 +265,8 @@ jobs:
           bazelrc: |
             common --announce_rc
             common --color=yes
-            common:aspect-cloud --remote_cache_header=X-Aspect=${{ secrets.OSS_SAAS_PAT }}
-            common:aspect-cloud --bes_header=X-Aspect=${{ secrets.OSS_SAAS_PAT }}
+            common:aspect-cloud --remote_cache_header=X-Aspect=${{ secrets.ASPECT_OSS_API_TOKEN }}
+            common:aspect-cloud --bes_header=X-Aspect=${{ secrets.ASPECT_OSS_API_TOKEN }}
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
         with:
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
