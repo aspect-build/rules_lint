@@ -368,6 +368,9 @@ def clang_tidy_action(ctx, compilation_context, executable, srcs, stdout, exit_c
             command = executable._clang_tidy_wrapper.path + " $@",
             arguments = [executable._clang_tidy.path] + clang_tidy_args + ["--", compiler_args_obj],
             env = env,
+            # The wrapper runs coreutils (mktemp) through PATH, which only the
+            # default shell env provides. `env` still takes precedence.
+            use_default_shell_env = True,
             mnemonic = _MNEMONIC,
             progress_message = "Linting %{{label}}:{} with clang-tidy".format(srcs[0].basename),
         )

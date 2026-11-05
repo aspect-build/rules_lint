@@ -47,11 +47,24 @@ async function sync(src, dst, subdir, filesToDiff) {
   }
 }
 
+// The linter gets only its configured env, plus PATH so that a linter that is
+// a shell script (clang-tidy's wrapper, say) can find coreutils.
+function linterEnv(env) {
+  const out = { ...(env || {}) };
+  if (out.PATH === undefined && process.env.PATH !== undefined) {
+    out.PATH = process.env.PATH;
+  }
+  return out;
+}
+
 async function main(args, sandbox) {
   const config = JSON.parse(await fs.promises.readFile(args[0]));
-  const spawnArgs = args.length > 1
-    ? (await fs.promises.readFile(args[1], "utf8")).split(/\r?\n/).filter(Boolean)
-    : config.args;
+  const spawnArgs =
+    args.length > 1
+      ? (await fs.promises.readFile(args[1], "utf8"))
+          .split(/\r?\n/)
+          .filter(Boolean)
+      : config.args;
 
   debug("sandbox", sandbox);
   debug("config", JSON.stringify(config, null, 2));
@@ -77,7 +90,7 @@ async function main(args, sandbox) {
   const ret = childProcess.spawnSync(config.linter, spawnArgs, {
     stdio: "inherit",
     cwd: sandbox,
-    env: config.env || {},
+    env: linterEnv(config.env),
   });
 
   // Check if we failed to spawn the process.
@@ -86,7 +99,6 @@ async function main(args, sandbox) {
     console.error(ret.error);
     process.exit(1);
   }
-  
 
   const diffOut = fs.openSync(config.output, "w");
   const diffBin = process.env["DIFF_BIN"]

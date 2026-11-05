@@ -1,0 +1,5 @@
+--- a/lint/test/patcher_path_input.txt
++++ b/lint/test/patcher_path_input.txt
+@@ -1 +1 @@
+-unfixed
++fixed

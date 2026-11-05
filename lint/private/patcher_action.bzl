@@ -63,7 +63,7 @@ def run_patcher(
         patch_cfg_dict["env"] = patch_cfg_env
 
     if type(args) == "Args":
-        args.use_param_file("%s", use_always=True)
+        args.use_param_file("%s", use_always = True)
         args.set_param_file_format("multiline")
         arguments.append(args)
     else:
@@ -113,6 +113,9 @@ def run_patcher(
         "arguments": arguments,
         "env": final_env,
         "tools": tools,
+        # The js_binary launcher calls coreutils (mktemp) through PATH, which only
+        # the default shell env provides. `env` still takes precedence.
+        "use_default_shell_env": True,
     }
     if mnemonic != None:
         kwargs["mnemonic"] = mnemonic
