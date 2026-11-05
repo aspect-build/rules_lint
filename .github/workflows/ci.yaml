@@ -74,7 +74,7 @@ jobs:
             build:lint --no@rules_lint//lint:color
       # `aspect` must be on PATH: the rc's aspect-cloud section uses it as the
       # credential helper for cache.aspect.build and bes.aspect.build.
-      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+      - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
         with:
           aspect-api-token: ${{ secrets.ASPECT_CLOUD_API_TOKEN }}
       # Permit this gross non-hermetic dependency
@@ -101,7 +101,7 @@ jobs:
         folder: ${{ fromJson(needs.list-examples.outputs.format-matrix) }}
     steps:
       - uses: actions/checkout@v6
-      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+      - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
         with:
           aspect-api-token: ${{ secrets.ASPECT_CLOUD_API_TOKEN }}
       # Permit this gross non-hermetic dependency
@@ -131,7 +131,7 @@ jobs:
       - uses: actions/checkout@v6
       # The lint_test.bats in each example shell out to `aspect lint`, so this
       # job needs the token too.
-      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+      - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
         with:
           aspect-api-token: ${{ secrets.ASPECT_CLOUD_API_TOKEN }}
       - name: Setup bats
@@ -163,7 +163,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
         with: *bazelrc
-      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+      - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
         with:
           aspect-api-token: ${{ secrets.ASPECT_CLOUD_API_TOKEN }}
       # TODO: Fix for Bazel 9
@@ -196,7 +196,7 @@ jobs:
         folder: ${{ fromJson(needs.list-examples.outputs.lint-matrix) }}
     steps:
       - uses: actions/checkout@v6
-      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+      - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
         with:
           aspect-api-token: ${{ secrets.ASPECT_CLOUD_API_TOKEN }}
       # TODO: Fix for Bazel 9
@@ -229,7 +229,7 @@ jobs:
       USE_BAZEL_VERSION: ${{ matrix.bazel.version }}
     steps:
       - uses: actions/checkout@v6
-      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+      - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
         with:
           aspect-api-token: ${{ secrets.ASPECT_CLOUD_API_TOKEN }}
       - name: Test
@@ -256,7 +256,7 @@ jobs:
           bazelrc: |
             common --announce_rc
             common --color=yes
-      - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
+      - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
         with:
           aspect-api-token: ${{ secrets.ASPECT_CLOUD_API_TOKEN }}
       - name: Test
