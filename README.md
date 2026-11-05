@@ -2,6 +2,8 @@
 
 > [!IMPORTANT]
 > These modules were previously published as `aspect_rules_lint`, `aspect_rules_lint_rust` and `aspect_rules_lint_scala`. To upgrade, drop the `aspect_` prefix in your `bazel_dep`, `load()` statements and flags.
+>
+> With the Aspect CLI, also set `ctx.tasks["lint"].args.rules_lint_fix_flag = "@rules_lint//lint:fix"` in `.aspect/config.axl` (requires [v2026.45.6](https://github.com/aspect-build/aspect-cli/releases/tag/v2026.45.6) or later) so `aspect lint --fix` finds the renamed flag.
 
 > [!NOTE]
 > This repository uses the [Aspect CLI](https://github.com/aspect-build/aspect-cli) for CI and local development.
