@@ -14,14 +14,10 @@ concurrency:
 permissions:
   id-token: write
 
-# BAZEL_ASPECT_FLAGS is empty on a fork PR, which gets no org secrets, so the
-# vanilla `bazel` jobs skip Aspect Cloud instead of calling the `aspect`
-# credential helper with no login. The `aspect` jobs need no equivalent:
-# `--remote` defaults to `auto`, which wires Aspect Cloud on CI only when a
-# credential is present.
-env:
-  BAZEL_ASPECT_FLAGS: ${{ secrets.ASPECT_CLOUD_API_TOKEN != '' && '--config=aspect-cloud' || '' }}
-
+# Aspect Cloud needs no per-command flag. setup-aspect runs `aspect setup
+# bazelrc`, which writes `~/.aspect/bazelrc` enabling the remote cache and BES
+# for vanilla `bazel`, and `aspect <task>` defaults to `--remote=auto`. Both
+# leave Aspect Cloud off when there is no credential, as on a fork PR.
 jobs:
   list-examples:
     runs-on: ubuntu-latest
@@ -83,7 +79,7 @@ jobs:
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
-      - run: bazel run $BAZEL_ASPECT_FLAGS //tools/format
+      - run: bazel run //tools/format
         working-directory: ${{ matrix.folder }}
   # Same examples as `format`, exercised through `aspect format` — the
   # better-DX entry point users actually run. `aspect format` defaults to the
@@ -173,9 +169,9 @@ jobs:
       - name: Lint
         working-directory: ${{ matrix.folder }}
         run: |
-          bazel build $BAZEL_ASPECT_FLAGS --config=lint --output_groups=rules_lint_human //...
+          bazel build --config=lint --output_groups=rules_lint_human //...
 
-          bazel build $BAZEL_ASPECT_FLAGS --config=lint \
+          bazel build --config=lint \
             --output_groups=rules_lint_patch \
             --@rules_lint//lint:fix \
             //...
@@ -264,4 +260,4 @@ jobs:
         working-directory: examples/java
         env:
           USE_BAZEL_VERSION: ${{ matrix.version }}
-        run: bazel test $BAZEL_ASPECT_FLAGS //...
+        run: bazel test //...
