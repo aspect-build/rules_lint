@@ -14,19 +14,11 @@ concurrency:
 permissions:
   id-token: write
 
-# Points the Aspect CLI at the committed `.aspect/config.json`, which is what
-# tells it cache.aspect.build and bes.aspect.build belong to Aspect Cloud. The
-# CI login records a credential but no endpoints, so nothing else supplies them.
-# Pinned to the checkout root because the example jobs run from subdirectories;
-# it selects only the deployment list, never which `.aspect/config.axl` loads.
-#
-# REMOTE_FLAG and BAZEL_ASPECT_FLAGS are empty on a fork PR, which gets no org
-# secrets: setup-aspect's `aspect auth login --with-api-token` never runs there
-# and the X-Aspect headers would be blank, so Aspect Cloud would be reached with
-# no credential.
+# BAZEL_ASPECT_FLAGS is empty on a fork PR, which gets no org secrets, so the
+# vanilla `bazel` jobs skip Aspect Cloud instead of sending a blank X-Aspect
+# header. The `aspect` jobs need no equivalent: `--remote` defaults to `auto`,
+# which wires Aspect Cloud on CI only when a credential is present.
 env:
-  ASPECT_WORKSPACE: ${{ github.workspace }}
-  REMOTE_FLAG: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--remote' || '' }}
   BAZEL_ASPECT_FLAGS: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--config=aspect-cloud' || '' }}
 
 jobs:
@@ -119,7 +111,7 @@ jobs:
       # TODO: Fix for Bazel 9
       - if: matrix.folder == 'examples/csharp' || matrix.folder == 'examples/fsharp' || matrix.folder == 'examples/nodejs'
         run: echo "USE_BAZEL_VERSION=8.x" >> "$GITHUB_ENV"
-      - run: aspect format $REMOTE_FLAG --scope=all --severity=warn
+      - run: aspect format --scope=all --severity=warn
         working-directory: ${{ matrix.folder }}
   integration-test:
     needs: list-examples
@@ -139,7 +131,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       # The lint_test.bats in each example shell out to `aspect lint`, so this
-      # job needs the token too — they pick up $REMOTE_FLAG from the job env.
+      # job needs the token too.
       - uses: aspect-build/setup-aspect@b1e9d142e86f63c10d603304daa22bf80492e24c # v2026.25.1
         with:
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
@@ -218,8 +210,8 @@ jobs:
           folder: ${{ matrix.folder }}
         run: |
           key="lint-${folder//\//-}"
-          aspect lint $REMOTE_FLAG --task:name="$key" --strategy=soft -- //...
-          aspect lint $REMOTE_FLAG --task:name="$key-fix" --fix --strategy=soft -- //...
+          aspect lint --task:name="$key" --strategy=soft -- //...
+          aspect lint --task:name="$key-fix" --fix --strategy=soft -- //...
   # Build & test the root workspace through `aspect test` on Linux across Bazel
   # versions. Complements `test` below, which covers macOS via vanilla Bazel.
   aspect-test:
@@ -243,7 +235,7 @@ jobs:
           aspect-api-token: ${{ secrets.ASPECT_OSS_API_TOKEN }}
       - name: Test
         working-directory: ${{ matrix.workspace.path }}
-        run: aspect test $REMOTE_FLAG --task:name=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} ${{ matrix.bazel.flags }} -- //...
+        run: aspect test --task:name=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} ${{ matrix.bazel.flags }} -- //...
   test:
     strategy:
       matrix:
