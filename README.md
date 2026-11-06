@@ -1,5 +1,10 @@
 # Run linters and formatters under Bazel
 
+> [!IMPORTANT]
+> These modules were previously published as `aspect_rules_lint`, `aspect_rules_lint_rust` and `aspect_rules_lint_scala`. To upgrade, drop the `aspect_` prefix in your `bazel_dep`, `load()` statements and flags.
+>
+> With the Aspect CLI, also set `ctx.tasks["lint"].args.rules_lint_fix_flag = "@rules_lint//lint:fix"` in `.aspect/config.axl` (requires [v2026.45.6](https://github.com/aspect-build/aspect-cli/releases/tag/v2026.45.6) or later) so `aspect lint --fix` finds the renamed flag.
+
 > [!NOTE]
 > This repository uses the [Aspect CLI](https://github.com/aspect-build/aspect-cli) for CI and local development.
 > See the [docs](https://docs.aspect.build/cli/overview) and [install instructions](https://docs.aspect.build/cli/install) to get started.
@@ -294,7 +299,3 @@ Instructions to do this are out-of-scope for this repo, particularly since they 
 
 [aspect workflows]: https://docs.aspect.build/workflows
 [aspect cli]: https://docs.aspect.build/cli
-
-# Telemetry & privacy policy
-
-This ruleset collects limited usage data via [`tools_telemetry`](https://github.com/aspect-build/tools_telemetry), which is reported to Aspect Build Inc and governed by our [privacy policy](https://www.aspect.build/privacy-policy).
