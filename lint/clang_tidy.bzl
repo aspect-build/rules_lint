@@ -41,6 +41,7 @@ load("@bazel_skylib//rules/directory:providers.bzl", "DirectoryInfo")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("@rules_cc//cc:defs.bzl", "CcInfo", "cc_common")
+load("//lint/private:gcc_includes.bzl", "with_gcc_builtin_includes_last")
 load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER_TOOLCHAIN", "OUTFILE_FORMAT", "noop_lint_action", "output_files", "parse_to_sarif_action", "patch_and_output_files", "should_visit")
 load("//lint/private:patcher_action.bzl", "patcher_attrs", "run_patcher")
 
@@ -147,7 +148,7 @@ def _safe_flags(ctx, flags):
     # a clang toolchain configured (that would produce a good command line with --compiler clang)
     safe_flags = []
     skipped_flags = []
-    for flag in flags:
+    for flag in with_gcc_builtin_includes_last(flags):
         updated = _update_flag(flag)
         if (any(updated)):
             safe_flags.extend(updated)
