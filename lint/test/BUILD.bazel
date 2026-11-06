@@ -1,6 +1,7 @@
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load(":lint_test_no_report_test.bzl", "no_report_test", "skipped_lint_test")
 load(":lint_test_xml.bzl", "fake_lint_test")
+load(":required_providers_test.bzl", "python_target", "ruff_default_requires_tool_test", "ruff_requires_tool_test", "ruff_skips_target_test", "ty_default_requires_tool_test", "ty_requires_tool_test", "ty_skips_target_test", "unavailable_linter")
 
 sh_test(
     name = "clang_tidy_wrapper_test",
@@ -46,4 +47,59 @@ sh_test(
     args = ["$(rlocationpath :fake_lint)"],
     data = [":fake_lint"],
     deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+# Fails analysis by design; only the provider-filtering analysis tests reach it.
+unavailable_linter(
+    name = "unavailable_linter",
+    tags = ["manual"],
+)
+
+python_target(name = "python_provider_target")
+
+filegroup(
+    name = "tagged_python_filegroup",
+    tags = ["python"],
+)
+
+ruff_skips_target_test(
+    name = "ruff_skips_target_without_pyinfo_test",
+    target_under_test = ":tagged_python_filegroup",
+)
+
+ty_skips_target_test(
+    name = "ty_skips_target_without_pyinfo_test",
+    target_under_test = ":tagged_python_filegroup",
+)
+
+ruff_requires_tool_test(
+    name = "ruff_requires_tool_with_pyinfo_test",
+    target_under_test = ":python_provider_target",
+)
+
+ty_requires_tool_test(
+    name = "ty_requires_tool_with_pyinfo_test",
+    target_under_test = ":python_provider_target",
+)
+
+ruff_default_requires_tool_test(
+    name = "ruff_default_keeps_tagged_filegroups_test",
+    target_under_test = ":tagged_python_filegroup",
+)
+
+ty_default_requires_tool_test(
+    name = "ty_default_keeps_tagged_filegroups_test",
+    target_under_test = ":tagged_python_filegroup",
+)
+
+test_suite(
+    name = "required_providers_tests",
+    tests = [
+        ":ruff_default_keeps_tagged_filegroups_test",
+        ":ruff_requires_tool_with_pyinfo_test",
+        ":ruff_skips_target_without_pyinfo_test",
+        ":ty_default_keeps_tagged_filegroups_test",
+        ":ty_requires_tool_with_pyinfo_test",
+        ":ty_skips_target_without_pyinfo_test",
+    ],
 )
