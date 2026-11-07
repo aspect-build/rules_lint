@@ -171,8 +171,9 @@ def _stylelint_aspect_impl(target, ctx):
         args = color_options + ctx.attr._args,
         target = target,
     )
+    patch_exit_code = None
     if ctx.attr._options[LintOptionsInfo].fix:
-        _exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(
+        patch_exit_code = ctx.actions.declare_file(OUTFILE_FORMAT.format(
             label = target.label.name,
             mnemonic = _MNEMONIC,
             suffix = "patch.exit_code",
@@ -182,7 +183,7 @@ def _stylelint_aspect_impl(target, ctx):
             ctx.executable,
             files_to_lint,
             None,
-            _exit_code,
+            patch_exit_code,
             args = color_options + ctx.attr._args,
             patch = outputs.patch,
             target = target,
@@ -195,6 +196,13 @@ def _stylelint_aspect_impl(target, ctx):
 
     # We could probably use https://www.npmjs.com/package/stylelint-sarif-formatter instead.
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
+
+    if patch_exit_code:
+        info = OutputGroupInfo(
+            rules_lint_human = info.rules_lint_human,
+            rules_lint_machine = info.rules_lint_machine,
+            rules_lint_patch = depset([patch_exit_code], transitive = [info.rules_lint_patch]),
+        )
 
     return [info]
 
