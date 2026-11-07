@@ -1,0 +1,6 @@
+Running FSharpLint with 98 rules (6 enabled, 92 disabled)...
+========== Linting src/record.fs ==========
+src/record.fs(9,16,9,20):FSharpLint warning FL0039: Consider changing `name` to PascalCase.
+src/record.fs(11,17,11,25):FSharpLint warning FL0065: `not true` might be able to be refactored into `false`.
+========== Finished: 2 warnings ==========
+========== Summary: 2 warnings ==========
